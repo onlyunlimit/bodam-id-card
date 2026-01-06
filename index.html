@@ -11,13 +11,7 @@
 
 <!-- HEADER -->
 
-<div style="text-align:center;padding:14px 0 6px 0">
-  <div style="font-size:18px;color:#e7d6c4;letter-spacing:2px">
-    보담고 학생증
-  </div>
-  <div style="font-size:11px;opacity:.7">
-    BODAM HIGH SCHOOL
-  </div>
+<div style="text-align:center;padding:14px 0 6px 0"><div style="font-size:18px;color:#e7d6c4;letter-spacing:2px">보담고 학생증</div><div style="font-size:11px;opacity:.7">BODAM HIGH SCHOOL</div>
 </div>
 
 <!-- CARD PREVIEW -->
@@ -43,7 +37,7 @@
 
 <div style="padding:10px;flex:1">
 
-<div style="width:100%;aspect-ratio:3/4;border-radius:12px;overflow:hidden;border:3px solid #3a0f14;box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 0 8px rgba(255,255,255,.25);margin-bottom:10px">
+<div style="width:100%;aspect-ratio:3/4;border-radius:12px;overflow:hidden;border:3px solid #3a0f14;box-shadow:0 6px 14px rgba(0,0,0,.35),margin-bottom:10px">
 <img id="p_photo" style="width:100%;height:100%;object-fit:cover"></div>
 
 <div style="font-size:11px;color:#7a5a46;letter-spacing:1px">NAME</div>
@@ -82,8 +76,8 @@ oninput="p_creator.innerText=this.value"
 style="width:100%;margin:6px 0 12px;padding:8px;border-radius:8px;border:none">
 
 <label>학생 사진</label>
-<input type="file"
-onchange="p_photo.src=URL.createObjectURL(this.files[0])"
+<input type="file"  accept="image/*"
+onchange="updatePhoto(this)"
 style="margin:6px 0 60px">
 
 </div>
@@ -110,13 +104,22 @@ border-radius:14px">
 </div>
 
 <script>
+function updatePhoto(input){
+  if(!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    p_photo.src = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
 function saveCard(){
-html2canvas(card).then(c=>{
-let a=document.createElement("a");
-a.href=c.toDataURL();
-a.download="bodam_id.png";
-a.click();
-});
+  html2canvas(card).then(c=>{
+    let a=document.createElement("a");
+    a.href=c.toDataURL();
+    a.download="bodam_id.png";
+    a.click();
+  });
 }
 </script>
 
