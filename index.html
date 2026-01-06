@@ -22,7 +22,7 @@
 <div style="background:linear-gradient(135deg,#3a0f14,#1e070a);padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.15)">
 
 <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 6px rgba(255,255,255,.25)">
-<img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/61915949-8310-4d43-b51a-eff0c013cb80?v=6ac7d3" style="width:80px;height:80px;object-fit:contain" crossOrigin="anonymous">
+<img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/61915949-8310-4d43-b51a-eff0c013cb80?v=6ac7d3" crossOrigin="anonymous" style="width:80px;height:80px;object-fit:contain" >
 </div>
 
 <div style="color:#e7d6c4">
@@ -74,9 +74,14 @@ oninput="p_creator.innerText=this.value"
 style="width:100%;margin:6px 0 12px;padding:8px;border-radius:8px;border:none">
 
 <label>학생 사진</label>
-<input type="file"  accept="image/*"
-onchange="updatePhoto(this)"
-style="margin:6px 0 60px">
+<input type="file" accept="image/*"
+onchange="
+const f=this.files[0];
+if(!f)return;
+const r=new FileReader();
+r.onload=e=>p_photo.src=e.target.result;
+r.readAsDataURL(f);
+">
 
 </div>
 
