@@ -3,64 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>보담고 학생증 생성기</title>
+<title>보담고 학생증 만들기</title>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
-<body style="background:#111;padding:20px;color:#fff;font-family:serif">
 
-<div style="max-width:340px;margin:auto">
+<body style="margin:0;background:radial-gradient(circle at top,#3b0f14,#0c0405);font-family:'Times New Roman',serif;color:#eee;">
 
-<!-- INPUT -->
-<div style="margin-bottom:14px;font-size:13px">
-이름 <input id="name" value="서이건"><br>
-생일 <input id="birth" value="01 / 18"><br>
-닉네임 <input id="creator" value="only_unlimit"><br>
-사진 <input type="file" id="photo">
-<button onclick="saveCard()">이미지 저장</button>
+<!-- HEADER -->
+
+<div style="text-align:center;padding:14px 0 6px 0">
+  <div style="font-size:18px;color:#e7d6c4;letter-spacing:2px">
+    보담고 학생증
+  </div>
+  <div style="font-size:11px;opacity:.7">
+    BODAM HIGH SCHOOL
+  </div>
 </div>
 
-<!-- CARD -->
+<!-- CARD PREVIEW -->
+<div style="display:flex;justify-content:center;padding:10px 0">
 <div id="card" style="width:320px;background:linear-gradient(145deg,#f5f2ef,#ebe4dc);border-radius:20px;box-shadow:0 14px 32px rgba(0,0,0,.35),inset 0 0 12px rgba(255,255,255,.6);font-family:'Times New Roman',serif;overflow:hidden">
-<div style="background:linear-gradient(135deg,#3a0f14,#1e070a);padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.15)">
+
+  <!-- CARD HEADER -->
+  <div style="background:linear-gradient(135deg,#3a0f14,#1e070a);padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.15)">
+
 <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 6px rgba(255,255,255,.25)">
-<img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/61915949-8310-4d43-b51a-eff0c013cb80?v=6ac7d3" style="width:80px;height:80px;object-fit:contain">
+  <img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/61915949-8310-4d43-b51a-eff0c013cb80?v=6ac7d3" style="width:80px;height:80px;object-fit:contain">
 </div>
+
 <div style="color:#e7d6c4">
 <div style="font-size:19px;letter-spacing:1.4px">보담고등학교</div>
-<div style="font-size:13px;opacity:.85">BODAM HIGH SCHOOL</div>
-</div>
-</div>
+<div style="font-size:13px;opacity:.85">BODAM HIGH SCHOOL</div></div></div>
 
+  <!-- CARD BODY -->
 <div style="display:flex">
-<div style="writing-mode:vertical-rl;text-orientation:mixed;font-size:18px;letter-spacing:2px;color:#8a6a55;padding:19px 6px 10px 10px;">STUDENT IDENTITY CARD
-</div>
+    <div style="writing-mode:vertical-rl;text-orientation:mixed;font-size:18px;letter-spacing:2px;color:#8a6a55;padding:19px 6px 10px 10px;">
+      STUDENT IDENTITY CARD
+    </div>
 
-<div style="padding:12px;flex:1">
-<div style="width:100%;aspect-ratio:3/4;border-radius:12px;overflow:hidden;border:3px solid #3a0f14;box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 0 8px rgba(255,255,255,.25);background:#111;margin-bottom:10px">
-<img id="photoPreview" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.05) saturate(.95)">
-</div>
+<div style="padding:10px;flex:1">
+
+<div style="width:100%;aspect-ratio:3/4;border-radius:12px;overflow:hidden;border:3px solid #3a0f14;box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 0 8px rgba(255,255,255,.25);margin-bottom:10px">
+<img id="p_photo" style="width:100%;height:100%;object-fit:cover"></div>
 
 <div style="font-size:11px;color:#7a5a46;letter-spacing:1px">NAME</div>
-<div style="font-size:18px;font-weight:bold;color:#2a0c10;margin-bottom:6px; letter-spacing:10px">이름</div>
+<div id="p_name" style="font-size:18px;font-weight:bold;color:#2a0c10;margin-bottom:6px; letter-spacing:10px">서이건</div>
 
-<div style="font-size:11px;color:#7a5a46;letter-spacing:1px">DATE OF BIRTH</div>
-<div id="birthText" style="font-size:15px;color:#2a0c10;margin-bottom:6px">01 / 18</div>
+<div style="font-size:11px;color:#7a5a46;letter-spacing:1px">DATE OF BIRTH</div><div id="p_birth" style="font-size:15px;color:#2a0c10;margin-bottom:6px">01 / 18</div>
 
-<div style="font-size:11px;color:#7a5a46;letter-spacing:1px">@ID</div>
-<div id="creatorText" style="font-size:14px;color:#2a0c10">only_unlimit</div>
+<div style="font-size:11px;color:#7a5a46;letter-spacing:1px">CREATOR</div>
+<div id="p_creator" style="font-size:14px;color:#2a0c10">only_unlimit</div>
+
 </div>
 </div>
 </div>
+</div>
 
+<!-- FORM -->
+<div style="
+background:rgba(20,6,8,.9);
+border-radius:20px 20px 0 0;
+padding:16px;
+margin-top:10px">
+
+<label>이름</label>
+<input placeholder="서이건"
+oninput="p_name.innerText=this.value"
+style="width:100%;margin:6px 0 12px;padding:8px;border-radius:8px;border:none">
+
+<label>생일</label>
+<input placeholder="01 / 18"
+oninput="p_birth.innerText=this.value"
+style="width:100%;margin:6px 0 12px;padding:8px;border-radius:8px;border:none">
+
+<label>닉네임</label>
+<input placeholder="only_unlimit"
+oninput="p_creator.innerText=this.value"
+style="width:100%;margin:6px 0 12px;padding:8px;border-radius:8px;border:none">
+
+<label>학생 사진</label>
+<input type="file"
+onchange="p_photo.src=URL.createObjectURL(this.files[0])"
+style="margin:6px 0 60px">
+
+</div>
+
+<!-- SAVE BUTTON -->
+<div style="
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:linear-gradient(to top,rgba(12,4,5,.95),transparent);
+padding:14px">
+<button onclick="saveCard()"
+style="
+width:100%;
+padding:14px;
+font-size:16px;
+background:#6b1b22;
+color:#fff;
+border:none;
+border-radius:14px">
+이미지로 저장
+</button>
 </div>
 
 <script>
-name.oninput=()=>nameText.innerText=name.value;
-birth.oninput=()=>birthText.innerText=birth.value;
-creator.oninput=()=>creatorText.innerText=creator.value;
-photo.onchange=e=>{
-photoPreview.src=URL.createObjectURL(e.target.files[0]);
-}
 function saveCard(){
 html2canvas(card).then(c=>{
 let a=document.createElement("a");
