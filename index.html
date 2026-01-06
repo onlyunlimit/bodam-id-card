@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>보담고 학생증 생성기</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body style="background:#111;padding:20px;color:#fff;font-family:serif">
+
+<div style="max-width:340px;margin:auto">
+
+<!-- INPUT -->
+<div style="margin-bottom:14px;font-size:13px">
+이름 <input id="name" value="서이건"><br>
+생일 <input id="birth" value="01 / 18"><br>
+닉네임 <input id="creator" value="only_unlimit"><br>
+사진 <input type="file" id="photo">
+<button onclick="saveCard()">이미지 저장</button>
+</div>
+
+<!-- CARD -->
+<div id="card" style="width:320px;background:linear-gradient(145deg,#f5f2ef,#ebe4dc);border-radius:20px;box-shadow:0 14px 32px rgba(0,0,0,.35);overflow:hidden">
+
+<div style="background:linear-gradient(135deg,#3a0f14,#1e070a);padding:12px;display:flex;gap:12px">
+<img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/61915949-8310-4d43-b51a-eff0c013cb80?v=6ac7d3"
+style="width:70px;height:70px">
+<div style="color:#e7d6c4">
+<div style="font-size:18px">보담고등학교</div>
+<div style="font-size:12px">BODAM HIGH SCHOOL</div>
+</div>
+</div>
+
+<div style="display:flex">
+<div style="writing-mode:vertical-rl;font-size:16px;color:#8a6a55;padding:14px">
+STUDENT IDENTITY CARD
+</div>
+
+<div style="padding:12px;flex:1">
+<div style="width:100%;aspect-ratio:3/4;border:3px solid #3a0f14;border-radius:12px;overflow:hidden;margin-bottom:8px">
+<img id="photoPreview" style="width:100%;height:100%;object-fit:cover">
+</div>
+
+<div style="font-size:11px">NAME</div>
+<div id="nameText" style="font-size:18px;font-weight:bold">서이건</div>
+
+<div style="font-size:11px">DATE OF BIRTH</div>
+<div id="birthText">01 / 18</div>
+
+<div style="font-size:11px">CREATOR</div>
+<div id="creatorText">only_unlimit</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+name.oninput=()=>nameText.innerText=name.value;
+birth.oninput=()=>birthText.innerText=birth.value;
+creator.oninput=()=>creatorText.innerText=creator.value;
+photo.onchange=e=>{
+photoPreview.src=URL.createObjectURL(e.target.files[0]);
+}
+function saveCard(){
+html2canvas(card).then(c=>{
+let a=document.createElement("a");
+a.href=c.toDataURL();
+a.download="bodam_id.png";
+a.click();
+});
+}
+</script>
+
+</body>
+</html>
