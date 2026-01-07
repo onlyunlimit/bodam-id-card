@@ -8,6 +8,51 @@
 </head>
 
 <body style="margin:0;background:radial-gradient(circle at top,#3b0f14,#0c0405);font-family:'Times New Roman',serif;color:#eee;">
+    <audio id="bgm" src="./main.mp3" loop></audio>
+
+<!-- PLAYER -->
+<div
+  id="player"
+  style="
+    position:fixed;
+    top:20px;
+    right:20px;
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    background:linear-gradient(145deg,#2a2a2a,#141414);
+    box-shadow:
+      0 12px 30px rgba(0,0,0,.6),
+      inset 0 1px 1px rgba(255,255,255,.15);
+    cursor:pointer;
+    transition:all .35s ease;
+    overflow:hidden;
+    z-index:9999;
+  "
+  onclick="togglePlayer()"
+>
+
+  <!-- INNER -->
+  <div
+    id="playerInner"
+    style="
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#bbb;
+      font-size:11px;
+      letter-spacing:.5px;
+      user-select:none;
+    "
+  >
+    PLAY
+    
+  </div>
+
+</div>
+
 
 <!-- HEADER -->
 <div style="text-align:center;padding:14px 0 6px 0"><div style="font-size:18px;color:#e7d6c4;letter-spacing:2px">보담고 학생증</div><div style="font-size:11px;opacity:.7">BODAM HIGH SCHOOL</div>
@@ -329,11 +374,114 @@ function goCharacter(id){
   // 예: /character/seoigeon.html
   window.location.href = "./character/" + id + ".html";
 }
+
+
+//플레이버튼
+let opened = false;
+let playing = false;
+const player = document.getElementById("player");
+const inner = document.getElementById("playerInner");
+const audio = document.getElementById("bgm");
+
+function togglePlayer(){
+
+  if(!opened){
+    // OPEN
+    opened = true;
+    player.style.width = "260px";
+    player.style.height = "360px";
+    player.style.borderRadius = "26px";
+
+    inner.innerHTML = `
+      <div style="
+        width:100%;
+        height:100%;
+        display:flex;
+        flex-direction:column;
+        padding:18px;
+        box-sizing:border-box;
+        color:#eee;
+        font-family: -apple-system, BlinkMacSystemFont, serif;
+      ">
+
+        <!-- DISPLAY -->
+        <div style="
+          flex:1;
+          border-radius:18px;
+          background:linear-gradient(180deg,#1b1b1b,#0d0d0d);
+          box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,.05),
+            inset 0 8px 20px rgba(255,255,255,.05);
+          display:flex;
+          flex-direction:column;
+          justify-content:flex-end;
+          padding:14px;
+        ">
+          <div style="font-size:14px;opacity:.85">Now Playing</div>
+          <div style="font-size:18px;margin-top:4px;">main.mp3</div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div style="
+          height:70px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:26px;
+        ">
+          <div
+            onclick="event.stopPropagation();togglePlay();"
+            style="
+              width:46px;
+              height:46px;
+              border-radius:50%;
+              background:linear-gradient(145deg,#2b2b2b,#151515);
+              box-shadow:
+                0 6px 14px rgba(0,0,0,.6),
+                inset 0 1px 1px rgba(255,255,255,.15);
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              font-size:14px;
+            "
+          >
+            <span id="playIcon">▶</span>
+          </div>
+        </div>
+
+      </div>
+    `;
+  }else{
+    // CLOSE
+    opened = false;
+    player.style.width = "52px";
+    player.style.height = "52px";
+    player.style.borderRadius = "14px";
+    inner.innerHTML = "PLAY";
+  }
+}
+
+function togglePlay(){
+  const icon = document.getElementById("playIcon");
+
+  if(!playing){
+    audio.play();
+    playing = true;
+    icon.innerText = "Ⅱ";
+  }else{
+    audio.pause();
+    playing = false;
+    icon.innerText = "▶";
+  }
+}
+
 </script>
 
 <audio id="bgm" loop>
   <source src="./bgm/main.mp3" type="audio/mpeg">
 </audio>
+
+
 
 
 
