@@ -10,48 +10,7 @@
 <body style="margin:0;background:radial-gradient(circle at top,#3b0f14,#0c0405);font-family:'Times New Roman',serif;color:#eee;">
     <audio id="bgm" src="./main.mp3" loop></audio>
 
-<!-- PLAYER -->
-<div
-  id="player"
-  style="
-    position:fixed;
-    top:20px;
-    right:20px;
-    width:52px;
-    height:52px;
-    border-radius:14px;
-    background:linear-gradient(145deg,#2a2a2a,#141414);
-    box-shadow:
-      0 12px 30px rgba(0,0,0,.6),
-      inset 0 1px 1px rgba(255,255,255,.15);
-    cursor:pointer;
-    transition:all .35s ease;
-    overflow:hidden;
-    z-index:9999;
-  "
-  onclick="togglePlayer()"
->
 
-  <!-- INNER -->
-  <div
-    id="playerInner"
-    style="
-      width:100%;
-      height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#bbb;
-      font-size:11px;
-      letter-spacing:.5px;
-      user-select:none;
-    "
-  >
-    PLAY
-    
-  </div>
-
-</div>
 
 
 <!-- HEADER -->
@@ -73,29 +32,10 @@
       cursor:pointer;
       backdrop-filter:blur(6px);
     ">
-    🏫 보담고 홈페이지 바로가기
+    🏫 보담고 홈페이지 바로가기 (coming soon)
   </button>
 </div>
 
-<!-- BGM TOGGLE BUTTON -->
-<div style="display:flex;justify-content:center;margin:0 0 20px 0">
-  <button
-    id="bgmBtn"
-    onclick="toggleBGM()"
-    style="
-      padding:10px 18px;
-      font-size:14px;
-      letter-spacing:1px;
-      background:rgba(255,255,255,.08);
-      color:#e7d6c4;
-      border:1px solid rgba(255,255,255,.25);
-      border-radius:999px;
-      cursor:pointer;
-      backdrop-filter:blur(6px);
-    ">
-    🎵 BGM 켜기
-  </button>
-</div>
 
 
 
@@ -307,61 +247,6 @@
 </div>
 
 
-<!-- FORM -->
-<div style="
-background:rgba(20,6,8,.9);
-border-radius:20px 20px 0 0;
-padding:16px;
-padding-bottom:110px;
-margin-top:10px">
-
-<label>이름</label>
-<input placeholder="서이건"
-oninput="p_name.innerText=this.value"
-style="width:100%;margin:6px 0 12px;padding:8px;border-radius:8px;border:none">
-
-<label>생일</label>
-<input placeholder="01 / 18"
-oninput="p_birth.innerText=this.value"
-style="width:100%;margin:6px 0 12px;padding:8px;border-radius:8px;border:none">
-
-<label>닉네임</label>
-<input placeholder="only_unlimit"
-oninput="p_creator.innerText=this.value"
-style="width:100%;margin:6px 0 12px;padding:8px;border-radius:8px;border:none">
-
-<label>학생 사진</label>
-<input type="file" accept="image/*"
-onchange="
-const f=this.files[0];
-if(!f)return;
-const r=new FileReader();
-r.onload=e=>p_photo.src=e.target.result;
-r.readAsDataURL(f);
-">
-
-</div>
-
-<!-- SAVE BUTTON -->
-<div style="
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:linear-gradient(to top,rgba(12,4,5,.95),transparent);
-padding:14px">
-<button onclick="saveCard()"
-style="
-width:100%;
-padding:14px;
-font-size:16px;
-background:#6b1b22;
-color:#fff;
-border:none;
-border-radius:14px">
-이미지로 저장
-</button>
-</div>
 
 <script>
 function goSchool(){
@@ -375,115 +260,7 @@ function goCharacter(id){
   window.location.href = "./character/" + id + ".html";
 }
 
-
-//플레이버튼
-let opened = false;
-let playing = false;
-const player = document.getElementById("player");
-const inner = document.getElementById("playerInner");
-const audio = document.getElementById("bgm");
-
-function togglePlayer(){
-
-  if(!opened){
-    // OPEN
-    opened = true;
-    player.style.width = "260px";
-    player.style.height = "360px";
-    player.style.borderRadius = "26px";
-
-    inner.innerHTML = `
-      <div style="
-        width:100%;
-        height:100%;
-        display:flex;
-        flex-direction:column;
-        padding:18px;
-        box-sizing:border-box;
-        color:#eee;
-        font-family: -apple-system, BlinkMacSystemFont, serif;
-      ">
-
-        <!-- DISPLAY -->
-        <div style="
-          flex:1;
-          border-radius:18px;
-          background:linear-gradient(180deg,#1b1b1b,#0d0d0d);
-          box-shadow:
-            inset 0 0 0 1px rgba(255,255,255,.05),
-            inset 0 8px 20px rgba(255,255,255,.05);
-          display:flex;
-          flex-direction:column;
-          justify-content:flex-end;
-          padding:14px;
-        ">
-          <div style="font-size:14px;opacity:.85">Now Playing</div>
-          <div style="font-size:18px;margin-top:4px;">main.mp3</div>
-        </div>
-
-        <!-- CONTROLS -->
-        <div style="
-          height:70px;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          gap:26px;
-        ">
-          <div
-            onclick="event.stopPropagation();togglePlay();"
-            style="
-              width:46px;
-              height:46px;
-              border-radius:50%;
-              background:linear-gradient(145deg,#2b2b2b,#151515);
-              box-shadow:
-                0 6px 14px rgba(0,0,0,.6),
-                inset 0 1px 1px rgba(255,255,255,.15);
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              font-size:14px;
-            "
-          >
-            <span id="playIcon">▶</span>
-          </div>
-        </div>
-
-      </div>
-    `;
-  }else{
-    // CLOSE
-    opened = false;
-    player.style.width = "52px";
-    player.style.height = "52px";
-    player.style.borderRadius = "14px";
-    inner.innerHTML = "PLAY";
-  }
-}
-
-function togglePlay(){
-  const icon = document.getElementById("playIcon");
-
-  if(!playing){
-    audio.play();
-    playing = true;
-    icon.innerText = "Ⅱ";
-  }else{
-    audio.pause();
-    playing = false;
-    icon.innerText = "▶";
-  }
-}
-
 </script>
-
-<audio id="bgm" loop>
-  <source src="./bgm/main.mp3" type="audio/mpeg">
-</audio>
-
-
-
-
 
 </body>
 </html>
