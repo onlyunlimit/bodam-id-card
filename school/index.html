@@ -1,58 +1,132 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>보담고등학교</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>보담고 학생증 만들기</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 
-<body style="
-  margin:0;
-  font-family:'Times New Roman',serif;
-  background:#f5f2ef;
-  color:#2a0c10;
-">
+<body style="margin:0;background:radial-gradient(circle at top,#3b0f14,#0c0405);font-family:'Times New Roman',serif;color:#eee;">
 
-<header style="
-  padding:24px;
-  background:#3a0f14;
-  color:#e7d6c4;
-  text-align:center;
-">
-  <h1 style="margin:0;letter-spacing:2px">보담고등학교</h1>
-  <div style="font-size:14px;opacity:.8">BODAM HIGH SCHOOL</div>
-</header>
+<!-- HEADER -->
+<div style="text-align:center;padding:14px 0 6px 0">
+<div style="font-size:18px;color:#e7d6c4;letter-spacing:2px">보담고 학생증</div>
+<div style="font-size:11px;opacity:.7">BODAM HIGH SCHOOL</div>
+</div>
 
-<main style="padding:24px;max-width:800px;margin:0 auto">
-  <h2>학교 안내</h2>
-  <p>
-    보담고등학교는 읍내 끝자락, 논과 주택 사이에 자리한 공립 인문계 고등학교입니다.
-    화려하지는 않지만, 학생들의 하루가 차곡차곡 쌓이는 곳입니다.
-  </p>
+<!-- CARD PREVIEW -->
+<div style="display:flex;justify-content:center;padding:10px 0">
+    <div id="card" style="width:320px;background:linear-gradient(145deg,#f5f2ef,#ebe4dc);border-radius:20px;box-shadow:0 14px 32px rgba(0,0,0,.35),inset 0 0 12px rgba(255,255,255,.6);font-family:'Times New Roman',serif;overflow:hidden">
 
-  <h2>공지사항</h2>
-  <ul>
-    <li>2학년 1학기 중간고사 일정 안내</li>
-    <li>체육관 보수 공사 안내</li>
-    <li>동아리 추가 모집 공지</li>
-  </ul>
+<!-- CARD HEADER -->
+<div style="background:linear-gradient(135deg,#3a0f14,#1e070a);padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.15)">
+<div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 6px rgba(255,255,255,.25)">
+<img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/61915949-8310-4d43-b51a-eff0c013cb80?v=6ac7d3" crossOrigin="anonymous" style="width:80px;height:80px;object-fit:contain" />
+</div>
+<div style="color:#e7d6c4">
+<div style="font-size:19px;letter-spacing:1.4px">보담고등학교</div>
+<div style="font-size:13px;opacity:.85">BODAM HIGH SCHOOL</div>
+</div>
+</div>
 
-  <button
-    onclick="location.href='../index.html'"
-    style="
-      margin-top:30px;
-      padding:10px 16px;
-      background:#6b1b22;
-      color:#fff;
-      border:none;
-      border-radius:10px;
-      cursor:pointer;
-    "
-  >
-    메인으로 돌아가기
-  </button>
-</main>
+<!-- CARD BODY (이미지 배경 + 오버레이) -->
+<div id="cardBody" style="position:relative">
+<!-- 배경(세로 글자 포함된 템플릿 이미지) -->
+<img id="bg_template" src="https://cdn.caveduck.io/cdn-cgi/image/f=auto,w=800/charim/2694dbd3-b16e-4c7a-91e1-f09e14141f5b?v=cda0a5" crossOrigin="anonymous" style="width:100%;display:block"/>
+
+<!-- 사진 프레임(더 크게) -->
+<div style="position:absolute;left:17.6%;top:4%;width:79%;height:66%;aspect-ratio:1/1;border-radius:14px;overflow:hidden;box-shadow:0 8px 18px rgba(0,0,0,.28);background:#111">
+<img id="p_photo" crossOrigin="anonymous" style="width:100%;height:100%;object-fit:cover;display:block"/></div>
+
+<!-- NAME 값 -->
+<div id="p_name" style="position:absolute;left:18%;top:76%;width:72%;font-size:18px;font-weight:900;color:#2a0c10;letter-spacing:9px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">서이건</div>
+
+<!-- BIRTH 값 -->
+<div id="p_birth" style="position:absolute;left:18%;top:85.1%;width:72%;font-size:15px;color:#2a0c10;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">01 / 18</div>
+
+<!-- CREATOR 값 -->
+<div id="p_creator" style="position:absolute;left:18%;top:94.1%;width:72%;font-size:14px;color:#2a0c10;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">only_unlimit</div></div>
+
+      <!-- (옵션) 아래 얇은 라인 -->
+      <div style="height:6px;background:linear-gradient(to right,transparent,rgba(120,60,60,.35),transparent)"></div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div style="background:rgba(20,6,8,.9);border-radius:20px 20px 0 0;padding:16px;margin-top:10px">
+    <label style="display:block;margin-bottom:6px;opacity:.9">이름</label>
+    <input id="in_name" placeholder="서이건" value="서이건"
+      oninput="p_name.innerText=this.value||' ';"
+      style="width:100%;margin:0 0 12px;padding:10px;border-radius:10px;border:none;outline:none" />
+
+    <label style="display:block;margin-bottom:6px;opacity:.9">생일</label>
+    <input id="in_birth" placeholder="01 / 18" value="01 / 18"
+      oninput="p_birth.innerText=this.value||' ';"
+      style="width:100%;margin:0 0 12px;padding:10px;border-radius:10px;border:none;outline:none" />
+
+    <label style="display:block;margin-bottom:6px;opacity:.9">닉네임</label>
+    <input id="in_creator" placeholder="only_unlimit" value="only_unlimit"
+      oninput="p_creator.innerText=this.value||' ';"
+      style="width:100%;margin:0 0 12px;padding:10px;border-radius:10px;border:none;outline:none" />
+
+    <label style="display:block;margin-bottom:6px;opacity:.9">학생 사진</label>
+    <input type="file" accept="image/*"
+      onchange="const f=this.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{p_photo.src=e.target.result;};r.readAsDataURL(f);"
+      style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,.08);color:#eee" />
+  </div>
+
+  <!-- SAVE BUTTON -->
+  <div style="position:fixed;bottom:0;left:0;width:100%;background:linear-gradient(to top,rgba(12,4,5,.95),transparent);padding:14px">
+    <button onclick="saveCard()"
+      style="width:100%;padding:14px;font-size:16px;background:#6b1b22;color:#fff;border:none;border-radius:14px">
+      이미지로 저장
+    </button>
+  </div>
+
+  <br /><br /><br /><br />
+
+<script>
+  // 초기값이 바로 미리보기에 보이도록(사진은 비어있어도 OK)
+  p_name.innerText = in_name.value || " ";
+  p_birth.innerText = in_birth.value || " ";
+  p_creator.innerText = in_creator.value || " ";
+
+  function saveCard(){
+    const target = document.getElementById("card");
+    const imgs = target.querySelectorAll("img");
+    let loaded = 0;
+
+    // 이미지가 로딩 안 된 상태에서 캡처하면 템플릿/로고가 빠질 수 있어 대기
+    imgs.forEach(img=>{
+      if(img.complete && img.naturalWidth > 0) loaded++;
+      else img.onload = () => {
+        loaded++;
+        if(loaded === imgs.length) capture();
+      };
+      img.onerror = () => { // 혹시 CORS 등으로 실패해도 진행은 하되 누락될 수 있음
+        loaded++;
+        if(loaded === imgs.length) capture();
+      };
+    });
+
+    if(loaded === imgs.length) capture();
+
+    function capture(){
+      html2canvas(target,{
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        allowTaint: false
+      }).then(canvas=>{
+        const a=document.createElement("a");
+        a.href=canvas.toDataURL("image/png");
+        a.download="bodam_id.png";
+        a.click();
+      });
+    }
+  }
+</script>
 
 </body>
 </html>
-
