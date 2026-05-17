@@ -75,7 +75,7 @@
         <main class="app">
           <header class="top-bar">
             <div class="round-btn">‹</div>
-            <div class="title-pill" contenteditable="true">제목(수정 가능)</div>
+            <div class="title-pill" contenteditable="true" spellcheck="false">제목(수정 가능)</div>
             <div class="round-btn">⇧</div>
           </header>
 
@@ -170,12 +170,12 @@
               <img crossorigin="anonymous" src="${item.profile}" alt="">
               <input class="hidden-file profile-input" type="file" accept="image/*">
             </div>
-            <div class="nickname" contenteditable="true" data-field="name" data-index="${index}">${item.name}</div>
+            <div class="nickname" contenteditable="true" spellcheck="false" data-field="name" data-index="${index}">${item.name}</div>
           </div>
 
           <div class="message-box">
-            <div class="time" contenteditable="true" data-field="time" data-index="${index}">${item.time}</div>
-            <div class="message" contenteditable="true" data-field="message" data-index="${index}">${item.message}</div>
+            <div class="time" contenteditable="true" spellcheck="false" data-field="time" data-index="${index}">${item.time}</div>
+            <div class="message" contenteditable="true" spellcheck="false" data-field="message" data-index="${index}">${item.message}</div>
           </div>
 
           <div class="side-icons"><span>♡</span></div>
