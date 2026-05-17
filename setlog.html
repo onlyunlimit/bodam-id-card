@@ -4,384 +4,64 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SETLOG EDITOR</title>
-
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    :root{--phone-scale:.78;}
+    html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#d8d9dd;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:#111;}
+    body{display:flex;justify-content:center;align-items:center;}
+
+    .stage{position:relative;width:100%;height:100%;display:flex;justify-content:center;align-items:center;padding-bottom:108px;overflow:hidden;}
+    .phone-frame{position:relative;width:390px;height:820px;background:#070707;border-radius:44px;padding:10px;box-shadow:0 22px 65px rgba(0,0,0,.36),inset 0 0 0 2px rgba(255,255,255,.08),inset 0 0 0 7px rgba(255,255,255,.025);overflow:hidden;transform:scale(var(--phone-scale));transform-origin:center center;}
+    .phone-screen{position:relative;width:100%;height:100%;background:#fff;border-radius:34px;overflow:hidden;}
+    .phone-notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:108px;height:21px;background:#090909;border-radius:0 0 17px 17px;z-index:30;pointer-events:none;}
+
+    .app{width:100%;height:100%;padding:39px 11px 13px;background:#fff;display:flex;flex-direction:column;overflow:hidden;}
+    .top-bar{flex:0 0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+    .round-btn{width:42px;height:42px;border-radius:50%;background:#f1f1f1;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500;color:#111;user-select:none;}
+    .title-pill{min-width:145px;max-width:190px;padding:10px 17px;border-radius:999px;background:#f3f3f3;text-align:center;font-size:13px;font-weight:800;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none;}
+
+    .dots{flex:0 0 auto;width:100%;text-align:center;margin-bottom:9px;letter-spacing:4px;color:#d5d5d5;font-size:14px;line-height:1;user-select:none;}
+    .dots .active{color:#b66cff;}
+
+    .feed{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:7px;overflow:hidden;}
+    .set-card{position:relative;width:100%;flex:1 1 0;min-height:0;border-radius:20px;overflow:hidden;background:#111;box-shadow:0 3px 10px rgba(0,0,0,.08),inset 0 -50px 80px rgba(0,0,0,.12);cursor:pointer;}
+    .bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;user-select:none;pointer-events:none;}
+    .set-card::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.36),rgba(0,0,0,.08)),linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.16));z-index:1;pointer-events:none;}
+
+    .profile-line{position:absolute;left:12px;top:12px;z-index:3;display:flex;align-items:center;gap:9px;max-width:calc(100% - 66px);}
+    .profile-wrap{width:35px;height:35px;border-radius:50%;overflow:hidden;background:#eee;border:1px solid rgba(255,255,255,.68);box-shadow:0 2px 8px rgba(0,0,0,.22);flex-shrink:0;cursor:pointer;}
+    .profile-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+    .nickname{font-size:14px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.45);letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none;cursor:text;min-width:20px;}
+
+    .message-box{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);z-index:3;width:74%;text-align:center;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.48);}
+    .time{font-size:18px;font-weight:850;letter-spacing:3px;line-height:1;outline:none;cursor:text;min-height:1em;}
+    .message{margin-top:7px;font-size:12px;font-weight:650;line-height:1.32;word-break:keep-all;outline:none;cursor:text;min-height:1em;}
+    [contenteditable="true"]:focus{background:rgba(255,255,255,.18);border-radius:8px;padding:2px 5px;}
+
+    .side-icons{position:absolute;right:14px;bottom:11px;z-index:3;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35);pointer-events:none;user-select:none;}
+    .side-icons span{font-size:27px;line-height:1;font-weight:300;}
+    .hidden-file{display:none;}
+
+    .controls{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);width:min(390px,calc(100vw - 24px));padding:9px 10px;border-radius:24px;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.16);display:flex;flex-direction:column;gap:8px;z-index:100;}
+    .control-row{display:flex;align-items:center;gap:7px;width:100%;}
+    .control-btn{height:34px;padding:0 12px;border:0;border-radius:999px;background:#111;color:#fff;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;}
+    .control-btn.light{width:34px;padding:0;background:#f0f0f0;color:#111;font-size:17px;}
+    .control-btn.mode{flex:1;background:#f1f1f1;color:#222;}
+    .control-btn.mode.active{background:#111;color:#fff;}
+    .zoom-range{flex:1;min-width:70px;accent-color:#111;}
+
+    @media(max-width:480px){
+      :root{--phone-scale:.72;}
+      .stage{padding-bottom:112px;}
+      .controls{width:min(360px,calc(100vw - 22px));padding:8px 9px;}
+      .control-btn{height:32px;padding:0 10px;font-size:11px;}
+      .control-btn.light{width:32px;font-size:16px;}
     }
 
-    :root {
-      --phone-scale: 0.86;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #d8d9dd;
-      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      color: #111;
-    }
-
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .stage {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding-bottom: 74px;
-      overflow: hidden;
-    }
-
-    .phone-frame {
-      position: relative;
-      width: 390px;
-      height: 820px;
-      background: #070707;
-      border-radius: 44px;
-      padding: 10px;
-      box-shadow:
-        0 22px 65px rgba(0, 0, 0, 0.36),
-        inset 0 0 0 2px rgba(255,255,255,0.08),
-        inset 0 0 0 7px rgba(255,255,255,0.025);
-      overflow: hidden;
-      transform: scale(var(--phone-scale));
-      transform-origin: center center;
-    }
-
-    .phone-screen {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #fff;
-      border-radius: 34px;
-      overflow: hidden;
-    }
-
-    .phone-notch {
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 108px;
-      height: 21px;
-      background: #090909;
-      border-radius: 0 0 17px 17px;
-      z-index: 30;
-      pointer-events: none;
-    }
-
-    .app {
-      width: 100%;
-      height: 100%;
-      padding: 39px 11px 13px;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .top-bar {
-      flex: 0 0 auto;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 9px;
-    }
-
-    .round-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #f1f1f1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      font-weight: 500;
-      color: #111;
-      user-select: none;
-    }
-
-    .title-pill {
-      min-width: 145px;
-      max-width: 190px;
-      padding: 10px 17px;
-      border-radius: 999px;
-      background: #f3f3f3;
-      text-align: center;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      outline: none;
-    }
-
-    .dots {
-      flex: 0 0 auto;
-      width: 100%;
-      text-align: center;
-      margin-bottom: 9px;
-      letter-spacing: 4px;
-      color: #d5d5d5;
-      font-size: 14px;
-      line-height: 1;
-      user-select: none;
-    }
-
-    .dots .active {
-      color: #b66cff;
-    }
-
-    .feed {
-      flex: 1 1 auto;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-      overflow: hidden;
-    }
-
-    .set-card {
-      position: relative;
-      width: 100%;
-      flex: 1 1 0;
-      min-height: 0;
-      border-radius: 20px;
-      overflow: hidden;
-      background: #111;
-      box-shadow:
-        0 3px 10px rgba(0,0,0,0.08),
-        inset 0 -50px 80px rgba(0,0,0,0.12);
-      cursor: pointer;
-    }
-
-    .bg-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      z-index: 0;
-      user-select: none;
-      pointer-events: none;
-    }
-
-    .set-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(90deg, rgba(0,0,0,.36), rgba(0,0,0,.08)),
-        linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.16));
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .profile-line {
-      position: absolute;
-      left: 12px;
-      top: 12px;
-      z-index: 3;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      max-width: calc(100% - 66px);
-    }
-
-    .profile-wrap {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      overflow: hidden;
-      background: #eee;
-      border: 1px solid rgba(255,255,255,.68);
-      box-shadow: 0 2px 8px rgba(0,0,0,.22);
-      flex-shrink: 0;
-      cursor: pointer;
-    }
-
-    .profile-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-    }
-
-    .nickname {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-      text-shadow: 0 1px 6px rgba(0,0,0,.45);
-      letter-spacing: -0.4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      outline: none;
-      cursor: text;
-      min-width: 20px;
-    }
-
-    .message-box {
-      position: absolute;
-      left: 50%;
-      top: 54%;
-      transform: translate(-50%, -50%);
-      z-index: 3;
-      width: 74%;
-      text-align: center;
-      color: #fff;
-      text-shadow: 0 2px 8px rgba(0,0,0,.48);
-    }
-
-    .time {
-      font-size: 18px;
-      font-weight: 850;
-      letter-spacing: 3px;
-      line-height: 1;
-      outline: none;
-      cursor: text;
-      min-height: 1em;
-    }
-
-    .message {
-      margin-top: 7px;
-      font-size: 12px;
-      font-weight: 650;
-      line-height: 1.32;
-      word-break: keep-all;
-      outline: none;
-      cursor: text;
-      min-height: 1em;
-    }
-
-    [contenteditable="true"]:focus {
-      background: rgba(255,255,255,0.18);
-      border-radius: 8px;
-      padding: 2px 5px;
-    }
-
-    .side-icons {
-      position: absolute;
-      right: 14px;
-      bottom: 11px;
-      z-index: 3;
-      color: #fff;
-      text-shadow: 0 2px 8px rgba(0,0,0,.35);
-      pointer-events: none;
-      user-select: none;
-    }
-
-    .side-icons span {
-      font-size: 27px;
-      line-height: 1;
-      font-weight: 300;
-    }
-
-    .hidden-file {
-      display: none;
-    }
-
-    .controls {
-      position: fixed;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%);
-      width: min(390px, calc(100vw - 24px));
-      min-height: 54px;
-      padding: 9px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.88);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.16);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 100;
-    }
-
-    .control-btn {
-      height: 36px;
-      padding: 0 13px;
-      border: 0;
-      border-radius: 999px;
-      background: #111;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 800;
-      font-family: inherit;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .control-btn.light {
-      width: 36px;
-      padding: 0;
-      background: #f0f0f0;
-      color: #111;
-      font-size: 18px;
-    }
-
-    .zoom-range {
-      flex: 1;
-      min-width: 70px;
-      accent-color: #111;
-    }
-
-    @media (max-width: 480px) {
-      :root {
-        --phone-scale: 0.78;
-      }
-
-      .stage {
-        padding-bottom: 70px;
-      }
-
-      .phone-frame {
-        width: 390px;
-        height: 820px;
-      }
-
-      .controls {
-        bottom: 12px;
-        width: min(360px, calc(100vw - 22px));
-        padding: 8px 9px;
-      }
-
-      .control-btn {
-        height: 34px;
-        padding: 0 11px;
-        font-size: 12px;
-      }
-
-      .control-btn.light {
-        width: 34px;
-        font-size: 17px;
-      }
-    }
-
-    @media (max-height: 760px) {
-      :root {
-        --phone-scale: 0.7;
-      }
+    @media(max-height:760px){
+      :root{--phone-scale:.64;}
     }
   </style>
 </head>
@@ -403,132 +83,70 @@
             <span class="active">●</span><span>●</span><span class="active">●</span><span>●</span><span class="active">●</span><span>●</span><span class="active">●</span><span>●</span>
           </div>
 
-          <section class="feed">
-
-            <article class="set-card">
-              <img class="bg-img" crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ff60c83b-d49a-4115-b172-8abc81b20bce?v=4e0a68" alt="">
-              <input class="hidden-file bg-input" type="file" accept="image/*">
-
-              <div class="profile-line">
-                <div class="profile-wrap">
-                  <img crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim-1920x/5b9c787c-c5bd-450a-ad2e-78d8046ae6e9?v=8ff5e2" alt="">
-                  <input class="hidden-file profile-input" type="file" accept="image/*">
-                </div>
-                <div class="nickname" contenteditable="true">원 혈</div>
-              </div>
-
-              <div class="message-box">
-                <div class="time" contenteditable="true">08:00</div>
-                <div class="message" contenteditable="true">훈련 시작이다. 지온 당장 훈련실로.</div>
-              </div>
-
-              <div class="side-icons">
-                <span>♡</span>
-              </div>
-            </article>
-
-            <article class="set-card">
-              <img class="bg-img" crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/4c16f51d-ea6a-4877-8cac-d3e3457ff4dd?v=8eb456" alt="">
-              <input class="hidden-file bg-input" type="file" accept="image/*">
-
-              <div class="profile-line">
-                <div class="profile-wrap">
-                  <img crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/11c1552e-7754-46e9-94d2-dc9e7213f465?v=fc408d" alt="">
-                  <input class="hidden-file profile-input" type="file" accept="image/*">
-                </div>
-                <div class="nickname" contenteditable="true">데인</div>
-              </div>
-
-              <div class="message-box">
-                <div class="time" contenteditable="true">08:00</div>
-                <div class="message" contenteditable="true">잠시만요~~^ ^</div>
-              </div>
-
-              <div class="side-icons">
-                <span>♡</span>
-              </div>
-            </article>
-
-            <article class="set-card">
-              <img class="bg-img" crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ecc4e652-6508-424c-882b-e8a1840aee8e?v=3c144f" alt="">
-              <input class="hidden-file bg-input" type="file" accept="image/*">
-
-              <div class="profile-line">
-                <div class="profile-wrap">
-                  <img crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/d16e2b08-a975-4faf-949a-c9f6941fd7c7?v=b0c3b1" alt="">
-                  <input class="hidden-file profile-input" type="file" accept="image/*">
-                </div>
-                <div class="nickname" contenteditable="true">지온</div>
-              </div>
-
-              <div class="message-box">
-                <div class="time" contenteditable="true">08:00</div>
-                <div class="message" contenteditable="true" style="font-size:18px;">Zzz</div>
-              </div>
-
-              <div class="side-icons">
-                <span>♡</span>
-              </div>
-            </article>
-
-            <article class="set-card">
-              <img class="bg-img" crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/50a7d056-3da2-4d93-85fa-459fdb86b26b?v=b794c9" alt="">
-              <input class="hidden-file bg-input" type="file" accept="image/*">
-
-              <div class="profile-line">
-                <div class="profile-wrap">
-                  <img crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/10f105ac-30a3-44be-93ea-a2613bc9f919?v=eba775" alt="">
-                  <input class="hidden-file profile-input" type="file" accept="image/*">
-                </div>
-                <div class="nickname" contenteditable="true">SD</div>
-              </div>
-
-              <div class="message-box">
-                <div class="time" contenteditable="true">08:00</div>
-                <div class="message" contenteditable="true">수면 패턴이 신생아 같군. 지각 확률 100%</div>
-              </div>
-
-              <div class="side-icons">
-                <span>♡</span>
-              </div>
-            </article>
-
-            <article class="set-card">
-              <img class="bg-img" crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ecf4866c-5dc1-4ad9-85a8-04f4f094d67d?v=359c2a" alt="">
-              <input class="hidden-file bg-input" type="file" accept="image/*">
-
-              <div class="profile-line">
-                <div class="profile-wrap">
-                  <img crossorigin="anonymous" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/977f2cac-d41f-4c02-8bb2-47c69947d69d?v=5fc8c1" alt="">
-                  <input class="hidden-file profile-input" type="file" accept="image/*">
-                </div>
-                <div class="nickname" contenteditable="true">백진</div>
-              </div>
-
-              <div class="message-box">
-                <div class="time" contenteditable="true">08:00</div>
-                <div class="message" contenteditable="true">천천히 오십쇼...!</div>
-              </div>
-
-              <div class="side-icons">
-                <span>♡</span>
-              </div>
-            </article>
-
-          </section>
+          <section class="feed" id="feed"></section>
         </main>
       </div>
     </div>
   </div>
 
   <div class="controls">
-    <button class="control-btn light" id="zoomOut">−</button>
-    <input class="zoom-range" id="zoomRange" type="range" min="0.55" max="1.05" step="0.01" value="0.86">
-    <button class="control-btn light" id="zoomIn">＋</button>
-    <button class="control-btn" id="saveBtn">저장</button>
+    <div class="control-row">
+      <button class="control-btn mode" data-count="2">2인</button>
+      <button class="control-btn mode" data-count="3">3인</button>
+      <button class="control-btn mode" data-count="4">4인</button>
+      <button class="control-btn mode active" data-count="5">5인</button>
+    </div>
+
+    <div class="control-row">
+      <button class="control-btn light" id="zoomOut">−</button>
+      <input class="zoom-range" id="zoomRange" type="range" min="0.55" max="1.05" step="0.01" value="0.72">
+      <button class="control-btn light" id="zoomIn">＋</button>
+      <button class="control-btn" id="saveBtn">저장</button>
+    </div>
   </div>
 
   <script>
+    let activeCount = 5;
+
+    const DATA = [
+      {
+        name:"원 혈",
+        time:"08:00",
+        message:"훈련 시작이다. 지온 당장 훈련실로.",
+        profile:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim-1920x/5b9c787c-c5bd-450a-ad2e-78d8046ae6e9?v=8ff5e2",
+        background:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ff60c83b-d49a-4115-b172-8abc81b20bce?v=4e0a68"
+      },
+      {
+        name:"데인",
+        time:"08:00",
+        message:"잠시만요~~^ ^",
+        profile:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/11c1552e-7754-46e9-94d2-dc9e7213f465?v=fc408d",
+        background:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/4c16f51d-ea6a-4877-8cac-d3e3457ff4dd?v=8eb456"
+      },
+      {
+        name:"지온",
+        time:"08:00",
+        message:"Zzz",
+        profile:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/d16e2b08-a975-4faf-949a-c9f6941fd7c7?v=b0c3b1",
+        background:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ecc4e652-6508-424c-882b-e8a1840aee8e?v=3c144f"
+      },
+      {
+        name:"SD",
+        time:"08:00",
+        message:"수면 패턴이 신생아 같군. 지각 확률 100%",
+        profile:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/10f105ac-30a3-44be-93ea-a2613bc9f919?v=eba775",
+        background:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/50a7d056-3da2-4d93-85fa-459fdb86b26b?v=b794c9"
+      },
+      {
+        name:"백진",
+        time:"08:00",
+        message:"천천히 오십쇼...!",
+        profile:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/977f2cac-d41f-4c02-8bb2-47c69947d69d?v=5fc8c1",
+        background:"https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ecf4866c-5dc1-4ad9-85a8-04f4f094d67d?v=359c2a"
+      }
+    ];
+
+    const feed = document.getElementById("feed");
     const root = document.documentElement;
     const zoomRange = document.getElementById("zoomRange");
     const zoomIn = document.getElementById("zoomIn");
@@ -536,123 +154,158 @@
     const saveBtn = document.getElementById("saveBtn");
     const captureArea = document.getElementById("captureArea");
 
-    function setZoom(value) {
-      const next = Math.max(0.55, Math.min(1.05, Number(value)));
+    function renderCards(){
+      feed.innerHTML = "";
+
+      DATA.slice(0, activeCount).forEach((item, index) => {
+        const card = document.createElement("article");
+        card.className = "set-card";
+
+        card.innerHTML = `
+          <img class="bg-img" crossorigin="anonymous" src="${item.background}" alt="">
+          <input class="hidden-file bg-input" type="file" accept="image/*">
+
+          <div class="profile-line">
+            <div class="profile-wrap">
+              <img crossorigin="anonymous" src="${item.profile}" alt="">
+              <input class="hidden-file profile-input" type="file" accept="image/*">
+            </div>
+            <div class="nickname" contenteditable="true" data-field="name" data-index="${index}">${item.name}</div>
+          </div>
+
+          <div class="message-box">
+            <div class="time" contenteditable="true" data-field="time" data-index="${index}">${item.time}</div>
+            <div class="message" contenteditable="true" data-field="message" data-index="${index}">${item.message}</div>
+          </div>
+
+          <div class="side-icons"><span>♡</span></div>
+        `;
+
+        feed.appendChild(card);
+      });
+
+      bindEditable();
+      bindImageUpload();
+    }
+
+    function bindEditable(){
+      document.querySelectorAll('[contenteditable="true"]').forEach((el) => {
+        el.addEventListener("click", (event) => event.stopPropagation());
+
+        el.addEventListener("input", () => {
+          const index = el.dataset.index;
+          const field = el.dataset.field;
+          if(index !== undefined && field){
+            DATA[index][field] = el.innerText.trim();
+          }
+        });
+
+        el.addEventListener("keydown", (event) => {
+          if(event.key === "Enter"){
+            event.preventDefault();
+            el.blur();
+          }
+        });
+      });
+    }
+
+    function readImageFile(file, callback){
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(event){callback(event.target.result);};
+      reader.readAsDataURL(file);
+    }
+
+    function bindImageUpload(){
+      document.querySelectorAll(".profile-wrap").forEach((wrap, index) => {
+        const input = wrap.querySelector(".profile-input");
+        const img = wrap.querySelector("img");
+
+        wrap.addEventListener("click", (event) => {
+          event.stopPropagation();
+          input.click();
+        });
+
+        input.addEventListener("change", () => {
+          readImageFile(input.files[0], (dataUrl) => {
+            img.src = dataUrl;
+            DATA[index].profile = dataUrl;
+          });
+        });
+      });
+
+      document.querySelectorAll(".set-card").forEach((card, index) => {
+        const bgInput = card.querySelector(".bg-input");
+        const bgImg = card.querySelector(".bg-img");
+
+        card.addEventListener("click", (event) => {
+          const isEditingText = event.target.closest('[contenteditable="true"]');
+          const isProfile = event.target.closest(".profile-wrap");
+          if(isEditingText || isProfile) return;
+          bgInput.click();
+        });
+
+        bgInput.addEventListener("change", () => {
+          readImageFile(bgInput.files[0], (dataUrl) => {
+            bgImg.src = dataUrl;
+            DATA[index].background = dataUrl;
+          });
+        });
+      });
+    }
+
+    document.querySelectorAll(".control-btn.mode").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeCount = Number(btn.dataset.count);
+
+        document.querySelectorAll(".control-btn.mode").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        renderCards();
+      });
+    });
+
+    function setZoom(value){
+      const next = Math.max(.55, Math.min(1.05, Number(value)));
       root.style.setProperty("--phone-scale", next);
       zoomRange.value = next;
     }
 
-    zoomRange.addEventListener("input", () => {
-      setZoom(zoomRange.value);
-    });
-
-    zoomIn.addEventListener("click", () => {
-      setZoom(Number(zoomRange.value) + 0.05);
-    });
-
-    zoomOut.addEventListener("click", () => {
-      setZoom(Number(zoomRange.value) - 0.05);
-    });
-
-    document.querySelectorAll('[contenteditable="true"]').forEach((el) => {
-      el.addEventListener("click", (event) => {
-        event.stopPropagation();
-      });
-
-      el.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          el.blur();
-        }
-      });
-    });
-
-    function readImageFile(file, callback) {
-      if (!file) return;
-
-      const reader = new FileReader();
-
-      reader.onload = function(event) {
-        callback(event.target.result);
-      };
-
-      reader.readAsDataURL(file);
-    }
-
-    document.querySelectorAll(".profile-wrap").forEach((wrap) => {
-      const input = wrap.querySelector(".profile-input");
-      const img = wrap.querySelector("img");
-
-      wrap.addEventListener("click", (event) => {
-        event.stopPropagation();
-        input.click();
-      });
-
-      input.addEventListener("change", () => {
-        const file = input.files[0];
-
-        readImageFile(file, (dataUrl) => {
-          img.src = dataUrl;
-        });
-      });
-    });
-
-    document.querySelectorAll(".set-card").forEach((card) => {
-      const bgInput = card.querySelector(".bg-input");
-      const bgImg = card.querySelector(".bg-img");
-
-      card.addEventListener("click", (event) => {
-        const isEditingText = event.target.closest('[contenteditable="true"]');
-        const isProfile = event.target.closest(".profile-wrap");
-
-        if (isEditingText || isProfile) return;
-
-        bgInput.click();
-      });
-
-      bgInput.addEventListener("change", () => {
-        const file = bgInput.files[0];
-
-        readImageFile(file, (dataUrl) => {
-          bgImg.src = dataUrl;
-        });
-      });
-    });
+    zoomRange.addEventListener("input", () => setZoom(zoomRange.value));
+    zoomIn.addEventListener("click", () => setZoom(Number(zoomRange.value) + .05));
+    zoomOut.addEventListener("click", () => setZoom(Number(zoomRange.value) - .05));
 
     saveBtn.addEventListener("click", async () => {
       document.activeElement.blur();
 
       const previousScale = getComputedStyle(root).getPropertyValue("--phone-scale");
       root.style.setProperty("--phone-scale", 1);
-
       saveBtn.textContent = "저장중...";
 
       await new Promise(resolve => setTimeout(resolve, 120));
 
-      try {
+      try{
         const canvas = await html2canvas(captureArea, {
-          backgroundColor: null,
-          scale: 3,
-          useCORS: true,
-          allowTaint: false,
-          logging: false,
-          width: captureArea.offsetWidth,
-          height: captureArea.offsetHeight,
-          windowWidth: document.documentElement.clientWidth,
-          windowHeight: document.documentElement.clientHeight
+          backgroundColor:null,
+          scale:3,
+          useCORS:true,
+          allowTaint:false,
+          logging:false
         });
 
         const link = document.createElement("a");
-        link.download = "setlog.png";
+        link.download = `setlog_${activeCount}people.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
-      } catch (error) {
-        alert("저장에 실패했어요. 외부 URL 이미지가 저장을 막을 수 있어서, 이미지를 직접 첨부한 뒤 다시 저장해보세요.");
-      } finally {
+      }catch(error){
+        alert("저장에 실패했어요. 외부 URL 이미지가 막힐 수 있어서, 이미지를 직접 첨부한 뒤 다시 저장해보세요.");
+      }finally{
         root.style.setProperty("--phone-scale", previousScale);
         saveBtn.textContent = "저장";
       }
     });
+
+    renderCards();
   </script>
 </body>
 </html>
