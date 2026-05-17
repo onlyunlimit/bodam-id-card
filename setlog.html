@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SGIA SHIELD Setlog</title>
+  <title>SETLOG EDITOR</title>
 
   <style>
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html, body {
@@ -16,7 +17,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #d7d8dc;
+      background: #d8d9dd;
       font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
       color: #111;
     }
@@ -59,13 +60,14 @@
       height: 24px;
       background: #090909;
       border-radius: 0 0 18px 18px;
-      z-index: 20;
+      z-index: 30;
+      pointer-events: none;
     }
 
     .app {
       width: 100%;
       height: 100%;
-      padding: 44px 13px 16px;
+      padding: 44px 13px 15px;
       background: #fff;
       display: flex;
       flex-direction: column;
@@ -97,6 +99,7 @@
 
     .title-pill {
       min-width: 158px;
+      max-width: 210px;
       padding: 11px 20px;
       border-radius: 999px;
       background: #f3f3f3;
@@ -105,6 +108,9 @@
       font-weight: 800;
       letter-spacing: 0.2px;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      outline: none;
     }
 
     .dots {
@@ -116,6 +122,7 @@
       color: #d5d5d5;
       font-size: 15px;
       line-height: 1;
+      user-select: none;
     }
 
     .dots .active {
@@ -138,11 +145,23 @@
       min-height: 0;
       border-radius: 22px;
       overflow: hidden;
-      background-size: cover;
-      background-position: center;
+      background: #111;
       box-shadow:
         0 3px 10px rgba(0,0,0,0.08),
         inset 0 -50px 80px rgba(0,0,0,0.12);
+      cursor: pointer;
+    }
+
+    .bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0;
+      user-select: none;
+      pointer-events: none;
     }
 
     .set-card::before {
@@ -153,29 +172,38 @@
         linear-gradient(90deg, rgba(0,0,0,.36), rgba(0,0,0,.08)),
         linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.16));
       z-index: 1;
+      pointer-events: none;
     }
 
     .profile-line {
       position: absolute;
       left: 12px;
       top: 12px;
-      z-index: 2;
+      z-index: 3;
       display: flex;
       align-items: center;
       gap: 9px;
       max-width: calc(100% - 82px);
     }
 
-    .profile-img {
+    .profile-wrap {
       width: 39px;
       height: 39px;
       border-radius: 50%;
-      background-size: cover;
-      background-position: center;
-      background-color: #eee;
+      overflow: hidden;
+      background: #eee;
       border: 1px solid rgba(255,255,255,.68);
       box-shadow: 0 2px 8px rgba(0,0,0,.22);
       flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .profile-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
     }
 
     .nickname {
@@ -187,6 +215,9 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      outline: none;
+      cursor: text;
+      min-width: 20px;
     }
 
     .message-box {
@@ -194,7 +225,7 @@
       left: 50%;
       top: 54%;
       transform: translate(-50%, -50%);
-      z-index: 2;
+      z-index: 3;
       width: 74%;
       text-align: center;
       color: #fff;
@@ -206,6 +237,9 @@
       font-weight: 850;
       letter-spacing: 3px;
       line-height: 1;
+      outline: none;
+      cursor: text;
+      min-height: 1em;
     }
 
     .message {
@@ -214,6 +248,15 @@
       font-weight: 650;
       line-height: 1.32;
       word-break: keep-all;
+      outline: none;
+      cursor: text;
+      min-height: 1em;
+    }
+
+    [contenteditable="true"]:focus {
+      background: rgba(255,255,255,0.18);
+      border-radius: 8px;
+      padding: 2px 5px;
     }
 
     .side-icons {
@@ -221,19 +264,25 @@
       right: 16px;
       top: 50%;
       transform: translateY(-43%);
-      z-index: 2;
+      z-index: 3;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 20px;
       color: #fff;
       text-shadow: 0 2px 8px rgba(0,0,0,.35);
+      pointer-events: none;
+      user-select: none;
     }
 
     .side-icons span {
       font-size: 30px;
       line-height: 1;
       font-weight: 300;
+    }
+
+    .hidden-file {
+      display: none;
     }
 
     @media (max-width: 480px) {
@@ -273,7 +322,7 @@
         border-radius: 20px;
       }
 
-      .profile-img {
+      .profile-wrap {
         width: 36px;
         height: 36px;
       }
@@ -302,7 +351,7 @@
       <main class="app">
         <header class="top-bar">
           <div class="round-btn">‹</div>
-          <div class="title-pill" id="appTitle">SGIA SHIELD</div>
+          <div class="title-pill" contenteditable="true">SGIA SHIELD</div>
           <div class="round-btn">⇧</div>
         </header>
 
@@ -310,89 +359,182 @@
           <span class="active">●</span><span>●</span><span class="active">●</span><span>●</span><span class="active">●</span><span>●</span><span class="active">●</span><span>●</span>
         </div>
 
-        <section class="feed" id="feed"></section>
+        <section class="feed">
+
+          <article class="set-card">
+            <img class="bg-img" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ff60c83b-d49a-4115-b172-8abc81b20bce?v=4e0a68" alt="">
+            <input class="hidden-file bg-input" type="file" accept="image/*">
+
+            <div class="profile-line">
+              <div class="profile-wrap">
+                <img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim-1920x/5b9c787c-c5bd-450a-ad2e-78d8046ae6e9?v=8ff5e2" alt="">
+                <input class="hidden-file profile-input" type="file" accept="image/*">
+              </div>
+              <div class="nickname" contenteditable="true">원 혈</div>
+            </div>
+
+            <div class="message-box">
+              <div class="time" contenteditable="true">08:00</div>
+              <div class="message" contenteditable="true">훈련 시작이다. 지온 당장 훈련실로.</div>
+            </div>
+
+            <div class="side-icons">
+              <span>↩</span>
+              <span>♡</span>
+            </div>
+          </article>
+
+          <article class="set-card">
+            <img class="bg-img" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/4c16f51d-ea6a-4877-8cac-d3e3457ff4dd?v=8eb456" alt="">
+            <input class="hidden-file bg-input" type="file" accept="image/*">
+
+            <div class="profile-line">
+              <div class="profile-wrap">
+                <img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/11c1552e-7754-46e9-94d2-dc9e7213f465?v=fc408d" alt="">
+                <input class="hidden-file profile-input" type="file" accept="image/*">
+              </div>
+              <div class="nickname" contenteditable="true">데인</div>
+            </div>
+
+            <div class="message-box">
+              <div class="time" contenteditable="true">08:00</div>
+              <div class="message" contenteditable="true">잠시만요~~^ ^</div>
+            </div>
+
+            <div class="side-icons">
+              <span>↩</span>
+              <span>♡</span>
+            </div>
+          </article>
+
+          <article class="set-card">
+            <img class="bg-img" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ecc4e652-6508-424c-882b-e8a1840aee8e?v=3c144f" alt="">
+            <input class="hidden-file bg-input" type="file" accept="image/*">
+
+            <div class="profile-line">
+              <div class="profile-wrap">
+                <img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/d16e2b08-a975-4faf-949a-c9f6941fd7c7?v=b0c3b1" alt="">
+                <input class="hidden-file profile-input" type="file" accept="image/*">
+              </div>
+              <div class="nickname" contenteditable="true">지온</div>
+            </div>
+
+            <div class="message-box">
+              <div class="time" contenteditable="true">08:00</div>
+              <div class="message" contenteditable="true" style="font-size:18px;">Zzz</div>
+            </div>
+
+            <div class="side-icons">
+              <span>↩</span>
+              <span>♡</span>
+            </div>
+          </article>
+
+          <article class="set-card">
+            <img class="bg-img" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/50a7d056-3da2-4d93-85fa-459fdb86b26b?v=b794c9" alt="">
+            <input class="hidden-file bg-input" type="file" accept="image/*">
+
+            <div class="profile-line">
+              <div class="profile-wrap">
+                <img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/10f105ac-30a3-44be-93ea-a2613bc9f919?v=eba775" alt="">
+                <input class="hidden-file profile-input" type="file" accept="image/*">
+              </div>
+              <div class="nickname" contenteditable="true">SD</div>
+            </div>
+
+            <div class="message-box">
+              <div class="time" contenteditable="true">08:00</div>
+              <div class="message" contenteditable="true">수면 패턴이 신생아 같군. 지각 확률 100%</div>
+            </div>
+
+            <div class="side-icons">
+              <span>↩</span>
+              <span>♡</span>
+            </div>
+          </article>
+
+          <article class="set-card">
+            <img class="bg-img" src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ecf4866c-5dc1-4ad9-85a8-04f4f094d67d?v=359c2a" alt="">
+            <input class="hidden-file bg-input" type="file" accept="image/*">
+
+            <div class="profile-line">
+              <div class="profile-wrap">
+                <img src="https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/977f2cac-d41f-4c02-8bb2-47c69947d69d?v=5fc8c1" alt="">
+                <input class="hidden-file profile-input" type="file" accept="image/*">
+              </div>
+              <div class="nickname" contenteditable="true">백진</div>
+            </div>
+
+            <div class="message-box">
+              <div class="time" contenteditable="true">08:00</div>
+              <div class="message" contenteditable="true">천천히 오십쇼...!</div>
+            </div>
+
+            <div class="side-icons">
+              <span>↩</span>
+              <span>♡</span>
+            </div>
+          </article>
+
+        </section>
       </main>
     </div>
   </div>
 
   <script>
-    /*
-      수정은 여기만 하면 됨.
+    const editableTexts = document.querySelectorAll('[contenteditable="true"]');
 
-      name: 인물 이름
-      time: 시간
-      message: 할말
-      profile: 프로필 사진 URL
-      background: 가로 배경 이미지 URL
-    */
+    editableTexts.forEach((el) => {
+      el.addEventListener('click', (event) => {
+        event.stopPropagation();
+      });
 
-    const APP_TITLE = "SGIA SHIELD";
+      el.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          el.blur();
+        }
+      });
+    });
 
-    const DATA = [
-      {
-        name: "원 혈",
-        time: "08:00",
-        message: "훈련 시작이다. 지온 당장 훈련실로.",
-        profile: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim-1920x/5b9c787c-c5bd-450a-ad2e-78d8046ae6e9?v=8ff5e2",
-        background: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ff60c83b-d49a-4115-b172-8abc81b20bce?v=4e0a68"
-      },
-      {
-        name: "데인",
-        time: "08:00",
-        message: "잠시만요~~^ ^",
-        profile: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/11c1552e-7754-46e9-94d2-dc9e7213f465?v=fc408d",
-        background: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/4c16f51d-ea6a-4877-8cac-d3e3457ff4dd?v=8eb456"
-      },
-      {
-        name: "지온",
-        time: "08:00",
-        message: "Zzz",
-        profile: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/d16e2b08-a975-4faf-949a-c9f6941fd7c7?v=b0c3b1",
-        background: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ecc4e652-6508-424c-882b-e8a1840aee8e?v=3c144f"
-      },
-      {
-        name: "SD",
-        time: "08:00",
-        message: "수면 패턴이 신생아 같군. 지각 확률 100%",
-        profile: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/10f105ac-30a3-44be-93ea-a2613bc9f919?v=eba775",
-        background: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/50a7d056-3da2-4d93-85fa-459fdb86b26b?v=b794c9"
-      },
-      {
-        name: "백진",
-        time: "08:00",
-        message: "천천히 오십쇼...!",
-        profile: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/977f2cac-d41f-4c02-8bb2-47c69947d69d?v=5fc8c1",
-        background: "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/ecf4866c-5dc1-4ad9-85a8-04f4f094d67d?v=359c2a"
-      }
-    ];
+    document.querySelectorAll('.profile-wrap').forEach((wrap) => {
+      const input = wrap.querySelector('.profile-input');
+      const img = wrap.querySelector('img');
 
-    document.getElementById("appTitle").textContent = APP_TITLE;
+      wrap.addEventListener('click', (event) => {
+        event.stopPropagation();
+        input.click();
+      });
 
-    const feed = document.getElementById("feed");
+      input.addEventListener('change', () => {
+        const file = input.files[0];
+        if (!file) return;
 
-    DATA.forEach((item) => {
-      const card = document.createElement("article");
-      card.className = "set-card";
-      card.style.backgroundImage = `url('${item.background}')`;
+        const url = URL.createObjectURL(file);
+        img.src = url;
+      });
+    });
 
-      card.innerHTML = `
-        <div class="profile-line">
-          <div class="profile-img" style="background-image:url('${item.profile}')"></div>
-          <div class="nickname">${item.name}</div>
-        </div>
+    document.querySelectorAll('.set-card').forEach((card) => {
+      const bgInput = card.querySelector('.bg-input');
+      const bgImg = card.querySelector('.bg-img');
 
-        <div class="message-box">
-          <div class="time">${item.time}</div>
-          <div class="message">${item.message}</div>
-        </div>
+      card.addEventListener('click', (event) => {
+        const isEditingText = event.target.closest('[contenteditable="true"]');
+        const isProfile = event.target.closest('.profile-wrap');
 
-        <div class="side-icons">
-          <span>↩</span>
-          <span>♡</span>
-        </div>
-      `;
+        if (isEditingText || isProfile) return;
 
-      feed.appendChild(card);
+        bgInput.click();
+      });
+
+      bgInput.addEventListener('change', () => {
+        const file = bgInput.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+        bgImg.src = url;
+      });
     });
   </script>
 </body>
