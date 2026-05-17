@@ -286,60 +286,94 @@
     }
 
     @media (max-width: 480px) {
-      .phone-frame {
-        width: 100vw;
-        height: 100vh;
-        border-radius: 0;
-        padding: 0;
-        box-shadow: none;
-      }
+  body {
+    padding: 18px 14px;
+    background: #d8d9dd;
+    align-items: center;
+  }
 
-      .phone-screen {
-        border-radius: 0;
-      }
+  .phone-frame {
+    width: min(390px, calc(100vw - 28px));
+    height: min(820px, calc(100vh - 36px));
+    border-radius: 44px;
+    padding: 10px;
+    box-shadow:
+      0 18px 55px rgba(0, 0, 0, 0.34),
+      inset 0 0 0 2px rgba(255,255,255,0.08),
+      inset 0 0 0 7px rgba(255,255,255,0.025);
+  }
 
-      .phone-notch {
-        top: 8px;
-        width: 108px;
-        height: 21px;
-      }
+  .phone-screen {
+    border-radius: 34px;
+  }
 
-      .app {
-        padding: 40px 11px 14px;
-      }
+  .phone-notch {
+    top: 8px;
+    width: 104px;
+    height: 21px;
+  }
 
-      .round-btn {
-        width: 44px;
-        height: 44px;
-      }
+  .app {
+    padding: 40px 11px 14px;
+  }
 
-      .title-pill {
-        min-width: 150px;
-        padding: 10px 18px;
-      }
+  .round-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 24px;
+  }
 
-      .set-card {
-        border-radius: 20px;
-      }
+  .title-pill {
+    min-width: 145px;
+    max-width: 190px;
+    padding: 10px 17px;
+    font-size: 13px;
+  }
 
-      .profile-wrap {
-        width: 36px;
-        height: 36px;
-      }
+  .dots {
+    margin-bottom: 9px;
+    font-size: 14px;
+    letter-spacing: 4px;
+  }
 
-      .nickname {
-        font-size: 15px;
-      }
+  .feed {
+    gap: 7px;
+  }
 
-      .side-icons {
-        right: 14px;
-        gap: 18px;
-      }
+  .set-card {
+    border-radius: 20px;
+  }
 
-      .side-icons span {
-        font-size: 28px;
-      }
-    }
+  .profile-wrap {
+    width: 35px;
+    height: 35px;
+  }
+
+  .nickname {
+    font-size: 14px;
+  }
+
+  .message-box {
+    width: 72%;
+  }
+
+  .time {
+    font-size: 18px;
+  }
+
+  .message {
+    font-size: 12px;
+  }
+
+  .side-icons {
+    right: 13px;
+    gap: 17px;
+  }
+
+  .side-icons span {
+    font-size: 27px;
+  }
+}
   </style>
 </head>
 
