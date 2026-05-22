@@ -191,6 +191,15 @@
       text-rendering:optimizeLegibility;
     }
 
+    .board.exporting{
+      position:relative !important;
+      left:0 !important;
+      top:0 !important;
+      transform:none !important;
+      width:1440px !important;
+      height:810px !important;
+    }
+
     .board::before{
       content:"";
       position:absolute;
@@ -719,6 +728,27 @@
 
     .hidden-file{display:none;}
 
+    .export-root{
+      position:fixed;
+      left:-20000px;
+      top:0;
+      width:1440px;
+      height:810px;
+      overflow:hidden;
+      background:transparent;
+      z-index:-1;
+      pointer-events:none;
+    }
+
+    .export-root .board{
+      position:relative !important;
+      left:0 !important;
+      top:0 !important;
+      transform:none !important;
+      width:1440px !important;
+      height:810px !important;
+    }
+
     @media(max-width:900px){
       .stage-scroll{
         height:calc(100vh - 190px);
@@ -1097,10 +1127,14 @@
       });
     });
 
-    async function waitForImages(){
-      const images = Array.from(captureArea.querySelectorAll("img"));
+    async function waitForImages(target){
+      const images = Array.from(target.querySelectorAll("img"));
+
       await Promise.all(images.map((img)=>{
-        if(!img.src || img.complete) return Promise.resolve();
+        if(!img.src) return Promise.resolve();
+
+        if(img.complete && img.naturalWidth > 0) return Promise.resolve();
+
         return new Promise((resolve)=>{
           img.onload = resolve;
           img.onerror = resolve;
@@ -1108,33 +1142,48 @@
       }));
     }
 
+    function refitAllImages(target){
+      target.querySelectorAll(".upload-box").forEach((box)=>{
+        const img = box.querySelector("img");
+        if(img && img.src) fitImageToFrame(box,img);
+      });
+    }
+
+    function makeExportClone(){
+      const exportRoot = document.createElement("div");
+      exportRoot.className = "export-root";
+
+      const clone = captureArea.cloneNode(true);
+      clone.id = "captureExport";
+      clone.classList.add("exporting");
+      clone.classList.remove("save-mode");
+
+      exportRoot.appendChild(clone);
+      document.body.appendChild(exportRoot);
+
+      return {exportRoot, clone};
+    }
+
     saveBtn.addEventListener("click", async ()=>{
       document.activeElement.blur();
       window.getSelection()?.removeAllRanges();
 
-      captureArea.classList.add("save-mode");
       saveBtn.textContent = "저장중...";
 
-      const previousTransform = captureArea.style.transform;
-      const previousShellWidth = boardShell.style.width;
-      const previousShellHeight = boardShell.style.height;
+      refitAllImages(captureArea);
+      await waitForImages(captureArea);
 
-      captureArea.style.transform = "none";
-      boardShell.style.width = CAPTURE_WIDTH + "px";
-      boardShell.style.height = CAPTURE_HEIGHT + "px";
+      const {exportRoot, clone} = makeExportClone();
 
-      document.querySelectorAll(".upload-box").forEach((box)=>{
-        const img = box.querySelector("img");
-        if(img && img.src) fitImageToFrame(box,img);
-      });
+      await waitForImages(clone);
+      refitAllImages(clone);
 
-      await waitForImages();
       await new Promise((resolve)=>setTimeout(resolve,220));
 
       try{
-        const canvas = await html2canvas(captureArea,{
+        const canvas = await html2canvas(clone,{
           backgroundColor:null,
-          scale:4,
+          scale:3,
           useCORS:true,
           allowTaint:true,
           logging:false,
@@ -1142,10 +1191,11 @@
           height:CAPTURE_HEIGHT,
           windowWidth:CAPTURE_WIDTH,
           windowHeight:CAPTURE_HEIGHT,
+          x:0,
+          y:0,
           scrollX:0,
           scrollY:0,
           imageTimeout:0,
-          foreignObjectRendering:true,
           removeContainer:true
         });
 
@@ -1156,10 +1206,7 @@
       }catch(error){
         alert("저장에 실패했어요. 이미지를 다시 업로드한 뒤 시도해보세요.");
       }finally{
-        captureArea.style.transform = previousTransform;
-        boardShell.style.width = previousShellWidth;
-        boardShell.style.height = previousShellHeight;
-        captureArea.classList.remove("save-mode");
+        exportRoot.remove();
         saveBtn.textContent = "PNG 저장";
       }
     });
