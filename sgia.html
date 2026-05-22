@@ -135,18 +135,22 @@
     }
 
     .viewport{
-      width:100%;
-      display:flex;
-      justify-content:center;
-      overflow:visible;
-    }
+  width:100%;
+  min-height:0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:visible;
+  padding:18px 0 40px;
+}
 
-    .board-shell{
-      position:relative;
-      width:1600px;
-      height:900px;
-      transform-origin:top center;
-    }
+.board-shell{
+  position:relative;
+  width:1600px;
+  height:900px;
+  transform-origin:top center;
+  flex-shrink:0;
+}
 
     .board{
       position:relative;
@@ -595,11 +599,16 @@
 
     .hidden-file{display:none;}
 
-    @media(max-width:1700px){
-      .board-shell{
-        transform:scale(var(--fit-scale,1));
-      }
-    }
+    .board-shell{
+  transform:scale(var(--fit-scale, .78));
+}
+
+@media(max-width:900px){
+  .viewport{
+    padding-top:10px;
+    padding-bottom:32px;
+  }
+}
   </style>
 </head>
 
@@ -836,12 +845,30 @@
     const boardShell = document.getElementById("boardShell");
 
     function fitBoard(){
-      const available = Math.min(window.innerWidth - 28, 1600);
-      const scale = available / 1600;
-      boardShell.style.setProperty("--fit-scale", scale);
-      boardShell.style.width = (1600 * scale) + "px";
-      boardShell.style.height = (900 * scale) + "px";
-    }
+  const toolbar = document.querySelector(".toolbar");
+  const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
+
+  const availableWidth = window.innerWidth - 48;
+  const availableHeight = window.innerHeight - toolbarHeight - 72;
+
+  const scaleByWidth = availableWidth / 1600;
+  const scaleByHeight = availableHeight / 900;
+
+  let scale = Math.min(scaleByWidth, scaleByHeight);
+
+  // 너무 꽉 차지 않게 일부러 여백 줌
+  scale = scale * 0.88;
+
+  // 데스크톱에서도 너무 커지지 않게 제한
+  scale = Math.min(scale, 0.82);
+
+  // 모바일에서 너무 작아지지 않게 최소값
+  scale = Math.max(scale, 0.38);
+
+  boardShell.style.setProperty("--fit-scale", scale);
+  boardShell.style.width = (1600 * scale) + "px";
+  boardShell.style.height = (900 * scale) + "px";
+}
 
     window.addEventListener("resize", fitBoard);
     fitBoard();
