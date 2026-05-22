@@ -139,17 +139,23 @@
     }
 
     body{
-      overflow:auto;
-      padding:32px 36px 150px;
+      overflow:hidden;
     }
 
-    .viewport{
-      width:100%;
-      min-height:calc(100vh - 190px);
+    .stage-scroll{
+      width:100vw;
+      height:calc(100vh - 150px);
+      overflow:auto;
+      padding:32px 36px 42px;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .stage-inner{
+      width:max-content;
+      min-width:100%;
       display:flex;
       justify-content:center;
       align-items:flex-start;
-      padding:18px 0 32px;
     }
 
     .board-shell{
@@ -740,211 +746,227 @@
     .hidden-file{display:none;}
 
     @media(max-width:900px){
-      body{
-        padding:26px 24px 170px;
+      .stage-scroll{
+        height:calc(100vh - 185px);
+        padding:26px 24px 42px;
       }
+
+      .toolbar{
+        bottom:10px;
+        width:calc(100% - 20px);
+        padding:10px;
+        gap:8px;
+      }
+
       .zoom-range{
         width:210px;
       }
+
       .tool-btn,.theme-btn{
         font-size:12px;
         padding:10px 13px;
+      }
+
+      .toolbar-note{
+        font-size:11px;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="viewport" id="viewport">
-    <div class="board-shell" id="boardShell">
-      <section class="board" id="captureArea">
-        <div class="save-cover"></div>
+  <div class="stage-scroll" id="stageScroll">
+    <div class="stage-inner">
+      <div class="board-shell" id="boardShell">
+        <section class="board" id="captureArea">
+          <div class="save-cover"></div>
 
-        <div class="panel left-panel">
-          <div class="panel-head">
-            <span>Profile</span>
-            <div class="dots"><span></span><span></span><span></span></div>
-          </div>
-
-          <div class="left-body">
-            <div class="profile-top">
-              <div class="avatar-upload upload-box">
-                <div class="upload-hint">프로필</div>
-                <input class="hidden-file" type="file" accept="image/*">
-              </div>
-
-              <div class="nickname-box">
-                <div class="nickname-label editable" contenteditable="true" spellcheck="false">NICKNAME</div>
-                <div class="nickname-input editable" contenteditable="true" spellcheck="false">닉네임</div>
-              </div>
+          <div class="panel left-panel">
+            <div class="panel-head">
+              <span>Profile</span>
+              <div class="dots"><span></span><span></span><span></span></div>
             </div>
 
-            <div class="id-box">
-              <span class="label">Twitter ID</span>
-              @<span class="editable" contenteditable="true" spellcheck="false">monster_id</span>
-            </div>
+            <div class="left-body">
+              <div class="profile-top">
+                <div class="avatar-upload upload-box">
+                  <div class="upload-hint">프로필</div>
+                  <input class="hidden-file" type="file" accept="image/*">
+                </div>
 
-            <div class="mini-pref">
-              <div class="mini-row">
-                <div class="mini-label">나이</div>
-                <div class="chip-group" data-mode="single">
-                  <button class="choice-chip">성인</button>
-                  <button class="choice-chip">미성년자</button>
-                  <button class="choice-chip">비공개</button>
+                <div class="nickname-box">
+                  <div class="nickname-label editable" contenteditable="true" spellcheck="false">NICKNAME</div>
+                  <div class="nickname-input editable" contenteditable="true" spellcheck="false">닉네임</div>
                 </div>
               </div>
 
-              <div class="mini-row">
-                <div class="mini-label">FUB Free</div>
-                <div class="chip-group" data-mode="single">
-                  <button class="choice-chip">O</button>
-                  <button class="choice-chip">X</button>
+              <div class="id-box">
+                <span class="label">Twitter ID</span>
+                @<span class="editable" contenteditable="true" spellcheck="false">monster_id</span>
+              </div>
+
+              <div class="mini-pref">
+                <div class="mini-row">
+                  <div class="mini-label">나이</div>
+                  <div class="chip-group" data-mode="single">
+                    <button class="choice-chip">성인</button>
+                    <button class="choice-chip">미성년자</button>
+                    <button class="choice-chip">비공개</button>
+                  </div>
+                </div>
+
+                <div class="mini-row">
+                  <div class="mini-label">FUB Free</div>
+                  <div class="chip-group" data-mode="single">
+                    <button class="choice-chip">O</button>
+                    <button class="choice-chip">X</button>
+                  </div>
+                </div>
+
+                <div class="mini-row">
+                  <div class="mini-label">언팔</div>
+                  <div class="chip-group" data-mode="single">
+                    <button class="choice-chip">블블</button>
+                    <button class="choice-chip">블락</button>
+                    <button class="choice-chip">언팔</button>
+                  </div>
                 </div>
               </div>
 
-              <div class="mini-row">
-                <div class="mini-label">언팔</div>
-                <div class="chip-group" data-mode="single">
-                  <button class="choice-chip">블블</button>
-                  <button class="choice-chip">블락</button>
-                  <button class="choice-chip">언팔</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="mine-box">
-              <div class="mine-title">지뢰 / NG</div>
-              <div class="mine-text editable memo" contenteditable="true" spellcheck="false">지뢰나 NG 요소를 입력하세요.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="center-area">
-          <div class="main-upload upload-box">
-            <div class="upload-hint">대표 괴물 이미지<br>클릭해서 업로드</div>
-            <input class="hidden-file" type="file" accept="image/*">
-
-            <div class="detect-box">
-              <span class="detect-corner tl"></span>
-              <span class="detect-corner tr"></span>
-              <span class="detect-corner bl"></span>
-              <span class="detect-corner br"></span>
-
-              <div class="detect-label editable" contenteditable="true" spellcheck="false">monster</div>
-              <div class="detect-meta">
-                <div class="editable" contenteditable="true" spellcheck="false">98.4%</div>
-                <div class="editable" contenteditable="true" spellcheck="false">FOCUS</div>
+              <div class="mine-box">
+                <div class="mine-title">지뢰 / NG</div>
+                <div class="mine-text editable memo" contenteditable="true" spellcheck="false">지뢰나 NG 요소를 입력하세요.</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="panel right-panel">
-          <div class="panel-head">
-            <span>preview.jpg</span>
-            <div class="dots"><span></span><span></span><span></span></div>
-          </div>
-
-          <div class="right-body">
-            <div class="side-upload upload-box">
-              <div class="upload-hint">보조 이미지</div>
+          <div class="center-area">
+            <div class="main-upload upload-box">
+              <div class="upload-hint">대표 괴물 이미지<br>클릭해서 업로드</div>
               <input class="hidden-file" type="file" accept="image/*">
-            </div>
 
-            <div class="right-pref-box">
-              <div class="mini-row">
-                <div class="mini-label">계정 성향</div>
-                <div class="chip-group" data-mode="multi">
-                  <button class="choice-chip">OPEN</button>
-                  <button class="choice-chip">CBC</button>
-                  <button class="choice-chip">ONLY</button>
+              <div class="detect-box">
+                <span class="detect-corner tl"></span>
+                <span class="detect-corner tr"></span>
+                <span class="detect-corner bl"></span>
+                <span class="detect-corner br"></span>
+
+                <div class="detect-label editable" contenteditable="true" spellcheck="false">monster</div>
+                <div class="detect-meta">
+                  <div class="editable" contenteditable="true" spellcheck="false">98.4%</div>
+                  <div class="editable" contenteditable="true" spellcheck="false">FOCUS</div>
                 </div>
-              </div>
-
-              <div class="mini-row">
-                <div class="mini-label">플레이</div>
-                <div class="chip-group" data-mode="multi">
-                  <button class="choice-chip">제작</button>
-                  <button class="choice-chip">소비</button>
-                  <button class="choice-chip">OOC</button>
-                  <button class="choice-chip">짤뽑</button>
-                </div>
-              </div>
-
-              <div class="mini-row">
-                <div class="mini-label">플랫폼</div>
-                <div class="mine-text editable memo" contenteditable="true" spellcheck="false">주력 플랫폼 입력</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="prefs-panel">
-          <div class="prefs-head">
-            <span>SGIA 트친소 · Preference Matrix</span>
-            <div class="dots"><span></span><span></span><span></span></div>
-          </div>
-
-          <div class="prefs-body">
-            <div class="bottom-gallery">
-              <div class="square-upload upload-box">
-                <div class="upload-hint">이미지 1</div>
-                <input class="hidden-file" type="file" accept="image/*">
-              </div>
-
-              <div class="square-upload upload-box">
-                <div class="upload-hint">이미지 2</div>
-                <input class="hidden-file" type="file" accept="image/*">
-              </div>
-
-              <div class="square-upload upload-box">
-                <div class="upload-hint">이미지 3</div>
-                <input class="hidden-file" type="file" accept="image/*">
-              </div>
+          <div class="panel right-panel">
+            <div class="panel-head">
+              <span>preview.jpg</span>
+              <div class="dots"><span></span><span></span><span></span></div>
             </div>
 
-            <div class="bottom-mid">
-              <div class="pref-block">
-                <div class="pref-title">CP</div>
-                <div class="chip-group" data-mode="multi">
-                  <button class="choice-chip">ALL</button>
-                  <button class="choice-chip">BL</button>
-                  <button class="choice-chip">GL</button>
-                  <button class="choice-chip">HL</button>
-                  <button class="choice-chip">NCP</button>
-                  <button class="choice-chip">리버시블</button>
-                  <button class="choice-chip">논리버시블</button>
-                  <button class="choice-chip">다인</button>
+            <div class="right-body">
+              <div class="side-upload upload-box">
+                <div class="upload-hint">보조 이미지</div>
+                <input class="hidden-file" type="file" accept="image/*">
+              </div>
+
+              <div class="right-pref-box">
+                <div class="mini-row">
+                  <div class="mini-label">계정 성향</div>
+                  <div class="chip-group" data-mode="multi">
+                    <button class="choice-chip">OPEN</button>
+                    <button class="choice-chip">CBC</button>
+                    <button class="choice-chip">ONLY</button>
+                  </div>
+                </div>
+
+                <div class="mini-row">
+                  <div class="mini-label">플레이</div>
+                  <div class="chip-group" data-mode="multi">
+                    <button class="choice-chip">제작</button>
+                    <button class="choice-chip">소비</button>
+                    <button class="choice-chip">OOC</button>
+                    <button class="choice-chip">짤뽑</button>
+                  </div>
+                </div>
+
+                <div class="mini-row">
+                  <div class="mini-label">플랫폼</div>
+                  <div class="mine-text editable memo" contenteditable="true" spellcheck="false">주력 플랫폼 입력</div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="bottom-right">
-              <div class="pref-block">
-                <div class="pref-title">트윗 성향</div>
-                <div class="chip-group" data-mode="multi">
-                  <button class="choice-chip">구독</button>
-                  <button class="choice-chip">소비</button>
-                  <button class="choice-chip">탐라 대화</button>
-                  <button class="choice-chip">RT</button>
-                  <button class="choice-chip">인용</button>
-                  <button class="choice-chip">로그</button>
-                  <button class="choice-chip">연성</button>
-                  <button class="choice-chip">OOC</button>
-                  <button class="choice-chip">프롬프트</button>
-                  <button class="choice-chip">사담</button>
+          <div class="prefs-panel">
+            <div class="prefs-head">
+              <span>SGIA 트친소 · Preference Matrix</span>
+              <div class="dots"><span></span><span></span><span></span></div>
+            </div>
+
+            <div class="prefs-body">
+              <div class="bottom-gallery">
+                <div class="square-upload upload-box">
+                  <div class="upload-hint">이미지 1</div>
+                  <input class="hidden-file" type="file" accept="image/*">
+                </div>
+
+                <div class="square-upload upload-box">
+                  <div class="upload-hint">이미지 2</div>
+                  <input class="hidden-file" type="file" accept="image/*">
+                </div>
+
+                <div class="square-upload upload-box">
+                  <div class="upload-hint">이미지 3</div>
+                  <input class="hidden-file" type="file" accept="image/*">
                 </div>
               </div>
 
-              <div class="pref-block">
-                <div class="pref-title">메모</div>
-                <div class="memo-box editable memo" contenteditable="true" spellcheck="false">추가 메모 입력</div>
+              <div class="bottom-mid">
+                <div class="pref-block">
+                  <div class="pref-title">CP</div>
+                  <div class="chip-group" data-mode="multi">
+                    <button class="choice-chip">ALL</button>
+                    <button class="choice-chip">BL</button>
+                    <button class="choice-chip">GL</button>
+                    <button class="choice-chip">HL</button>
+                    <button class="choice-chip">NCP</button>
+                    <button class="choice-chip">리버시블</button>
+                    <button class="choice-chip">논리버시블</button>
+                    <button class="choice-chip">다인</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bottom-right">
+                <div class="pref-block">
+                  <div class="pref-title">트윗 성향</div>
+                  <div class="chip-group" data-mode="multi">
+                    <button class="choice-chip">구독</button>
+                    <button class="choice-chip">소비</button>
+                    <button class="choice-chip">탐라 대화</button>
+                    <button class="choice-chip">RT</button>
+                    <button class="choice-chip">인용</button>
+                    <button class="choice-chip">로그</button>
+                    <button class="choice-chip">연성</button>
+                    <button class="choice-chip">OOC</button>
+                    <button class="choice-chip">프롬프트</button>
+                    <button class="choice-chip">사담</button>
+                  </div>
+                </div>
+
+                <div class="pref-block">
+                  <div class="pref-title">메모</div>
+                  <div class="memo-box editable memo" contenteditable="true" spellcheck="false">추가 메모 입력</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-      </section>
+        </section>
+      </div>
     </div>
   </div>
 
@@ -953,12 +975,12 @@
       <div class="toolbar-left">
         <button class="tool-btn primary" id="saveBtn">PNG 저장</button>
       </div>
-      <div class="toolbar-note">1200×675 고정 · 프레임에 보이는 잘린 상태 그대로 저장</div>
+      <div class="toolbar-note">1200×675 고정 · 고화질 저장 · 프레임에 보이는 상태 그대로 저장</div>
     </div>
 
     <div class="zoom-bar">
       <span class="zoom-label">화면 확대</span>
-      <input class="zoom-range" id="zoomRange" type="range" min="45" max="120" value="68">
+      <input class="zoom-range" id="zoomRange" type="range" min="45" max="150" value="68">
       <span class="zoom-value" id="zoomValue">68%</span>
     </div>
 
@@ -980,11 +1002,21 @@
     const boardShell = document.getElementById("boardShell");
     const zoomRange = document.getElementById("zoomRange");
     const zoomValue = document.getElementById("zoomValue");
+    const stageScroll = document.getElementById("stageScroll");
 
     function setViewScale(scale){
-      const safeScale = Math.max(0.45, Math.min(1.2, scale));
+      const beforeWidth = boardShell.offsetWidth;
+      const beforeScrollLeft = stageScroll.scrollLeft;
+      const safeScale = Math.max(0.45, Math.min(1.5, scale));
+
       boardShell.style.setProperty("--view-scale", safeScale);
       zoomValue.textContent = Math.round(safeScale * 100) + "%";
+
+      requestAnimationFrame(()=>{
+        const afterWidth = boardShell.offsetWidth;
+        const delta = (afterWidth - beforeWidth) / 2;
+        stageScroll.scrollLeft = Math.max(0, beforeScrollLeft + delta);
+      });
     }
 
     setViewScale(Number(zoomRange.value) / 100);
@@ -1064,12 +1096,12 @@
       boardShell.style.width = "1200px";
       boardShell.style.height = "675px";
 
-      await new Promise((resolve)=>setTimeout(resolve,120));
+      await new Promise((resolve)=>setTimeout(resolve,160));
 
       try{
         const canvas = await html2canvas(captureArea,{
           backgroundColor:null,
-          scale:2.5,
+          scale:4,
           useCORS:true,
           allowTaint:true,
           logging:false,
@@ -1078,12 +1110,13 @@
           windowWidth:1200,
           windowHeight:675,
           scrollX:0,
-          scrollY:0
+          scrollY:0,
+          imageTimeout:0
         });
 
         const link = document.createElement("a");
-        link.download = "sgia_trchinso_1200x675.png";
-        link.href = canvas.toDataURL("image/png");
+        link.download = "sgia_trchinso_1200x675_high.png";
+        link.href = canvas.toDataURL("image/png",1.0);
         link.click();
       }catch(error){
         alert("저장에 실패했어요. 이미지를 다시 업로드한 뒤 시도해보세요.");
