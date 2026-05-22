@@ -75,7 +75,10 @@
     }
 
     html,body{
-      margin:0;padding:0;width:100%;min-height:100%;
+      margin:0;
+      padding:0;
+      width:100%;
+      min-height:100%;
       background:var(--page-bg);
       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
       color:var(--ink);
@@ -108,8 +111,10 @@
 
     .board{
       position:absolute;
-      left:0;top:0;
-      width:1200px;height:675px;
+      left:0;
+      top:0;
+      width:1200px;
+      height:675px;
       overflow:hidden;
       border-radius:28px;
       background:
@@ -257,7 +262,9 @@
     .dots{display:flex;gap:5px;}
 
     .dots span{
-      width:7px;height:7px;border-radius:50%;
+      width:7px;
+      height:7px;
+      border-radius:50%;
       background:linear-gradient(135deg,var(--accent),var(--active));
     }
 
@@ -272,9 +279,23 @@
     }
 
     .upload-box{
-      background-size:cover;
-      background-position:center;
-      background-repeat:no-repeat;
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
+    }
+
+    .upload-box img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      display:block;
+      image-rendering:auto;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      z-index:0;
     }
 
     .profile-top{
@@ -289,11 +310,10 @@
     }
 
     .avatar-upload{
-      position:relative;
-      width:64px;height:64px;
+      width:64px;
+      height:64px;
       flex:0 0 64px;
       border-radius:50%;
-      overflow:hidden;
       background-color:rgba(255,255,255,.35);
       border:1px solid rgba(255,255,255,.55);
       cursor:pointer;
@@ -435,11 +455,9 @@
     }
 
     .main-upload{
-      position:relative;
       width:340px;
       height:455px;
       border-radius:28px;
-      overflow:hidden;
       background-color:rgba(255,255,255,.36);
       border:1px solid rgba(255,255,255,.92);
       box-shadow:0 16px 32px rgba(0,0,0,.12);
@@ -460,6 +478,7 @@
       font-weight:900;
       line-height:1.35;
       pointer-events:none;
+      z-index:2;
     }
 
     .filled .upload-hint{display:none;}
@@ -473,6 +492,7 @@
       border:2px solid var(--detect);
       pointer-events:none;
       box-shadow:0 0 0 1px rgba(255,255,255,.18) inset;
+      z-index:3;
     }
 
     .detect-corner{
@@ -502,7 +522,9 @@
 
     .detect-meta{
       position:absolute;
-      left:0;right:0;bottom:-26px;
+      left:0;
+      right:0;
+      bottom:-26px;
       display:flex;
       justify-content:space-between;
       color:var(--detect);
@@ -513,11 +535,9 @@
     }
 
     .side-upload{
-      position:relative;
       width:246px;
       height:150px;
       border-radius:16px;
-      overflow:hidden;
       background-color:rgba(255,255,255,.35);
       cursor:pointer;
       flex-shrink:0;
@@ -550,8 +570,10 @@
 
     .prefs-head{
       position:absolute;
-      left:0;top:0;
-      width:1060px;height:28px;
+      left:0;
+      top:0;
+      width:1060px;
+      height:28px;
       padding:0 12px;
       display:flex;
       align-items:center;
@@ -581,11 +603,9 @@
     }
 
     .square-upload{
-      position:relative;
       width:88px;
       height:88px;
       border-radius:16px;
-      overflow:hidden;
       background-color:rgba(255,255,255,.35);
       border:1px solid rgba(255,255,255,.5);
       cursor:pointer;
@@ -663,6 +683,7 @@
             <div class="left-body">
               <div class="profile-top">
                 <div class="avatar-upload upload-box">
+                  <img alt="">
                   <div class="upload-hint">프로필</div>
                   <input class="hidden-file" type="file" accept="image/*">
                 </div>
@@ -715,6 +736,7 @@
 
           <div class="center-area">
             <div class="main-upload upload-box">
+              <img alt="">
               <div class="upload-hint">대표 괴물 이미지<br>클릭해서 업로드</div>
               <input class="hidden-file" type="file" accept="image/*">
 
@@ -741,6 +763,7 @@
 
             <div class="right-body">
               <div class="side-upload upload-box">
+                <img alt="">
                 <div class="upload-hint">보조 이미지</div>
                 <input class="hidden-file" type="file" accept="image/*">
               </div>
@@ -782,16 +805,19 @@
             <div class="prefs-body">
               <div class="bottom-gallery">
                 <div class="square-upload upload-box">
+                  <img alt="">
                   <div class="upload-hint">이미지 1</div>
                   <input class="hidden-file" type="file" accept="image/*">
                 </div>
 
                 <div class="square-upload upload-box">
+                  <img alt="">
                   <div class="upload-hint">이미지 2</div>
                   <input class="hidden-file" type="file" accept="image/*">
                 </div>
 
                 <div class="square-upload upload-box">
+                  <img alt="">
                   <div class="upload-hint">이미지 3</div>
                   <input class="hidden-file" type="file" accept="image/*">
                 </div>
@@ -907,6 +933,7 @@
 
     document.querySelectorAll(".upload-box").forEach((box)=>{
       const input = box.querySelector("input[type='file']");
+      const img = box.querySelector("img");
 
       box.addEventListener("click",(e)=>{
         if(e.target.closest("[contenteditable='true']")) return;
@@ -918,10 +945,14 @@
         if(!file) return;
 
         const reader = new FileReader();
+
         reader.onload = (event)=>{
-          box.style.backgroundImage = `url("${event.target.result}")`;
-          box.classList.add("filled");
+          img.onload = ()=>{
+            box.classList.add("filled");
+          };
+          img.src = event.target.result;
         };
+
         reader.readAsDataURL(file);
       });
     });
@@ -950,6 +981,17 @@
       });
     });
 
+    async function waitForImages(){
+      const images = Array.from(captureArea.querySelectorAll("img"));
+      await Promise.all(images.map((img)=>{
+        if(!img.src || img.complete) return Promise.resolve();
+        return new Promise((resolve)=>{
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+    }
+
     saveBtn.addEventListener("click", async ()=>{
       document.activeElement.blur();
       window.getSelection()?.removeAllRanges();
@@ -965,12 +1007,13 @@
       boardShell.style.width = "1200px";
       boardShell.style.height = "675px";
 
-      await new Promise((resolve)=>setTimeout(resolve,160));
+      await waitForImages();
+      await new Promise((resolve)=>setTimeout(resolve,180));
 
       try{
         const canvas = await html2canvas(captureArea,{
           backgroundColor:null,
-          scale:4,
+          scale:5,
           useCORS:true,
           allowTaint:true,
           logging:false,
@@ -984,8 +1027,8 @@
         });
 
         const link = document.createElement("a");
-        link.download = "sgia_trchinso_1200x675_high.png";
-        link.href = canvas.toDataURL("image/png",1.0);
+        link.download = "sgia_trchinso_1200x675_ultra.png";
+        link.href = canvas.toDataURL("image/png");
         link.click();
       }catch(error){
         alert("저장에 실패했어요. 이미지를 다시 업로드한 뒤 시도해보세요.");
