@@ -286,15 +286,12 @@
 
     .upload-box img{
       position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      object-position:center;
       display:block;
+      max-width:none;
+      max-height:none;
+      width:auto;
+      height:auto;
       image-rendering:auto;
-      transform:translateZ(0);
-      backface-visibility:hidden;
       z-index:0;
     }
 
@@ -931,6 +928,34 @@
       });
     });
 
+    function fitImageToFrame(box,img){
+      const boxW = box.clientWidth;
+      const boxH = box.clientHeight;
+      const imgW = img.naturalWidth;
+      const imgH = img.naturalHeight;
+
+      if(!boxW || !boxH || !imgW || !imgH) return;
+
+      const boxRatio = boxW / boxH;
+      const imgRatio = imgW / imgH;
+
+      let drawW;
+      let drawH;
+
+      if(imgRatio > boxRatio){
+        drawH = boxH;
+        drawW = boxH * imgRatio;
+      }else{
+        drawW = boxW;
+        drawH = boxW / imgRatio;
+      }
+
+      img.style.width = drawW + "px";
+      img.style.height = drawH + "px";
+      img.style.left = ((boxW - drawW) / 2) + "px";
+      img.style.top = ((boxH - drawH) / 2) + "px";
+    }
+
     document.querySelectorAll(".upload-box").forEach((box)=>{
       const input = box.querySelector("input[type='file']");
       const img = box.querySelector("img");
@@ -948,12 +973,20 @@
 
         reader.onload = (event)=>{
           img.onload = ()=>{
+            fitImageToFrame(box,img);
             box.classList.add("filled");
           };
           img.src = event.target.result;
         };
 
         reader.readAsDataURL(file);
+      });
+    });
+
+    window.addEventListener("resize",()=>{
+      document.querySelectorAll(".upload-box").forEach((box)=>{
+        const img = box.querySelector("img");
+        if(img && img.src) fitImageToFrame(box,img);
       });
     });
 
@@ -1006,6 +1039,11 @@
       captureArea.style.transform = "none";
       boardShell.style.width = "1200px";
       boardShell.style.height = "675px";
+
+      document.querySelectorAll(".upload-box").forEach((box)=>{
+        const img = box.querySelector("img");
+        if(img && img.src) fitImageToFrame(box,img);
+      });
 
       await waitForImages();
       await new Promise((resolve)=>setTimeout(resolve,180));
