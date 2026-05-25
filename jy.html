@@ -1,342 +1,1006 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jiyeon App v3</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jiyeon App</title>
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <style>
+    html,
     body {
       margin: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      min-height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: #ffffff;
+      color: #172033;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    
-    /* tailwind utilities that might be needed by lucide icons or layouts */
+
+    * {
+      box-sizing: border-box;
+    }
+
     .lucide {
       width: 1em;
       height: 1em;
       vertical-align: middle;
     }
+
+    input,
+    textarea,
+    button {
+      font-family: inherit;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    ::selection {
+      background: rgba(0, 122, 255, 0.16);
+    }
+
+    .soft-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .soft-scroll::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 999px;
+    }
+
+    .soft-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
   </style>
 </head>
+
 <body>
   <div id="root"></div>
-  <!-- Babel Standalone (for JSX parsing in the browser) -->
+
+  <!-- Babel Standalone -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- React Application -->
+
+  <!-- React App -->
   <script type="text/babel" data-type="module">
-    import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
+    import React, { useEffect, useMemo, useState } from 'https://esm.sh/react@18.2.0';
     import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
-    import { 
-      Calendar as CalendarIcon, MapPin, CheckCircle, Plus, 
-      Book, Edit3, Trash2, X, Check, Save
+    import {
+      Plus,
+      Trash2,
+      Check,
+      Pencil,
+      CalendarDays,
+      MapPin,
+      RotateCcw,
+      Download,
+      Upload,
+      X
     } from 'https://esm.sh/lucide-react@0.294.0';
-    // API BASE URL MUST POINT TO THE BACKEND TUNNEL URL (Set to loca.lt dynamically later, or use localhost if local)
-    const API_BASE_URL = window.location.hostname.includes('loca.lt') 
-      ? `https://jiyeon-api-2026.loca.lt` 
-      : 'http://localhost:8080';
-    const fetchOptions = {
-      headers: {
-        'Bypass-Tunnel-Reminder': 'true', // Important for Localtunnel
-        'Content-Type': 'application/json'
+
+    const STORAGE_KEY = 'jiyeon-github-pages-app-v1';
+
+    function makeId() {
+      if (window.crypto && crypto.randomUUID) {
+        return crypto.randomUUID();
       }
-    };
-    const JiyeonAppV3 = () => {
-      const [activeTab, setActiveTab] = useState('travel');
-      const [isLoading, setIsLoading] = useState(true);
-      
-      const [travelLogs, setTravelLogs] = useState([]);
-      const [isLogEditing, setIsLogEditing] = useState(null);
-      const fileInputRef = useRef(null);
-      const [studyGoals, setStudyGoals] = useState([]);
-      const [selectedGoalId, setSelectedGoalId] = useState(null);
-      const [todos, setTodos] = useState([]);
-      useEffect(() => {
-        fetchData();
-      }, []);
-      const fetchData = async () => {
-        try {
-          const res = await fetch(`${API_BASE_URL}/api/data`, { headers: fetchOptions.headers });
-          if (res.ok) {
-            const data = await res.json();
-            setTravelLogs(data.travelLogs || []);
-            setStudyGoals(data.studyGoals || []);
-            setTodos(data.todos || []);
-          }
-        } catch (err) {
-          console.error("Failed to fetch data", err);
-        } finally {
-          setIsLoading(false);
+
+      return String(Date.now()) + '-' + Math.random().toString(16).slice(2);
+    }
+
+    function todayString() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    const initialData = {
+      goals: [
+        {
+          id: makeId(),
+          title: '토익 850+',
+          targetDate: '2026-06-13',
+          useDDay: true,
+          memo: '토익 850점 이상 달성. LC, RC, 단어, 모의고사를 주차별로 나누어 관리하기.'
+        },
+        {
+          id: makeId(),
+          title: '토스 IH',
+          targetDate: '',
+          useDDay: false,
+          memo: ''
+        },
+        {
+          id: makeId(),
+          title: '계절학기 4학점',
+          targetDate: '',
+          useDDay: false,
+          memo: ''
+        },
+        {
+          id: makeId(),
+          title: '기록 습관',
+          targetDate: '',
+          useDDay: false,
+          memo: ''
+        },
+        {
+          id: makeId(),
+          title: '포항에서 정모',
+          targetDate: '',
+          useDDay: false,
+          memo: ''
         }
-      };
-      // --- TRAVEL ---
-      const addTravelLog = async () => {
-        const newLogData = { date: new Date().toISOString().split('T')[0], location: "새 장소", summary: "" };
-        try {
-          const res = await fetch(`${API_BASE_URL}/api/travel`, { method: 'POST', ...fetchOptions, body: JSON.stringify(newLogData) });
-          if (res.ok) {
-            const savedLog = await res.json();
-            setTravelLogs([savedLog, ...travelLogs]);
-            setIsLogEditing(savedLog.id);
-          }
-        } catch (err) { console.error(err); }
-      };
-      const saveTravelLog = async (log) => {
-        try {
-          await fetch(`${API_BASE_URL}/api/travel/${log.id}`, { method: 'PUT', ...fetchOptions, body: JSON.stringify(log) });
-        } catch (err) { console.error(err); }
-      };
-      const deleteTravelLog = async (id) => {
-        try {
-          await fetch(`${API_BASE_URL}/api/travel/${id}`, { method: 'DELETE', headers: fetchOptions.headers });
-          setTravelLogs(travelLogs.filter(l => l.id !== id));
-        } catch (err) { console.error(err); }
-      };
-      const handleImageUpload = async (logId, files) => {
-        const fileList = Array.from(files).slice(0, 5);
-        const formData = new FormData();
-        fileList.forEach(file => formData.append('photos', file));
-        try {
-          const res = await fetch(`${API_BASE_URL}/api/travel/${logId}/photos`, { 
-            method: 'POST', 
-            headers: { 'Bypass-Tunnel-Reminder': 'true' }, // No content-type so browser sets multipart boundary
-            body: formData 
-          });
-          if (res.ok) {
-            const result = await res.json();
-            setTravelLogs(travelLogs.map(log => log.id === logId ? { ...log, photos: [...(log.photos || []), ...result.photos] } : log));
-          }
-        } catch (err) { console.error(err); }
-      };
-      // --- STUDY GOALS ---
-      const addStudyGoal = async () => {
-        const newGoalData = { title: "새 목표", targetDate: "", hasDDay: false, memo: "" };
-        try {
-          const res = await fetch(`${API_BASE_URL}/api/study`, { method: 'POST', ...fetchOptions, body: JSON.stringify(newGoalData) });
-          if (res.ok) {
-            const savedGoal = await res.json();
-            setStudyGoals([...studyGoals, savedGoal]);
-            setSelectedGoalId(savedGoal.id);
-          }
-        } catch (err) { console.error(err); }
-      };
-      const saveStudyGoal = async (goal) => {
-        try {
-          await fetch(`${API_BASE_URL}/api/study/${goal.id}`, { method: 'PUT', ...fetchOptions, body: JSON.stringify(goal) });
-        } catch (err) { console.error(err); }
-      };
-      // --- TODOS ---
-      const addTodo = async (text) => {
+      ],
+      todos: [
+        {
+          id: makeId(),
+          text: '파리 앙스테르담 윤카이랑 여행가기',
+          completed: false
+        },
+        {
+          id: makeId(),
+          text: '네이버 스마트 스토어로 식물 가게 창업하기',
+          completed: false
+        },
+        {
+          id: makeId(),
+          text: '네모네모 언니 보러가기',
+          completed: false
+        },
+        {
+          id: makeId(),
+          text: '증권 회사에서 대외활동하기',
+          completed: false
+        }
+      ],
+      travelLogs: [
+        {
+          id: makeId(),
+          date: todayString(),
+          location: '새 장소',
+          summary: '',
+          photos: []
+        }
+      ]
+    };
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+
+        if (!saved) {
+          return initialData;
+        }
+
+        const parsed = JSON.parse(saved);
+
+        return {
+          goals: Array.isArray(parsed.goals) ? parsed.goals : initialData.goals,
+          todos: Array.isArray(parsed.todos) ? parsed.todos : initialData.todos,
+          travelLogs: Array.isArray(parsed.travelLogs) ? parsed.travelLogs : initialData.travelLogs
+        };
+      } catch (error) {
+        console.error('데이터를 불러오지 못했습니다.', error);
+        return initialData;
+      }
+    }
+
+    function saveData(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (error) {
+        alert('저장 공간이 부족할 수 있어요. 여행 사진을 너무 많이 넣으면 저장이 실패할 수 있습니다.');
+        console.error('데이터 저장 실패', error);
+      }
+    }
+
+    function getDDay(dateText) {
+      if (!dateText) return '';
+
+      const today = new Date();
+      const target = new Date(dateText);
+
+      today.setHours(0, 0, 0, 0);
+      target.setHours(0, 0, 0, 0);
+
+      const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+
+      if (diff > 0) return `D-${diff}`;
+      if (diff === 0) return 'D-DAY';
+      return `D+${Math.abs(diff)}`;
+    }
+
+    function imageFileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function App() {
+      const [data, setData] = useState(loadData);
+      const [view, setView] = useState('goals');
+      const [selectedGoalId, setSelectedGoalId] = useState(null);
+      const [newTodoText, setNewTodoText] = useState('');
+      const [editingTravelId, setEditingTravelId] = useState(null);
+
+      const goals = data.goals;
+      const todos = data.todos;
+      const travelLogs = data.travelLogs;
+
+      const selectedGoal = useMemo(() => {
+        return goals.find(goal => goal.id === selectedGoalId) || goals[0] || null;
+      }, [goals, selectedGoalId]);
+
+      useEffect(() => {
+        saveData(data);
+      }, [data]);
+
+      useEffect(() => {
+        if (!selectedGoalId && goals.length > 0) {
+          setSelectedGoalId(goals[0].id);
+        }
+      }, [goals, selectedGoalId]);
+
+      function updateData(patch) {
+        setData(prev => ({
+          ...prev,
+          ...patch
+        }));
+      }
+
+      function addGoal() {
+        const newGoal = {
+          id: makeId(),
+          title: '새 목표',
+          targetDate: '',
+          useDDay: false,
+          memo: ''
+        };
+
+        updateData({
+          goals: [...goals, newGoal]
+        });
+
+        setSelectedGoalId(newGoal.id);
+        setView('goals');
+      }
+
+      function updateGoal(goalId, patch) {
+        updateData({
+          goals: goals.map(goal => {
+            if (goal.id !== goalId) return goal;
+            return { ...goal, ...patch };
+          })
+        });
+      }
+
+      function deleteGoal(goalId) {
+        const ok = confirm('이 목표를 삭제할까요?');
+
+        if (!ok) return;
+
+        const nextGoals = goals.filter(goal => goal.id !== goalId);
+
+        updateData({
+          goals: nextGoals
+        });
+
+        if (selectedGoalId === goalId) {
+          setSelectedGoalId(nextGoals[0]?.id || null);
+        }
+      }
+
+      function addTodo() {
+        const text = newTodoText.trim();
+
         if (!text) return;
+
+        const newTodo = {
+          id: makeId(),
+          text,
+          completed: false
+        };
+
+        updateData({
+          todos: [...todos, newTodo]
+        });
+
+        setNewTodoText('');
+      }
+
+      function toggleTodo(todoId) {
+        updateData({
+          todos: todos.map(todo => {
+            if (todo.id !== todoId) return todo;
+            return { ...todo, completed: !todo.completed };
+          })
+        });
+      }
+
+      function deleteTodo(todoId) {
+        updateData({
+          todos: todos.filter(todo => todo.id !== todoId)
+        });
+      }
+
+      function addTravelLog() {
+        const newLog = {
+          id: makeId(),
+          date: todayString(),
+          location: '새 장소',
+          summary: '',
+          photos: []
+        };
+
+        updateData({
+          travelLogs: [newLog, ...travelLogs]
+        });
+
+        setEditingTravelId(newLog.id);
+        setView('travel');
+      }
+
+      function updateTravelLog(logId, patch) {
+        updateData({
+          travelLogs: travelLogs.map(log => {
+            if (log.id !== logId) return log;
+            return { ...log, ...patch };
+          })
+        });
+      }
+
+      function deleteTravelLog(logId) {
+        const ok = confirm('이 여행 일지를 삭제할까요?');
+
+        if (!ok) return;
+
+        updateData({
+          travelLogs: travelLogs.filter(log => log.id !== logId)
+        });
+      }
+
+      async function addTravelPhotos(logId, files) {
+        const fileList = Array.from(files || []);
+
+        if (fileList.length === 0) return;
+
+        const currentLog = travelLogs.find(log => log.id === logId);
+        const currentCount = currentLog?.photos?.length || 0;
+        const availableCount = Math.max(0, 5 - currentCount);
+        const selectedFiles = fileList.slice(0, availableCount);
+
+        if (availableCount <= 0) {
+          alert('사진은 일지 하나당 최대 5장까지 추가할 수 있어요.');
+          return;
+        }
+
         try {
-          const res = await fetch(`${API_BASE_URL}/api/todos`, { method: 'POST', ...fetchOptions, body: JSON.stringify({ text }) });
-          if (res.ok) {
-            const savedTodo = await res.json();
-            setTodos([...todos, savedTodo]);
+          const urls = await Promise.all(
+            selectedFiles.map(file => imageFileToDataURL(file))
+          );
+
+          updateData({
+            travelLogs: travelLogs.map(log => {
+              if (log.id !== logId) return log;
+
+              return {
+                ...log,
+                photos: [...(log.photos || []), ...urls].slice(0, 5)
+              };
+            })
+          });
+        } catch (error) {
+          console.error(error);
+          alert('이미지를 불러오지 못했어요.');
+        }
+      }
+
+      function removeTravelPhoto(logId, photoIndex) {
+        updateData({
+          travelLogs: travelLogs.map(log => {
+            if (log.id !== logId) return log;
+
+            return {
+              ...log,
+              photos: (log.photos || []).filter((_, index) => index !== photoIndex)
+            };
+          })
+        });
+      }
+
+      function resetAllData() {
+        const ok = confirm('모든 데이터를 초기화할까요? 이 작업은 되돌릴 수 없어요.');
+
+        if (!ok) return;
+
+        localStorage.removeItem(STORAGE_KEY);
+        setData(initialData);
+        setSelectedGoalId(initialData.goals[0]?.id || null);
+        setView('goals');
+      }
+
+      function exportData() {
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+
+        anchor.href = url;
+        anchor.download = 'jiyeon-app-data.json';
+        anchor.click();
+
+        URL.revokeObjectURL(url);
+      }
+
+      function importData(event) {
+        const file = event.target.files?.[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+
+            if (!Array.isArray(parsed.goals) || !Array.isArray(parsed.todos) || !Array.isArray(parsed.travelLogs)) {
+              alert('올바른 데이터 파일이 아니에요.');
+              return;
+            }
+
+            setData(parsed);
+            setSelectedGoalId(parsed.goals[0]?.id || null);
+            alert('데이터를 불러왔어요.');
+          } catch (error) {
+            alert('데이터 파일을 읽지 못했어요.');
           }
-        } catch (err) { console.error(err); }
-      };
-      const toggleTodo = async (todo) => {
-        const updated = { ...todo, completed: !todo.completed };
-        setTodos(todos.map(t => t.id === todo.id ? updated : t));
-        try {
-          await fetch(`${API_BASE_URL}/api/todos/${todo.id}`, { method: 'PUT', ...fetchOptions, body: JSON.stringify(updated) });
-        } catch (err) { console.error(err); }
-      };
-      const deleteTodo = async (id) => {
-        setTodos(todos.filter(t => t.id !== id));
-        try {
-          await fetch(`${API_BASE_URL}/api/todos/${id}`, { method: 'DELETE', headers: fetchOptions.headers });
-        } catch (err) { console.error(err); }
-      };
-      if (isLoading) return <div className="flex h-screen items-center justify-center font-bold">로딩 중...</div>;
+        };
+
+        reader.readAsText(file);
+        event.target.value = '';
+      }
+
       return (
-        <div className="flex h-screen bg-white text-slate-800 font-sans overflow-hidden">
-          <aside className="w-72 bg-slate-50 border-r border-slate-100 p-8 flex flex-col gap-4 relative">
-            <h1 className="text-3xl font-black text-[#007AFF] mb-8 italic">JIYEON</h1>
-            {[
-              { id: 'travel', label: '2025년', icon: MapPin },
-              { id: 'exam', label: '2026년', icon: Book },
-              { id: 'wishlist', label: '2027년+', icon: CheckCircle }
-            ].map(item => (
-              <button key={item.id} onClick={() => setActiveTab(item.id)} className={`flex items-center gap-3 p-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-white shadow-md text-[#007AFF] ring-1 ring-blue-100' : 'text-slate-400 hover:bg-slate-100'}`}>
-                <item.icon size={20} /> <span className="font-bold">{item.label}</span>
-              </button>
-            ))}
-            <div className="mt-auto bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
-              <span className="font-bold text-sm text-slate-600 truncate mr-2">지연 (게스트 모드)</span>
-            </div>
-          </aside>
-          <main className="flex-1 p-12 overflow-y-auto bg-white">
-            {/* TRAVEL TAB */}
-            {activeTab === 'travel' && (
-              <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-                <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-4xl font-extrabold tracking-tight">2025 여행 일지</h2>
-                  <button onClick={addTravelLog} className="bg-[#007AFF] text-white px-5 py-2.5 rounded-full flex items-center gap-2 hover:bg-blue-600 shadow-lg transition-all"><Plus size={20} /> 추가하기</button>
-                </div>
-                <div className="space-y-8">
-                  {travelLogs.length === 0 && <p className="text-slate-400 text-center py-10">아직 추가된 일지가 없습니다.</p>}
-                  {travelLogs.sort((a,b) => new Date(b.date) - new Date(a.date)).map(log => (
-                    <div key={log.id} className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100">
-                      <div className="flex justify-between items-start mb-6">
-                        {isLogEditing === log.id ? (
-                          <div className="flex flex-col gap-2 w-full pr-12">
-                            <input type="date" value={log.date} onChange={(e) => setTravelLogs(travelLogs.map(l => l.id === log.id ? {...l, date: e.target.value} : l))} onBlur={() => saveTravelLog(travelLogs.find(l => l.id === log.id))} className="p-2 rounded-lg border focus:ring-2 focus:ring-blue-400 outline-none" />
-                            <input type="text" value={log.location} placeholder="위치 입력" onChange={(e) => setTravelLogs(travelLogs.map(l => l.id === log.id ? {...l, location: e.target.value} : l))} onBlur={() => saveTravelLog(travelLogs.find(l => l.id === log.id))} className="p-2 rounded-lg border focus:ring-2 focus:ring-blue-400 outline-none" />
-                          </div>
-                        ) : (
-                          <div>
-                            <span className="text-blue-500 font-bold text-sm bg-blue-50 px-3 py-1 rounded-full">{log.date}</span>
-                            <h3 className="text-2xl font-bold mt-2">📍 {log.location}</h3>
-                          </div>
-                        )}
-                        <div className="flex gap-2">
-                          <button onClick={() => {
-                            if (isLogEditing === log.id) { saveTravelLog(travelLogs.find(l => l.id === log.id)); setIsLogEditing(null); } 
-                            else { setIsLogEditing(log.id); }
-                          }} className="p-2 text-slate-400 hover:text-blue-500 bg-white rounded-full shadow-sm">
-                            {isLogEditing === log.id ? <Check size={18} /> : <Edit3 size={18} />}
-                          </button>
-                          <button onClick={() => deleteTravelLog(log.id)} className="p-2 text-slate-400 hover:text-red-500 bg-white rounded-full shadow-sm">
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-5 gap-3 mb-6">
-                        {(log.photos || []).map((url, idx) => (
-                          <div key={idx} className="relative aspect-square rounded-xl overflow-hidden shadow-sm">
-                            <img src={url} className="w-full h-full object-cover" alt="travel" />
-                          </div>
-                        ))}
-                        {(log.photos || []).length < 5 && isLogEditing === log.id && (
-                          <button onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 bg-white transition-all">
-                            <Plus size={24} /> <span className="text-[10px] mt-1 font-bold">ADD</span>
-                            <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={(e) => handleImageUpload(log.id, e.target.files)} />
-                          </button>
-                        )}
-                      </div>
-                      {isLogEditing === log.id ? (
-                        <textarea value={log.summary} onChange={(e) => setTravelLogs(travelLogs.map(l => l.id === log.id ? {...l, summary: e.target.value} : l))} onBlur={() => saveTravelLog(travelLogs.find(l => l.id === log.id))} className="w-full p-4 rounded-xl border h-24 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="오늘의 요약..." />
+        <div className="min-h-screen bg-white">
+          <div className="flex min-h-screen">
+
+            <aside className="hidden lg:flex w-[248px] shrink-0 bg-white border-r border-slate-100 px-[30px] py-[42px] flex-col">
+              <div className="mb-10">
+                <h1 className="text-[38px] leading-[1.05] font-black tracking-[0.08em] text-slate-900">
+                  2026 플랜
+                </h1>
+              </div>
+
+              <nav className="space-y-4">
+                {goals.slice(0, 5).map((goal, index) => (
+                  <button
+                    key={goal.id}
+                    onClick={() => {
+                      setSelectedGoalId(goal.id);
+                      setView('goals');
+                    }}
+                    className={
+                      selectedGoal?.id === goal.id && view === 'goals'
+                        ? 'w-full min-h-[69px] rounded-2xl bg-white border border-blue-300 px-5 py-4 text-left shadow-sm transition'
+                        : 'w-full min-h-[69px] rounded-2xl bg-slate-50 border border-slate-100 px-5 py-4 text-left hover:border-blue-200 transition'
+                    }
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[17px] font-extrabold text-slate-900 break-keep">
+                        {goal.title}
+                      </span>
+
+                      {goal.useDDay && goal.targetDate ? (
+                        <span className="shrink-0 text-[11px] font-black text-blue-500 bg-blue-100 rounded-full px-2 py-1">
+                          {getDDay(goal.targetDate)}
+                        </span>
                       ) : (
-                        <div className="bg-white p-6 rounded-2xl border border-slate-100 italic text-slate-600 leading-relaxed font-medium">
-                          "{log.summary || "기록이 없습니다."}"
+                        <span className="shrink-0 text-[16px] font-medium text-slate-900">
+                          0
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setView('todo')}
+                  className={
+                    view === 'todo'
+                      ? 'w-full min-h-[69px] rounded-2xl bg-[#007AFF] text-white border border-transparent px-5 py-4 text-left shadow-lg shadow-blue-100 transition'
+                      : 'w-full min-h-[69px] rounded-2xl bg-slate-50 border border-slate-100 px-5 py-4 text-left hover:border-blue-200 transition'
+                  }
+                >
+                  <span className="text-[17px] font-extrabold">
+                    투두리스트
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setView('travel')}
+                  className={
+                    view === 'travel'
+                      ? 'w-full min-h-[69px] rounded-2xl bg-[#007AFF] text-white border border-transparent px-5 py-4 text-left shadow-lg shadow-blue-100 transition'
+                      : 'w-full min-h-[69px] rounded-2xl bg-slate-50 border border-slate-100 px-5 py-4 text-left hover:border-blue-200 transition'
+                  }
+                >
+                  <span className="text-[17px] font-extrabold">
+                    여행 일지
+                  </span>
+                </button>
+              </nav>
+
+              <button
+                onClick={addGoal}
+                className="mt-4 w-full min-h-[69px] rounded-2xl bg-[#007AFF] text-white px-5 py-4 text-left shadow-lg shadow-blue-100 hover:bg-blue-600 transition"
+              >
+                <span className="text-[17px] font-extrabold">
+                  새 목표
+                </span>
+              </button>
+
+              <div className="mt-auto pt-8 space-y-2">
+                <button
+                  onClick={exportData}
+                  className="w-full rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 text-left text-sm font-bold text-slate-500 hover:text-blue-500"
+                >
+                  <Download size={15} className="inline mr-2" />
+                  백업 저장
+                </button>
+
+                <label className="block w-full rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 text-left text-sm font-bold text-slate-500 hover:text-blue-500 cursor-pointer">
+                  <Upload size={15} className="inline mr-2" />
+                  백업 불러오기
+                  <input
+                    type="file"
+                    accept="application/json"
+                    className="hidden"
+                    onChange={importData}
+                  />
+                </label>
+
+                <button
+                  onClick={resetAllData}
+                  className="w-full rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 text-left text-sm font-bold text-slate-400 hover:text-red-500"
+                >
+                  <RotateCcw size={15} className="inline mr-2" />
+                  초기화
+                </button>
+              </div>
+            </aside>
+
+            <main className="flex-1 min-w-0 px-5 py-7 lg:px-12 lg:py-10 pb-28 lg:pb-10 overflow-y-auto soft-scroll">
+
+              <div className="lg:hidden mb-7">
+                <div className="flex items-start justify-between gap-4">
+                  <h1 className="text-[34px] leading-[1.05] font-black tracking-[0.06em] text-slate-900">
+                    2026 플랜
+                  </h1>
+
+                  <button
+                    onClick={addGoal}
+                    className="w-12 h-12 rounded-2xl bg-[#007AFF] text-white flex items-center justify-center shadow-lg shadow-blue-100"
+                  >
+                    <Plus size={22} />
+                  </button>
+                </div>
+
+                <div className="mt-5 flex gap-2 overflow-x-auto soft-scroll pb-2">
+                  <button
+                    onClick={() => setView('goals')}
+                    className={
+                      view === 'goals'
+                        ? 'shrink-0 rounded-full bg-[#007AFF] text-white px-5 py-3 text-sm font-extrabold'
+                        : 'shrink-0 rounded-full bg-slate-50 border border-slate-100 text-slate-500 px-5 py-3 text-sm font-extrabold'
+                    }
+                  >
+                    목표
+                  </button>
+
+                  <button
+                    onClick={() => setView('todo')}
+                    className={
+                      view === 'todo'
+                        ? 'shrink-0 rounded-full bg-[#007AFF] text-white px-5 py-3 text-sm font-extrabold'
+                        : 'shrink-0 rounded-full bg-slate-50 border border-slate-100 text-slate-500 px-5 py-3 text-sm font-extrabold'
+                    }
+                  >
+                    투두리스트
+                  </button>
+
+                  <button
+                    onClick={() => setView('travel')}
+                    className={
+                      view === 'travel'
+                        ? 'shrink-0 rounded-full bg-[#007AFF] text-white px-5 py-3 text-sm font-extrabold'
+                        : 'shrink-0 rounded-full bg-slate-50 border border-slate-100 text-slate-500 px-5 py-3 text-sm font-extrabold'
+                    }
+                  >
+                    여행 일지
+                  </button>
+
+                  <button
+                    onClick={exportData}
+                    className="shrink-0 rounded-full bg-slate-50 border border-slate-100 text-slate-400 px-5 py-3 text-sm font-extrabold"
+                  >
+                    백업
+                  </button>
+
+                  <label className="shrink-0 rounded-full bg-slate-50 border border-slate-100 text-slate-400 px-5 py-3 text-sm font-extrabold cursor-pointer">
+                    불러오기
+                    <input
+                      type="file"
+                      accept="application/json"
+                      className="hidden"
+                      onChange={importData}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {view === 'goals' && (
+                <section className="max-w-[980px] mx-auto">
+                  <div className="hidden lg:flex items-center justify-between mb-10">
+                    <h2 className="text-[38px] font-black tracking-[0.06em] text-slate-900">
+                      새 목표
+                    </h2>
+
+                    <button
+                      onClick={addGoal}
+                      className="inline-flex items-center gap-2 rounded-full bg-[#007AFF] text-white px-6 py-3 text-sm font-bold shadow-lg shadow-blue-100 hover:bg-blue-600 transition"
+                    >
+                      <Plus size={18} />
+                      목표 추가
+                    </button>
+                  </div>
+
+                  <div className="grid lg:grid-cols-[260px_1fr] gap-7">
+                    <div className="lg:hidden">
+                      <div className="flex gap-3 overflow-x-auto soft-scroll pb-3">
+                        {goals.map(goal => (
+                          <button
+                            key={goal.id}
+                            onClick={() => setSelectedGoalId(goal.id)}
+                            className={
+                              selectedGoal?.id === goal.id
+                                ? 'shrink-0 max-w-[220px] rounded-2xl bg-[#007AFF] text-white px-5 py-4 text-left shadow-lg shadow-blue-100'
+                                : 'shrink-0 max-w-[220px] rounded-2xl bg-slate-50 border border-slate-100 text-slate-700 px-5 py-4 text-left'
+                            }
+                          >
+                            <div className="font-extrabold truncate">
+                              {goal.title}
+                            </div>
+
+                            {goal.useDDay && goal.targetDate && (
+                              <div className="mt-2 text-xs font-black opacity-80">
+                                {getDDay(goal.targetDate)}
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="hidden lg:block space-y-3">
+                      {goals.map(goal => (
+                        <button
+                          key={goal.id}
+                          onClick={() => setSelectedGoalId(goal.id)}
+                          className={
+                            selectedGoal?.id === goal.id
+                              ? 'w-full rounded-2xl bg-[#007AFF] text-white px-5 py-4 text-left shadow-lg shadow-blue-100'
+                              : 'w-full rounded-2xl bg-slate-50 border border-slate-100 text-slate-700 px-5 py-4 text-left hover:border-blue-200 transition'
+                          }
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="font-extrabold truncate">
+                              {goal.title}
+                            </span>
+
+                            {goal.useDDay && goal.targetDate && (
+                              <span className={
+                                selectedGoal?.id === goal.id
+                                  ? 'shrink-0 text-xs font-black bg-white/20 px-2 py-1 rounded-full'
+                                  : 'shrink-0 text-xs font-black bg-blue-100 text-blue-500 px-2 py-1 rounded-full'
+                              }>
+                                {getDDay(goal.targetDate)}
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="bg-slate-50 rounded-[30px] lg:rounded-[40px] border border-slate-100 min-h-[560px] px-6 py-8 lg:px-10 lg:py-11">
+                      {selectedGoal ? (
+                        <div className="space-y-7">
+                          <div className="flex items-start gap-3">
+                            <input
+                              value={selectedGoal.title}
+                              onChange={event => updateGoal(selectedGoal.id, { title: event.target.value })}
+                              placeholder="목표 이름"
+                              className="flex-1 min-w-0 bg-transparent outline-none text-[30px] lg:text-[34px] font-black tracking-[0.04em] text-slate-900 placeholder:text-slate-300"
+                            />
+
+                            <button
+                              onClick={() => deleteGoal(selectedGoal.id)}
+                              className="w-10 h-10 rounded-full bg-white text-slate-300 hover:text-red-500 flex items-center justify-center shadow-sm"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+
+                          <label className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedGoal.useDDay}
+                              onChange={event => updateGoal(selectedGoal.id, { useDDay: event.target.checked })}
+                              className="accent-[#007AFF]"
+                            />
+                            디데이 사용
+                          </label>
+
+                          {selectedGoal.useDDay && (
+                            <div>
+                              <input
+                                type="date"
+                                value={selectedGoal.targetDate}
+                                onChange={event => updateGoal(selectedGoal.id, { targetDate: event.target.value })}
+                                className="w-full max-w-[300px] rounded-2xl bg-white border border-slate-100 px-4 py-3 outline-none text-slate-600 font-semibold"
+                              />
+
+                              {selectedGoal.targetDate && (
+                                <div className="mt-3 inline-flex rounded-full bg-blue-100 text-blue-500 px-3 py-1 text-xs font-black">
+                                  {getDDay(selectedGoal.targetDate)}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          <textarea
+                            value={selectedGoal.memo}
+                            onChange={event => updateGoal(selectedGoal.id, { memo: event.target.value })}
+                            placeholder="목표에 대한 상세 계획..."
+                            className="w-full h-[160px] bg-white rounded-2xl border border-slate-100 px-6 py-5 outline-none text-slate-500 leading-relaxed placeholder:text-slate-400"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-full min-h-[420px] flex items-center justify-center text-slate-300 font-bold">
+                          목표를 추가해주세요.
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {/* STUDY TAB */}
-            {activeTab === 'exam' && (
-              <div className="flex gap-10 h-full animate-in slide-in-from-right-8 duration-500">
-                <div className="flex-1 max-w-md">
-                  <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-4xl font-extrabold">2026 플랜</h2>
-                    <button onClick={addStudyGoal} className="text-[#007AFF] hover:bg-blue-50 p-2 rounded-full"><Plus size={28}/></button>
                   </div>
-                  <div className="space-y-4">
-                    {studyGoals.map(goal => (
-                      <div key={goal.id} onClick={() => setSelectedGoalId(goal.id)} className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedGoalId === goal.id ? 'bg-[#007AFF] text-white border-transparent shadow-lg' : 'bg-slate-50 border-slate-100 hover:border-blue-300'}`}>
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-lg">{goal.title}</span>
-                          {goal.hasDDay && goal.targetDate && (
-                            <span className={`text-[10px] font-black px-2 py-1 rounded-full ${selectedGoalId === goal.id ? 'bg-white/20' : 'bg-blue-100 text-blue-500'}`}>
-                              D-{Math.ceil((new Date(goal.targetDate) - new Date()) / (1000*60*60*24))}
+                </section>
+              )}
+
+              {view === 'todo' && (
+                <section className="max-w-[420px] mx-auto">
+                  <div className="bg-slate-50 rounded-[32px] lg:rounded-[40px] border border-slate-100 px-8 py-10 min-h-[620px]">
+                    <h2 className="text-[36px] lg:text-[40px] font-black tracking-[0.08em] text-center mb-10 text-slate-900">
+                      투두리스트
+                    </h2>
+
+                    <div className="flex gap-2 mb-8">
+                      <input
+                        value={newTodoText}
+                        onChange={event => setNewTodoText(event.target.value)}
+                        onKeyDown={event => {
+                          if (event.key === 'Enter') addTodo();
+                        }}
+                        placeholder="미래의 꿈 추가..."
+                        className="flex-1 min-w-0 h-14 rounded-2xl bg-white border border-slate-100 px-5 outline-none text-sm font-semibold text-slate-600 placeholder:text-slate-400 shadow-sm"
+                      />
+
+                      <button
+                        onClick={addTodo}
+                        className="w-14 h-14 rounded-2xl bg-[#007AFF] text-white flex items-center justify-center shadow-lg shadow-blue-100 hover:bg-blue-600 transition"
+                      >
+                        <Plus size={22} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {todos.length === 0 && (
+                        <div className="rounded-2xl bg-white border border-slate-100 px-5 py-8 text-center text-slate-300 font-bold">
+                          아직 추가된 투두가 없습니다.
+                        </div>
+                      )}
+
+                      {todos.map(todo => (
+                        <div
+                          key={todo.id}
+                          className="group rounded-2xl bg-white border border-slate-100 px-4 py-4 flex items-center gap-3 shadow-sm"
+                        >
+                          <label className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={todo.completed}
+                              onChange={() => toggleTodo(todo.id)}
+                              className="w-4 h-4 accent-[#007AFF]"
+                            />
+
+                            <span className={
+                              todo.completed
+                                ? 'text-[15px] leading-relaxed text-slate-300 line-through break-keep'
+                                : 'text-[15px] leading-relaxed text-slate-600 break-keep'
+                            }>
+                              {todo.text}
                             </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex-[1.5] bg-slate-50 rounded-[2.5rem] p-10 border border-slate-100 flex flex-col gap-8">
-                  {selectedGoalId ? (
-                    <>
-                      <div className="space-y-4">
-                        <input type="text" value={studyGoals.find(g=>g.id===selectedGoalId)?.title || ''} 
-                          onChange={(e) => setStudyGoals(studyGoals.map(g=>g.id===selectedGoalId ? {...g, title: e.target.value} : g))} 
-                          onBlur={() => saveStudyGoal(studyGoals.find(g=>g.id===selectedGoalId))}
-                          className="text-3xl font-black bg-transparent outline-none w-full border-b-2 border-transparent focus:border-blue-400" />
-                        
-                        <div className="flex items-center gap-4">
-                          <label className="flex items-center gap-2 text-sm font-bold text-slate-400">
-                            <input type="checkbox" checked={studyGoals.find(g=>g.id===selectedGoalId)?.hasDDay || false} 
-                              onChange={(e) => {
-                                const updated = studyGoals.map(g=>g.id===selectedGoalId ? {...g, hasDDay: e.target.checked} : g);
-                                setStudyGoals(updated);
-                                saveStudyGoal(updated.find(g=>g.id===selectedGoalId));
-                              }} /> 디데이 사용
                           </label>
-                          {studyGoals.find(g=>g.id===selectedGoalId)?.hasDDay && (
-                            <input type="date" value={studyGoals.find(g=>g.id===selectedGoalId)?.targetDate || ''} 
-                              onChange={(e) => {
-                                const updated = studyGoals.map(g=>g.id===selectedGoalId ? {...g, targetDate: e.target.value} : g);
-                                setStudyGoals(updated);
-                                saveStudyGoal(updated.find(g=>g.id===selectedGoalId));
-                              }} className="p-1 rounded bg-white text-xs border" />
+
+                          <button
+                            onClick={() => deleteTodo(todo.id)}
+                            className="shrink-0 text-slate-200 hover:text-red-500 transition"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {view === 'travel' && (
+                <section className="max-w-[1060px] mx-auto">
+                  <div className="flex items-center justify-between mb-10">
+                    <h2 className="text-[32px] lg:text-[38px] font-black tracking-[0.06em] text-slate-900">
+                      2025 여행 일지
+                    </h2>
+
+                    <button
+                      onClick={addTravelLog}
+                      className="inline-flex items-center gap-2 rounded-full bg-[#007AFF] text-white px-5 lg:px-6 py-3 text-sm font-bold shadow-lg shadow-blue-100 hover:bg-blue-600 transition"
+                    >
+                      <Plus size={18} />
+                      추가하기
+                    </button>
+                  </div>
+
+                  <div className="space-y-8">
+                    {travelLogs.length === 0 && (
+                      <div className="bg-slate-50 rounded-[32px] border border-slate-100 px-8 py-16 text-center text-slate-300 font-bold">
+                        아직 추가된 여행 일지가 없습니다.
+                      </div>
+                    )}
+
+                    {travelLogs.map(log => {
+                      const isEditing = editingTravelId === log.id;
+
+                      return (
+                        <article
+                          key={log.id}
+                          className="bg-slate-50 rounded-[32px] lg:rounded-[40px] border border-slate-100 px-6 py-7 lg:px-8 lg:py-8"
+                        >
+                          <div className="flex items-start gap-4 mb-6">
+                            <div className="flex-1 min-w-0">
+                              {isEditing ? (
+                                <div className="space-y-3 max-w-[430px]">
+                                  <input
+                                    type="date"
+                                    value={log.date}
+                                    onChange={event => updateTravelLog(log.id, { date: event.target.value })}
+                                    className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2 outline-none text-slate-600"
+                                  />
+
+                                  <input
+                                    value={log.location}
+                                    onChange={event => updateTravelLog(log.id, { location: event.target.value })}
+                                    placeholder="새 장소"
+                                    className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2 outline-none text-slate-600"
+                                  />
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 text-blue-500 px-3 py-1 text-sm font-black">
+                                    <CalendarDays size={14} />
+                                    {log.date}
+                                  </div>
+
+                                  <h3 className="mt-3 text-2xl font-black text-slate-900 flex items-center gap-2">
+                                    <MapPin size={20} />
+                                    {log.location || '새 장소'}
+                                  </h3>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setEditingTravelId(isEditing ? null : log.id)}
+                                className="w-10 h-10 rounded-full bg-white text-slate-300 hover:text-blue-500 flex items-center justify-center shadow-sm transition"
+                              >
+                                {isEditing ? <Check size={18} /> : <Pencil size={17} />}
+                              </button>
+
+                              <button
+                                onClick={() => deleteTravelLog(log.id)}
+                                className="w-10 h-10 rounded-full bg-white text-slate-300 hover:text-red-500 flex items-center justify-center shadow-sm transition"
+                              >
+                                <Trash2 size={17} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
+                            {(log.photos || []).map((photo, index) => (
+                              <div
+                                key={index}
+                                className="relative aspect-square rounded-xl overflow-hidden bg-white border border-slate-100 shadow-sm"
+                              >
+                                <img
+                                  src={photo}
+                                  alt="여행 사진"
+                                  className="w-full h-full object-cover"
+                                />
+
+                                {isEditing && (
+                                  <button
+                                    onClick={() => removeTravelPhoto(log.id, index)}
+                                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/95 text-red-500 shadow flex items-center justify-center"
+                                  >
+                                    <X size={15} />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+
+                            {isEditing && (log.photos || []).length < 5 && (
+                              <label className="aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-white text-slate-400 hover:text-blue-500 hover:border-blue-300 flex flex-col items-center justify-center cursor-pointer transition">
+                                <Plus size={24} />
+                                <span className="mt-1 text-[10px] font-black tracking-wider">
+                                  ADD
+                                </span>
+
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple
+                                  className="hidden"
+                                  onChange={event => addTravelPhotos(log.id, event.target.files)}
+                                />
+                              </label>
+                            )}
+                          </div>
+
+                          {isEditing ? (
+                            <textarea
+                              value={log.summary}
+                              onChange={event => updateTravelLog(log.id, { summary: event.target.value })}
+                              placeholder="오늘의 요약..."
+                              className="w-full h-[94px] rounded-2xl bg-white border border-slate-100 px-5 py-4 outline-none text-slate-500 leading-relaxed placeholder:text-slate-400"
+                            />
+                          ) : (
+                            <div className="w-full min-h-[94px] rounded-2xl bg-white border border-slate-100 px-5 py-4 text-slate-500 leading-relaxed">
+                              {log.summary || '아직 작성된 요약이 없습니다.'}
+                            </div>
                           )}
-                        </div>
-                        <textarea value={studyGoals.find(g=>g.id===selectedGoalId)?.memo || ''} 
-                          onChange={(e) => setStudyGoals(studyGoals.map(g=>g.id===selectedGoalId ? {...g, memo: e.target.value} : g))} 
-                          onBlur={() => saveStudyGoal(studyGoals.find(g=>g.id===selectedGoalId))}
-                          className="w-full h-40 bg-white p-6 rounded-2xl border-none shadow-sm outline-none text-slate-500" placeholder="목표에 대한 상세 계획..." />
-                      </div>
-                    </>
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-slate-300 font-medium">목표를 선택해주세요.</div>
-                  )}
-                </div>
-              </div>
-            )}
-            {/* WISHLIST TAB */}
-            {activeTab === 'wishlist' && (
-              <div className="flex gap-10 h-full animate-in zoom-in-95 duration-500">
-                <div className="flex-1 bg-slate-50 rounded-[2.5rem] p-10 border border-slate-100 flex flex-col">
-                  <h2 className="text-4xl font-extrabold mb-8">투두리스트</h2>
-                  <div className="flex gap-2 mb-6">
-                    <input id="new-todo" type="text" placeholder="미래의 꿈 추가..." className="flex-1 p-4 rounded-2xl border-none shadow-sm outline-none" onKeyDown={(e) => { if(e.key === 'Enter') { addTodo(e.target.value); e.target.value = ''; }}} />
-                    <button onClick={() => { const input = document.getElementById('new-todo'); addTodo(input.value); input.value = ''; }} className="bg-[#007AFF] text-white p-4 rounded-2xl shadow-lg shadow-blue-100"><Plus/></button>
+                        </article>
+                      );
+                    })}
                   </div>
-                  <div className="space-y-3 overflow-y-auto pr-2">
-                    {todos.map(todo => (
-                      <div key={todo.id} className="bg-white p-4 rounded-2xl flex items-center justify-between group shadow-sm">
-                        <div className="flex items-center gap-4">
-                          <input type="checkbox" checked={todo.completed} onChange={() => toggleTodo(todo)} className="w-5 h-5 accent-[#007AFF]" />
-                          <span className={`font-medium ${todo.completed ? 'line-through text-slate-300' : 'text-slate-700'}`}>{todo.text}</span>
-                        </div>
-                        <button onClick={() => deleteTodo(todo.id)} className="text-slate-200 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={16}/></button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="w-[450px] bg-slate-100 rounded-[2.5rem] overflow-hidden border border-slate-200 relative group">
-                  <div className="absolute top-6 left-6 z-10 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl shadow-md border border-white">
-                    <h3 className="text-sm font-black text-slate-800 flex items-center gap-2"><MapPin size={14} className="text-blue-500"/> 내 미래 지도</h3>
-                  </div>
-                  <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1024!2d2.2945!3d48.8584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDjCsDUxJzMwLjIiTiAywrAxNyc0MC4yIkU!5e0!3m2!1sko!2skr!4v1" 
-                    className="w-full h-full border-none opacity-80 group-hover:opacity-100 transition-opacity"
-                    allowFullScreen loading="lazy"
-                  ></iframe>
-                </div>
-              </div>
-            )}
-          </main>
+                </section>
+              )}
+            </main>
+          </div>
         </div>
       );
-    };
+    }
+
     const root = createRoot(document.getElementById('root'));
-    root.render(<JiyeonAppV3 />);
+    root.render(<App />);
   </script>
 </body>
 </html>
