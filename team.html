@@ -15,8 +15,9 @@
       --page-bg:#dfe9ff;
       --board-bg1:#dbe7ff;
       --board-bg2:#cfdfff;
-      --panel:rgba(255,255,255,.84);
-      --panel2:rgba(255,255,255,.62);
+      --panel:#f8fbff;
+      --panel2:#edf4ff;
+      --card:#edf4ff;
       --ink:#183c83;
       --sub:#5f7fb8;
       --muted:#95a8cf;
@@ -32,8 +33,9 @@
       --page-bg:#d7dee9;
       --board-bg1:#f0f3f8;
       --board-bg2:#c9d4e4;
-      --panel:rgba(250,252,255,.88);
-      --panel2:rgba(226,233,243,.80);
+      --panel:#f7f9fd;
+      --panel2:#e7edf6;
+      --card:#e7edf6;
       --ink:#223146;
       --sub:#607797;
       --muted:#8b9db8;
@@ -47,7 +49,7 @@
 
     html[data-theme="pink"]{
       --page-bg:#ffeaf4;--board-bg1:#ffeaf4;--board-bg2:#ffdce9;
-      --panel:rgba(255,255,255,.88);--panel2:rgba(255,245,251,.76);
+      --panel:#fff8fc;--panel2:#ffeaf5;--card:#ffeaf5;
       --ink:#8b3f68;--sub:#b06f95;--muted:#c990aa;--line:#f4bad7;
       --accent:#ffd5eb;--active:#ff82bd;--active-text:#fff;--detect:#ff82bd;
       --shadow:0 18px 42px rgba(185,107,147,.14);
@@ -55,7 +57,7 @@
 
     html[data-theme="orange-red"]{
       --page-bg:#fff3e3;--board-bg1:#fff0dc;--board-bg2:#ffcf91;
-      --panel:rgba(255,252,245,.91);--panel2:rgba(255,235,196,.76);
+      --panel:#fffaf0;--panel2:#ffe6bd;--card:#ffe6bd;
       --ink:#8f260e;--sub:#b44b22;--muted:#d98143;--line:#ffb35a;
       --accent:#fff34d;--active:#ff1744;--active-text:#fff;--detect:#ff1744;
       --shadow:0 18px 42px rgba(210,84,20,.18);
@@ -63,23 +65,33 @@
 
     html[data-theme="blue-neon"]{
       --page-bg:#dfe9ff;--board-bg1:#dbe7ff;--board-bg2:#cfdfff;
-      --panel:rgba(255,255,255,.84);--panel2:rgba(255,255,255,.62);
+      --panel:#f8fbff;--panel2:#edf4ff;--card:#edf4ff;
       --ink:#183c83;--sub:#5f7fb8;--muted:#95a8cf;--line:#9abaff;
       --accent:#69e3ff;--active:#ff7a1a;--active-text:#fff;--detect:#ffb000;
       --shadow:0 18px 42px rgba(63,96,163,.14);
     }
 
     html[data-theme="black-red"]{
-      --page-bg:#151217;--board-bg1:#121216;--board-bg2:#220f13;
-      --panel:rgba(25,25,31,.92);--panel2:rgba(35,35,43,.84);
-      --ink:#f4f4f6;--sub:#d9dbe6;--muted:#9da1ad;--line:#5a2227;
-      --accent:#ff2a3f;--active:#ff1744;--active-text:#fff;--detect:#ff1744;
+      --page-bg:#151217;
+      --board-bg1:#111116;
+      --board-bg2:#241014;
+      --panel:#1b1b22;
+      --panel2:#282832;
+      --card:#282832;
+      --ink:#f4f4f6;
+      --sub:#d7d9e3;
+      --muted:#9da1ad;
+      --line:#5a2227;
+      --accent:#ff2a3f;
+      --active:#ff1744;
+      --active-text:#fff;
+      --detect:#ff1744;
       --shadow:0 18px 42px rgba(0,0,0,.34);
     }
 
     html[data-theme="white-red"]{
       --page-bg:#f4f8ff;--board-bg1:#fff;--board-bg2:#eaf4ff;
-      --panel:rgba(255,255,255,.94);--panel2:rgba(241,248,255,.86);
+      --panel:#ffffff;--panel2:#eef7ff;--card:#eef7ff;
       --ink:#252a36;--sub:#526f9e;--muted:#93a8c4;--line:#cfe5ff;
       --accent:#9ad7ff;--active:#ff1744;--active-text:#fff;--detect:#ff1744;
       --shadow:0 18px 42px rgba(40,70,130,.10);
@@ -87,14 +99,17 @@
 
     html[data-theme="sky-yellow"]{
       --page-bg:#edf8ff;--board-bg1:#eaf8ff;--board-bg2:#fff5b8;
-      --panel:rgba(255,255,250,.92);--panel2:rgba(255,250,210,.78);
+      --panel:#fffffb;--panel2:#fff7cc;--card:#fff7cc;
       --ink:#244f9e;--sub:#637da9;--muted:#9caac6;--line:#c7e2ff;
       --accent:#174fc7;--active:#174fc7;--active-text:#fff;--detect:#ffea00;
       --shadow:0 18px 42px rgba(86,130,170,.13);
     }
 
     html,body{
-      margin:0;padding:0;width:100%;min-height:100%;
+      margin:0;
+      padding:0;
+      width:100%;
+      min-height:100%;
       background:var(--page-bg);
       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
       color:var(--ink);
@@ -129,7 +144,8 @@
 
     .board{
       position:absolute;
-      left:0;top:0;
+      left:0;
+      top:0;
       width:var(--capture-w);
       height:var(--capture-h);
       overflow:hidden;
@@ -173,7 +189,12 @@
     }
 
     .toolbar-top,.toolbar-left,.theme-bar,.zoom-bar{
-      display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;width:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      width:100%;
     }
 
     button{font-family:inherit;}
@@ -228,6 +249,11 @@
       box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);
     }
 
+    body.exporting-now [contenteditable="true"]:focus{
+      background:transparent !important;
+      box-shadow:none !important;
+    }
+
     .upload-box{
       position:relative;
       overflow:hidden;
@@ -258,7 +284,7 @@
       width:520px;
       height:676px;
       border-radius:34px;
-      background-color:rgba(255,255,255,.36);
+      background-color:var(--panel);
       border:3px solid var(--ink);
       box-shadow:8px 8px 0 rgba(111,137,181,.42),0 16px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.80);
       cursor:pointer;
@@ -322,7 +348,9 @@
 
     .detect-meta{
       position:absolute;
-      left:0;right:0;bottom:-34px;
+      left:0;
+      right:0;
+      bottom:-34px;
       display:flex;
       justify-content:space-between;
       color:var(--detect);
@@ -352,8 +380,12 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      background:var(--panel2);
+      background:var(--card);
       border-bottom:2px solid rgba(30,39,50,.15);
+    }
+
+    html[data-theme="black-red"] .record-head{
+      background:#22222b;
     }
 
     .record-head-title{
@@ -382,12 +414,23 @@
       flex-direction:column;
       gap:10px;
       overflow:hidden;
+      background:var(--panel);
     }
 
     .name-card,.info-card,.wide-card,.footer-card,.status-card{
-      background:var(--panel2);
+      background:var(--card);
       border:1px solid rgba(255,255,255,.56);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.55);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
+    }
+
+    html[data-theme="black-red"] .name-card,
+    html[data-theme="black-red"] .info-card,
+    html[data-theme="black-red"] .wide-card,
+    html[data-theme="black-red"] .footer-card,
+    html[data-theme="black-red"] .status-card{
+      background:#282832;
+      border-color:#4b4b58;
+      box-shadow:none;
     }
 
     .name-card{
@@ -453,6 +496,11 @@
       cursor:pointer;
     }
 
+    html[data-theme="black-red"] .choice-chip{
+      background:#34343f;
+      border-color:#5a5a66;
+    }
+
     .choice-chip.active{
       background:var(--active);
       color:var(--active-text);
@@ -515,6 +563,11 @@
       line-height:1;
     }
 
+    html[data-theme="black-red"] .mini-choice{
+      background:#34343f;
+      border-color:#5a5a66;
+    }
+
     .mini-choice.active{
       background:var(--active);
       color:var(--active-text);
@@ -546,6 +599,10 @@
       text-align:center;
     }
 
+    html[data-theme="black-red"] .grade-input{
+      background:#34343f;
+    }
+
     .wide-card{
       min-height:82px;
       border-radius:18px;
@@ -573,7 +630,6 @@
     .footer-card{
       min-height:62px;
       border-radius:18px;
-      background:linear-gradient(135deg,rgba(255,255,255,.45),var(--panel2));
       padding:12px 14px;
       overflow:hidden;
     }
@@ -600,13 +656,13 @@
 
     .export-root{
       position:fixed;
-      left:-20000px;
+      left:0;
       top:0;
       width:1440px;
       height:810px;
       overflow:hidden;
       background:transparent;
-      z-index:-1;
+      z-index:-9999;
       pointer-events:none;
     }
 
@@ -793,6 +849,17 @@
       return first ? first.textContent.trim() || "Beacon" : "Beacon";
     }
 
+    function bindEditableBasics(el){
+      if(!el) return;
+      el.setAttribute("spellcheck","false");
+      el.addEventListener("keydown",(e)=>{
+        if(e.key === "Enter" && !el.classList.contains("ability-input") && !el.classList.contains("field-input")){
+          e.preventDefault();
+          el.blur();
+        }
+      });
+    }
+
     function setFooterLabel(type){
       const team = currentTeamName();
 
@@ -803,17 +870,6 @@
       }
 
       bindEditableBasics(footerLabel.querySelector(".team-name"));
-    }
-
-    function bindEditableBasics(el){
-      if(!el) return;
-      el.setAttribute("spellcheck","false");
-      el.addEventListener("keydown",(e)=>{
-        if(e.key === "Enter" && !el.classList.contains("ability-input") && !el.classList.contains("field-input")){
-          e.preventDefault();
-          el.blur();
-        }
-      });
     }
 
     function setViewScale(scale){
@@ -1015,6 +1071,7 @@
       document.activeElement.blur();
       window.getSelection()?.removeAllRanges();
 
+      document.body.classList.add("exporting-now");
       saveBtn.textContent = "저장중...";
 
       refitAllImages(captureArea);
@@ -1054,6 +1111,7 @@
         alert("저장에 실패했어요. 이미지를 다시 업로드한 뒤 시도해보세요.");
       }finally{
         exportRoot.remove();
+        document.body.classList.remove("exporting-now");
         saveBtn.textContent = "PNG 저장";
       }
     });
