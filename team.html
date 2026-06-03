@@ -138,37 +138,6 @@
       user-select:none!important;
     }
 
-    /* TARGET 라벨은 저장할 때도 박스 유지 */
-.export-root .detect-label.export-plain,
-body.exporting-now .detect-label{
-  position:absolute!important;
-  right:-2px!important;
-  top:-36px!important;
-  display:block!important;
-  background:var(--detect)!important;
-  background-color:var(--detect)!important;
-  color:#173b22!important;
-  padding:7px 13px!important;
-  border-radius:9px 9px 0 9px!important;
-  border:0!important;
-  box-shadow:none!important;
-  outline:0!important;
-  font-size:15px!important;
-  font-weight:700!important;
-  line-height:normal!important;
-}
-
-/* 하단 98.4% / TRACKING은 글자만 유지 */
-.export-root .detect-meta .export-plain,
-body.exporting-now .detect-meta .editable{
-  background:transparent!important;
-  background-color:transparent!important;
-  color:var(--detect)!important;
-  border:0!important;
-  box-shadow:none!important;
-  outline:0!important;
-}
-
     .upload-box{position:relative;overflow:hidden;isolation:isolate;}
     .upload-box img{position:absolute;display:block;max-width:none;max-height:none;width:auto;height:auto;image-rendering:auto;z-index:0;}
     .image-panel{position:absolute;left:86px;top:66px;width:520px;height:676px;z-index:4;}
@@ -221,10 +190,10 @@ body.exporting-now .detect-meta .editable{
       overflow:hidden;background:var(--panel);
     }
     .name-card,.info-card,.wide-card,.footer-card,.status-card{
-  background:var(--card);
-  border:1px solid rgba(255,255,255,.56);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
-}
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.56);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
+    }
     html[data-theme="black-red"] .name-card,
     html[data-theme="black-red"] .info-card,
     html[data-theme="black-red"] .wide-card,
@@ -308,34 +277,33 @@ body.exporting-now .detect-meta .editable{
     .export-root .board::after{
       box-shadow:none!important;
     }
-    /* 저장할 때만 카드 안쪽 사각형처럼 보이는 inset 그림자 제거 */
-.export-root .name-card,
-.export-root .info-card,
-.export-root .wide-card,
-.export-root .footer-card,
-.export-root .status-card,
-body.exporting-now .name-card,
-body.exporting-now .info-card,
-body.exporting-now .wide-card,
-body.exporting-now .footer-card,
-body.exporting-now .status-card{
-  box-shadow:none!important;
-}
 
-/* 저장할 때 카드 안쪽에 생기는 가짜 사각형 방지 */
-.export-root .name-card *,
-.export-root .info-card *,
-.export-root .wide-card *,
-.export-root .footer-card *,
-.export-root .status-card *,
-body.exporting-now .name-card *,
-body.exporting-now .info-card *,
-body.exporting-now .wide-card *,
-body.exporting-now .footer-card *,
-body.exporting-now .status-card *{
-  box-shadow:none!important;
-  background-image:none!important;
-}
+    .export-root .name-card,
+    .export-root .info-card,
+    .export-root .wide-card,
+    .export-root .footer-card,
+    .export-root .status-card,
+    body.exporting-now .name-card,
+    body.exporting-now .info-card,
+    body.exporting-now .wide-card,
+    body.exporting-now .footer-card,
+    body.exporting-now .status-card{
+      box-shadow:none!important;
+    }
+
+    .export-root .name-card *,
+    .export-root .info-card *,
+    .export-root .wide-card *,
+    .export-root .footer-card *,
+    .export-root .status-card *,
+    body.exporting-now .name-card *,
+    body.exporting-now .info-card *,
+    body.exporting-now .wide-card *,
+    body.exporting-now .footer-card *,
+    body.exporting-now .status-card *{
+      box-shadow:none!important;
+      background-image:none!important;
+    }
 
     @media(max-width:900px){
       .stage-scroll{height:calc(100vh - 190px);padding:26px 24px 44px;}
@@ -628,33 +596,39 @@ body.exporting-now .status-card *{
       });
     }
 
-    function cleanEditables(rootEl, doc=document){
-  rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
-    const tagName=el.tagName.toLowerCase();
-    const safe=doc.createElement(tagName);
-    const classes=Array.from(el.classList).filter((cls)=>cls!=="editable");
+    function makePlainTextNode(el, doc=document){
+      const tagName=el.tagName.toLowerCase();
+      const safe=doc.createElement(tagName);
+      const classes=Array.from(el.classList).filter((cls)=>cls!=="editable");
 
-    safe.className=classes.join(" ");
-    safe.classList.add("export-plain");
-    safe.textContent=el.textContent;
+      safe.className=classes.join(" ");
+      safe.classList.add("export-plain");
+      safe.textContent=el.textContent;
 
-    if(el.id) safe.id=el.id;
+      if(el.id) safe.id=el.id;
 
-    safe.removeAttribute("contenteditable");
-    safe.removeAttribute("spellcheck");
+      safe.removeAttribute("contenteditable");
+      safe.removeAttribute("spellcheck");
 
-    const isDetectLabel=el.classList.contains("detect-label");
-    const isDetectMeta=!!el.closest(".detect-meta");
+      safe.style.setProperty("background","transparent","important");
+      safe.style.setProperty("background-color","transparent","important");
+      safe.style.setProperty("box-shadow","none","important");
+      safe.style.setProperty("outline","0","important");
+      safe.style.setProperty("border","0","important");
+      safe.style.setProperty("caret-color","transparent","important");
+      safe.style.setProperty("-webkit-user-modify","inherit","important");
+      safe.style.setProperty("-webkit-appearance","none","important");
+      safe.style.setProperty("appearance","none","important");
+      safe.style.setProperty("user-select","none","important");
 
-    safe.style.setProperty("box-shadow","none","important");
-    safe.style.setProperty("outline","0","important");
-    safe.style.setProperty("caret-color","transparent","important");
-    safe.style.setProperty("-webkit-user-modify","inherit","important");
-    safe.style.setProperty("-webkit-appearance","none","important");
-    safe.style.setProperty("appearance","none","important");
-    safe.style.setProperty("user-select","none","important");
+      return safe;
+    }
 
-    if(isDetectLabel){
+    function makeDetectLabelNode(el, doc=document){
+      const safe=doc.createElement("div");
+      safe.className="detect-label";
+      safe.textContent=el.textContent;
+
       safe.style.setProperty("position","absolute","important");
       safe.style.setProperty("right","-2px","important");
       safe.style.setProperty("top","-36px","important");
@@ -665,23 +639,48 @@ body.exporting-now .status-card *{
       safe.style.setProperty("padding","7px 13px","important");
       safe.style.setProperty("border-radius","9px 9px 0 9px","important");
       safe.style.setProperty("border","0","important");
+      safe.style.setProperty("box-shadow","none","important");
+      safe.style.setProperty("outline","0","important");
       safe.style.setProperty("font-size","15px","important");
       safe.style.setProperty("font-weight","700","important");
       safe.style.setProperty("line-height","normal","important");
-    }else if(isDetectMeta){
+      safe.style.setProperty("pointer-events","none","important");
+
+      return safe;
+    }
+
+    function makeDetectMetaNode(el, doc=document){
+      const safe=doc.createElement("div");
+      safe.textContent=el.textContent;
+
       safe.style.setProperty("background","transparent","important");
       safe.style.setProperty("background-color","transparent","important");
       safe.style.setProperty("color","var(--detect)","important");
       safe.style.setProperty("border","0","important");
-    }else{
-      safe.style.setProperty("background","transparent","important");
-      safe.style.setProperty("background-color","transparent","important");
-      safe.style.setProperty("border","0","important");
+      safe.style.setProperty("box-shadow","none","important");
+      safe.style.setProperty("outline","0","important");
+      safe.style.setProperty("font-size","14px","important");
+      safe.style.setProperty("font-weight","700","important");
+      safe.style.setProperty("line-height","normal","important");
+
+      return safe;
     }
 
-    el.replaceWith(safe);
-  });
-}
+    function cleanEditables(rootEl, doc=document){
+      rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
+        let safe;
+
+        if(el.classList.contains("detect-label")){
+          safe=makeDetectLabelNode(el,doc);
+        }else if(el.closest(".detect-meta")){
+          safe=makeDetectMetaNode(el,doc);
+        }else{
+          safe=makePlainTextNode(el,doc);
+        }
+
+        el.replaceWith(safe);
+      });
+    }
 
     function makeExportClone(){
       const exportRoot=document.createElement("div");
