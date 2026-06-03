@@ -91,16 +91,16 @@
       isolation:isolate;transform:scale(var(--view-scale, .64));transform-origin:top left;
     }
     .board.exporting{
-  position:relative!important;
-  left:0!important;
-  top:0!important;
-  transform:none!important;
-  width:1440px!important;
-  height:810px!important;
-  box-shadow:none!important;
-  border:1px solid rgba(255,255,255,.82)!important;
-  overflow:hidden!important;
-}
+      position:relative!important;
+      left:0!important;
+      top:0!important;
+      transform:none!important;
+      width:1440px!important;
+      height:810px!important;
+      box-shadow:none!important;
+      border:1px solid rgba(255,255,255,.82)!important;
+      overflow:hidden!important;
+    }
 
     .toolbar{
       position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
@@ -122,43 +122,21 @@
     .editable{outline:none;}
     [contenteditable="true"]{-webkit-user-modify:read-write-plaintext-only;font-weight:650;}
     [contenteditable="true"]:focus{background:rgba(255,255,255,.22);border-radius:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);}
-    body.exporting-now [contenteditable="true"]:focus{background:transparent!important;box-shadow:none!important;}
+
+    body.exporting-now [contenteditable="true"],
+    body.exporting-now .editable,
     .export-root .export-plain{
-  background:none!important;
-  background-color:transparent!important;
-  box-shadow:none!important;
-  outline:0!important;
-  border:0!important;
-  -webkit-user-modify:inherit!important;
-  -webkit-appearance:none!important;
-  appearance:none!important;
-  caret-color:transparent!important;
-  user-select:none!important;
-}
-
-.export-root .export-plain:focus{
-  background:none!important;
-  background-color:transparent!important;
-  box-shadow:none!important;
-  outline:0!important;
-  border:0!important;
-}
-
-.export-root .name-input.export-plain,
-.export-root .field-input.export-plain,
-.export-root .ability-input.export-plain,
-.export-root .footer-text.export-plain,
-.export-root .tiny-label.export-plain,
-.export-root .record-head-title.export-plain,
-.export-root .team-name.export-plain,
-.export-root .detect-label.export-plain,
-.export-root .detect-meta .export-plain{
-  background:none!important;
-  background-color:transparent!important;
-  box-shadow:none!important;
-  outline:0!important;
-  border:0!important;
-}
+      background:transparent!important;
+      background-color:transparent!important;
+      box-shadow:none!important;
+      outline:0!important;
+      border:0!important;
+      caret-color:transparent!important;
+      -webkit-user-modify:inherit!important;
+      -webkit-appearance:none!important;
+      appearance:none!important;
+      user-select:none!important;
+    }
 
     .upload-box{position:relative;overflow:hidden;isolation:isolate;}
     .upload-box img{position:absolute;display:block;max-width:none;max-height:none;width:auto;height:auto;image-rendering:auto;z-index:0;}
@@ -278,29 +256,25 @@
       height:810px;
       overflow:hidden;
       background:transparent!important;
-      z-index:-1;
+      z-index:999999;
       pointer-events:none;
     }
     .export-root .board{
-  position:relative!important;
-  left:0!important;
-  top:0!important;
-  transform:none!important;
-  width:1440px!important;
-  height:810px!important;
-  box-shadow:none!important;
-  border:1px solid rgba(255,255,255,.82)!important;
-  overflow:hidden!important;
-}
-    .export-root .board,
-.export-root .board.exporting{
-  filter:none!important;
-}
-
-.export-root .board::before,
-.export-root .board::after{
-  box-shadow:none!important;
-}
+      position:relative!important;
+      left:0!important;
+      top:0!important;
+      transform:none!important;
+      width:1440px!important;
+      height:810px!important;
+      box-shadow:none!important;
+      border:1px solid rgba(255,255,255,.82)!important;
+      overflow:hidden!important;
+      filter:none!important;
+    }
+    .export-root .board::before,
+    .export-root .board::after{
+      box-shadow:none!important;
+    }
 
     @media(max-width:900px){
       .stage-scroll{height:calc(100vh - 190px);padding:26px 24px 44px;}
@@ -593,43 +567,51 @@
       });
     }
 
-    function cleanEditableForExport(rootEl){
-  rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
-    el.removeAttribute("contenteditable");
-    el.removeAttribute("spellcheck");
-    el.removeAttribute("data-placeholder");
+    function cleanEditables(rootEl, doc=document){
+      rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
+        const tagName=el.tagName.toLowerCase();
+        const safe=doc.createElement(tagName);
+        const classes=Array.from(el.classList).filter((cls)=>cls!=="editable");
+        safe.className=classes.join(" ");
+        safe.classList.add("export-plain");
+        safe.textContent=el.textContent;
 
-    el.classList.remove("editable");
-    el.classList.add("export-plain");
+        if(el.id) safe.id=el.id;
+        if(el.getAttribute("style")) safe.setAttribute("style",el.getAttribute("style"));
 
-    el.style.setProperty("background","none","important");
-    el.style.setProperty("background-color","transparent","important");
-    el.style.setProperty("box-shadow","none","important");
-    el.style.setProperty("outline","0","important");
-    el.style.setProperty("border","0","important");
-    el.style.setProperty("caret-color","transparent","important");
-    el.style.setProperty("-webkit-user-modify","inherit","important");
-    el.style.setProperty("-webkit-appearance","none","important");
-    el.style.setProperty("appearance","none","important");
-    el.style.setProperty("user-select","none","important");
-  });
-}
+        safe.removeAttribute("contenteditable");
+        safe.removeAttribute("spellcheck");
 
-function makeExportClone(){
-  const exportRoot=document.createElement("div");
-  exportRoot.className="export-root";
+        safe.style.setProperty("background","transparent","important");
+        safe.style.setProperty("background-color","transparent","important");
+        safe.style.setProperty("box-shadow","none","important");
+        safe.style.setProperty("outline","0","important");
+        safe.style.setProperty("border","0","important");
+        safe.style.setProperty("caret-color","transparent","important");
+        safe.style.setProperty("-webkit-user-modify","inherit","important");
+        safe.style.setProperty("-webkit-appearance","none","important");
+        safe.style.setProperty("appearance","none","important");
+        safe.style.setProperty("user-select","none","important");
 
-  const clone=captureArea.cloneNode(true);
-  clone.id="captureExport";
-  clone.classList.add("exporting");
+        el.replaceWith(safe);
+      });
+    }
 
-  cleanEditableForExport(clone);
+    function makeExportClone(){
+      const exportRoot=document.createElement("div");
+      exportRoot.className="export-root";
 
-  exportRoot.appendChild(clone);
-  document.body.appendChild(exportRoot);
+      const clone=captureArea.cloneNode(true);
+      clone.id="captureExport";
+      clone.classList.add("exporting");
 
-  return{exportRoot,clone};
-}
+      cleanEditables(clone,document);
+
+      exportRoot.appendChild(clone);
+      document.body.appendChild(exportRoot);
+
+      return{exportRoot,clone};
+    }
 
     saveBtn.addEventListener("click",async()=>{
       document.activeElement.blur();
@@ -646,7 +628,7 @@ function makeExportClone(){
       await waitForImages(exportRoot);
       refitAllImages(exportRoot);
 
-      await new Promise((resolve)=>setTimeout(resolve,180));
+      await new Promise((resolve)=>setTimeout(resolve,220));
 
       try{
         const canvas=await html2canvas(exportRoot,{
@@ -667,8 +649,8 @@ function makeExportClone(){
           removeContainer:true,
           onclone:(clonedDoc)=>{
             const target=clonedDoc.getElementById("captureExport");
-            if(target) cleanEditableForExport(target);
-        },
+            if(target) cleanEditables(target,clonedDoc);
+          }
         });
 
         const link=document.createElement("a");
