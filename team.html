@@ -123,21 +123,41 @@
     [contenteditable="true"]{-webkit-user-modify:read-write-plaintext-only;font-weight:650;}
     [contenteditable="true"]:focus{background:rgba(255,255,255,.22);border-radius:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);}
     body.exporting-now [contenteditable="true"]:focus{background:transparent!important;box-shadow:none!important;}
-    .export-root [contenteditable],
-.export-root .editable{
-  background:transparent!important;
+    .export-root .export-plain{
+  background:none!important;
+  background-color:transparent!important;
   box-shadow:none!important;
-  outline:none!important;
+  outline:0!important;
+  border:0!important;
+  -webkit-user-modify:inherit!important;
+  -webkit-appearance:none!important;
+  appearance:none!important;
   caret-color:transparent!important;
-  -webkit-user-modify:read-only!important;
   user-select:none!important;
 }
 
-.export-root [contenteditable]:focus,
-.export-root .editable:focus{
-  background:transparent!important;
+.export-root .export-plain:focus{
+  background:none!important;
+  background-color:transparent!important;
   box-shadow:none!important;
-  outline:none!important;
+  outline:0!important;
+  border:0!important;
+}
+
+.export-root .name-input.export-plain,
+.export-root .field-input.export-plain,
+.export-root .ability-input.export-plain,
+.export-root .footer-text.export-plain,
+.export-root .tiny-label.export-plain,
+.export-root .record-head-title.export-plain,
+.export-root .team-name.export-plain,
+.export-root .detect-label.export-plain,
+.export-root .detect-meta .export-plain{
+  background:none!important;
+  background-color:transparent!important;
+  box-shadow:none!important;
+  outline:0!important;
+  border:0!important;
 }
 
     .upload-box{position:relative;overflow:hidden;isolation:isolate;}
@@ -573,7 +593,29 @@
       });
     }
 
-    function makeExportClone(){
+    function cleanEditableForExport(rootEl){
+  rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
+    el.removeAttribute("contenteditable");
+    el.removeAttribute("spellcheck");
+    el.removeAttribute("data-placeholder");
+
+    el.classList.remove("editable");
+    el.classList.add("export-plain");
+
+    el.style.setProperty("background","none","important");
+    el.style.setProperty("background-color","transparent","important");
+    el.style.setProperty("box-shadow","none","important");
+    el.style.setProperty("outline","0","important");
+    el.style.setProperty("border","0","important");
+    el.style.setProperty("caret-color","transparent","important");
+    el.style.setProperty("-webkit-user-modify","inherit","important");
+    el.style.setProperty("-webkit-appearance","none","important");
+    el.style.setProperty("appearance","none","important");
+    el.style.setProperty("user-select","none","important");
+  });
+}
+
+function makeExportClone(){
   const exportRoot=document.createElement("div");
   exportRoot.className="export-root";
 
@@ -581,26 +623,7 @@
   clone.id="captureExport";
   clone.classList.add("exporting");
 
-  clone.querySelectorAll("[contenteditable]").forEach((el)=>{
-    el.removeAttribute("contenteditable");
-    el.removeAttribute("spellcheck");
-    el.blur();
-    el.style.background="transparent";
-    el.style.boxShadow="none";
-    el.style.outline="none";
-    el.style.caretColor="transparent";
-    el.style.webkitUserModify="read-only";
-    el.style.userSelect="none";
-  });
-
-  clone.querySelectorAll(".editable").forEach((el)=>{
-    el.style.background="transparent";
-    el.style.boxShadow="none";
-    el.style.outline="none";
-    el.style.caretColor="transparent";
-    el.style.webkitUserModify="read-only";
-    el.style.userSelect="none";
-  });
+  cleanEditableForExport(clone);
 
   exportRoot.appendChild(clone);
   document.body.appendChild(exportRoot);
@@ -642,6 +665,10 @@
           scrollY:0,
           imageTimeout:0,
           removeContainer:true
+          onclone:(clonedDoc)=>{
+            const target=clonedDoc.getElementById("captureExport");
+            if(target) cleanEditableForExport(target);
+        },
         });
 
         const link=document.createElement("a");
