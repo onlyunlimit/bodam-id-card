@@ -190,8 +190,10 @@
       overflow:hidden;background:var(--panel);
     }
     .name-card,.info-card,.wide-card,.footer-card,.status-card{
-      background:var(--card);border:1px solid rgba(255,255,255,.56);box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
-    }
+  background:var(--card);
+  border:1px solid rgba(255,255,255,.56);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
+}
     html[data-theme="black-red"] .name-card,
     html[data-theme="black-red"] .info-card,
     html[data-theme="black-red"] .wide-card,
@@ -275,6 +277,34 @@
     .export-root .board::after{
       box-shadow:none!important;
     }
+    /* 저장할 때만 카드 안쪽 사각형처럼 보이는 inset 그림자 제거 */
+.export-root .name-card,
+.export-root .info-card,
+.export-root .wide-card,
+.export-root .footer-card,
+.export-root .status-card,
+body.exporting-now .name-card,
+body.exporting-now .info-card,
+body.exporting-now .wide-card,
+body.exporting-now .footer-card,
+body.exporting-now .status-card{
+  box-shadow:none!important;
+}
+
+/* 저장할 때 카드 안쪽에 생기는 가짜 사각형 방지 */
+.export-root .name-card *,
+.export-root .info-card *,
+.export-root .wide-card *,
+.export-root .footer-card *,
+.export-root .status-card *,
+body.exporting-now .name-card *,
+body.exporting-now .info-card *,
+body.exporting-now .wide-card *,
+body.exporting-now .footer-card *,
+body.exporting-now .status-card *{
+  box-shadow:none!important;
+  background-image:none!important;
+}
 
     @media(max-width:900px){
       .stage-scroll{height:calc(100vh - 190px);padding:26px 24px 44px;}
