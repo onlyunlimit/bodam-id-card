@@ -123,6 +123,22 @@
     [contenteditable="true"]{-webkit-user-modify:read-write-plaintext-only;font-weight:650;}
     [contenteditable="true"]:focus{background:rgba(255,255,255,.22);border-radius:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);}
     body.exporting-now [contenteditable="true"]:focus{background:transparent!important;box-shadow:none!important;}
+    .export-root [contenteditable],
+.export-root .editable{
+  background:transparent!important;
+  box-shadow:none!important;
+  outline:none!important;
+  caret-color:transparent!important;
+  -webkit-user-modify:read-only!important;
+  user-select:none!important;
+}
+
+.export-root [contenteditable]:focus,
+.export-root .editable:focus{
+  background:transparent!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
 
     .upload-box{position:relative;overflow:hidden;isolation:isolate;}
     .upload-box img{position:absolute;display:block;max-width:none;max-height:none;width:auto;height:auto;image-rendering:auto;z-index:0;}
@@ -558,18 +574,39 @@
     }
 
     function makeExportClone(){
-      const exportRoot=document.createElement("div");
-      exportRoot.className="export-root";
+  const exportRoot=document.createElement("div");
+  exportRoot.className="export-root";
 
-      const clone=captureArea.cloneNode(true);
-      clone.id="captureExport";
-      clone.classList.add("exporting");
+  const clone=captureArea.cloneNode(true);
+  clone.id="captureExport";
+  clone.classList.add("exporting");
 
-      exportRoot.appendChild(clone);
-      document.body.appendChild(exportRoot);
+  clone.querySelectorAll("[contenteditable]").forEach((el)=>{
+    el.removeAttribute("contenteditable");
+    el.removeAttribute("spellcheck");
+    el.blur();
+    el.style.background="transparent";
+    el.style.boxShadow="none";
+    el.style.outline="none";
+    el.style.caretColor="transparent";
+    el.style.webkitUserModify="read-only";
+    el.style.userSelect="none";
+  });
 
-      return{exportRoot,clone};
-    }
+  clone.querySelectorAll(".editable").forEach((el)=>{
+    el.style.background="transparent";
+    el.style.boxShadow="none";
+    el.style.outline="none";
+    el.style.caretColor="transparent";
+    el.style.webkitUserModify="read-only";
+    el.style.userSelect="none";
+  });
+
+  exportRoot.appendChild(clone);
+  document.body.appendChild(exportRoot);
+
+  return{exportRoot,clone};
+}
 
     saveBtn.addEventListener("click",async()=>{
       document.activeElement.blur();
