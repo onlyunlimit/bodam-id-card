@@ -597,32 +597,44 @@
     }
 
     function makePlainTextNode(el, doc=document){
-      const tagName=el.tagName.toLowerCase();
-      const safe=doc.createElement(tagName);
-      const classes=Array.from(el.classList).filter((cls)=>cls!=="editable");
+  const tagName=el.tagName.toLowerCase();
+  const safe=doc.createElement(tagName);
+  const classes=Array.from(el.classList).filter((cls)=>cls!=="editable");
 
-      safe.className=classes.join(" ");
-      safe.classList.add("export-plain");
-      safe.textContent=el.textContent;
+  safe.className=classes.join(" ");
+  safe.classList.add("export-plain");
+  safe.textContent=el.textContent;
 
-      if(el.id) safe.id=el.id;
+  if(el.id) safe.id=el.id;
 
-      safe.removeAttribute("contenteditable");
-      safe.removeAttribute("spellcheck");
+  safe.removeAttribute("contenteditable");
+  safe.removeAttribute("spellcheck");
 
-      safe.style.setProperty("background","transparent","important");
-      safe.style.setProperty("background-color","transparent","important");
-      safe.style.setProperty("box-shadow","none","important");
-      safe.style.setProperty("outline","0","important");
-      safe.style.setProperty("border","0","important");
-      safe.style.setProperty("caret-color","transparent","important");
-      safe.style.setProperty("-webkit-user-modify","inherit","important");
-      safe.style.setProperty("-webkit-appearance","none","important");
-      safe.style.setProperty("appearance","none","important");
-      safe.style.setProperty("user-select","none","important");
+  const computed=window.getComputedStyle(el);
+  const isHidden=
+    el.style.display==="none" ||
+    computed.display==="none" ||
+    el.hidden ||
+    el.closest('[style*="display:none"]') ||
+    el.closest('[style*="display: none"]');
 
-      return safe;
-    }
+  if(isHidden){
+    safe.style.setProperty("display","none","important");
+  }
+
+  safe.style.setProperty("background","transparent","important");
+  safe.style.setProperty("background-color","transparent","important");
+  safe.style.setProperty("box-shadow","none","important");
+  safe.style.setProperty("outline","0","important");
+  safe.style.setProperty("border","0","important");
+  safe.style.setProperty("caret-color","transparent","important");
+  safe.style.setProperty("-webkit-user-modify","inherit","important");
+  safe.style.setProperty("-webkit-appearance","none","important");
+  safe.style.setProperty("appearance","none","important");
+  safe.style.setProperty("user-select","none","important");
+
+  return safe;
+}
 
     function makeDetectLabelNode(el, doc=document){
       const safe=doc.createElement("div");
@@ -667,20 +679,32 @@
     }
 
     function cleanEditables(rootEl, doc=document){
-      rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
-        let safe;
+  rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
+    const computed=window.getComputedStyle(el);
+    const isHidden=
+      el.style.display==="none" ||
+      computed.display==="none" ||
+      el.hidden ||
+      el.closest('[style*="display:none"]') ||
+      el.closest('[style*="display: none"]');
 
-        if(el.classList.contains("detect-label")){
-          safe=makeDetectLabelNode(el,doc);
-        }else if(el.closest(".detect-meta")){
-          safe=makeDetectMetaNode(el,doc);
-        }else{
-          safe=makePlainTextNode(el,doc);
-        }
+    let safe;
 
-        el.replaceWith(safe);
-      });
+    if(el.classList.contains("detect-label")){
+      safe=makeDetectLabelNode(el,doc);
+    }else if(el.closest(".detect-meta")){
+      safe=makeDetectMetaNode(el,doc);
+    }else{
+      safe=makePlainTextNode(el,doc);
     }
+
+    if(isHidden){
+      safe.style.setProperty("display","none","important");
+    }
+
+    el.replaceWith(safe);
+  });
+}
 
     function makeExportClone(){
       const exportRoot=document.createElement("div");
