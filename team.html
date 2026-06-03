@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="beacon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SGIA 기밀 기록물</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+    :root{
+      --capture-w:1440px;
+      --capture-h:810px;
+      --page-bg:#dfe9ff;
+      --board-bg1:#dbe7ff;
+      --board-bg2:#cfdfff;
+      --panel:rgba(255,255,255,.84);
+      --panel2:rgba(255,255,255,.62);
+      --ink:#183c83;
+      --sub:#5f7fb8;
+      --muted:#95a8cf;
+      --line:#9abaff;
+      --accent:#69e3ff;
+      --active:#ff7a1a;
+      --active-text:#ffffff;
+      --detect:#ffb000;
+      --shadow:0 18px 42px rgba(63,96,163,.14);
+    }
+
+    html[data-theme="beacon"]{
+      --page-bg:#d7dee9;
+      --board-bg1:#f0f3f8;
+      --board-bg2:#c9d4e4;
+      --panel:rgba(250,252,255,.88);
+      --panel2:rgba(226,233,243,.80);
+      --ink:#223146;
+      --sub:#607797;
+      --muted:#8b9db8;
+      --line:#6f89b5;
+      --accent:#7b93b9;
+      --active:#223146;
+      --active-text:#f5f8ff;
+      --detect:#6f89b5;
+      --shadow:0 20px 46px rgba(37,52,75,.22);
+    }
+
+    html[data-theme="pink"]{
+      --page-bg:#ffeaf4;--board-bg1:#ffeaf4;--board-bg2:#ffdce9;
+      --panel:rgba(255,255,255,.88);--panel2:rgba(255,245,251,.76);
+      --ink:#8b3f68;--sub:#b06f95;--muted:#c990aa;--line:#f4bad7;
+      --accent:#ffd5eb;--active:#ff82bd;--active-text:#fff;--detect:#ff82bd;
+      --shadow:0 18px 42px rgba(185,107,147,.14);
+    }
+
+    html[data-theme="orange-red"]{
+      --page-bg:#fff3e3;--board-bg1:#fff0dc;--board-bg2:#ffcf91;
+      --panel:rgba(255,252,245,.91);--panel2:rgba(255,235,196,.76);
+      --ink:#8f260e;--sub:#b44b22;--muted:#d98143;--line:#ffb35a;
+      --accent:#fff34d;--active:#ff1744;--active-text:#fff;--detect:#ff1744;
+      --shadow:0 18px 42px rgba(210,84,20,.18);
+    }
+
+    html[data-theme="blue-neon"]{
+      --page-bg:#dfe9ff;--board-bg1:#dbe7ff;--board-bg2:#cfdfff;
+      --panel:rgba(255,255,255,.84);--panel2:rgba(255,255,255,.62);
+      --ink:#183c83;--sub:#5f7fb8;--muted:#95a8cf;--line:#9abaff;
+      --accent:#69e3ff;--active:#ff7a1a;--active-text:#fff;--detect:#ffb000;
+      --shadow:0 18px 42px rgba(63,96,163,.14);
+    }
+
+    html[data-theme="black-red"]{
+      --page-bg:#151217;--board-bg1:#121216;--board-bg2:#220f13;
+      --panel:rgba(25,25,31,.92);--panel2:rgba(35,35,43,.84);
+      --ink:#f4f4f6;--sub:#d9dbe6;--muted:#9da1ad;--line:#5a2227;
+      --accent:#ff2a3f;--active:#ff1744;--active-text:#fff;--detect:#ff1744;
+      --shadow:0 18px 42px rgba(0,0,0,.34);
+    }
+
+    html[data-theme="white-red"]{
+      --page-bg:#f4f8ff;--board-bg1:#fff;--board-bg2:#eaf4ff;
+      --panel:rgba(255,255,255,.94);--panel2:rgba(241,248,255,.86);
+      --ink:#252a36;--sub:#526f9e;--muted:#93a8c4;--line:#cfe5ff;
+      --accent:#9ad7ff;--active:#ff1744;--active-text:#fff;--detect:#ff1744;
+      --shadow:0 18px 42px rgba(40,70,130,.10);
+    }
+
+    html[data-theme="sky-yellow"]{
+      --page-bg:#edf8ff;--board-bg1:#eaf8ff;--board-bg2:#fff5b8;
+      --panel:rgba(255,255,250,.92);--panel2:rgba(255,250,210,.78);
+      --ink:#244f9e;--sub:#637da9;--muted:#9caac6;--line:#c7e2ff;
+      --accent:#174fc7;--active:#174fc7;--active-text:#fff;--detect:#ffea00;
+      --shadow:0 18px 42px rgba(86,130,170,.13);
+    }
+
+    html,body{
+      margin:0;padding:0;width:100%;min-height:100%;
+      background:var(--page-bg);
+      font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+
+    body{overflow:hidden;}
+
+    .stage-scroll{
+      width:100vw;
+      height:calc(100vh - 158px);
+      overflow:auto;
+      padding:34px 40px 48px;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .stage-inner{
+      width:max-content;
+      min-width:100%;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+
+    .board-shell{
+      position:relative;
+      width:calc(var(--capture-w) * var(--view-scale, .64));
+      height:calc(var(--capture-h) * var(--view-scale, .64));
+      flex:0 0 auto;
+    }
+
+    .board{
+      position:absolute;
+      left:0;top:0;
+      width:var(--capture-w);
+      height:var(--capture-h);
+      overflow:hidden;
+      border-radius:30px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.02)),
+        linear-gradient(135deg,var(--board-bg1),var(--board-bg2));
+      border:1px solid rgba(255,255,255,.82);
+      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.60),inset 0 -10px 18px rgba(103,120,147,.12);
+      isolation:isolate;
+      transform:scale(var(--view-scale, .64));
+      transform-origin:top left;
+    }
+
+    .board.exporting{
+      position:relative !important;
+      left:0 !important;
+      top:0 !important;
+      transform:none !important;
+      width:1440px !important;
+      height:810px !important;
+    }
+
+    .toolbar{
+      position:fixed;
+      left:50%;
+      bottom:16px;
+      transform:translateX(-50%);
+      width:min(1220px,calc(100% - 32px));
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      z-index:100;
+      padding:12px 14px;
+      border-radius:24px;
+      background:rgba(255,255,255,.45);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      box-shadow:0 14px 34px rgba(0,0,0,.10);
+    }
+
+    .toolbar-top,.toolbar-left,.theme-bar,.zoom-bar{
+      display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;width:100%;
+    }
+
+    button{font-family:inherit;}
+
+    .tool-btn,.theme-btn{
+      border:0;
+      border-radius:999px;
+      background:var(--panel);
+      color:var(--ink);
+      font-weight:800;
+      font-size:13px;
+      padding:11px 15px;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(0,0,0,.08);
+    }
+
+    .tool-btn.primary,.theme-btn.active{
+      background:var(--active);
+      color:var(--active-text);
+    }
+
+    .toolbar-note,.theme-title,.zoom-label{
+      color:var(--sub);
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .zoom-range{
+      width:260px;
+      accent-color:var(--active);
+      cursor:pointer;
+    }
+
+    .zoom-value{
+      min-width:46px;
+      color:var(--ink);
+      font-size:13px;
+      font-weight:900;
+      text-align:left;
+    }
+
+    .editable{outline:none;}
+
+    [contenteditable="true"]{
+      -webkit-user-modify:read-write-plaintext-only;
+      font-weight:650;
+    }
+
+    [contenteditable="true"]:focus{
+      background:rgba(255,255,255,.22);
+      border-radius:8px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);
+    }
+
+    .upload-box{
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
+    }
+
+    .upload-box img{
+      position:absolute;
+      display:block;
+      max-width:none;
+      max-height:none;
+      width:auto;
+      height:auto;
+      image-rendering:auto;
+      z-index:0;
+    }
+
+    .image-panel{
+      position:absolute;
+      left:86px;
+      top:66px;
+      width:520px;
+      height:676px;
+      z-index:4;
+    }
+
+    .main-upload{
+      width:520px;
+      height:676px;
+      border-radius:34px;
+      background-color:rgba(255,255,255,.36);
+      border:3px solid var(--ink);
+      box-shadow:8px 8px 0 rgba(111,137,181,.42),0 16px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.80);
+      cursor:pointer;
+    }
+
+    .upload-hint{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:12px;
+      background:linear-gradient(135deg,rgba(255,255,255,.58),rgba(255,255,255,.22));
+      color:var(--sub);
+      font-size:16px;
+      font-weight:800;
+      line-height:1.4;
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .filled .upload-hint{display:none;}
+
+    .detect-box{
+      position:absolute;
+      left:64px;
+      top:82px;
+      width:392px;
+      height:438px;
+      border:2px solid var(--detect);
+      pointer-events:none;
+      box-shadow:0 0 0 1px rgba(255,255,255,.18) inset;
+      z-index:3;
+    }
+
+    .detect-corner{
+      position:absolute;
+      width:18px;
+      height:18px;
+      border:2px solid var(--detect);
+    }
+
+    .tl{left:-2px;top:-2px;border-right:0;border-bottom:0;}
+    .tr{right:-2px;top:-2px;border-left:0;border-bottom:0;}
+    .bl{left:-2px;bottom:-2px;border-right:0;border-top:0;}
+    .br{right:-2px;bottom:-2px;border-left:0;border-top:0;}
+
+    .detect-label{
+      position:absolute;
+      right:-2px;
+      top:-36px;
+      padding:7px 13px;
+      border-radius:9px 9px 0 9px;
+      background:var(--detect);
+      color:#173b22;
+      font-size:15px;
+      font-weight:700;
+      pointer-events:auto;
+    }
+
+    .detect-meta{
+      position:absolute;
+      left:0;right:0;bottom:-34px;
+      display:flex;
+      justify-content:space-between;
+      color:var(--detect);
+      font-size:14px;
+      font-weight:700;
+      text-shadow:0 1px 4px rgba(0,0,0,.25);
+      pointer-events:auto;
+    }
+
+    .record-panel{
+      position:absolute;
+      right:86px;
+      top:66px;
+      width:688px;
+      height:676px;
+      z-index:5;
+      border-radius:34px;
+      background:var(--panel);
+      border:3px solid var(--ink);
+      box-shadow:8px 8px 0 rgba(111,137,181,.38),0 14px 34px rgba(0,0,0,.10);
+      overflow:hidden;
+    }
+
+    .record-head{
+      height:58px;
+      padding:0 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:var(--panel2);
+      border-bottom:2px solid rgba(30,39,50,.15);
+    }
+
+    .record-head-title{
+      color:var(--ink);
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:-.02em;
+    }
+
+    .record-head-code{
+      color:var(--sub);
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.08em;
+    }
+
+    .team-name{
+      display:inline-block;
+      min-width:42px;
+    }
+
+    .record-body{
+      height:calc(100% - 58px);
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+    }
+
+    .name-card,.info-card,.wide-card,.footer-card,.status-card{
+      background:var(--panel2);
+      border:1px solid rgba(255,255,255,.56);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.55);
+    }
+
+    .name-card{
+      min-height:94px;
+      border-radius:22px;
+      padding:14px 18px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:6px;
+      flex-shrink:0;
+    }
+
+    .tiny-label{
+      color:var(--sub);
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .name-input{
+      color:var(--ink);
+      font-size:40px;
+      font-weight:700;
+      line-height:1.05;
+      letter-spacing:-.055em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .status-card{
+      min-height:70px;
+      border-radius:18px;
+      padding:12px 14px;
+      flex-shrink:0;
+    }
+
+    .status-title{
+      color:var(--ink);
+      font-size:13px;
+      font-weight:800;
+      line-height:1;
+      margin-bottom:10px;
+    }
+
+    .choice-group{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .choice-chip{
+      border:1px solid rgba(255,255,255,.58);
+      border-radius:999px;
+      background:rgba(255,255,255,.35);
+      color:var(--sub);
+      font-size:13px;
+      font-weight:800;
+      padding:8px 13px;
+      line-height:1;
+      cursor:pointer;
+    }
+
+    .choice-chip.active{
+      background:var(--active);
+      color:var(--active-text);
+      border-color:transparent;
+    }
+
+    .info-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      flex-shrink:0;
+    }
+
+    .info-card{
+      min-height:78px;
+      border-radius:18px;
+      padding:12px 14px;
+      overflow:hidden;
+    }
+
+    .field-label{
+      color:var(--ink);
+      font-size:13px;
+      font-weight:800;
+      line-height:1;
+      margin-bottom:10px;
+    }
+
+    .field-input{
+      color:var(--sub);
+      font-size:17px;
+      font-weight:650;
+      line-height:1.3;
+      white-space:pre-wrap;
+    }
+
+    .awakener-kind-wrap{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      flex-wrap:wrap;
+    }
+
+    .small-choice-row{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      flex-wrap:wrap;
+    }
+
+    .mini-choice{
+      border:1px solid rgba(255,255,255,.58);
+      border-radius:999px;
+      background:rgba(255,255,255,.35);
+      color:var(--sub);
+      font-size:12px;
+      font-weight:800;
+      padding:7px 11px;
+      cursor:pointer;
+      line-height:1;
+    }
+
+    .mini-choice.active{
+      background:var(--active);
+      color:var(--active-text);
+      border-color:transparent;
+    }
+
+    .grade-line{
+      display:flex;
+      align-items:center;
+      gap:3px;
+      color:var(--sub);
+      font-size:16px;
+      font-weight:650;
+      line-height:1.2;
+    }
+
+    .grade-input{
+      display:inline-block;
+      min-width:38px;
+      min-height:22px;
+      padding:1px 6px;
+      color:var(--sub);
+      font-size:17px;
+      font-weight:650;
+      line-height:1.2;
+      border:0;
+      background:rgba(255,255,255,.32);
+      border-radius:8px;
+      text-align:center;
+    }
+
+    .wide-card{
+      min-height:82px;
+      border-radius:18px;
+      padding:14px 16px;
+      overflow:hidden;
+      flex-shrink:0;
+    }
+
+    .ability-card{min-height:98px;}
+
+    .ability-input{
+      color:var(--sub);
+      font-size:16px;
+      font-weight:650;
+      line-height:1.4;
+      white-space:pre-wrap;
+    }
+
+    .project-footer{
+      margin-top:0;
+      display:block;
+      flex-shrink:0;
+    }
+
+    .footer-card{
+      min-height:62px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(255,255,255,.45),var(--panel2));
+      padding:12px 14px;
+      overflow:hidden;
+    }
+
+    .footer-label{
+      color:var(--ink);
+      font-size:12px;
+      font-weight:800;
+      margin-bottom:8px;
+      line-height:1;
+    }
+
+    .footer-text{
+      color:var(--sub);
+      font-size:16px;
+      font-weight:650;
+      line-height:1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .hidden-file{display:none;}
+
+    .export-root{
+      position:fixed;
+      left:-20000px;
+      top:0;
+      width:1440px;
+      height:810px;
+      overflow:hidden;
+      background:transparent;
+      z-index:-1;
+      pointer-events:none;
+    }
+
+    .export-root .board{
+      position:relative !important;
+      left:0 !important;
+      top:0 !important;
+      transform:none !important;
+      width:1440px !important;
+      height:810px !important;
+    }
+
+    @media(max-width:900px){
+      .stage-scroll{
+        height:calc(100vh - 190px);
+        padding:26px 24px 44px;
+      }
+
+      .toolbar{
+        bottom:10px;
+        width:calc(100% - 20px);
+        padding:10px;
+        gap:8px;
+      }
+
+      .zoom-range{width:210px;}
+
+      .tool-btn,.theme-btn{
+        font-size:12px;
+        padding:10px 13px;
+      }
+
+      .toolbar-note{font-size:11px;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage-scroll" id="stageScroll">
+    <div class="stage-inner">
+      <div class="board-shell" id="boardShell">
+        <section class="board" id="captureArea">
+          <div class="image-panel">
+            <div class="main-upload upload-box">
+              <img alt="">
+              <div class="upload-hint">기록 대상 이미지<br>클릭해서 업로드</div>
+              <input class="hidden-file" type="file" accept="image/*">
+
+              <div class="detect-box">
+                <span class="detect-corner tl"></span>
+                <span class="detect-corner tr"></span>
+                <span class="detect-corner bl"></span>
+                <span class="detect-corner br"></span>
+
+                <div class="detect-label editable" contenteditable="true" spellcheck="false">TARGET</div>
+                <div class="detect-meta">
+                  <div class="editable" contenteditable="true" spellcheck="false">98.4%</div>
+                  <div class="editable" contenteditable="true" spellcheck="false">TRACKING</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="record-panel">
+            <div class="record-head">
+              <div class="record-head-title editable" contenteditable="true" spellcheck="false">SGIA 기밀 기록물</div>
+              <div class="record-head-code">CLASSIFIED / TEAM <span class="team-name editable" contenteditable="true" spellcheck="false">BEACON</span></div>
+            </div>
+
+            <div class="record-body">
+              <div class="name-card">
+                <div class="tiny-label editable" contenteditable="true" spellcheck="false">NAME</div>
+                <div class="name-input editable" contenteditable="true" spellcheck="false">이름 입력</div>
+              </div>
+
+              <div class="status-card">
+                <div class="status-title">기록 대상 분류</div>
+                <div class="choice-group" id="subjectTypeGroup">
+                  <button class="choice-chip active" data-subject="monster">괴물</button>
+                  <button class="choice-chip" data-subject="awakener">각성자</button>
+                  <button class="choice-chip" data-subject="civilian">비각성자</button>
+                </div>
+              </div>
+
+              <div class="info-grid">
+                <div class="info-card">
+                  <div class="field-label" id="riskLabel">위험 등급</div>
+                  <div class="field-input editable" id="riskInput" contenteditable="true" spellcheck="false">위험 등급 입력</div>
+                </div>
+
+                <div class="info-card">
+                  <div class="field-label" id="kindLabel">개체 종류</div>
+
+                  <div id="monsterKindInput" class="field-input editable" contenteditable="true" spellcheck="false">개체 종류 입력</div>
+
+                  <div id="awakenerKindInput" class="awakener-kind-wrap" style="display:none;">
+                    <div class="small-choice-row" id="awakenerTypeGroup">
+                      <button class="mini-choice active" data-awakener="sentinel">센티넬</button>
+                      <button class="mini-choice" data-awakener="guide">가이드</button>
+                    </div>
+                    <div class="grade-line">
+                      <span class="grade-input editable" contenteditable="true" spellcheck="false"></span>
+                      <span>급</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="wide-card">
+                <div class="field-label" id="traitLabel">개체 특성</div>
+                <div class="field-input editable" id="traitInput" contenteditable="true" spellcheck="false">개체의 외형, 습성, 관찰된 특이점을 입력하세요.</div>
+              </div>
+
+              <div class="wide-card ability-card">
+                <div class="field-label" id="abilityLabel">주요 능력</div>
+                <div class="ability-input editable" id="abilityInput" contenteditable="true" spellcheck="false">주요 능력, 발현 조건, 위험 요소를 입력하세요.</div>
+              </div>
+
+              <div class="project-footer">
+                <div class="footer-card">
+                  <div class="footer-label" id="footerLabel">Team <span class="team-name editable" contenteditable="true" spellcheck="false">Beacon</span> 담당 요원</div>
+                  <div class="footer-text editable" contenteditable="true" spellcheck="false">담당 요원 입력</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-top">
+      <div class="toolbar-left">
+        <button class="tool-btn primary" id="saveBtn">PNG 저장</button>
+      </div>
+      <div class="toolbar-note">텍스트는 터치해서 수정 · 이미지는 터치해서 등록 · 기록 대상 분류에 따라 항목명이 바뀜</div>
+    </div>
+
+    <div class="zoom-bar">
+      <span class="zoom-label">화면 확대</span>
+      <input class="zoom-range" id="zoomRange" type="range" min="45" max="150" value="64">
+      <span class="zoom-value" id="zoomValue">64%</span>
+    </div>
+
+    <div class="theme-bar">
+      <span class="theme-title">테마</span>
+      <button class="theme-btn active" data-theme="beacon">비콘</button>
+      <button class="theme-btn" data-theme="pink">핑크</button>
+      <button class="theme-btn" data-theme="orange-red">빨강-주황</button>
+      <button class="theme-btn" data-theme="blue-neon">파랑-주황</button>
+      <button class="theme-btn" data-theme="black-red">검정-빨강</button>
+      <button class="theme-btn" data-theme="white-red">흰-빨강</button>
+      <button class="theme-btn" data-theme="sky-yellow">노랑-하늘</button>
+    </div>
+  </div>
+
+  <script>
+    const CAPTURE_WIDTH = 1440;
+    const CAPTURE_HEIGHT = 810;
+
+    const root = document.documentElement;
+    const saveBtn = document.getElementById("saveBtn");
+    const captureArea = document.getElementById("captureArea");
+    const boardShell = document.getElementById("boardShell");
+    const zoomRange = document.getElementById("zoomRange");
+    const zoomValue = document.getElementById("zoomValue");
+    const stageScroll = document.getElementById("stageScroll");
+
+    const riskLabel = document.getElementById("riskLabel");
+    const riskInput = document.getElementById("riskInput");
+    const kindLabel = document.getElementById("kindLabel");
+    const traitLabel = document.getElementById("traitLabel");
+    const traitInput = document.getElementById("traitInput");
+    const abilityLabel = document.getElementById("abilityLabel");
+    const abilityInput = document.getElementById("abilityInput");
+    const monsterKindInput = document.getElementById("monsterKindInput");
+    const awakenerKindInput = document.getElementById("awakenerKindInput");
+    const footerLabel = document.getElementById("footerLabel");
+
+    function currentTeamName(){
+      const first = document.querySelector(".team-name");
+      return first ? first.textContent.trim() || "Beacon" : "Beacon";
+    }
+
+    function setFooterLabel(type){
+      const team = currentTeamName();
+
+      if(type === "monster"){
+        footerLabel.innerHTML = 'Team <span class="team-name editable" contenteditable="true" spellcheck="false">' + team + '</span> 담당 요원';
+      }else{
+        footerLabel.innerHTML = '연관 Team <span class="team-name editable" contenteditable="true" spellcheck="false">' + team + '</span> 요원';
+      }
+
+      bindEditableBasics(footerLabel.querySelector(".team-name"));
+    }
+
+    function bindEditableBasics(el){
+      if(!el) return;
+      el.setAttribute("spellcheck","false");
+      el.addEventListener("keydown",(e)=>{
+        if(e.key === "Enter" && !el.classList.contains("ability-input") && !el.classList.contains("field-input")){
+          e.preventDefault();
+          el.blur();
+        }
+      });
+    }
+
+    function setViewScale(scale){
+      const beforeWidth = boardShell.offsetWidth;
+      const beforeScrollLeft = stageScroll.scrollLeft;
+      const safeScale = Math.max(0.45, Math.min(1.5, scale));
+
+      boardShell.style.setProperty("--view-scale", safeScale);
+      zoomValue.textContent = Math.round(safeScale * 100) + "%";
+
+      requestAnimationFrame(()=>{
+        const afterWidth = boardShell.offsetWidth;
+        const delta = (afterWidth - beforeWidth) / 2;
+        stageScroll.scrollLeft = Math.max(0, beforeScrollLeft + delta);
+      });
+    }
+
+    setViewScale(Number(zoomRange.value) / 100);
+
+    zoomRange.addEventListener("input",()=>{
+      setViewScale(Number(zoomRange.value) / 100);
+    });
+
+    document.querySelectorAll("[contenteditable='true']").forEach(bindEditableBasics);
+
+    function setSubjectType(type){
+      document.querySelectorAll("#subjectTypeGroup .choice-chip").forEach((btn)=>{
+        btn.classList.toggle("active", btn.dataset.subject === type);
+      });
+
+      if(type === "awakener"){
+        riskLabel.textContent = "소속";
+        if(riskInput.textContent === "위험 등급 입력") riskInput.textContent = "소속 입력";
+
+        kindLabel.textContent = "등급";
+        traitLabel.textContent = "업무";
+        if(traitInput.textContent.includes("개체의 외형") || traitInput.textContent === "특징 입력") traitInput.textContent = "업무 입력";
+
+        abilityLabel.textContent = "주요 능력";
+        if(abilityInput.textContent === "기타 특징을 입력하세요.") abilityInput.textContent = "주요 능력, 발현 조건, 위험 요소를 입력하세요.";
+
+        monsterKindInput.style.display = "none";
+        awakenerKindInput.style.display = "flex";
+        setFooterLabel("awakener");
+      }
+
+      if(type === "civilian"){
+        riskLabel.textContent = "소속";
+        if(riskInput.textContent === "위험 등급 입력") riskInput.textContent = "소속 입력";
+
+        kindLabel.textContent = "직업";
+        traitLabel.textContent = "특징";
+        if(traitInput.textContent.includes("개체의 외형") || traitInput.textContent === "업무 입력") traitInput.textContent = "특징 입력";
+
+        abilityLabel.textContent = "기타 특징";
+        if(abilityInput.textContent === "주요 능력, 발현 조건, 위험 요소를 입력하세요.") abilityInput.textContent = "기타 특징을 입력하세요.";
+
+        monsterKindInput.style.display = "block";
+        awakenerKindInput.style.display = "none";
+        setFooterLabel("civilian");
+      }
+
+      if(type === "monster"){
+        riskLabel.textContent = "위험 등급";
+        if(riskInput.textContent === "소속 입력") riskInput.textContent = "위험 등급 입력";
+
+        kindLabel.textContent = "개체 종류";
+        traitLabel.textContent = "개체 특성";
+        if(traitInput.textContent === "업무 입력" || traitInput.textContent === "특징 입력") traitInput.textContent = "개체의 외형, 습성, 관찰된 특이점을 입력하세요.";
+
+        abilityLabel.textContent = "주요 능력";
+        if(abilityInput.textContent === "기타 특징을 입력하세요.") abilityInput.textContent = "주요 능력, 발현 조건, 위험 요소를 입력하세요.";
+
+        monsterKindInput.style.display = "block";
+        awakenerKindInput.style.display = "none";
+        setFooterLabel("monster");
+      }
+    }
+
+    document.querySelectorAll("#subjectTypeGroup .choice-chip").forEach((btn)=>{
+      btn.addEventListener("click",()=>{
+        setSubjectType(btn.dataset.subject);
+      });
+    });
+
+    document.querySelectorAll("#awakenerTypeGroup .mini-choice").forEach((btn)=>{
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll("#awakenerTypeGroup .mini-choice").forEach((b)=>b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    function fitImageToFrame(box,img){
+      const boxW = box.clientWidth;
+      const boxH = box.clientHeight;
+      const imgW = img.naturalWidth;
+      const imgH = img.naturalHeight;
+
+      if(!boxW || !boxH || !imgW || !imgH) return;
+
+      const boxRatio = boxW / boxH;
+      const imgRatio = imgW / imgH;
+
+      let drawW;
+      let drawH;
+
+      if(imgRatio > boxRatio){
+        drawH = boxH;
+        drawW = boxH * imgRatio;
+      }else{
+        drawW = boxW;
+        drawH = boxW / imgRatio;
+      }
+
+      img.style.width = drawW + "px";
+      img.style.height = drawH + "px";
+      img.style.left = ((boxW - drawW) / 2) + "px";
+      img.style.top = ((boxH - drawH) / 2) + "px";
+    }
+
+    document.querySelectorAll(".upload-box").forEach((box)=>{
+      const input = box.querySelector("input[type='file']");
+      const img = box.querySelector("img");
+
+      box.addEventListener("click",(e)=>{
+        if(e.target.closest("[contenteditable='true']")) return;
+        input.click();
+      });
+
+      input.addEventListener("change",()=>{
+        const file = input.files && input.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = (event)=>{
+          img.onload = ()=>{
+            fitImageToFrame(box,img);
+            box.classList.add("filled");
+          };
+          img.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
+      });
+    });
+
+    window.addEventListener("resize",()=>{
+      document.querySelectorAll(".upload-box").forEach((box)=>{
+        const img = box.querySelector("img");
+        if(img && img.src) fitImageToFrame(box,img);
+      });
+    });
+
+    document.querySelectorAll(".theme-btn").forEach((btn)=>{
+      btn.addEventListener("click",()=>{
+        root.setAttribute("data-theme", btn.dataset.theme);
+        document.querySelectorAll(".theme-btn").forEach((b)=>b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    async function waitForImages(target){
+      const images = Array.from(target.querySelectorAll("img"));
+
+      await Promise.all(images.map((img)=>{
+        if(!img.src) return Promise.resolve();
+        if(img.complete && img.naturalWidth > 0) return Promise.resolve();
+
+        return new Promise((resolve)=>{
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+    }
+
+    function refitAllImages(target){
+      target.querySelectorAll(".upload-box").forEach((box)=>{
+        const img = box.querySelector("img");
+        if(img && img.src) fitImageToFrame(box,img);
+      });
+    }
+
+    function makeExportClone(){
+      const exportRoot = document.createElement("div");
+      exportRoot.className = "export-root";
+
+      const clone = captureArea.cloneNode(true);
+      clone.id = "captureExport";
+      clone.classList.add("exporting");
+
+      exportRoot.appendChild(clone);
+      document.body.appendChild(exportRoot);
+
+      return {exportRoot, clone};
+    }
+
+    saveBtn.addEventListener("click", async ()=>{
+      document.activeElement.blur();
+      window.getSelection()?.removeAllRanges();
+
+      saveBtn.textContent = "저장중...";
+
+      refitAllImages(captureArea);
+      await waitForImages(captureArea);
+
+      const {exportRoot, clone} = makeExportClone();
+
+      await waitForImages(clone);
+      refitAllImages(clone);
+
+      await new Promise((resolve)=>setTimeout(resolve,220));
+
+      try{
+        const canvas = await html2canvas(clone,{
+          backgroundColor:null,
+          scale:3,
+          useCORS:true,
+          allowTaint:true,
+          logging:false,
+          width:CAPTURE_WIDTH,
+          height:CAPTURE_HEIGHT,
+          windowWidth:CAPTURE_WIDTH,
+          windowHeight:CAPTURE_HEIGHT,
+          x:0,
+          y:0,
+          scrollX:0,
+          scrollY:0,
+          imageTimeout:0,
+          removeContainer:true
+        });
+
+        const link = document.createElement("a");
+        link.download = "sgia_beacon_record_1440x810.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }catch(error){
+        alert("저장에 실패했어요. 이미지를 다시 업로드한 뒤 시도해보세요.");
+      }finally{
+        exportRoot.remove();
+        saveBtn.textContent = "PNG 저장";
+      }
+    });
+  </script>
+</body>
+</html>
