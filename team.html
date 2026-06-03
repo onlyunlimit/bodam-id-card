@@ -138,6 +138,37 @@
       user-select:none!important;
     }
 
+    /* TARGET 라벨은 저장할 때도 박스 유지 */
+.export-root .detect-label.export-plain,
+body.exporting-now .detect-label{
+  position:absolute!important;
+  right:-2px!important;
+  top:-36px!important;
+  display:block!important;
+  background:var(--detect)!important;
+  background-color:var(--detect)!important;
+  color:#173b22!important;
+  padding:7px 13px!important;
+  border-radius:9px 9px 0 9px!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  line-height:normal!important;
+}
+
+/* 하단 98.4% / TRACKING은 글자만 유지 */
+.export-root .detect-meta .export-plain,
+body.exporting-now .detect-meta .editable{
+  background:transparent!important;
+  background-color:transparent!important;
+  color:var(--detect)!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+
     .upload-box{position:relative;overflow:hidden;isolation:isolate;}
     .upload-box img{position:absolute;display:block;max-width:none;max-height:none;width:auto;height:auto;image-rendering:auto;z-index:0;}
     .image-panel{position:absolute;left:86px;top:66px;width:520px;height:676px;z-index:4;}
@@ -598,34 +629,59 @@ body.exporting-now .status-card *{
     }
 
     function cleanEditables(rootEl, doc=document){
-      rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
-        const tagName=el.tagName.toLowerCase();
-        const safe=doc.createElement(tagName);
-        const classes=Array.from(el.classList).filter((cls)=>cls!=="editable");
-        safe.className=classes.join(" ");
-        safe.classList.add("export-plain");
-        safe.textContent=el.textContent;
+  rootEl.querySelectorAll("[contenteditable], .editable").forEach((el)=>{
+    const tagName=el.tagName.toLowerCase();
+    const safe=doc.createElement(tagName);
+    const classes=Array.from(el.classList).filter((cls)=>cls!=="editable");
 
-        if(el.id) safe.id=el.id;
-        if(el.getAttribute("style")) safe.setAttribute("style",el.getAttribute("style"));
+    safe.className=classes.join(" ");
+    safe.classList.add("export-plain");
+    safe.textContent=el.textContent;
 
-        safe.removeAttribute("contenteditable");
-        safe.removeAttribute("spellcheck");
+    if(el.id) safe.id=el.id;
 
-        safe.style.setProperty("background","transparent","important");
-        safe.style.setProperty("background-color","transparent","important");
-        safe.style.setProperty("box-shadow","none","important");
-        safe.style.setProperty("outline","0","important");
-        safe.style.setProperty("border","0","important");
-        safe.style.setProperty("caret-color","transparent","important");
-        safe.style.setProperty("-webkit-user-modify","inherit","important");
-        safe.style.setProperty("-webkit-appearance","none","important");
-        safe.style.setProperty("appearance","none","important");
-        safe.style.setProperty("user-select","none","important");
+    safe.removeAttribute("contenteditable");
+    safe.removeAttribute("spellcheck");
 
-        el.replaceWith(safe);
-      });
+    const isDetectLabel=el.classList.contains("detect-label");
+    const isDetectMeta=!!el.closest(".detect-meta");
+
+    safe.style.setProperty("box-shadow","none","important");
+    safe.style.setProperty("outline","0","important");
+    safe.style.setProperty("caret-color","transparent","important");
+    safe.style.setProperty("-webkit-user-modify","inherit","important");
+    safe.style.setProperty("-webkit-appearance","none","important");
+    safe.style.setProperty("appearance","none","important");
+    safe.style.setProperty("user-select","none","important");
+
+    if(isDetectLabel){
+      safe.style.setProperty("position","absolute","important");
+      safe.style.setProperty("right","-2px","important");
+      safe.style.setProperty("top","-36px","important");
+      safe.style.setProperty("display","block","important");
+      safe.style.setProperty("background","var(--detect)","important");
+      safe.style.setProperty("background-color","var(--detect)","important");
+      safe.style.setProperty("color","#173b22","important");
+      safe.style.setProperty("padding","7px 13px","important");
+      safe.style.setProperty("border-radius","9px 9px 0 9px","important");
+      safe.style.setProperty("border","0","important");
+      safe.style.setProperty("font-size","15px","important");
+      safe.style.setProperty("font-weight","700","important");
+      safe.style.setProperty("line-height","normal","important");
+    }else if(isDetectMeta){
+      safe.style.setProperty("background","transparent","important");
+      safe.style.setProperty("background-color","transparent","important");
+      safe.style.setProperty("color","var(--detect)","important");
+      safe.style.setProperty("border","0","important");
+    }else{
+      safe.style.setProperty("background","transparent","important");
+      safe.style.setProperty("background-color","transparent","important");
+      safe.style.setProperty("border","0","important");
     }
+
+    el.replaceWith(safe);
+  });
+}
 
     function makeExportClone(){
       const exportRoot=document.createElement("div");
