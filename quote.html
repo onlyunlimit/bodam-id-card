@@ -203,9 +203,7 @@
 
     body{overflow:hidden;}
 
-    button,select,input,textarea{
-      font-family:var(--ui-font)!important;
-    }
+    button,select,input,textarea{font-family:var(--ui-font)!important;}
 
     .app{
       width:100vw;
@@ -649,7 +647,6 @@
       animation:zScan 4s linear infinite;
     }
 
-    /* 장식 OFF 시, 배경의 원형/추가 장식도 함께 제거 */
     html[data-deco="off"][data-theme="cherry"] .quote-stage{
       background:linear-gradient(160deg,var(--stage-bg1),var(--stage-bg2) 58%,var(--stage-bg3));
       background-size:auto;
@@ -680,7 +677,6 @@
       height:var(--capture-h)!important;
     }
 
-    /* GIF 전용 안정화 */
     .quote-stage.gif-exporting{
       box-shadow:none!important;
       image-rendering:auto!important;
@@ -688,8 +684,8 @@
 
     .quote-stage.gif-exporting,
     .quote-stage.gif-exporting *{
-      animation-play-state:paused!important;
       transition:none!important;
+      animation-play-state:paused!important;
     }
 
     .quote-stage.gif-exporting .noise-overlay,
@@ -720,9 +716,7 @@
     }
 
     html[data-theme="zombie"] .noise-overlay,
-    html[data-theme="zombie"] .static-overlay{
-      display:block;
-    }
+    html[data-theme="zombie"] .static-overlay{display:block;}
 
     .noise-overlay{
       opacity:.18;
@@ -957,9 +951,7 @@
     html[data-theme="terminal"] .bubble-tail,
     html[data-theme="mono"] .bubble-tail,
     html[data-theme="yellowascii"] .bubble-tail,
-    html[data-theme="lilacdesk"] .bubble-tail{
-      display:none!important;
-    }
+    html[data-theme="lilacdesk"] .bubble-tail{display:none!important;}
 
     html[data-theme="blackwhite"] .bubble{
       background:#ffffff!important;
@@ -1033,9 +1025,7 @@
     }
 
     .quote-card-head.is-empty,
-    .quote-card-date.is-empty{
-      display:none!important;
-    }
+    .quote-card-date.is-empty{display:none!important;}
 
     html[data-theme="pixel"] .quote-card,
     html[data-theme="terminal"] .quote-card,
@@ -1045,9 +1035,7 @@
     html[data-theme="yellowascii"] .quote-card,
     html[data-theme="lilacdesk"] .quote-card,
     html[data-theme="blackwhite"] .quote-card,
-    html[data-theme="zombie"] .quote-card{
-      border-radius:0;
-    }
+    html[data-theme="zombie"] .quote-card{border-radius:0;}
 
     html[data-theme="blackwhite"] .quote-card{
       color:#111111!important;
@@ -1119,9 +1107,7 @@
     }
 
     html[data-theme="blackwhite"] .quote-card-head,
-    html[data-theme="blackwhite"] .quote-card-date{
-      color:#555555!important;
-    }
+    html[data-theme="blackwhite"] .quote-card-date{color:#555555!important;}
 
     html[data-theme="blackwhite"] .quote-text{
       color:#111111!important;
@@ -1188,9 +1174,7 @@
     }
 
     .export-root *,
-    html.saving-clean *{
-      caret-color:transparent!important;
-    }
+    html.saving-clean *{caret-color:transparent!important;}
 
     .export-root [contenteditable],
     html.saving-clean [contenteditable]{
@@ -1218,9 +1202,7 @@
 
     .editable{outline:none;}
 
-    [contenteditable="true"]{
-      -webkit-user-modify:read-write-plaintext-only;
-    }
+    [contenteditable="true"]{-webkit-user-modify:read-write-plaintext-only;}
 
     [contenteditable="true"]:focus{
       background:transparent!important;
@@ -1238,9 +1220,7 @@
     html[data-theme="yellowascii"] [contenteditable="true"]:focus,
     html[data-theme="lilacdesk"] [contenteditable="true"]:focus,
     html[data-theme="blackwhite"] [contenteditable="true"]:focus,
-    html[data-theme="zombie"] [contenteditable="true"]:focus{
-      border-radius:0;
-    }
+    html[data-theme="zombie"] [contenteditable="true"]:focus{border-radius:0;}
 
     html[data-theme="zombie"] [contenteditable="true"]:focus{
       outline:1px dashed rgba(91,255,154,.35);
@@ -1787,16 +1767,40 @@ R:"{{user}} 대사"
     }
 
     function hideAllAnimItems(scope=document){
-      getAnimItems(scope).forEach(el=>el.classList.remove("shown"));
+      getAnimItems(scope).forEach(el=>{
+        el.classList.remove("shown");
+      });
     }
 
     function revealAllAnimItems(scope=document){
-      getAnimItems(scope).forEach(el=>el.classList.add("shown"));
+      getAnimItems(scope).forEach(el=>{
+        el.classList.add("shown");
+      });
     }
 
     function showItemsUntil(scope=document, count=0){
       getAnimItems(scope).forEach((el, idx)=>{
         el.classList.toggle("shown", idx < count);
+      });
+    }
+
+    function forceGifItemsUntil(scope, count){
+      getAnimItems(scope).forEach((el, idx)=>{
+        const shown = idx < count;
+
+        if(shown){
+          el.classList.add("shown");
+          el.style.opacity = "1";
+          el.style.visibility = "visible";
+          el.style.transform = "translateY(0)";
+          el.style.filter = "none";
+        }else{
+          el.classList.remove("shown");
+          el.style.opacity = "0";
+          el.style.visibility = "hidden";
+          el.style.transform = "translateY(18px)";
+          el.style.filter = "none";
+        }
       });
     }
 
@@ -2065,11 +2069,13 @@ R:"{{user}} 대사"
         const clone = made.clone;
         clone.classList.add("gif-exporting");
 
-        hideAllAnimItems(clone);
-        await waitForPaint();
-
         const items = getAnimItems(clone);
         const totalItems = items.length;
+
+        if(totalItems === 0){
+          throw new Error("GIF로 만들 항목이 없습니다.");
+        }
+
         const isZombie = root.getAttribute("data-theme") === "zombie";
         const workerUrl = await getGifWorkerUrl();
         const matteColor = getCurrentPageBg();
@@ -2091,23 +2097,22 @@ R:"{{user}} 대사"
         });
 
         const framePlan = [];
-        framePlan.push({count:0, delay:220});
-        framePlan.push({count:0, delay:160});
 
         for(let i=1;i<=totalItems;i++){
-          framePlan.push({count:i, delay:isZombie ? 120 : 170});
-          framePlan.push({count:i, delay:isZombie ? 100 : 160});
+          framePlan.push({count:i, delay:isZombie ? 130 : 180});
+          framePlan.push({count:i, delay:isZombie ? 110 : 160});
         }
 
-        for(let i=0;i<5;i++){
-          framePlan.push({count:totalItems, delay:160});
+        for(let i=0;i<6;i++){
+          framePlan.push({count:totalItems, delay:170});
         }
 
         for(let f=0; f<framePlan.length; f++){
           const step = framePlan[f];
+
           gifBtn.textContent = "프레임 캡쳐중... " + (f + 1) + "/" + framePlan.length;
 
-          showItemsUntil(clone, step.count);
+          forceGifItemsUntil(clone, step.count);
 
           if(isZombie){
             clone.style.transform = (f % 2 === 0) ? "translateX(0px)" : "translateX(.45px)";
@@ -2126,8 +2131,9 @@ R:"{{user}} 대사"
           const sourceCanvas = await captureCanvas(clone, 1, matteColor);
           const flatCanvas = flattenCanvasForGif(sourceCanvas, matteColor);
           const smallCanvas = resizeCanvas(flatCanvas, GIF_WIDTH);
+          const smallCtx = smallCanvas.getContext("2d", {willReadFrequently:true});
 
-          gif.addFrame(smallCanvas, {
+          gif.addFrame(smallCtx, {
             copy:true,
             delay:speedAdjustedDelay(step.delay)
           });
