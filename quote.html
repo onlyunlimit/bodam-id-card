@@ -535,9 +535,7 @@
       background:var(--bubble-left);
       --bubble-tail-bg:var(--bubble-left);
       border:1px solid var(--bubble-border);
-      box-shadow:
-        0 12px 30px rgba(98,84,160,.16),
-        inset 0 1px 0 rgba(255,255,255,.88);
+      box-shadow:0 12px 30px rgba(98,84,160,.16);
       color:var(--deep);
       line-height:1.36;
       word-break:keep-all;
@@ -563,6 +561,7 @@
       outline:0;
       position:relative;
       z-index:2;
+      background:transparent!important;
     }
 
     .bubble-text{
@@ -572,6 +571,7 @@
       line-height:1.36;
       position:relative;
       z-index:2;
+      background:transparent!important;
     }
 
     .bubble::after{
@@ -624,9 +624,7 @@
       padding:66px 50px 46px;
       background:var(--panel-solid);
       border:1px solid rgba(255,255,255,.8);
-      box-shadow:
-        0 18px 40px rgba(98,84,160,.13),
-        inset 0 1px 0 rgba(255,255,255,.88);
+      box-shadow:0 18px 40px rgba(98,84,160,.13);
       overflow:hidden;
       font-family:var(--font-main);
     }
@@ -652,6 +650,7 @@
       font-size:22px;
       font-weight:760;
       outline:0;
+      background:transparent!important;
     }
 
     .quote-card-date{
@@ -662,6 +661,7 @@
       font-size:20px;
       font-weight:720;
       outline:0;
+      background:transparent!important;
     }
 
     .quote-text{
@@ -676,6 +676,7 @@
       overflow-wrap:break-word;
       outline:0;
       font-family:var(--font-main);
+      background:transparent!important;
     }
 
     html[data-theme="pixel"] .quote-text,
@@ -738,6 +739,7 @@
       letter-spacing:.03em;
       outline:0;
       font-family:var(--font-main);
+      background:transparent!important;
     }
 
     html[data-theme="terminal"] .footer-credit{
@@ -765,6 +767,30 @@
       height:1350px!important;
     }
 
+    .export-root *,
+    html.saving-clean *{
+      caret-color:transparent!important;
+    }
+
+    .export-root [contenteditable],
+    html.saving-clean [contenteditable]{
+      background:transparent!important;
+      box-shadow:none!important;
+      outline:none!important;
+      -webkit-user-modify:read-only!important;
+    }
+
+    .export-root .bubble-head,
+    .export-root .bubble-text,
+    .export-root .quote-card-head,
+    .export-root .quote-card-date,
+    .export-root .quote-text,
+    .export-root .footer-credit{
+      background:transparent!important;
+      box-shadow:none!important;
+      outline:none!important;
+    }
+
     .export-root .quote-card{
       background:var(--panel-solid)!important;
       backdrop-filter:none!important;
@@ -784,14 +810,22 @@
     }
 
     [contenteditable="true"]:focus{
-      background:rgba(255,255,255,.22);
+      background:transparent!important;
+      box-shadow:none!important;
+      outline:1px dashed rgba(140,125,255,.45);
+      outline-offset:3px;
       border-radius:8px;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);
     }
 
     html[data-theme="pixel"] [contenteditable="true"]:focus,
     html[data-theme="terminal"] [contenteditable="true"]:focus{
       border-radius:0;
+    }
+
+    html.saving-clean [contenteditable="true"]:focus{
+      background:transparent!important;
+      box-shadow:none!important;
+      outline:none!important;
     }
 
     @media(max-width:980px){
@@ -1250,6 +1284,23 @@ R:"{{user}} 대사"
       }));
     }
 
+    function cleanCloneForExport(clone){
+      clone.querySelectorAll("[contenteditable]").forEach((el)=>{
+        el.removeAttribute("contenteditable");
+        el.removeAttribute("spellcheck");
+        el.classList.remove("editable");
+        el.style.background = "transparent";
+        el.style.boxShadow = "none";
+        el.style.outline = "none";
+      });
+
+      clone.querySelectorAll(".bubble-head,.bubble-text,.quote-card-head,.quote-card-date,.quote-text,.footer-credit").forEach((el)=>{
+        el.style.background = "transparent";
+        el.style.boxShadow = "none";
+        el.style.outline = "none";
+      });
+    }
+
     function makeExportClone(){
       const exportRoot = document.createElement("div");
       exportRoot.className = "export-root";
@@ -1258,6 +1309,8 @@ R:"{{user}} 대사"
       clone.id = "captureExport";
       clone.classList.add("exporting");
 
+      cleanCloneForExport(clone);
+
       exportRoot.appendChild(clone);
       document.body.appendChild(exportRoot);
 
@@ -1265,19 +1318,25 @@ R:"{{user}} 대사"
     }
 
     saveBtn.addEventListener("click",async()=>{
-      document.activeElement.blur();
+      root.classList.add("saving-clean");
+
+      if(document.activeElement && typeof document.activeElement.blur === "function"){
+        document.activeElement.blur();
+      }
+
       window.getSelection()?.removeAllRanges();
 
       saveBtn.textContent = "저장중...";
 
       await document.fonts.ready;
       await waitForImages(captureArea);
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
       const {exportRoot, clone} = makeExportClone();
 
       await document.fonts.ready;
       await waitForImages(clone);
-      await new Promise((resolve)=>setTimeout(resolve,260));
+      await new Promise((resolve)=>setTimeout(resolve,300));
 
       try{
         const canvas = await html2canvas(clone,{
@@ -1306,6 +1365,7 @@ R:"{{user}} 대사"
         alert("저장에 실패했어요. 다시 시도해주세요.");
       }finally{
         exportRoot.remove();
+        root.classList.remove("saving-clean");
         saveBtn.textContent = "PNG 저장";
       }
     });
