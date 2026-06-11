@@ -19,7 +19,6 @@
       --capture-w:1080px;
       --capture-h:1350px;
       --view-scale:.52;
-
       --bubble-scale:1;
       --bubble-weight:800;
       --narration-scale:1;
@@ -187,9 +186,9 @@
       --sub:#b4c8b7;
       --muted:#6d7d71;
 
-      --panel-solid:#08110d;
-      --bubble-left:#07100c;
-      --bubble-right:#0d0f0a;
+      --panel-solid:#07100c;
+      --bubble-left:#08110d;
+      --bubble-right:#11100c;
       --bubble-border:#3f5f4a;
 
       --accent:#9ef0b0;
@@ -702,11 +701,12 @@
       height:var(--capture-h)!important;
     }
 
+    .quote-stage.export-stable,
     .quote-stage.gif-exporting{
-      box-shadow:none!important;
       image-rendering:auto!important;
     }
 
+    .quote-stage.export-stable *,
     .quote-stage.gif-exporting *{
       transition:none!important;
       animation:none!important;
@@ -725,8 +725,7 @@
     .deco.d1{left:70px;top:72px;font-size:42px;color:var(--point-text);}
     .deco.d2{right:76px;top:118px;font-size:54px;color:var(--point-border);}
 
-    .noise-overlay,
-    .static-overlay{
+    .noise-overlay{
       display:none;
       position:absolute;
       inset:0;
@@ -816,16 +815,11 @@
     .status{font-size:28px!important;font-weight:900!important;text-align:right;letter-spacing:.08em;outline:0;}
 
     html[data-theme="zombie"] .title,
-    html[data-theme="zombie"] .status{
-      color:#f3f8f3;
-      text-shadow:none;
-    }
-
+    html[data-theme="zombie"] .status,
     html[data-theme="zombie"] .time,
     html[data-theme="zombie"] .date,
     html[data-theme="zombie"] .subdate{
-      color:#edf5ed;
-      opacity:.98;
+      color:#f3f8f3;
       text-shadow:none;
     }
 
@@ -844,18 +838,15 @@
 
     .anim-item{
       opacity:0;
-      transform:translateY(18px);
-      filter:blur(3px);
+      transform:translateY(16px);
       transition:
-        opacity .42s ease,
-        transform .42s ease,
-        filter .42s ease;
+        opacity .38s ease,
+        transform .38s ease;
     }
 
     .anim-item.shown{
       opacity:1;
       transform:translateY(0);
-      filter:blur(0);
     }
 
     .bubble-row{
@@ -886,11 +877,13 @@
       word-break:keep-all;
       overflow-wrap:break-word;
       font-family:var(--font-main);
+      background-image:none!important;
     }
 
     .bubble-row.right .bubble{
       background:var(--bubble-right);
       --bubble-tail-bg:var(--bubble-right);
+      background-image:none!important;
     }
 
     .bubble-head{
@@ -934,6 +927,7 @@
       box-shadow:none;
       border-right:2px solid var(--point-border);
       border-bottom:2px solid var(--point-border);
+      background-image:none!important;
     }
 
     .bubble-row.left .bubble-tail{left:48px;}
@@ -977,7 +971,7 @@
     }
 
     html[data-theme="zombie"] .bubble{
-      background:#08110d;
+      background:#08110d!important;
       color:#eff7ef!important;
       border-color:#486b57!important;
       border-radius:28px;
@@ -987,7 +981,7 @@
     }
 
     html[data-theme="zombie"] .bubble-row.right .bubble{
-      background:#11100c;
+      background:#11100c!important;
       border-color:#7f4f4a!important;
     }
 
@@ -1003,10 +997,14 @@
     }
 
     html[data-theme="zombie"] .bubble-tail{
-      background:inherit!important;
-      border-right-color:inherit!important;
-      border-bottom-color:inherit!important;
+      background:#08110d!important;
+      border-color:#486b57!important;
       border-radius:3px;
+    }
+
+    html[data-theme="zombie"] .bubble-row.right .bubble-tail{
+      background:#11100c!important;
+      border-color:#7f4f4a!important;
     }
 
     .quote-card{
@@ -1021,6 +1019,7 @@
       box-shadow:0 18px 40px rgba(98,84,160,.13);
       overflow:visible;
       font-family:var(--font-main);
+      background-image:none!important;
     }
 
     .quote-card.compact{
@@ -1052,7 +1051,7 @@
     }
 
     html[data-theme="zombie"] .quote-card{
-      background:#07100c;
+      background:#07100c!important;
       border-color:#466853!important;
       border-radius:30px;
       box-shadow:
@@ -1743,7 +1742,6 @@ R:"{{user}} 대사"
       getAnimItems(scope).forEach(el=>{
         el.style.opacity = "";
         el.style.transform = "";
-        el.style.filter = "";
       });
     }
 
@@ -1755,7 +1753,6 @@ R:"{{user}} 대사"
       items.forEach((el)=>{
         el.style.opacity = "";
         el.style.transform = "";
-        el.style.filter = "";
         el.style.transition = "";
         el.style.animation = "";
       });
@@ -1835,24 +1832,109 @@ R:"{{user}} 대사"
       return getComputedStyle(root).getPropertyValue("--page-bg").trim() || "#ffffff";
     }
 
-    function forceOpaquePanelsForGif(clone){
+    function getCssVar(name){
+      return getComputedStyle(root).getPropertyValue(name).trim();
+    }
+
+    function forceOpaquePanelsForSave(clone){
+      const theme = root.getAttribute("data-theme");
+
       clone.querySelectorAll(".bubble").forEach(el=>{
         const isRight = el.closest(".bubble-row.right");
-        if(root.getAttribute("data-theme")==="zombie"){
-          el.style.background = isRight ? "#11100c" : "#08110d";
+        let bg;
+
+        if(theme === "zombie"){
+          bg = isRight ? "#11100c" : "#08110d";
+        }else if(theme === "blackwhite"){
+          bg = "#f2f2f2";
         }else{
-          el.style.background = isRight ? getComputedStyle(root).getPropertyValue("--bubble-right").trim() : getComputedStyle(root).getPropertyValue("--bubble-left").trim();
+          bg = isRight ? getCssVar("--bubble-right") : getCssVar("--bubble-left");
         }
+
+        el.style.background = bg;
+        el.style.backgroundColor = bg;
+        el.style.backgroundImage = "none";
+        el.style.backdropFilter = "none";
+        el.style.webkitBackdropFilter = "none";
+      });
+
+      clone.querySelectorAll(".bubble-tail").forEach(el=>{
+        const isRight = el.closest(".bubble-row.right");
+        let bg;
+
+        if(theme === "zombie"){
+          bg = isRight ? "#11100c" : "#08110d";
+          el.style.borderColor = isRight ? "#7f4f4a" : "#486b57";
+        }else if(theme === "blackwhite"){
+          bg = "#f2f2f2";
+        }else{
+          bg = isRight ? getCssVar("--bubble-right") : getCssVar("--bubble-left");
+        }
+
+        el.style.background = bg;
+        el.style.backgroundColor = bg;
         el.style.backgroundImage = "none";
       });
 
       clone.querySelectorAll(".quote-card").forEach(el=>{
-        if(root.getAttribute("data-theme")==="zombie"){
-          el.style.background = "#07100c";
+        let bg;
+
+        if(theme === "zombie"){
+          bg = "#07100c";
+        }else if(theme === "blackwhite"){
+          bg = "#f2f2f2";
         }else{
-          el.style.background = getComputedStyle(root).getPropertyValue("--panel-solid").trim();
+          bg = getCssVar("--panel-solid");
         }
+
+        el.style.background = bg;
+        el.style.backgroundColor = bg;
         el.style.backgroundImage = "none";
+        el.style.backdropFilter = "none";
+        el.style.webkitBackdropFilter = "none";
+      });
+    }
+
+    function forceFinalState(scope){
+      getAnimItems(scope).forEach(el=>{
+        el.classList.add("shown");
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0)";
+        el.style.transition = "none";
+        el.style.animation = "none";
+      });
+    }
+
+    function setAnimProgress(scope, count, progress){
+      const items = getAnimItems(scope);
+
+      items.forEach((el, idx)=>{
+        if(idx < count - 1){
+          el.classList.add("shown");
+          el.style.opacity = "1";
+          el.style.transform = "translateY(0)";
+          el.style.transition = "none";
+          el.style.animation = "none";
+          return;
+        }
+
+        if(idx === count - 1){
+          const p = Math.max(0, Math.min(1, progress));
+          const y = 16 - (16 * p);
+
+          el.classList.add("shown");
+          el.style.opacity = String(p);
+          el.style.transform = `translateY(${y}px)`;
+          el.style.transition = "none";
+          el.style.animation = "none";
+          return;
+        }
+
+        el.classList.remove("shown");
+        el.style.opacity = "0";
+        el.style.transform = "translateY(16px)";
+        el.style.transition = "none";
+        el.style.animation = "none";
       });
     }
 
@@ -1928,43 +2010,6 @@ R:"{{user}} 대사"
       return Math.max(30, Math.round(ms * 100 / speed));
     }
 
-    function setAnimProgress(scope, count, progress){
-      const items = getAnimItems(scope);
-      items.forEach((el, idx)=>{
-        if(idx < count - 1){
-          el.classList.add("shown");
-          el.style.opacity = "1";
-          el.style.transform = "translateY(0)";
-          el.style.filter = "blur(0)";
-          return;
-        }
-
-        if(idx === count - 1){
-          const p = Math.max(0, Math.min(1, progress));
-          const y = 18 - (18 * p);
-          const blur = 3 - (3 * p);
-          el.classList.add("shown");
-          el.style.opacity = String(p);
-          el.style.transform = `translateY(${y}px)`;
-          el.style.filter = `blur(${blur}px)`;
-          return;
-        }
-
-        el.classList.remove("shown");
-        el.style.opacity = "0";
-        el.style.transform = "translateY(18px)";
-        el.style.filter = "blur(3px)";
-      });
-    }
-
-    function clearInlineAnim(scope){
-      getAnimItems(scope).forEach((el)=>{
-        el.style.opacity = "";
-        el.style.transform = "";
-        el.style.filter = "";
-      });
-    }
-
     setViewScale(Number(zoomRange.value) / 100);
     setBubbleSize(Number(bubbleSizeRange.value) / 100);
     setNarrationSize(Number(narrationSizeRange.value) / 100);
@@ -2031,8 +2076,11 @@ R:"{{user}} 대사"
       await waitForPaint();
 
       const {exportRoot, clone} = makeExportClone();
-      revealAllAnimItems(clone);
-      clearInlineAnim(clone);
+      clone.classList.add("export-stable");
+
+      forceOpaquePanelsForSave(clone);
+      forceFinalState(clone);
+
       await waitForPaint();
 
       try{
@@ -2080,8 +2128,7 @@ R:"{{user}} 대사"
         const clone = made.clone;
 
         clone.classList.add("gif-exporting");
-        forceOpaquePanelsForGif(clone);
-        clearInlineAnim(clone);
+        forceOpaquePanelsForSave(clone);
         setAnimProgress(clone, 0, 0);
 
         const items = getAnimItems(clone);
@@ -2112,10 +2159,10 @@ R:"{{user}} 대사"
         framePlan.push({count:0, progress:0, delay:180});
 
         for(let i=1;i<=totalItems;i++){
-          framePlan.push({count:i, progress:0.18, delay:55});
-          framePlan.push({count:i, progress:0.42, delay:55});
-          framePlan.push({count:i, progress:0.68, delay:55});
-          framePlan.push({count:i, progress:1.00, delay:150});
+          framePlan.push({count:i, progress:0.20, delay:55});
+          framePlan.push({count:i, progress:0.48, delay:55});
+          framePlan.push({count:i, progress:0.74, delay:55});
+          framePlan.push({count:i, progress:1.00, delay:160});
         }
 
         for(let i=0;i<6;i++){
@@ -2130,8 +2177,8 @@ R:"{{user}} 대사"
 
           if(isZombie){
             clone.querySelectorAll(".noise-overlay").forEach(el=>{
-              const n = (f % 3);
-              el.style.opacity = n === 0 ? ".15" : n === 1 ? ".11" : ".18";
+              const n = f % 3;
+              el.style.opacity = n === 0 ? ".15" : n === 1 ? ".10" : ".18";
             });
           }
 
