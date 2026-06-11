@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dream" data-font="sans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Novel Excerpt Maker</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gaegu:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+    :root{
+      --capture-w:1080px;
+      --capture-h:1350px;
+      --view-scale:.52;
+
+      --bubble-scale:1;
+      --bubble-weight:760;
+      --narration-scale:1;
+      --narration-weight:460;
+
+      --page-bg:#eeeafe;
+      --stage-bg1:#d7ccff;
+      --stage-bg2:#f5f1ff;
+      --stage-bg3:#fff7fb;
+
+      --ink:#50466e;
+      --deep:#3f375f;
+      --sub:#8c83aa;
+      --muted:#bbb3cf;
+
+      --panel:rgba(255,255,255,.68);
+      --bubble-left:#ffffff;
+      --bubble-right:#fff4fb;
+      --bubble-border:rgba(255,255,255,.88);
+
+      --accent:#ff77bc;
+      --accent2:#8c7dff;
+      --accent3:#ffe39c;
+      --grid:rgba(255,255,255,.16);
+
+      --shadow:0 22px 50px rgba(93,74,150,.22);
+      --radius:46px;
+      --card-radius:34px;
+      --font-main:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+      --pixelated:auto;
+    }
+
+    html[data-theme="cherry"]{
+      --page-bg:#e4f5ff;
+      --stage-bg1:#c8e9ff;
+      --stage-bg2:#edf7ff;
+      --stage-bg3:#fff3fb;
+      --ink:#315a93;
+      --deep:#254875;
+      --sub:#6687b5;
+      --muted:#a6bddb;
+      --panel:rgba(255,255,255,.72);
+      --bubble-left:#fff;
+      --bubble-right:#fff2f8;
+      --bubble-border:rgba(85,132,180,.35);
+      --accent:#ff7fb3;
+      --accent2:#4d8bc4;
+      --accent3:#ffd1e5;
+      --grid:rgba(71,126,180,.13);
+      --shadow:0 22px 50px rgba(80,130,180,.18);
+      --radius:38px;
+      --card-radius:28px;
+      --pixelated:auto;
+    }
+
+    html[data-theme="pixel"]{
+      --page-bg:#dfe6ff;
+      --stage-bg1:#ccd7ff;
+      --stage-bg2:#eaf0ff;
+      --stage-bg3:#f9fbff;
+      --ink:#153a9b;
+      --deep:#0d2f91;
+      --sub:#4e6fc0;
+      --muted:#8ca2dd;
+      --panel:rgba(242,247,255,.86);
+      --bubble-left:#ffffff;
+      --bubble-right:#eef4ff;
+      --bubble-border:#1742b7;
+      --accent:#5586ff;
+      --accent2:#243ccf;
+      --accent3:#c9dcff;
+      --grid:rgba(29,64,170,.18);
+      --shadow:0 18px 0 rgba(36,60,170,.28);
+      --radius:0px;
+      --card-radius:0px;
+      --pixelated:pixelated;
+    }
+
+    html[data-theme="cream"]{
+      --page-bg:#fff7da;
+      --stage-bg1:#fff2c2;
+      --stage-bg2:#fff9df;
+      --stage-bg3:#e8fbff;
+      --ink:#7867aa;
+      --deep:#5e4f96;
+      --sub:#9889c7;
+      --muted:#c6bae7;
+      --panel:rgba(255,254,238,.82);
+      --bubble-left:#fffdf0;
+      --bubble-right:#fff3d8;
+      --bubble-border:#a898d9;
+      --accent:#f6a7ce;
+      --accent2:#9b8bea;
+      --accent3:#fff0a8;
+      --grid:rgba(130,116,194,.16);
+      --shadow:0 18px 34px rgba(145,126,200,.18);
+      --radius:28px;
+      --card-radius:18px;
+      --pixelated:auto;
+    }
+
+    html[data-theme="terminal"]{
+      --page-bg:#050908;
+      --stage-bg1:#020504;
+      --stage-bg2:#07120f;
+      --stage-bg3:#000;
+      --ink:#73ffd8;
+      --deep:#99ffe7;
+      --sub:#50c9ad;
+      --muted:#277b6b;
+      --panel:rgba(0,20,16,.82);
+      --bubble-left:#031a15;
+      --bubble-right:#061f1a;
+      --bubble-border:#19ffc6;
+      --accent:#20ffd0;
+      --accent2:#00a982;
+      --accent3:#003d32;
+      --grid:rgba(32,255,208,.13);
+      --shadow:0 0 34px rgba(32,255,208,.12);
+      --radius:0px;
+      --card-radius:0px;
+      --pixelated:pixelated;
+    }
+
+    html[data-font="sans"]{--font-main:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;}
+    html[data-font="round"]{--font-main:"Gowun Dodum","IBM Plex Sans KR","Noto Sans KR",sans-serif;}
+    html[data-font="serif"]{--font-main:"Nanum Myeongjo","Noto Serif KR",serif;}
+    html[data-font="mono"]{--font-main:"IBM Plex Sans KR","Courier New",monospace;}
+    html[data-font="display"]{--font-main:"Do Hyeon","Noto Sans KR",sans-serif;}
+    html[data-font="hand"]{--font-main:"Gaegu","Noto Sans KR",cursive;}
+
+    html,body{
+      margin:0;
+      padding:0;
+      width:100%;
+      min-height:100%;
+      background:var(--page-bg);
+      font-family:var(--font-main);
+      color:var(--ink);
+    }
+
+    body{overflow:hidden;}
+
+    button,select,input,textarea{
+      font-family:var(--font-main);
+    }
+
+    .app{
+      width:100vw;
+      height:100vh;
+      display:grid;
+      grid-template-columns:minmax(360px,440px) 1fr;
+      gap:18px;
+      padding:18px;
+    }
+
+    .editor{
+      height:calc(100vh - 36px);
+      overflow:auto;
+      border-radius:28px;
+      background:rgba(255,255,255,.66);
+      box-shadow:0 18px 45px rgba(86,73,150,.18);
+      padding:18px;
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+
+    html[data-theme="terminal"] .editor{
+      background:#04100d;
+      border:1px solid var(--accent);
+      box-shadow:0 0 24px rgba(32,255,208,.14);
+    }
+
+    .editor h1{
+      margin:0 0 8px;
+      color:var(--deep);
+      font-size:23px;
+      letter-spacing:-.05em;
+    }
+
+    .editor p{
+      margin:0 0 16px;
+      color:var(--sub);
+      font-size:13px;
+      line-height:1.55;
+      font-weight:700;
+    }
+
+    .control-row{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    .control-label{
+      color:var(--sub);
+      font-size:13px;
+      font-weight:900;
+      min-width:78px;
+    }
+
+    .btn,.select{
+      border:0;
+      border-radius:999px;
+      padding:10px 14px;
+      background:#fff;
+      color:var(--deep);
+      font-size:13px;
+      font-weight:900;
+      box-shadow:0 8px 18px rgba(98,84,160,.12);
+      cursor:pointer;
+    }
+
+    .select.small{
+      padding:9px 12px;
+      min-width:104px;
+    }
+
+    html[data-theme="pixel"] .btn,
+    html[data-theme="pixel"] .select,
+    html[data-theme="terminal"] .btn,
+    html[data-theme="terminal"] .select{
+      border-radius:0;
+      border:2px solid var(--accent2);
+      box-shadow:none;
+    }
+
+    html[data-theme="terminal"] .btn,
+    html[data-theme="terminal"] .select{
+      background:#020806;
+      color:var(--deep);
+      border-color:var(--accent);
+    }
+
+    .btn.primary{background:var(--accent);color:#fff;}
+    .btn.dark{background:var(--deep);color:#fff;}
+
+    html[data-theme="terminal"] .btn.primary,
+    html[data-theme="terminal"] .btn.dark{
+      background:#031a15;
+      color:var(--deep);
+      border-color:var(--accent);
+    }
+
+    .textarea-label{
+      display:block;
+      margin:14px 0 8px;
+      color:var(--deep);
+      font-size:13px;
+      font-weight:900;
+    }
+
+    textarea{
+      width:100%;
+      min-height:330px;
+      resize:vertical;
+      border:0;
+      outline:0;
+      border-radius:22px;
+      padding:16px;
+      background:rgba(255,255,255,.86);
+      color:var(--deep);
+      font-size:14px;
+      line-height:1.65;
+      font-weight:650;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.9),
+        0 10px 22px rgba(98,84,160,.10);
+    }
+
+    html[data-theme="terminal"] textarea{
+      background:#020806;
+      color:var(--deep);
+      border:1px solid var(--accent);
+      box-shadow:inset 0 0 18px rgba(32,255,208,.08);
+      border-radius:0;
+    }
+
+    html[data-theme="pixel"] textarea{
+      border-radius:0;
+      border:2px solid var(--accent2);
+      box-shadow:none;
+    }
+
+    .hint{
+      margin-top:12px;
+      padding:14px;
+      border-radius:20px;
+      background:rgba(255,255,255,.58);
+      color:var(--sub);
+      font-size:12px;
+      line-height:1.65;
+      font-weight:750;
+    }
+
+    html[data-theme="terminal"] .hint{
+      background:#020806;
+      border:1px solid var(--accent2);
+      border-radius:0;
+    }
+
+    .hint b{color:var(--deep);}
+
+    .preview-wrap{
+      width:100%;
+      height:calc(100vh - 36px);
+      overflow:auto;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:20px;
+      border-radius:28px;
+      background:rgba(255,255,255,.22);
+    }
+
+    .stage-shell{
+      position:relative;
+      width:calc(var(--capture-w) * var(--view-scale));
+      height:calc(var(--capture-h) * var(--view-scale));
+      flex:0 0 auto;
+    }
+
+    .quote-stage{
+      position:absolute;
+      left:0;
+      top:0;
+      width:var(--capture-w);
+      height:var(--capture-h);
+      overflow:hidden;
+      border-radius:var(--radius);
+      background:
+        linear-gradient(160deg,var(--stage-bg1) 0%,var(--stage-bg2) 54%,var(--stage-bg3) 100%);
+      box-shadow:var(--shadow);
+      transform:scale(var(--view-scale));
+      transform-origin:top left;
+      isolation:isolate;
+      image-rendering:var(--pixelated);
+      font-family:var(--font-main);
+    }
+
+    .quote-stage::before{
+      content:"";
+      position:absolute;
+      inset:34px;
+      border:1px solid rgba(255,255,255,.55);
+      border-radius:calc(var(--radius) - 12px);
+      pointer-events:none;
+      z-index:1;
+    }
+
+    .quote-stage::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg,var(--grid) 1px, transparent 1px);
+      background-size:28px 28px;
+      opacity:.72;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    html[data-theme="cherry"] .quote-stage{
+      background:
+        radial-gradient(circle at 12% 8%,rgba(255,255,255,.8) 0 8px,transparent 9px),
+        radial-gradient(circle at 88% 15%,rgba(255,127,179,.25) 0 18px,transparent 19px),
+        linear-gradient(90deg,rgba(80,160,220,.22) 0 52px,transparent 52px 104px),
+        linear-gradient(160deg,var(--stage-bg1),var(--stage-bg2) 58%,var(--stage-bg3));
+      background-size:auto,auto,104px 104px,auto;
+    }
+
+    html[data-theme="pixel"] .quote-stage::after,
+    html[data-theme="cream"] .quote-stage::after{
+      background-size:18px 18px;
+      opacity:.9;
+    }
+
+    html[data-theme="terminal"] .quote-stage::after{
+      background:
+        repeating-linear-gradient(180deg,rgba(32,255,208,.12) 0 1px,transparent 1px 4px),
+        linear-gradient(rgba(32,255,208,.10) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(32,255,208,.10) 1px,transparent 1px);
+      background-size:auto,32px 32px,32px 32px;
+      opacity:.7;
+    }
+
+    .quote-stage.exporting{
+      position:relative!important;
+      left:0!important;
+      top:0!important;
+      transform:none!important;
+      width:1080px!important;
+      height:1350px!important;
+    }
+
+    .deco{
+      position:absolute;
+      z-index:2;
+      pointer-events:none;
+      color:var(--accent);
+      font-weight:900;
+      user-select:none;
+    }
+
+    .deco.d1{left:70px;top:72px;font-size:42px;}
+    .deco.d2{right:76px;top:118px;font-size:54px;color:var(--accent2);}
+    .deco.d3{left:64px;bottom:84px;font-size:34px;color:var(--accent2);}
+    .deco.d4{right:74px;bottom:90px;font-size:72px;color:var(--accent);}
+
+    .top-info{
+      position:absolute;
+      left:70px;
+      right:70px;
+      top:42px;
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:start;
+      z-index:4;
+      color:#fff;
+      text-shadow:0 2px 10px rgba(98,84,160,.24);
+      font-family:var(--font-main);
+    }
+
+    html[data-theme="terminal"] .top-info{
+      color:var(--deep);
+      text-shadow:0 0 10px rgba(32,255,208,.35);
+    }
+
+    html[data-theme="pixel"] .top-info,
+    html[data-theme="cream"] .top-info{
+      color:var(--deep);
+      text-shadow:none;
+    }
+
+    .time{
+      font-size:30px;
+      font-weight:900;
+      text-align:left;
+      outline:0;
+    }
+
+    .title-box{text-align:center;line-height:1.2;}
+
+    .title{
+      min-width:120px;
+      font-size:36px;
+      font-weight:950;
+      letter-spacing:-.035em;
+      outline:0;
+    }
+
+    .date{
+      margin-top:16px;
+      font-size:27px;
+      font-weight:900;
+      outline:0;
+    }
+
+    .subdate{
+      margin-top:4px;
+      font-size:23px;
+      font-weight:850;
+      outline:0;
+    }
+
+    .status{
+      font-size:28px;
+      font-weight:900;
+      text-align:right;
+      letter-spacing:.08em;
+      outline:0;
+    }
+
+    .content{
+      position:absolute;
+      left:86px;
+      right:86px;
+      top:226px;
+      bottom:76px;
+      z-index:5;
+      display:flex;
+      flex-direction:column;
+      gap:30px;
+      overflow:hidden;
+      font-family:var(--font-main);
+    }
+
+    .bubble-row{
+      display:flex;
+      width:100%;
+      position:relative;
+      z-index:2;
+    }
+
+    .bubble-row.left{justify-content:flex-start;}
+    .bubble-row.right{justify-content:flex-end;}
+
+    .bubble{
+      position:relative;
+      z-index:1;
+      isolation:isolate;
+      overflow:visible;
+      max-width:74%;
+      min-width:286px;
+      padding:21px 32px 24px;
+      border-radius:26px;
+      background:var(--bubble-left);
+      border:1px solid var(--bubble-border);
+      box-shadow:
+        0 12px 30px rgba(98,84,160,.16),
+        inset 0 1px 0 rgba(255,255,255,.88);
+      color:var(--deep);
+      line-height:1.36;
+      word-break:keep-all;
+      overflow-wrap:break-word;
+      font-family:var(--font-main);
+    }
+
+    .bubble-row.right .bubble{background:var(--bubble-right);}
+
+    .bubble-head{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:7px;
+      color:var(--sub);
+      font-size:17px;
+      line-height:1;
+      font-weight:760;
+      letter-spacing:.02em;
+      outline:0;
+    }
+
+    .bubble-text{
+      outline:0;
+      font-size:calc(28px * var(--bubble-scale));
+      font-weight:var(--bubble-weight);
+      line-height:1.36;
+    }
+
+    .bubble::after{
+      content:"";
+      position:absolute;
+      bottom:-9px;
+      width:34px;
+      height:24px;
+      background:inherit;
+      border:1px solid var(--bubble-border);
+      border-top:0;
+      z-index:-1;
+      clip-path:polygon(0 0,100% 0,36% 100%);
+      box-shadow:0 10px 14px rgba(98,84,160,.08);
+    }
+
+    .bubble-row.left .bubble::after{
+      left:40px;
+      transform:rotate(2deg);
+    }
+
+    .bubble-row.right .bubble::after{
+      right:40px;
+      transform:scaleX(-1) rotate(2deg);
+    }
+
+    html[data-theme="pixel"] .bubble,
+    html[data-theme="terminal"] .bubble{
+      border-radius:0;
+      box-shadow:none;
+      border-width:3px;
+      padding:20px 28px;
+    }
+
+    html[data-theme="terminal"] .bubble{
+      box-shadow:0 0 18px rgba(32,255,208,.10);
+    }
+
+    html[data-theme="pixel"] .bubble::after,
+    html[data-theme="terminal"] .bubble::after{
+      display:none;
+      content:none;
+    }
+
+    .quote-card{
+      position:relative;
+      width:100%;
+      border-radius:var(--card-radius);
+      padding:66px 50px 46px;
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.8);
+      box-shadow:
+        0 18px 40px rgba(98,84,160,.16),
+        inset 0 1px 0 rgba(255,255,255,.90);
+      overflow:hidden;
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
+      font-family:var(--font-main);
+    }
+
+    html[data-theme="pixel"] .quote-card,
+    html[data-theme="terminal"] .quote-card{
+      box-shadow:none;
+      border:3px solid var(--bubble-border);
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+    }
+
+    html[data-theme="terminal"] .quote-card{
+      box-shadow:0 0 20px rgba(32,255,208,.12);
+    }
+
+    .quote-card-head{
+      position:absolute;
+      left:46px;
+      top:28px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:var(--sub);
+      font-size:22px;
+      font-weight:760;
+      outline:0;
+    }
+
+    .quote-card-date{
+      position:absolute;
+      right:46px;
+      top:30px;
+      color:var(--sub);
+      font-size:20px;
+      font-weight:720;
+      outline:0;
+    }
+
+    .quote-text{
+      color:var(--deep);
+      font-size:calc(34px * var(--narration-scale));
+      line-height:1.62;
+      font-weight:var(--narration-weight);
+      font-style:italic;
+      letter-spacing:-.035em;
+      white-space:pre-wrap;
+      word-break:keep-all;
+      overflow-wrap:break-word;
+      outline:0;
+      font-family:var(--font-main);
+    }
+
+    html[data-theme="pixel"] .quote-text,
+    html[data-theme="terminal"] .quote-text,
+    html[data-theme="cream"] .quote-text{
+      font-style:normal;
+      letter-spacing:-.02em;
+    }
+
+    .quote-img{
+      margin-top:30px;
+      width:100%;
+      height:360px;
+      border-radius:28px;
+      background:#f8f7ff;
+      overflow:hidden;
+      cursor:pointer;
+      position:relative;
+      border:1px solid rgba(255,255,255,.75);
+    }
+
+    html[data-theme="pixel"] .quote-img,
+    html[data-theme="terminal"] .quote-img{
+      border-radius:0;
+      border:3px solid var(--bubble-border);
+    }
+
+    .quote-img img{
+      position:absolute;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .quote-img .img-hint{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--sub);
+      font-size:20px;
+      font-weight:900;
+      background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(255,255,255,.28));
+    }
+
+    .quote-img.filled .img-hint{display:none;}
+
+    .footer-credit{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:24px;
+      z-index:5;
+      text-align:center;
+      color:rgba(98,94,132,.34);
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.03em;
+      outline:0;
+      font-family:var(--font-main);
+    }
+
+    html[data-theme="terminal"] .footer-credit{
+      color:rgba(32,255,208,.45);
+    }
+
+    .export-root{
+      position:fixed;
+      left:-20000px;
+      top:0;
+      width:1080px;
+      height:1350px;
+      overflow:hidden;
+      background:transparent;
+      z-index:-1;
+      pointer-events:none;
+    }
+
+    .export-root .quote-stage{
+      position:relative!important;
+      left:0!important;
+      top:0!important;
+      transform:none!important;
+      width:1080px!important;
+      height:1350px!important;
+    }
+
+    .hidden-file{display:none;}
+    .editable{outline:none;}
+
+    [contenteditable="true"]{
+      -webkit-user-modify:read-write-plaintext-only;
+    }
+
+    [contenteditable="true"]:focus{
+      background:rgba(255,255,255,.22);
+      border-radius:8px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);
+    }
+
+    html[data-theme="pixel"] [contenteditable="true"]:focus,
+    html[data-theme="terminal"] [contenteditable="true"]:focus{
+      border-radius:0;
+    }
+
+    @media(max-width:980px){
+      body{overflow:auto;}
+
+      .app{
+        height:auto;
+        min-height:100vh;
+        display:flex;
+        flex-direction:column;
+        padding:12px;
+      }
+
+      .editor{
+        height:auto;
+        max-height:none;
+      }
+
+      .preview-wrap{
+        height:calc(100vh - 20px);
+        min-height:560px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="editor">
+      <h1>소설 발췌앱</h1>
+      <p>텍스트 또는 JSON을 넣으면 대사는 말풍선, 서술은 발췌 카드로 변환됩니다.</p>
+
+      <div class="control-row">
+        <select class="select" id="inputMode">
+          <option value="text">텍스트 입력</option>
+          <option value="json">JSON 입력</option>
+        </select>
+
+        <select class="select" id="themeSelect">
+          <option value="dream">Dream Pop</option>
+          <option value="cherry">Cherry Grid</option>
+          <option value="pixel">Pixel Mail</option>
+          <option value="cream">Cream Game</option>
+          <option value="terminal">Terminal</option>
+        </select>
+
+        <select class="select" id="fontSelect">
+          <option value="sans">기본 고딕</option>
+          <option value="round">둥근 고딕</option>
+          <option value="serif">명조</option>
+          <option value="mono">단정한 모노</option>
+          <option value="display">굵은 제목체</option>
+          <option value="hand">손글씨</option>
+        </select>
+
+        <button class="btn primary" id="renderBtn">미리보기 생성</button>
+        <button class="btn dark" id="saveBtn">PNG 저장</button>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">화면 확대</span>
+        <input class="zoom-range" id="zoomRange" type="range" min="35" max="100" value="52">
+        <span class="zoom-value" id="zoomValue">52%</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">말풍선 크기</span>
+        <input class="zoom-range" id="bubbleSizeRange" type="range" min="75" max="140" value="100">
+        <span class="zoom-value" id="bubbleSizeValue">100%</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">말풍선 두께</span>
+        <select class="select small" id="bubbleWeightSelect">
+          <option value="400">얇게 400</option>
+          <option value="500">보통 500</option>
+          <option value="600">중간 600</option>
+          <option value="700">굵게 700</option>
+          <option value="800" selected>아주 굵게 800</option>
+          <option value="900">최대 900</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">서술 크기</span>
+        <input class="zoom-range" id="narrationSizeRange" type="range" min="75" max="140" value="100">
+        <span class="zoom-value" id="narrationSizeValue">100%</span>
+      </div>
+
+      <div class="control-row">
+        <span class="control-label">서술 두께</span>
+        <select class="select small" id="narrationWeightSelect">
+          <option value="300">얇게 300</option>
+          <option value="400">보통 400</option>
+          <option value="500" selected>중간 500</option>
+          <option value="600">조금 굵게 600</option>
+          <option value="700">굵게 700</option>
+          <option value="800">아주 굵게 800</option>
+        </select>
+      </div>
+
+      <label class="textarea-label">입력</label>
+      <textarea id="sourceInput" spellcheck="false">L:"꽃송이가 나를 삼킬 걸"
+
+R:"알면서 난 뛰어들었어"
+
+*비가 그친 뒤의 공원은 이상할 만큼 조용했다. 젖은 잔디 위로 빛이 낮게 번졌고, 두 사람은 서로의 이름을 부르지 않은 채 오래 마주 보고 있었다.*</textarea>
+
+      <div class="hint">
+        <b>텍스트 형식</b><br>
+        L:"왼쪽 말풍선"<br>
+        R:"오른쪽 말풍선"<br>
+        "기본 말풍선"<br>
+        *큰 서술 카드*<br><br>
+
+        <b>JSON 형식</b><br>
+        [{"type":"dialogue","side":"left","text":"대사"},{"type":"narration","text":"서술"}]<br><br>
+
+        <b>주의</b><br>
+        MESSAGE 라벨은 말풍선/서술 크기와 두께 조절에 영향받지 않고 그대로 유지됩니다.
+      </div>
+    </aside>
+
+    <main class="preview-wrap" id="previewWrap">
+      <div class="stage-shell" id="stageShell">
+        <section class="quote-stage" id="captureArea">
+          <div class="deco d1">♡</div>
+          <div class="deco d2">♪</div>
+          <div class="deco d3">✦</div>
+          <div class="deco d4">●</div>
+
+          <div class="top-info">
+            <div class="time editable" contenteditable="true" spellcheck="false">6:00</div>
+            <div class="title-box">
+              <div class="title editable" contenteditable="true" spellcheck="false">TITLE</div>
+              <div class="date editable" contenteditable="true" spellcheck="false">2023.08.21</div>
+              <div class="subdate editable" contenteditable="true" spellcheck="false">6:00 PM</div>
+            </div>
+            <div class="status editable" contenteditable="true" spellcheck="false">▮▮▮ 𖤐</div>
+          </div>
+
+          <div class="content" id="quoteContent"></div>
+
+          <div class="footer-credit editable" contenteditable="true" spellcheck="false">© QUOTE CARD MAKER · FICTION EXCERPT</div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <input class="hidden-file" type="file" id="imageInput" accept="image/*">
+
+  <script>
+    const CAPTURE_WIDTH = 1080;
+    const CAPTURE_HEIGHT = 1350;
+
+    const root = document.documentElement;
+    const sourceInput = document.getElementById("sourceInput");
+    const inputMode = document.getElementById("inputMode");
+    const themeSelect = document.getElementById("themeSelect");
+    const fontSelect = document.getElementById("fontSelect");
+    const renderBtn = document.getElementById("renderBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const captureArea = document.getElementById("captureArea");
+    const quoteContent = document.getElementById("quoteContent");
+    const zoomRange = document.getElementById("zoomRange");
+    const zoomValue = document.getElementById("zoomValue");
+    const bubbleSizeRange = document.getElementById("bubbleSizeRange");
+    const bubbleSizeValue = document.getElementById("bubbleSizeValue");
+    const bubbleWeightSelect = document.getElementById("bubbleWeightSelect");
+    const narrationSizeRange = document.getElementById("narrationSizeRange");
+    const narrationSizeValue = document.getElementById("narrationSizeValue");
+    const narrationWeightSelect = document.getElementById("narrationWeightSelect");
+    const imageInput = document.getElementById("imageInput");
+
+    let activeImageBox = null;
+
+    function parseTextInput(text){
+      const items = [];
+      const lines = text.split(/\n+/).map(line=>line.trim()).filter(Boolean);
+
+      lines.forEach((line,index)=>{
+        let side = index % 2 === 0 ? "left" : "right";
+
+        if(/^L\s*:/i.test(line)){
+          side = "left";
+          line = line.replace(/^L\s*:\s*/i,"").trim();
+        }
+
+        if(/^R\s*:/i.test(line)){
+          side = "right";
+          line = line.replace(/^R\s*:\s*/i,"").trim();
+        }
+
+        const narrationMatch = line.match(/^\*([^*][\s\S]*?)\*$/);
+        if(narrationMatch){
+          items.push({
+            type:"narration",
+            text:narrationMatch[1].trim()
+          });
+          return;
+        }
+
+        const dialogueMatch = line.match(/^"([\s\S]+)"$/);
+        if(dialogueMatch){
+          items.push({
+            type:"dialogue",
+            side,
+            text:dialogueMatch[1].trim()
+          });
+          return;
+        }
+
+        items.push({
+          type:"narration",
+          text:line
+        });
+      });
+
+      return items;
+    }
+
+    function parseJsonInput(text){
+      const parsed = JSON.parse(text);
+      if(!Array.isArray(parsed)){
+        throw new Error("JSON은 배열 형식이어야 합니다.");
+      }
+
+      return parsed.map((item,index)=>({
+        type:item.type || "narration",
+        side:item.side || (index % 2 === 0 ? "left" : "right"),
+        text:item.text || "",
+        label:item.label || "MESSAGE",
+        date:item.date || "23.08.21",
+        image:item.image || false
+      }));
+    }
+
+    function makeEditable(el){
+      el.setAttribute("contenteditable","true");
+      el.setAttribute("spellcheck","false");
+      el.classList.add("editable");
+
+      el.addEventListener("keydown",(e)=>{
+        if(e.key === "Enter"){
+          e.preventDefault();
+          el.blur();
+        }
+      });
+    }
+
+    function renderItems(items){
+      quoteContent.innerHTML = "";
+
+      items.forEach((item)=>{
+        if(item.type === "dialogue"){
+          const row = document.createElement("div");
+          row.className = "bubble-row " + (item.side === "right" ? "right" : "left");
+
+          const bubble = document.createElement("div");
+          bubble.className = "bubble";
+
+          const head = document.createElement("div");
+          head.className = "bubble-head";
+
+          const label = document.createElement("span");
+          label.textContent = item.label || "MESSAGE";
+          makeEditable(label);
+
+          head.appendChild(label);
+
+          const text = document.createElement("div");
+          text.className = "bubble-text";
+          text.textContent = item.text;
+          makeEditable(text);
+
+          bubble.appendChild(head);
+          bubble.appendChild(text);
+          row.appendChild(bubble);
+          quoteContent.appendChild(row);
+          return;
+        }
+
+        const card = document.createElement("div");
+        card.className = "quote-card";
+
+        const head = document.createElement("div");
+        head.className = "quote-card-head";
+
+        const label = document.createElement("span");
+        label.textContent = item.label || "MESSAGE";
+        makeEditable(label);
+
+        head.appendChild(label);
+
+        const date = document.createElement("div");
+        date.className = "quote-card-date";
+        date.textContent = item.date || "23.08.21";
+        makeEditable(date);
+
+        const text = document.createElement("div");
+        text.className = "quote-text";
+        text.textContent = item.text;
+        makeEditable(text);
+
+        card.appendChild(head);
+        card.appendChild(date);
+        card.appendChild(text);
+
+        if(item.image === true){
+          const imgBox = document.createElement("div");
+          imgBox.className = "quote-img";
+          imgBox.innerHTML = '<img alt=""><div class="img-hint">이미지 추가</div>';
+          imgBox.addEventListener("click",()=>{
+            activeImageBox = imgBox;
+            imageInput.click();
+          });
+          card.appendChild(imgBox);
+        }
+
+        quoteContent.appendChild(card);
+      });
+    }
+
+    function renderFromInput(){
+      try{
+        const items = inputMode.value === "json"
+          ? parseJsonInput(sourceInput.value)
+          : parseTextInput(sourceInput.value);
+
+        renderItems(items);
+      }catch(error){
+        alert("입력 형식을 확인해주세요.\n" + error.message);
+      }
+    }
+
+    function setViewScale(scale){
+      const safeScale = Math.max(0.35, Math.min(1, scale));
+      root.style.setProperty("--view-scale", safeScale);
+      zoomValue.textContent = Math.round(safeScale * 100) + "%";
+    }
+
+    function setBubbleSize(scale){
+      const safeScale = Math.max(0.75, Math.min(1.4, scale));
+      root.style.setProperty("--bubble-scale", safeScale);
+      bubbleSizeValue.textContent = Math.round(safeScale * 100) + "%";
+    }
+
+    function setNarrationSize(scale){
+      const safeScale = Math.max(0.75, Math.min(1.4, scale));
+      root.style.setProperty("--narration-scale", safeScale);
+      narrationSizeValue.textContent = Math.round(safeScale * 100) + "%";
+    }
+
+    function setBubbleWeight(weight){
+      root.style.setProperty("--bubble-weight", weight);
+    }
+
+    function setNarrationWeight(weight){
+      root.style.setProperty("--narration-weight", weight);
+    }
+
+    async function applyFont(fontValue){
+      root.setAttribute("data-font", fontValue);
+      await document.fonts.ready;
+    }
+
+    setViewScale(Number(zoomRange.value) / 100);
+    setBubbleSize(Number(bubbleSizeRange.value) / 100);
+    setNarrationSize(Number(narrationSizeRange.value) / 100);
+    setBubbleWeight(bubbleWeightSelect.value);
+    setNarrationWeight(narrationWeightSelect.value);
+
+    zoomRange.addEventListener("input",()=>{
+      setViewScale(Number(zoomRange.value) / 100);
+    });
+
+    bubbleSizeRange.addEventListener("input",()=>{
+      setBubbleSize(Number(bubbleSizeRange.value) / 100);
+    });
+
+    narrationSizeRange.addEventListener("input",()=>{
+      setNarrationSize(Number(narrationSizeRange.value) / 100);
+    });
+
+    bubbleWeightSelect.addEventListener("change",()=>{
+      setBubbleWeight(bubbleWeightSelect.value);
+    });
+
+    narrationWeightSelect.addEventListener("change",()=>{
+      setNarrationWeight(narrationWeightSelect.value);
+    });
+
+    themeSelect.addEventListener("change",()=>{
+      root.setAttribute("data-theme", themeSelect.value);
+    });
+
+    fontSelect.addEventListener("change",()=>{
+      applyFont(fontSelect.value);
+    });
+
+    renderBtn.addEventListener("click",renderFromInput);
+
+    inputMode.addEventListener("change",()=>{
+      if(inputMode.value === "json"){
+        sourceInput.value = JSON.stringify([
+          {"type":"dialogue","side":"left","label":"MESSAGE","text":"꽃송이가 나를 삼킬 걸"},
+          {"type":"dialogue","side":"right","label":"MESSAGE","text":"알면서 난 뛰어들었어"},
+          {"type":"narration","label":"MESSAGE","date":"23.08.21","text":"비가 그친 뒤의 공원은 이상할 만큼 조용했다. 젖은 잔디 위로 빛이 낮게 번졌고, 두 사람은 서로의 이름을 부르지 않은 채 오래 마주 보고 있었다.","image":true}
+        ],null,2);
+      }else{
+        sourceInput.value = 'L:"꽃송이가 나를 삼킬 걸"\\n\\nR:"알면서 난 뛰어들었어"\\n\\n*비가 그친 뒤의 공원은 이상할 만큼 조용했다. 젖은 잔디 위로 빛이 낮게 번졌고, 두 사람은 서로의 이름을 부르지 않은 채 오래 마주 보고 있었다.*';
+      }
+      renderFromInput();
+    });
+
+    imageInput.addEventListener("change",()=>{
+      const file = imageInput.files && imageInput.files[0];
+      if(!file || !activeImageBox) return;
+
+      const reader = new FileReader();
+      const img = activeImageBox.querySelector("img");
+
+      reader.onload = (event)=>{
+        img.src = event.target.result;
+        activeImageBox.classList.add("filled");
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    document.querySelectorAll("[contenteditable='true']").forEach((el)=>{
+      el.setAttribute("spellcheck","false");
+      el.addEventListener("keydown",(e)=>{
+        if(e.key === "Enter"){
+          e.preventDefault();
+          el.blur();
+        }
+      });
+    });
+
+    async function waitForImages(target){
+      const images = Array.from(target.querySelectorAll("img"));
+
+      await Promise.all(images.map((img)=>{
+        if(!img.src) return Promise.resolve();
+        if(img.complete && img.naturalWidth > 0) return Promise.resolve();
+
+        return new Promise((resolve)=>{
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+    }
+
+    function makeExportClone(){
+      const exportRoot = document.createElement("div");
+      exportRoot.className = "export-root";
+
+      const clone = captureArea.cloneNode(true);
+      clone.id = "captureExport";
+      clone.classList.add("exporting");
+
+      exportRoot.appendChild(clone);
+      document.body.appendChild(exportRoot);
+
+      return {exportRoot, clone};
+    }
+
+    saveBtn.addEventListener("click",async()=>{
+      document.activeElement.blur();
+      window.getSelection()?.removeAllRanges();
+
+      saveBtn.textContent = "저장중...";
+
+      await document.fonts.ready;
+      await waitForImages(captureArea);
+
+      const {exportRoot, clone} = makeExportClone();
+
+      await document.fonts.ready;
+      await waitForImages(clone);
+      await new Promise((resolve)=>setTimeout(resolve,260));
+
+      try{
+        const canvas = await html2canvas(clone,{
+          backgroundColor:null,
+          scale:3,
+          useCORS:true,
+          allowTaint:true,
+          logging:false,
+          width:CAPTURE_WIDTH,
+          height:CAPTURE_HEIGHT,
+          windowWidth:CAPTURE_WIDTH,
+          windowHeight:CAPTURE_HEIGHT,
+          x:0,
+          y:0,
+          scrollX:0,
+          scrollY:0,
+          imageTimeout:0,
+          removeContainer:true
+        });
+
+        const link = document.createElement("a");
+        link.download = "novel_excerpt_card_1080x1350.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }catch(error){
+        alert("저장에 실패했어요. 다시 시도해주세요.");
+      }finally{
+        exportRoot.remove();
+        saveBtn.textContent = "PNG 저장";
+      }
+    });
+
+    window.addEventListener("load", async ()=>{
+      await document.fonts.ready;
+      renderFromInput();
+    });
+
+    renderFromInput();
+  </script>
+</body>
+</html>
