@@ -509,7 +509,7 @@
       display:flex;
       flex-direction:column;
       gap:30px;
-      overflow:hidden;
+      overflow:visible;
       font-family:var(--font-main);
     }
 
@@ -620,12 +620,14 @@
     .quote-card{
       position:relative;
       width:100%;
+      min-height:0;
+      height:auto;
       border-radius:var(--card-radius);
-      padding:66px 50px 46px;
+      padding:46px 50px 48px;
       background:var(--panel-solid);
       border:1px solid rgba(255,255,255,.8);
       box-shadow:0 18px 40px rgba(98,84,160,.13);
-      overflow:hidden;
+      overflow:visible;
       font-family:var(--font-main);
     }
 
@@ -639,35 +641,10 @@
       box-shadow:0 0 20px rgba(32,255,208,.12);
     }
 
-    .quote-card-head{
-      position:absolute;
-      left:46px;
-      top:28px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      color:var(--sub);
-      font-size:22px;
-      font-weight:760;
-      outline:0;
-      background:transparent!important;
-    }
-
-    .quote-card-date{
-      position:absolute;
-      right:46px;
-      top:30px;
-      color:var(--sub);
-      font-size:20px;
-      font-weight:720;
-      outline:0;
-      background:transparent!important;
-    }
-
     .quote-text{
       color:var(--deep);
       font-size:calc(34px * var(--narration-scale));
-      line-height:1.62;
+      line-height:1.58;
       font-weight:var(--narration-weight);
       font-style:italic;
       letter-spacing:-.035em;
@@ -742,8 +719,6 @@
 
     .export-root .bubble-head,
     .export-root .bubble-text,
-    .export-root .quote-card-head,
-    .export-root .quote-card-date,
     .export-root .quote-text,
     .export-root .footer-credit{
       background:transparent!important;
@@ -762,7 +737,6 @@
       -webkit-backdrop-filter:none!important;
     }
 
-    .hidden-file{display:none;}
     .editable{outline:none;}
 
     [contenteditable="true"]{
@@ -866,7 +840,7 @@
 
       <div class="control-row">
         <span class="control-label">서술 크기</span>
-        <input class="zoom-range" id="narrationSizeRange" type="range" min="75" max="140" value="100">
+        <input class="zoom-range" id="narrationSizeRange" type="range" min="45" max="140" value="100">
         <span class="zoom-value" id="narrationSizeValue">100%</span>
       </div>
 
@@ -897,7 +871,8 @@ R:"{{user}} 대사"
         *큰 서술 카드*<br><br>
 
         <b>안내</b><br>
-        MESSAGE, TITLE, 시간, 날짜, PLATFORM, 하단 CREATOR/CHARACTER 부분은 터치해서 수정 가능합니다.
+        MESSAGE, TITLE, 시간, 날짜, PLATFORM, 하단 CREATOR/CHARACTER 부분은 터치해서 수정 가능합니다.<br>
+        서술 카드에는 라벨/날짜가 표시되지 않습니다.
       </div>
     </aside>
 
@@ -1045,29 +1020,12 @@ R:"{{user}} 대사"
         const card = document.createElement("div");
         card.className = "quote-card";
 
-        const head = document.createElement("div");
-        head.className = "quote-card-head";
-
-        const label = document.createElement("span");
-        label.textContent = "MESSAGE";
-        makeEditable(label);
-
-        head.appendChild(label);
-
-        const date = document.createElement("div");
-        date.className = "quote-card-date";
-        date.textContent = "23.08.21";
-        makeEditable(date);
-
         const text = document.createElement("div");
         text.className = "quote-text";
         text.textContent = item.text;
         makeEditable(text);
 
-        card.appendChild(head);
-        card.appendChild(date);
         card.appendChild(text);
-
         quoteContent.appendChild(card);
       });
     }
@@ -1090,7 +1048,7 @@ R:"{{user}} 대사"
     }
 
     function setNarrationSize(scale){
-      const safeScale = Math.max(0.75, Math.min(1.4, scale));
+      const safeScale = Math.max(0.45, Math.min(1.4, scale));
       root.style.setProperty("--narration-scale", safeScale);
       narrationSizeValue.textContent = Math.round(safeScale * 100) + "%";
     }
@@ -1178,7 +1136,7 @@ R:"{{user}} 대사"
         el.style.outline = "none";
       });
 
-      clone.querySelectorAll(".bubble-head,.bubble-text,.quote-card-head,.quote-card-date,.quote-text,.footer-credit").forEach((el)=>{
+      clone.querySelectorAll(".bubble-head,.bubble-text,.quote-text,.footer-credit").forEach((el)=>{
         el.style.background = "transparent";
         el.style.boxShadow = "none";
         el.style.outline = "none";
