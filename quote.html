@@ -871,8 +871,8 @@
     }
 
     .time{
-      font-size:30px;
-      font-weight:900;
+      font-size:30px!important;
+      font-weight:900!important;
       text-align:left;
       outline:0;
     }
@@ -881,29 +881,29 @@
 
     .title{
       min-width:120px;
-      font-size:36px;
-      font-weight:950;
+      font-size:36px!important;
+      font-weight:900!important;
       letter-spacing:-.035em;
       outline:0;
     }
 
     .date{
       margin-top:16px;
-      font-size:27px;
-      font-weight:900;
+      font-size:27px!important;
+      font-weight:900!important;
       outline:0;
     }
 
     .subdate{
       margin-top:4px;
-      font-size:23px;
-      font-weight:850;
+      font-size:23px!important;
+      font-weight:850!important;
       outline:0;
     }
 
     .status{
-      font-size:28px;
-      font-weight:900;
+      font-size:28px!important;
+      font-weight:900!important;
       text-align:right;
       letter-spacing:.08em;
       outline:0;
@@ -963,9 +963,9 @@
       gap:8px;
       margin-bottom:7px;
       color:var(--sub);
-      font-size:17px;
+      font-size:17px!important;
       line-height:1;
-      font-weight:760;
+      font-weight:760!important;
       letter-spacing:.02em;
       outline:0;
       position:relative;
@@ -1111,8 +1111,8 @@
       align-items:center;
       gap:8px;
       color:var(--sub);
-      font-size:20px;
-      font-weight:760;
+      font-size:20px!important;
+      font-weight:760!important;
       outline:0;
       background:transparent!important;
     }
@@ -1122,8 +1122,8 @@
       right:42px;
       top:22px;
       color:var(--sub);
-      font-size:18px;
-      font-weight:720;
+      font-size:18px!important;
+      font-weight:720!important;
       outline:0;
       background:transparent!important;
     }
@@ -1133,7 +1133,7 @@
       font-size:calc(34px * var(--narration-scale));
       line-height:1.55;
       font-weight:var(--narration-weight);
-      font-style:italic;
+      font-style:italic!important;
       letter-spacing:-.035em;
       white-space:pre-wrap;
       word-break:keep-all;
@@ -1151,8 +1151,8 @@
     html[data-theme="yellowascii"] .quote-text,
     html[data-theme="lilacdesk"] .quote-text,
     html[data-theme="blackwhite"] .quote-text{
-      font-style:normal;
       letter-spacing:-.02em;
+      font-style:italic!important;
     }
 
     html[data-theme="blackwhite"] .quote-card-head,
@@ -1162,6 +1162,7 @@
 
     html[data-theme="blackwhite"] .quote-text{
       color:#111111!important;
+      font-style:italic!important;
     }
 
     .footer-credit{
@@ -1172,8 +1173,8 @@
       z-index:5;
       text-align:center;
       color:rgba(98,94,132,.34);
-      font-size:16px;
-      font-weight:800;
+      font-size:16px!important;
+      font-weight:800!important;
       letter-spacing:.03em;
       outline:0;
       font-family:var(--font-main);
@@ -1459,6 +1460,18 @@ R:"{{user}} 대사"
 
     let heightTimer = null;
 
+    const fixedMetaStyles = {
+      ".time": {fontSize:"30px", fontWeight:"900"},
+      ".title": {fontSize:"36px", fontWeight:"900"},
+      ".date": {fontSize:"27px", fontWeight:"900"},
+      ".subdate": {fontSize:"23px", fontWeight:"850"},
+      ".status": {fontSize:"28px", fontWeight:"900"},
+      ".bubble-head": {fontSize:"17px", fontWeight:"760"},
+      ".quote-card-head": {fontSize:"20px", fontWeight:"760"},
+      ".quote-card-date": {fontSize:"18px", fontWeight:"720"},
+      ".footer-credit": {fontSize:"16px", fontWeight:"800"}
+    };
+
     function parseTextInput(text){
       const items = [];
       const lines = text.split(/\n+/).map(line=>line.trim()).filter(Boolean);
@@ -1509,16 +1522,27 @@ R:"{{user}} 대사"
       return el.textContent.replace(/\u00a0/g," ").trim() === "";
     }
 
+    function applyFixedMetaStyles(scope=document){
+      Object.entries(fixedMetaStyles).forEach(([selector, styles])=>{
+        scope.querySelectorAll(selector).forEach((el)=>{
+          el.style.fontSize = styles.fontSize;
+          el.style.fontWeight = styles.fontWeight;
+        });
+      });
+    }
+
     function applyTextControlStyles(scope=document){
       const bubbleWeight = String(bubbleWeightSelect.value || "800");
       const narrationWeight = String(narrationWeightSelect.value || "500");
 
       scope.querySelectorAll(".bubble-text").forEach((el)=>{
         el.style.fontWeight = bubbleWeight;
+        el.style.fontStyle = "normal";
       });
 
       scope.querySelectorAll(".quote-text").forEach((el)=>{
         el.style.fontWeight = narrationWeight;
+        el.style.fontStyle = "italic";
       });
 
       scope.querySelectorAll(".quote-stage").forEach((el)=>{
@@ -1528,6 +1552,8 @@ R:"{{user}} 대사"
         el.style.setProperty("--narration-weight", narrationWeight);
         el.style.setProperty("--capture-h", CURRENT_CAPTURE_HEIGHT + "px");
       });
+
+      applyFixedMetaStyles(scope);
     }
 
     function updateStageHeightNow(){
@@ -1796,10 +1822,12 @@ R:"{{user}} 대사"
 
       clone.querySelectorAll(".bubble-text").forEach((el)=>{
         el.style.fontWeight = String(bubbleWeightSelect.value || "800");
+        el.style.fontStyle = "normal";
       });
 
       clone.querySelectorAll(".quote-text").forEach((el)=>{
         el.style.fontWeight = String(narrationWeightSelect.value || "500");
+        el.style.fontStyle = "italic";
       });
 
       clone.querySelectorAll(".bubble-head,.bubble-text,.quote-card-head,.quote-card-date,.quote-text,.footer-credit").forEach((el)=>{
@@ -1807,6 +1835,8 @@ R:"{{user}} 대사"
         el.style.boxShadow = "none";
         el.style.outline = "none";
       });
+
+      applyFixedMetaStyles(clone);
     }
 
     function makeExportClone(){
