@@ -8,7 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gaegu:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
 
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -410,25 +412,51 @@
       --stage-bg1:#050505;
       --stage-bg2:#111111;
       --stage-bg3:#1c1c1c;
-
       --ink:#111111;
       --deep:#111111;
       --sub:#555555;
       --muted:#999999;
-
       --panel-solid:#ffffff;
       --bubble-left:#ffffff;
       --bubble-right:#ffffff;
       --bubble-border:#ffffff;
-
       --accent:#ffffff;
       --accent2:#cfcfcf;
       --accent3:#ffffff;
       --point-text:#555555;
       --point-border:#ffffff;
       --grid:rgba(255,255,255,.045);
-
       --shadow:none;
+      --radius:0px;
+      --card-radius:0px;
+      --pixelated:auto;
+    }
+
+    html[data-theme="zombie"]{
+      --page-bg:#050606;
+      --stage-bg1:#040505;
+      --stage-bg2:#090b0a;
+      --stage-bg3:#000000;
+
+      --ink:#d5ded2;
+      --deep:#f2f6ef;
+      --sub:#8dd69d;
+      --muted:#6d756c;
+
+      --panel-solid:#090c0c;
+      --bubble-left:#0b1110;
+      --bubble-right:#130c0c;
+      --bubble-border:#3ef28d;
+
+      --accent:#8cffb4;
+      --accent2:#ff2d55;
+      --accent3:#0f1b14;
+
+      --point-text:#8cffb4;
+      --point-border:#356d47;
+      --grid:rgba(124,255,177,.06);
+
+      --shadow:0 26px 60px rgba(0,0,0,.55);
       --radius:0px;
       --card-radius:0px;
       --pixelated:auto;
@@ -488,6 +516,12 @@
       background:#f5f5f5;
       border:1px solid #111;
       box-shadow:none;
+    }
+
+    html[data-theme="zombie"] .editor{
+      background:#0b0d0c;
+      border:1px solid rgba(91,255,154,.22);
+      box-shadow:0 0 30px rgba(0,0,0,.35);
     }
 
     .editor h1{
@@ -587,6 +621,15 @@
       border-color:#111;
     }
 
+    html[data-theme="zombie"] .btn,
+    html[data-theme="zombie"] .select{
+      background:#0d1110;
+      color:#d9ffe7;
+      border:1px solid rgba(91,255,154,.25);
+      box-shadow:none;
+      border-radius:0;
+    }
+
     .btn.primary{background:var(--accent);color:#fff;}
     .btn.dark{background:var(--deep);color:#fff;}
 
@@ -607,6 +650,18 @@
       background:#000;
       color:#fff;
       border-color:#000;
+    }
+
+    html[data-theme="zombie"] .btn.primary{
+      background:#11371f;
+      color:#9effc0;
+      border-color:#2cff78;
+    }
+
+    html[data-theme="zombie"] .btn.dark{
+      background:#3f1018;
+      color:#ffdfe5;
+      border-color:#ff2d55;
     }
 
     .textarea-label{
@@ -653,6 +708,14 @@
       border-radius:0;
     }
 
+    html[data-theme="zombie"] textarea{
+      background:#070909;
+      color:#dff7e7;
+      border:1px solid rgba(91,255,154,.25);
+      box-shadow:inset 0 0 18px rgba(0,0,0,.4);
+      border-radius:0;
+    }
+
     html[data-theme="pixel"] textarea,
     html[data-theme="win95"] textarea,
     html[data-theme="olive"] textarea,
@@ -685,6 +748,13 @@
       background:#fff;
       border:2px solid #111;
       color:#333;
+      border-radius:0;
+    }
+
+    html[data-theme="zombie"] .hint{
+      background:#080a09;
+      border:1px solid rgba(91,255,154,.25);
+      color:#96b49f;
       border-radius:0;
     }
 
@@ -838,6 +908,31 @@
       opacity:1;
     }
 
+    html[data-theme="zombie"] .quote-stage{
+      background:
+        radial-gradient(circle at 18% 12%,rgba(255,24,24,.16) 0 140px,transparent 141px),
+        radial-gradient(circle at 82% 10%,rgba(102,255,158,.12) 0 110px,transparent 111px),
+        linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),
+        linear-gradient(160deg,#020303 0%,#060707 35%,#020303 100%);
+    }
+
+    html[data-theme="zombie"] .quote-stage::before{
+      border:2px solid rgba(91,255,154,.18);
+      inset:26px;
+      border-radius:0;
+      box-shadow:0 0 18px rgba(91,255,154,.08), inset 0 0 18px rgba(255,45,85,.04);
+    }
+
+    html[data-theme="zombie"] .quote-stage::after{
+      background:
+        repeating-linear-gradient(180deg,rgba(255,255,255,.022) 0 1px,transparent 1px 4px),
+        linear-gradient(rgba(70,255,140,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,45,85,.03) 1px,transparent 1px);
+      background-size:auto,24px 24px,24px 24px;
+      opacity:.75;
+      animation:zScan 4s linear infinite;
+    }
+
     .quote-stage.exporting{
       position:relative!important;
       left:0!important;
@@ -851,7 +946,6 @@
       position:absolute;
       z-index:2;
       pointer-events:none;
-      color:var(--accent);
       font-weight:900;
       user-select:none;
     }
@@ -860,8 +954,54 @@
       display:none!important;
     }
 
-    .deco.d1{left:70px;top:72px;font-size:42px;}
-    .deco.d2{right:76px;top:118px;font-size:54px;color:var(--accent2);}
+    .deco.d1{
+      left:70px;
+      top:72px;
+      font-size:42px;
+      color:var(--point-text);
+    }
+
+    .deco.d2{
+      right:76px;
+      top:118px;
+      font-size:54px;
+      color:var(--point-border);
+    }
+
+    .noise-overlay,
+    .static-overlay{
+      display:none;
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:2;
+    }
+
+    html[data-theme="zombie"] .noise-overlay,
+    html[data-theme="zombie"] .static-overlay{
+      display:block;
+    }
+
+    .noise-overlay{
+      opacity:.18;
+      background:
+        radial-gradient(circle at 12% 16%, rgba(255,255,255,.12) 0 1px, transparent 2px),
+        radial-gradient(circle at 73% 44%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+        radial-gradient(circle at 42% 80%, rgba(255,255,255,.12) 0 1px, transparent 2px),
+        radial-gradient(circle at 88% 24%, rgba(255,255,255,.06) 0 1px, transparent 2px),
+        repeating-linear-gradient(180deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px);
+      background-size:150px 150px,170px 170px,140px 140px,160px 160px,auto;
+      mix-blend-mode:screen;
+      animation:zNoise .2s steps(2) infinite;
+    }
+
+    .static-overlay{
+      background:
+        linear-gradient(90deg, transparent 0 12%, rgba(255,45,85,.03) 12% 12.5%, transparent 12.5% 43%, rgba(79,255,180,.03) 43% 43.5%, transparent 43.5% 100%);
+      opacity:.45;
+      animation:zFlicker .18s steps(2) infinite;
+      mix-blend-mode:screen;
+    }
 
     .top-info{
       position:absolute;
@@ -907,6 +1047,12 @@
       text-shadow:none;
     }
 
+    html[data-theme="zombie"] .top-info{
+      color:#b8ffcd;
+      text-shadow:0 0 10px rgba(0,0,0,.8);
+      text-transform:uppercase;
+    }
+
     .time{
       font-size:30px!important;
       font-weight:900!important;
@@ -946,6 +1092,24 @@
       outline:0;
     }
 
+    html[data-theme="zombie"] .title,
+    html[data-theme="zombie"] .status{
+      color:#ffffff;
+      text-shadow:
+        -2px 0 rgba(255,45,85,.85),
+        2px 0 rgba(91,255,154,.75),
+        0 0 12px rgba(255,255,255,.06);
+      animation:zGlitchTitle 2.3s infinite steps(2);
+    }
+
+    html[data-theme="zombie"] .time,
+    html[data-theme="zombie"] .date,
+    html[data-theme="zombie"] .subdate{
+      color:#d8f7df;
+      opacity:.92;
+      text-shadow:0 0 8px rgba(91,255,154,.12);
+    }
+
     .content{
       position:absolute;
       left:86px;
@@ -957,6 +1121,31 @@
       gap:30px;
       overflow:visible;
       font-family:var(--font-main);
+    }
+
+    .anim-item{
+      opacity:0;
+      transform:translateY(18px);
+      filter:blur(3px);
+      transition:
+        opacity .42s ease,
+        transform .42s ease,
+        filter .42s ease;
+    }
+
+    .anim-item.shown{
+      opacity:1;
+      transform:translateY(0);
+      filter:blur(0);
+    }
+
+    html[data-theme="zombie"] .anim-item{
+      transform:translateY(10px) scale(.985);
+      filter:blur(4px);
+    }
+
+    html[data-theme="zombie"] .anim-item.shown{
+      animation:zAppear .45s ease both;
     }
 
     .bubble-row{
@@ -1036,15 +1225,12 @@
       pointer-events:none;
       z-index:0;
       box-shadow:none;
+      border-right:2px solid var(--point-border);
+      border-bottom:2px solid var(--point-border);
     }
 
-    .bubble-row.left .bubble-tail{
-      left:48px;
-    }
-
-    .bubble-row.right .bubble-tail{
-      right:48px;
-    }
+    .bubble-row.left .bubble-tail{left:48px;}
+    .bubble-row.right .bubble-tail{right:48px;}
 
     html[data-theme="pixel"] .bubble,
     html[data-theme="terminal"] .bubble,
@@ -1053,15 +1239,11 @@
     html[data-theme="mono"] .bubble,
     html[data-theme="yellowascii"] .bubble,
     html[data-theme="lilacdesk"] .bubble,
-    html[data-theme="blackwhite"] .bubble{
+    html[data-theme="blackwhite"] .bubble,
+    html[data-theme="zombie"] .bubble{
       border-radius:0;
-      box-shadow:none;
-      border-width:3px;
+      border-width:2px;
       padding:20px 28px;
-    }
-
-    html[data-theme="terminal"] .bubble{
-      box-shadow:0 0 18px rgba(32,255,208,.10);
     }
 
     html[data-theme="pixel"] .bubble-tail,
@@ -1079,17 +1261,48 @@
       box-shadow:8px 8px 0 rgba(255,255,255,.18);
     }
 
-    html[data-theme="blackwhite"] .bubble-head{
-      color:#555555!important;
-    }
-
-    html[data-theme="blackwhite"] .bubble-text{
-      color:#111111!important;
-    }
-
+    html[data-theme="blackwhite"] .bubble-head{color:#555555!important;}
+    html[data-theme="blackwhite"] .bubble-text{color:#111111!important;}
     html[data-theme="blackwhite"] .bubble-tail{
       display:block!important;
       background:#ffffff!important;
+      border-color:#ffffff!important;
+    }
+
+    html[data-theme="zombie"] .bubble{
+      background:
+        linear-gradient(180deg, rgba(6,10,10,.98), rgba(4,6,6,.98)),
+        radial-gradient(circle at 10% 10%, rgba(255,45,85,.06) 0 40px, transparent 41px);
+      color:#f3f6f3!important;
+      border-color:#2f5940!important;
+      box-shadow:
+        0 0 0 1px rgba(145,255,188,.06) inset,
+        0 18px 30px rgba(0,0,0,.45);
+    }
+
+    html[data-theme="zombie"] .bubble-row.right .bubble{
+      background:
+        linear-gradient(180deg, rgba(12,8,8,.98), rgba(5,4,4,.98)),
+        radial-gradient(circle at 90% 20%, rgba(255,45,85,.08) 0 55px, transparent 56px);
+      border-color:#6b2d39!important;
+    }
+
+    html[data-theme="zombie"] .bubble-head{
+      color:#8cffb4!important;
+      text-shadow:0 0 8px rgba(91,255,154,.18);
+      letter-spacing:.08em;
+    }
+
+    html[data-theme="zombie"] .bubble-text{
+      color:#f5f7f5!important;
+      text-shadow:
+        -1px 0 rgba(255,45,85,.15),
+        1px 0 rgba(91,255,154,.15);
+    }
+
+    html[data-theme="zombie"] .bubble-tail{
+      background:#080b0a!important;
+      border-color:#2f5940!important;
     }
 
     .quote-card{
@@ -1123,14 +1336,9 @@
     html[data-theme="mono"] .quote-card,
     html[data-theme="yellowascii"] .quote-card,
     html[data-theme="lilacdesk"] .quote-card,
-    html[data-theme="blackwhite"] .quote-card{
-      box-shadow:none;
-      border:3px solid var(--point-border);
+    html[data-theme="blackwhite"] .quote-card,
+    html[data-theme="zombie"] .quote-card{
       border-radius:0;
-    }
-
-    html[data-theme="terminal"] .quote-card{
-      box-shadow:0 0 20px rgba(32,255,208,.12);
     }
 
     html[data-theme="blackwhite"] .quote-card{
@@ -1138,6 +1346,16 @@
       background:#ffffff!important;
       border-color:#ffffff!important;
       box-shadow:10px 10px 0 rgba(255,255,255,.16);
+    }
+
+    html[data-theme="zombie"] .quote-card{
+      background:
+        linear-gradient(180deg, rgba(4,7,7,.985), rgba(3,5,5,.985)),
+        linear-gradient(90deg, rgba(255,45,85,.04), transparent 20%, rgba(91,255,154,.035) 70%, transparent 100%);
+      border-color:#29503a!important;
+      box-shadow:
+        0 0 0 1px rgba(144,255,193,.06) inset,
+        0 18px 40px rgba(0,0,0,.48);
     }
 
     .quote-card-head{
@@ -1202,6 +1420,20 @@
       font-style:italic!important;
     }
 
+    html[data-theme="zombie"] .quote-card-head,
+    html[data-theme="zombie"] .quote-card-date{
+      color:#8cffb4!important;
+      text-shadow:0 0 8px rgba(91,255,154,.16);
+    }
+
+    html[data-theme="zombie"] .quote-text{
+      color:#f4f7f4!important;
+      text-shadow:
+        -1px 0 rgba(255,45,85,.12),
+        1px 0 rgba(91,255,154,.12);
+      animation:zTextJitter 2.8s infinite steps(2);
+    }
+
     .footer-credit{
       position:absolute;
       left:0;
@@ -1224,6 +1456,11 @@
 
     html[data-theme="blackwhite"] .footer-credit{
       color:rgba(255,255,255,.54);
+    }
+
+    html[data-theme="zombie"] .footer-credit{
+      color:rgba(144,255,193,.42);
+      text-shadow:0 0 10px rgba(91,255,154,.08);
     }
 
     .export-root{
@@ -1271,22 +1508,6 @@
       outline:none!important;
     }
 
-    .export-root .quote-card{
-      background:var(--panel-solid)!important;
-      backdrop-filter:none!important;
-      -webkit-backdrop-filter:none!important;
-    }
-
-    html[data-theme="blackwhite"] .export-root .quote-card{
-      background:#ffffff!important;
-      color:#111111!important;
-    }
-
-    html[data-theme="blackwhite"] .export-root .bubble{
-      background:#ffffff!important;
-      color:#111111!important;
-    }
-
     .export-root .bubble{
       backdrop-filter:none!important;
       -webkit-backdrop-filter:none!important;
@@ -1313,14 +1534,82 @@
     html[data-theme="mono"] [contenteditable="true"]:focus,
     html[data-theme="yellowascii"] [contenteditable="true"]:focus,
     html[data-theme="lilacdesk"] [contenteditable="true"]:focus,
-    html[data-theme="blackwhite"] [contenteditable="true"]:focus{
+    html[data-theme="blackwhite"] [contenteditable="true"]:focus,
+    html[data-theme="zombie"] [contenteditable="true"]:focus{
       border-radius:0;
+    }
+
+    html[data-theme="zombie"] [contenteditable="true"]:focus{
+      outline:1px dashed rgba(91,255,154,.35);
     }
 
     html.saving-clean [contenteditable="true"]:focus{
       background:transparent!important;
       box-shadow:none!important;
       outline:none!important;
+    }
+
+    @keyframes zScan{
+      0%{transform:translateY(0)}
+      50%{transform:translateY(4px)}
+      100%{transform:translateY(0)}
+    }
+
+    @keyframes zNoise{
+      0%{transform:translate(0,0)}
+      25%{transform:translate(1px,-1px)}
+      50%{transform:translate(-1px,1px)}
+      75%{transform:translate(1px,1px)}
+      100%{transform:translate(0,0)}
+    }
+
+    @keyframes zFlicker{
+      0%,100%{opacity:.24}
+      20%{opacity:.46}
+      40%{opacity:.15}
+      60%{opacity:.35}
+      80%{opacity:.18}
+    }
+
+    @keyframes zGlitchTitle{
+      0%,100%{transform:translate(0,0)}
+      10%{transform:translate(-1px,0)}
+      12%{transform:translate(2px,1px)}
+      14%{transform:translate(0,0)}
+      42%{transform:translate(0,0)}
+      44%{transform:translate(2px,-1px)}
+      46%{transform:translate(-1px,1px)}
+      48%{transform:translate(0,0)}
+      74%{transform:translate(0,0)}
+      76%{transform:translate(1px,0)}
+      78%{transform:translate(0,0)}
+    }
+
+    @keyframes zTextJitter{
+      0%,100%{transform:translate(0,0)}
+      25%{transform:translate(.4px,0)}
+      50%{transform:translate(-.4px,0)}
+      75%{transform:translate(.5px,.2px)}
+    }
+
+    @keyframes zAppear{
+      0%{
+        opacity:0;
+        transform:translateY(12px) scale(.98);
+        filter:blur(5px);
+      }
+      35%{
+        opacity:.55;
+        transform:translate(-2px,1px) scale(1.005);
+      }
+      55%{
+        transform:translate(2px,-1px) scale(.998);
+      }
+      100%{
+        opacity:1;
+        transform:translateY(0) scale(1);
+        filter:blur(0);
+      }
     }
 
     @media(max-width:980px){
@@ -1351,7 +1640,7 @@
   <div class="app">
     <aside class="editor">
       <h1>소설/로그 발췌</h1>
-      <p>입력한 텍스트를 대사는 말풍선, 서술은 발췌 카드로 변환합니다. 직접 터치해서 수정 가능 O. 입력을 수정하고 반드시 미리보기 생성 버튼을 눌러주세요!</p>
+      <p>입력한 텍스트를 대사는 말풍선, 서술은 발췌 카드로 변환합니다. 미리보기 생성 시 순서대로 등장하며, GIF 저장 시 그 등장 연출도 함께 저장됩니다.</p>
 
       <div class="control-row">
         <select class="select" id="themeSelect">
@@ -1364,13 +1653,14 @@
           <option value="bank">Pink Account</option>
           <option value="olive">Olive Retro</option>
           <option value="peach">Peach Browser</option>
-          <option value="school">Retro Blue</option>
+          <option value="school">Back To School</option>
           <option value="focusblue">Focus Blue</option>
           <option value="mono">Mono Window</option>
           <option value="yellowascii">Yellow ASCII</option>
-          <option value="loverobot">Pink Violet</option>
+          <option value="loverobot">Love Robot</option>
           <option value="lilacdesk">Lilac Desk</option>
           <option value="blackwhite">Black White</option>
+          <option value="zombie">Zombie Horror</option>
         </select>
 
         <select class="select" id="fontSelect">
@@ -1389,6 +1679,7 @@
 
         <button class="btn primary" id="renderBtn">미리보기 생성</button>
         <button class="btn dark" id="saveBtn">PNG 저장</button>
+        <button class="btn dark" id="gifBtn">GIF 저장</button>
       </div>
 
       <div class="control-row">
@@ -1449,8 +1740,8 @@ R:"{{user}} 대사"
 
         <b>안내</b><br>
         MESSAGE, TITLE, 시간, 날짜, PLATFORM, 하단 CREATOR/CHARACTER 부분은 터치해서 수정 가능합니다.<br>
-        배경 장식을 꺼도 포인트 컬러는 MESSAGE/날짜/말풍선 테두리에 유지됩니다.<br>
-        서술 카드에서 MESSAGE와 날짜를 지우면 위쪽 공백도 자동으로 줄어듭니다.
+        일반 테마는 자연스럽게 등장하는 연출, 좀비 테마는 글리치/노이즈/호러풍 연출이 더해집니다.<br>
+        GIF 저장은 브라우저 성능에 따라 조금 오래 걸릴 수 있습니다.
       </div>
     </aside>
 
@@ -1459,6 +1750,8 @@ R:"{{user}} 대사"
         <section class="quote-stage" id="captureArea">
           <div class="deco d1">♡</div>
           <div class="deco d2">♪</div>
+          <div class="noise-overlay"></div>
+          <div class="static-overlay"></div>
 
           <div class="top-info">
             <div class="time editable" contenteditable="true" spellcheck="false">6:00</div>
@@ -1490,6 +1783,7 @@ R:"{{user}} 대사"
     const decoSelect = document.getElementById("decoSelect");
     const renderBtn = document.getElementById("renderBtn");
     const saveBtn = document.getElementById("saveBtn");
+    const gifBtn = document.getElementById("gifBtn");
     const captureArea = document.getElementById("captureArea");
     const quoteContent = document.getElementById("quoteContent");
     const zoomRange = document.getElementById("zoomRange");
@@ -1502,6 +1796,7 @@ R:"{{user}} 대사"
     const narrationWeightSelect = document.getElementById("narrationWeightSelect");
 
     let heightTimer = null;
+    let animationTimers = [];
 
     const fixedMetaStyles = {
       ".time": {fontSize:"30px", fontWeight:"900"},
@@ -1514,6 +1809,11 @@ R:"{{user}} 대사"
       ".quote-card-date": {fontSize:"18px", fontWeight:"720"},
       ".footer-credit": {fontSize:"16px", fontWeight:"800"}
     };
+
+    function clearAnimTimers(){
+      animationTimers.forEach(id=>clearTimeout(id));
+      animationTimers = [];
+    }
 
     function parseTextInput(text){
       const items = [];
@@ -1666,12 +1966,14 @@ R:"{{user}} 대사"
     }
 
     function renderItems(items){
+      clearAnimTimers();
       quoteContent.innerHTML = "";
 
-      items.forEach((item)=>{
+      items.forEach((item, index)=>{
         if(item.type === "dialogue"){
           const row = document.createElement("div");
-          row.className = "bubble-row " + (item.side === "right" ? "right" : "left");
+          row.className = "bubble-row " + (item.side === "right" ? "right" : "left") + " anim-item";
+          row.dataset.animIndex = index;
 
           const bubble = document.createElement("div");
           bubble.className = "bubble";
@@ -1702,7 +2004,8 @@ R:"{{user}} 대사"
         }
 
         const card = document.createElement("div");
-        card.className = "quote-card";
+        card.className = "quote-card anim-item";
+        card.dataset.animIndex = index;
 
         const head = document.createElement("div");
         head.className = "quote-card-head";
@@ -1733,6 +2036,7 @@ R:"{{user}} 대사"
       applyTextControlStyles(document);
       refreshMetaVisibility();
       updateStageHeightNow();
+      playEntranceAnimation(document);
     }
 
     function renderFromInput(){
@@ -1782,6 +2086,38 @@ R:"{{user}} 대사"
       updateStageHeightNow();
     }
 
+    function getAnimItems(scope=document){
+      return Array.from(scope.querySelectorAll(".anim-item"));
+    }
+
+    function hideAllAnimItems(scope=document){
+      getAnimItems(scope).forEach(el=>el.classList.remove("shown"));
+    }
+
+    function revealAllAnimItems(scope=document){
+      getAnimItems(scope).forEach(el=>el.classList.add("shown"));
+    }
+
+    function showItemsUntil(scope=document, count=0){
+      getAnimItems(scope).forEach((el, idx)=>{
+        el.classList.toggle("shown", idx < count);
+      });
+    }
+
+    function playEntranceAnimation(scope=document){
+      clearAnimTimers();
+      hideAllAnimItems(scope);
+      const items = getAnimItems(scope);
+      items.forEach((el, index)=>{
+        const delay = 120 + (index * 260);
+        const t = setTimeout(()=>{
+          el.classList.add("shown");
+          if(scope === document) scheduleStageHeight();
+        }, delay);
+        animationTimers.push(t);
+      });
+    }
+
     setViewScale(Number(zoomRange.value) / 100);
     setBubbleSize(Number(bubbleSizeRange.value) / 100);
     setNarrationSize(Number(narrationSizeRange.value) / 100);
@@ -1812,6 +2148,7 @@ R:"{{user}} 대사"
       root.setAttribute("data-theme", themeSelect.value);
       applyTextControlStyles(document);
       scheduleStageHeight();
+      playEntranceAnimation(document);
     });
 
     fontSelect.addEventListener("change",()=>{
@@ -1837,18 +2174,8 @@ R:"{{user}} 대사"
       el.addEventListener("blur",refreshMetaVisibility);
     });
 
-    async function waitForImages(target){
-      const images = Array.from(target.querySelectorAll("img"));
-
-      await Promise.all(images.map((img)=>{
-        if(!img.src) return Promise.resolve();
-        if(img.complete && img.naturalWidth > 0) return Promise.resolve();
-
-        return new Promise((resolve)=>{
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
-      }));
+    async function waitForPaint(){
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     }
 
     function cleanCloneForExport(clone){
@@ -1908,7 +2235,64 @@ R:"{{user}} 대사"
       return {exportRoot, clone};
     }
 
+    async function captureCanvas(target){
+      return await html2canvas(target,{
+        backgroundColor:null,
+        scale:2,
+        useCORS:true,
+        allowTaint:true,
+        logging:false,
+        width:CAPTURE_WIDTH,
+        height:CURRENT_CAPTURE_HEIGHT,
+        windowWidth:CAPTURE_WIDTH,
+        windowHeight:CURRENT_CAPTURE_HEIGHT,
+        x:0,
+        y:0,
+        scrollX:0,
+        scrollY:0,
+        imageTimeout:0,
+        removeContainer:true
+      });
+    }
+
     saveBtn.addEventListener("click",async()=>{
+      refreshMetaVisibility();
+      updateStageHeightNow();
+      applyTextControlStyles(document);
+      root.classList.add("saving-clean");
+      revealAllAnimItems(document);
+
+      if(document.activeElement && typeof document.activeElement.blur === "function"){
+        document.activeElement.blur();
+      }
+
+      window.getSelection()?.removeAllRanges();
+      saveBtn.textContent = "저장중...";
+
+      await document.fonts.ready;
+      await waitForPaint();
+
+      const {exportRoot, clone} = makeExportClone();
+      revealAllAnimItems(clone);
+      await waitForPaint();
+
+      try{
+        const canvas = await captureCanvas(clone);
+        const link = document.createElement("a");
+        link.download = "novel_excerpt_card_1080x" + CURRENT_CAPTURE_HEIGHT + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }catch(error){
+        alert("PNG 저장에 실패했어요.");
+      }finally{
+        exportRoot.remove();
+        root.classList.remove("saving-clean");
+        saveBtn.textContent = "PNG 저장";
+        playEntranceAnimation(document);
+      }
+    });
+
+    gifBtn.addEventListener("click",async()=>{
       refreshMetaVisibility();
       updateStageHeightNow();
       applyTextControlStyles(document);
@@ -1919,49 +2303,83 @@ R:"{{user}} 대사"
       }
 
       window.getSelection()?.removeAllRanges();
-
-      saveBtn.textContent = "저장중...";
+      gifBtn.textContent = "GIF 생성중...";
 
       await document.fonts.ready;
-      await waitForImages(captureArea);
-      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-      updateStageHeightNow();
+      await waitForPaint();
 
       const {exportRoot, clone} = makeExportClone();
+      hideAllAnimItems(clone);
+      await waitForPaint();
 
-      await document.fonts.ready;
-      await waitForImages(clone);
-      await new Promise((resolve)=>setTimeout(resolve,300));
+      const items = getAnimItems(clone);
+      const totalItems = items.length;
+      const isZombie = root.getAttribute("data-theme") === "zombie";
+
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        workerScript: "https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js",
+        width: CAPTURE_WIDTH,
+        height: CURRENT_CAPTURE_HEIGHT,
+        transparent: "rgba(0,0,0,0)"
+      });
 
       try{
-        const canvas = await html2canvas(clone,{
-          backgroundColor:null,
-          scale:3,
-          useCORS:true,
-          allowTaint:true,
-          logging:false,
-          width:CAPTURE_WIDTH,
-          height:CURRENT_CAPTURE_HEIGHT,
-          windowWidth:CAPTURE_WIDTH,
-          windowHeight:CURRENT_CAPTURE_HEIGHT,
-          x:0,
-          y:0,
-          scrollX:0,
-          scrollY:0,
-          imageTimeout:0,
-          removeContainer:true
+        const framePlan = [];
+
+        framePlan.push({count:0, delay:180});
+        framePlan.push({count:0, delay:180});
+
+        for(let i=1;i<=totalItems;i++){
+          framePlan.push({count:i, delay:isZombie ? 150 : 190});
+          framePlan.push({count:i, delay:isZombie ? 120 : 180});
+        }
+
+        for(let i=0;i<6;i++){
+          framePlan.push({count:totalItems, delay:160});
+        }
+
+        for(let f=0; f<framePlan.length; f++){
+          const step = framePlan[f];
+          showItemsUntil(clone, step.count);
+
+          if(isZombie){
+            clone.style.transform = (f % 2 === 0) ? "translateX(0px)" : "translateX(.35px)";
+            clone.querySelectorAll(".noise-overlay").forEach(el=>{
+              el.style.opacity = (f % 2 === 0) ? ".25" : ".15";
+            });
+            clone.querySelectorAll(".static-overlay").forEach(el=>{
+              el.style.opacity = (f % 3 === 0) ? ".52" : ".28";
+            });
+          }
+
+          await waitForPaint();
+          const canvas = await captureCanvas(clone);
+          gif.addFrame(canvas, {delay: step.delay});
+        }
+
+        gif.on("finished", function(blob){
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.download = "novel_excerpt_animation.gif";
+          link.href = url;
+          link.click();
+          setTimeout(()=>URL.revokeObjectURL(url), 3000);
         });
 
-        const link = document.createElement("a");
-        link.download = "novel_excerpt_card_1080x" + CURRENT_CAPTURE_HEIGHT + ".png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
+        await new Promise((resolve, reject)=>{
+          gif.on("finished", ()=>resolve());
+          gif.on("abort", ()=>reject(new Error("GIF aborted")));
+          gif.render();
+        });
       }catch(error){
-        alert("저장에 실패했어요. 다시 시도해주세요.");
+        alert("GIF 저장에 실패했어요.");
       }finally{
         exportRoot.remove();
         root.classList.remove("saving-clean");
-        saveBtn.textContent = "PNG 저장";
+        gifBtn.textContent = "GIF 저장";
+        playEntranceAnimation(document);
       }
     });
 
