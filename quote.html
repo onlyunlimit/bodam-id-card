@@ -528,6 +528,7 @@
       padding:21px 32px 24px;
       border-radius:26px;
       background:var(--bubble-left);
+      --bubble-tail-bg:var(--bubble-left);
       border:1px solid var(--bubble-border);
       box-shadow:
         0 12px 30px rgba(98,84,160,.16),
@@ -539,7 +540,10 @@
       font-family:var(--font-main);
     }
 
-    .bubble-row.right .bubble{background:var(--bubble-right);}
+    .bubble-row.right .bubble{
+      background:var(--bubble-right);
+      --bubble-tail-bg:var(--bubble-right);
+    }
 
     .bubble-head{
       display:flex;
@@ -552,6 +556,8 @@
       font-weight:760;
       letter-spacing:.02em;
       outline:0;
+      position:relative;
+      z-index:2;
     }
 
     .bubble-text{
@@ -559,30 +565,33 @@
       font-size:calc(28px * var(--bubble-scale));
       font-weight:var(--bubble-weight);
       line-height:1.36;
+      position:relative;
+      z-index:2;
     }
 
     .bubble::after{
-      content:"";
+      display:none!important;
+      content:none!important;
+    }
+
+    .bubble-tail{
       position:absolute;
-      bottom:-9px;
-      width:34px;
-      height:24px;
-      background:inherit;
-      border:1px solid var(--bubble-border);
-      border-top:0;
-      z-index:-1;
-      clip-path:polygon(0 0,100% 0,36% 100%);
-      box-shadow:0 10px 14px rgba(98,84,160,.08);
+      bottom:-14px;
+      width:0;
+      height:0;
+      border-left:14px solid transparent;
+      border-right:14px solid transparent;
+      border-top:16px solid var(--bubble-tail-bg);
+      pointer-events:none;
+      z-index:1;
     }
 
-    .bubble-row.left .bubble::after{
-      left:40px;
-      transform:rotate(2deg);
+    .bubble-row.left .bubble-tail{
+      left:42px;
     }
 
-    .bubble-row.right .bubble::after{
-      right:40px;
-      transform:scaleX(-1) rotate(2deg);
+    .bubble-row.right .bubble-tail{
+      right:42px;
     }
 
     html[data-theme="pixel"] .bubble,
@@ -597,10 +606,9 @@
       box-shadow:0 0 18px rgba(32,255,208,.10);
     }
 
-    html[data-theme="pixel"] .bubble::after,
-    html[data-theme="terminal"] .bubble::after{
-      display:none;
-      content:none;
+    html[data-theme="pixel"] .bubble-tail,
+    html[data-theme="terminal"] .bubble-tail{
+      display:none!important;
     }
 
     .quote-card{
@@ -1031,6 +1039,10 @@ R:"알면서 난 뛰어들었어"
 
           const bubble = document.createElement("div");
           bubble.className = "bubble";
+
+          const tail = document.createElement("span");
+          tail.className = "bubble-tail";
+          bubble.appendChild(tail);
 
           const head = document.createElement("div");
           head.className = "bubble-head";
