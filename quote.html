@@ -19,7 +19,6 @@
       --capture-w:1080px;
       --capture-h:1350px;
       --view-scale:.52;
-
       --bubble-scale:1;
       --bubble-weight:800;
       --narration-scale:1;
@@ -203,7 +202,9 @@
 
     body{overflow:hidden;}
 
-    button,select,input,textarea{font-family:var(--ui-font)!important;}
+    button,select,input,textarea{
+      font-family:var(--ui-font)!important;
+    }
 
     .app{
       width:100vw;
@@ -682,10 +683,25 @@
       image-rendering:auto!important;
     }
 
-    .quote-stage.gif-exporting,
     .quote-stage.gif-exporting *{
       transition:none!important;
-      animation-play-state:paused!important;
+    }
+
+    .quote-stage.gif-exporting .anim-item{
+      animation:none!important;
+    }
+
+    .quote-stage.gif-exporting .anim-item:not(.shown){
+      opacity:0!important;
+      transform:translateY(18px)!important;
+      filter:blur(3px)!important;
+    }
+
+    .quote-stage.gif-exporting .anim-item.shown{
+      opacity:1!important;
+      transform:translateY(0)!important;
+      filter:blur(0)!important;
+      animation:none!important;
     }
 
     .quote-stage.gif-exporting .noise-overlay,
@@ -716,7 +732,9 @@
     }
 
     html[data-theme="zombie"] .noise-overlay,
-    html[data-theme="zombie"] .static-overlay{display:block;}
+    html[data-theme="zombie"] .static-overlay{
+      display:block;
+    }
 
     .noise-overlay{
       opacity:.18;
@@ -951,7 +969,9 @@
     html[data-theme="terminal"] .bubble-tail,
     html[data-theme="mono"] .bubble-tail,
     html[data-theme="yellowascii"] .bubble-tail,
-    html[data-theme="lilacdesk"] .bubble-tail{display:none!important;}
+    html[data-theme="lilacdesk"] .bubble-tail{
+      display:none!important;
+    }
 
     html[data-theme="blackwhite"] .bubble{
       background:#ffffff!important;
@@ -1025,7 +1045,9 @@
     }
 
     .quote-card-head.is-empty,
-    .quote-card-date.is-empty{display:none!important;}
+    .quote-card-date.is-empty{
+      display:none!important;
+    }
 
     html[data-theme="pixel"] .quote-card,
     html[data-theme="terminal"] .quote-card,
@@ -1035,7 +1057,9 @@
     html[data-theme="yellowascii"] .quote-card,
     html[data-theme="lilacdesk"] .quote-card,
     html[data-theme="blackwhite"] .quote-card,
-    html[data-theme="zombie"] .quote-card{border-radius:0;}
+    html[data-theme="zombie"] .quote-card{
+      border-radius:0;
+    }
 
     html[data-theme="blackwhite"] .quote-card{
       color:#111111!important;
@@ -1107,7 +1131,9 @@
     }
 
     html[data-theme="blackwhite"] .quote-card-head,
-    html[data-theme="blackwhite"] .quote-card-date{color:#555555!important;}
+    html[data-theme="blackwhite"] .quote-card-date{
+      color:#555555!important;
+    }
 
     html[data-theme="blackwhite"] .quote-text{
       color:#111111!important;
@@ -1174,7 +1200,9 @@
     }
 
     .export-root *,
-    html.saving-clean *{caret-color:transparent!important;}
+    html.saving-clean *{
+      caret-color:transparent!important;
+    }
 
     .export-root [contenteditable],
     html.saving-clean [contenteditable]{
@@ -1202,7 +1230,9 @@
 
     .editable{outline:none;}
 
-    [contenteditable="true"]{-webkit-user-modify:read-write-plaintext-only;}
+    [contenteditable="true"]{
+      -webkit-user-modify:read-write-plaintext-only;
+    }
 
     [contenteditable="true"]:focus{
       background:transparent!important;
@@ -1220,7 +1250,9 @@
     html[data-theme="yellowascii"] [contenteditable="true"]:focus,
     html[data-theme="lilacdesk"] [contenteditable="true"]:focus,
     html[data-theme="blackwhite"] [contenteditable="true"]:focus,
-    html[data-theme="zombie"] [contenteditable="true"]:focus{border-radius:0;}
+    html[data-theme="zombie"] [contenteditable="true"]:focus{
+      border-radius:0;
+    }
 
     html[data-theme="zombie"] [contenteditable="true"]:focus{
       outline:1px dashed rgba(91,255,154,.35);
@@ -1310,7 +1342,7 @@
   <div class="app">
     <aside class="editor">
       <h1>소설/로그 발췌</h1>
-      <p>입력한 텍스트를 대사는 말풍선, 서술은 발췌 카드로 변환합니다. 미리보기 생성 시 순서대로 등장하며, GIF 저장 시 그 등장 연출도 함께 저장됩니다.</p>
+      <p>입력한 텍스트를 대사는 말풍선, 서술은 발췌 카드로 변환합니다. 미리보기 생성 시 순서대로 등장하며, GIF 저장 시 하나의 GIF 파일로 바로 재생됩니다.</p>
 
       <div class="control-row">
         <select class="select" id="themeSelect">
@@ -1767,15 +1799,11 @@ R:"{{user}} 대사"
     }
 
     function hideAllAnimItems(scope=document){
-      getAnimItems(scope).forEach(el=>{
-        el.classList.remove("shown");
-      });
+      getAnimItems(scope).forEach(el=>el.classList.remove("shown"));
     }
 
     function revealAllAnimItems(scope=document){
-      getAnimItems(scope).forEach(el=>{
-        el.classList.add("shown");
-      });
+      getAnimItems(scope).forEach(el=>el.classList.add("shown"));
     }
 
     function showItemsUntil(scope=document, count=0){
@@ -1784,23 +1812,15 @@ R:"{{user}} 대사"
       });
     }
 
-    function forceGifItemsUntil(scope, count){
+    function forceGifItemState(scope=document, count=0){
       getAnimItems(scope).forEach((el, idx)=>{
         const shown = idx < count;
-
-        if(shown){
-          el.classList.add("shown");
-          el.style.opacity = "1";
-          el.style.visibility = "visible";
-          el.style.transform = "translateY(0)";
-          el.style.filter = "none";
-        }else{
-          el.classList.remove("shown");
-          el.style.opacity = "0";
-          el.style.visibility = "hidden";
-          el.style.transform = "translateY(18px)";
-          el.style.filter = "none";
-        }
+        el.classList.toggle("shown", shown);
+        el.style.transition = "none";
+        el.style.animation = "none";
+        el.style.opacity = shown ? "1" : "0";
+        el.style.transform = shown ? "translateY(0)" : "translateY(18px)";
+        el.style.filter = shown ? "blur(0)" : "blur(3px)";
       });
     }
 
@@ -1808,6 +1828,15 @@ R:"{{user}} 대사"
       clearAnimTimers();
       hideAllAnimItems(scope);
       const items = getAnimItems(scope);
+
+      items.forEach((el, index)=>{
+        el.style.opacity = "";
+        el.style.transform = "";
+        el.style.filter = "";
+        el.style.transition = "";
+        el.style.animation = "";
+      });
+
       items.forEach((el, index)=>{
         const delay = 120 + (index * 260);
         const t = setTimeout(()=>{
@@ -1885,7 +1914,7 @@ R:"{{user}} 대사"
 
     async function captureCanvas(target, scale=2, backgroundColor=null){
       return await html2canvas(target,{
-        backgroundColor: backgroundColor,
+        backgroundColor:backgroundColor,
         scale,
         useCORS:true,
         allowTaint:true,
@@ -2067,15 +2096,13 @@ R:"{{user}} 대사"
         const made = makeExportClone();
         exportRoot = made.exportRoot;
         const clone = made.clone;
+
         clone.classList.add("gif-exporting");
+        forceGifItemState(clone, 0);
+        await waitForPaint();
 
         const items = getAnimItems(clone);
         const totalItems = items.length;
-
-        if(totalItems === 0){
-          throw new Error("GIF로 만들 항목이 없습니다.");
-        }
-
         const isZombie = root.getAttribute("data-theme") === "zombie";
         const workerUrl = await getGifWorkerUrl();
         const matteColor = getCurrentPageBg();
@@ -2083,13 +2110,13 @@ R:"{{user}} 대사"
         const gifHeight = Math.max(1, Math.round(CURRENT_CAPTURE_HEIGHT * (GIF_WIDTH / CAPTURE_WIDTH)));
 
         const gif = new GIF({
-          workers: 1,
-          quality: 12,
-          width: GIF_WIDTH,
-          height: gifHeight,
-          workerScript: workerUrl,
-          repeat: 0,
-          background: matteColor
+          workers:1,
+          quality:12,
+          width:GIF_WIDTH,
+          height:gifHeight,
+          workerScript:workerUrl,
+          repeat:0,
+          background:matteColor
         });
 
         gif.on("progress", function(progress){
@@ -2097,25 +2124,27 @@ R:"{{user}} 대사"
         });
 
         const framePlan = [];
+        framePlan.push({count:0, delay:220});
+        framePlan.push({count:0, delay:160});
 
         for(let i=1;i<=totalItems;i++){
-          framePlan.push({count:i, delay:isZombie ? 130 : 180});
-          framePlan.push({count:i, delay:isZombie ? 110 : 160});
+          framePlan.push({count:i, delay:isZombie ? 120 : 170});
+          framePlan.push({count:i, delay:isZombie ? 100 : 160});
         }
 
-        for(let i=0;i<6;i++){
+        for(let i=0;i<5;i++){
           framePlan.push({count:totalItems, delay:170});
         }
 
         for(let f=0; f<framePlan.length; f++){
           const step = framePlan[f];
 
-          gifBtn.textContent = "프레임 캡쳐중... " + (f + 1) + "/" + framePlan.length;
+          gifBtn.textContent = "GIF 합성중... " + (f + 1) + "/" + framePlan.length;
 
-          forceGifItemsUntil(clone, step.count);
+          forceGifItemState(clone, step.count);
 
           if(isZombie){
-            clone.style.transform = (f % 2 === 0) ? "translateX(0px)" : "translateX(.45px)";
+            clone.style.filter = (f % 2 === 0) ? "none" : "contrast(1.04) saturate(1.08)";
             clone.querySelectorAll(".noise-overlay").forEach(el=>{
               el.style.opacity = (f % 2 === 0) ? ".26" : ".13";
             });
@@ -2123,7 +2152,7 @@ R:"{{user}} 대사"
               el.style.opacity = (f % 3 === 0) ? ".54" : ".24";
             });
           }else{
-            clone.style.transform = "translateX(0px)";
+            clone.style.filter = "none";
           }
 
           await waitForPaint();
@@ -2131,9 +2160,8 @@ R:"{{user}} 대사"
           const sourceCanvas = await captureCanvas(clone, 1, matteColor);
           const flatCanvas = flattenCanvasForGif(sourceCanvas, matteColor);
           const smallCanvas = resizeCanvas(flatCanvas, GIF_WIDTH);
-          const smallCtx = smallCanvas.getContext("2d", {willReadFrequently:true});
 
-          gif.addFrame(smallCtx, {
+          gif.addFrame(smallCanvas, {
             copy:true,
             delay:speedAdjustedDelay(step.delay)
           });
