@@ -434,36 +434,6 @@
       --pixelated:auto;
     }
 
-    html[data-theme="zombie"]{
-      --page-bg:#0d1110;
-      --stage-bg1:#121715;
-      --stage-bg2:#1a201d;
-      --stage-bg3:#0a0d0c;
-
-      --ink:#d7ded1;
-      --deep:#eef5e7;
-      --sub:#92a38f;
-      --muted:#5a6559;
-
-      --panel-solid:#171d1a;
-      --bubble-left:#181f1b;
-      --bubble-right:#1f2420;
-      --bubble-border:#728b49;
-
-      --accent:#8ea95d;
-      --accent2:#b23b3b;
-      --accent3:#30402b;
-
-      --point-text:#9bbd57;
-      --point-border:#6f8443;
-      --grid:rgba(125,145,109,.06);
-
-      --shadow:0 22px 50px rgba(0,0,0,.45);
-      --radius:18px;
-      --card-radius:12px;
-      --pixelated:auto;
-    }
-
     html[data-font="sans"]{--font-main:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;}
     html[data-font="round"]{--font-main:"Gowun Dodum","IBM Plex Sans KR","Noto Sans KR",sans-serif;}
     html[data-font="serif"]{--font-main:"Nanum Myeongjo","Noto Serif KR",serif;}
@@ -518,12 +488,6 @@
       background:#f5f5f5;
       border:1px solid #111;
       box-shadow:none;
-    }
-
-    html[data-theme="zombie"] .editor{
-      background:#131816;
-      border:1px solid rgba(111,132,67,.65);
-      box-shadow:0 0 24px rgba(0,0,0,.28);
     }
 
     .editor h1{
@@ -623,14 +587,6 @@
       border-color:#111;
     }
 
-    html[data-theme="zombie"] .btn,
-    html[data-theme="zombie"] .select{
-      background:#1b201d;
-      color:var(--deep);
-      border:1px solid rgba(111,132,67,.75);
-      box-shadow:none;
-    }
-
     .btn.primary{background:var(--accent);color:#fff;}
     .btn.dark{background:var(--deep);color:#fff;}
 
@@ -651,16 +607,6 @@
       background:#000;
       color:#fff;
       border-color:#000;
-    }
-
-    html[data-theme="zombie"] .btn.primary{
-      background:#6f8443;
-      color:#eef5e7;
-    }
-
-    html[data-theme="zombie"] .btn.dark{
-      background:#3a1616;
-      color:#f2dfdf;
     }
 
     .textarea-label{
@@ -707,14 +653,6 @@
       border-radius:0;
     }
 
-    html[data-theme="zombie"] textarea{
-      background:#111613;
-      color:#e6eedf;
-      border:1px solid rgba(111,132,67,.8);
-      box-shadow:inset 0 0 18px rgba(0,0,0,.22);
-      border-radius:16px;
-    }
-
     html[data-theme="pixel"] textarea,
     html[data-theme="win95"] textarea,
     html[data-theme="olive"] textarea,
@@ -748,13 +686,6 @@
       border:2px solid #111;
       color:#333;
       border-radius:0;
-    }
-
-    html[data-theme="zombie"] .hint{
-      background:#111613;
-      border:1px solid rgba(111,132,67,.75);
-      color:#96a58f;
-      border-radius:16px;
     }
 
     .hint b{color:var(--deep);}
@@ -907,26 +838,6 @@
       opacity:1;
     }
 
-    html[data-theme="zombie"] .quote-stage{
-      background:
-        radial-gradient(circle at 18% 12%,rgba(120,22,22,.18) 0 120px,transparent 121px),
-        radial-gradient(circle at 82% 16%,rgba(122,148,67,.18) 0 90px,transparent 91px),
-        radial-gradient(circle at 50% 100%,rgba(0,0,0,.55) 0 260px,transparent 261px),
-        linear-gradient(180deg,#161b18 0%,#0d100f 54%,#060707 100%);
-    }
-
-    html[data-theme="zombie"] .quote-stage::before{
-      border-color:rgba(111,132,67,.26);
-    }
-
-    html[data-theme="zombie"] .quote-stage::after{
-      background:
-        linear-gradient(rgba(109,126,83,.06) 1px, transparent 1px),
-        linear-gradient(90deg,rgba(109,126,83,.06) 1px, transparent 1px);
-      background-size:34px 34px;
-      opacity:.55;
-    }
-
     .quote-stage.exporting{
       position:relative!important;
       left:0!important;
@@ -951,29 +862,6 @@
 
     .deco.d1{left:70px;top:72px;font-size:42px;}
     .deco.d2{right:76px;top:118px;font-size:54px;color:var(--accent2);}
-
-    .noise-overlay{
-      display:none;
-      position:absolute;
-      inset:0;
-      z-index:2;
-      pointer-events:none;
-      opacity:.22;
-      background:
-        repeating-linear-gradient(180deg,
-          rgba(255,255,255,.025) 0 1px,
-          transparent 1px 3px),
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,.08) 0 1px, transparent 2px),
-        radial-gradient(circle at 75% 60%, rgba(255,255,255,.05) 0 1px, transparent 2px),
-        radial-gradient(circle at 40% 80%, rgba(0,0,0,.22) 0 1px, transparent 2px),
-        linear-gradient(115deg, transparent 0 22%, rgba(255,255,255,.025) 22% 23%, transparent 23% 46%, rgba(255,255,255,.018) 46% 47%, transparent 47% 100%);
-      background-size:auto,120px 120px,160px 160px,140px 140px,100% 100%;
-      mix-blend-mode:screen;
-    }
-
-    html[data-theme="zombie"] .noise-overlay{
-      display:block;
-    }
 
     .top-info{
       position:absolute;
@@ -1017,11 +905,6 @@
     html[data-theme="blackwhite"] .top-info{
       color:#fff;
       text-shadow:none;
-    }
-
-    html[data-theme="zombie"] .top-info{
-      color:#dce7d2;
-      text-shadow:0 0 10px rgba(0,0,0,.55);
     }
 
     .time{
@@ -1209,33 +1092,6 @@
       background:#ffffff!important;
     }
 
-    html[data-theme="zombie"] .bubble{
-      background:linear-gradient(180deg, rgba(26,34,28,.98), rgba(18,24,20,.98))!important;
-      color:#edf5e5!important;
-      border-color:#6f8443!important;
-      box-shadow:
-        0 10px 22px rgba(0,0,0,.38),
-        inset 0 0 0 1px rgba(154,186,92,.06);
-    }
-
-    html[data-theme="zombie"] .bubble-row.right .bubble{
-      background:linear-gradient(180deg, rgba(35,29,29,.96), rgba(24,20,20,.96))!important;
-      border-color:#7e4747!important;
-    }
-
-    html[data-theme="zombie"] .bubble-head{
-      color:#9bbd57!important;
-      text-shadow:0 0 8px rgba(155,189,87,.1);
-    }
-
-    html[data-theme="zombie"] .bubble-text{
-      color:#ecf3e7!important;
-    }
-
-    html[data-theme="zombie"] .bubble-tail{
-      background:#171d1a!important;
-    }
-
     .quote-card{
       position:relative;
       width:100%;
@@ -1282,14 +1138,6 @@
       background:#ffffff!important;
       border-color:#ffffff!important;
       box-shadow:10px 10px 0 rgba(255,255,255,.16);
-    }
-
-    html[data-theme="zombie"] .quote-card{
-      background:linear-gradient(180deg, rgba(20,25,22,.98), rgba(14,17,15,.98))!important;
-      border-color:#6f8443!important;
-      box-shadow:
-        0 14px 28px rgba(0,0,0,.4),
-        inset 0 0 0 1px rgba(154,186,92,.05);
     }
 
     .quote-card-head{
@@ -1354,16 +1202,6 @@
       font-style:italic!important;
     }
 
-    html[data-theme="zombie"] .quote-card-head,
-    html[data-theme="zombie"] .quote-card-date{
-      color:#9bbd57!important;
-    }
-
-    html[data-theme="zombie"] .quote-text{
-      color:#edf5e8!important;
-      text-shadow:0 0 6px rgba(0,0,0,.18);
-    }
-
     .footer-credit{
       position:absolute;
       left:0;
@@ -1386,10 +1224,6 @@
 
     html[data-theme="blackwhite"] .footer-credit{
       color:rgba(255,255,255,.54);
-    }
-
-    html[data-theme="zombie"] .footer-credit{
-      color:rgba(155,189,87,.55);
     }
 
     .export-root{
@@ -1453,20 +1287,6 @@
       color:#111111!important;
     }
 
-    html[data-theme="zombie"] .export-root .quote-card{
-      background:linear-gradient(180deg, rgba(20,25,22,.98), rgba(14,17,15,.98))!important;
-      color:#edf5e8!important;
-    }
-
-    html[data-theme="zombie"] .export-root .bubble{
-      background:linear-gradient(180deg, rgba(26,34,28,.98), rgba(18,24,20,.98))!important;
-      color:#edf5e7!important;
-    }
-
-    html[data-theme="zombie"] .export-root .bubble-row.right .bubble{
-      background:linear-gradient(180deg, rgba(35,29,29,.96), rgba(24,20,20,.96))!important;
-    }
-
     .export-root .bubble{
       backdrop-filter:none!important;
       -webkit-backdrop-filter:none!important;
@@ -1495,11 +1315,6 @@
     html[data-theme="lilacdesk"] [contenteditable="true"]:focus,
     html[data-theme="blackwhite"] [contenteditable="true"]:focus{
       border-radius:0;
-    }
-
-    html[data-theme="zombie"] [contenteditable="true"]:focus{
-      outline:1px dashed rgba(155,189,87,.45);
-      border-radius:4px;
     }
 
     html.saving-clean [contenteditable="true"]:focus{
@@ -1556,7 +1371,6 @@
           <option value="loverobot">Love Robot</option>
           <option value="lilacdesk">Lilac Desk</option>
           <option value="blackwhite">Black White</option>
-          <option value="zombie">Zombie Apocalypse</option>
         </select>
 
         <select class="select" id="fontSelect">
@@ -1645,7 +1459,6 @@ R:"{{user}} 대사"
         <section class="quote-stage" id="captureArea">
           <div class="deco d1">♡</div>
           <div class="deco d2">♪</div>
-          <div class="noise-overlay"></div>
 
           <div class="top-info">
             <div class="time editable" contenteditable="true" spellcheck="false">6:00</div>
