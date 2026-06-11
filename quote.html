@@ -33,7 +33,6 @@
       --sub:#8c83aa;
       --muted:#bbb3cf;
 
-      --panel:rgba(255,255,255,.68);
       --panel-solid:#fbf9ff;
       --bubble-left:#ffffff;
       --bubble-right:#fff4fb;
@@ -47,6 +46,8 @@
       --shadow:0 22px 50px rgba(93,74,150,.22);
       --radius:46px;
       --card-radius:34px;
+
+      --ui-font:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
       --font-main:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
       --pixelated:auto;
     }
@@ -60,7 +61,6 @@
       --deep:#254875;
       --sub:#6687b5;
       --muted:#a6bddb;
-      --panel:rgba(255,255,255,.72);
       --panel-solid:#fbfdff;
       --bubble-left:#ffffff;
       --bubble-right:#fff2f8;
@@ -84,7 +84,6 @@
       --deep:#0d2f91;
       --sub:#4e6fc0;
       --muted:#8ca2dd;
-      --panel:rgba(242,247,255,.86);
       --panel-solid:#f2f7ff;
       --bubble-left:#ffffff;
       --bubble-right:#eef4ff;
@@ -108,7 +107,6 @@
       --deep:#5e4f96;
       --sub:#9889c7;
       --muted:#c6bae7;
-      --panel:rgba(255,254,238,.82);
       --panel-solid:#fffef0;
       --bubble-left:#fffdf0;
       --bubble-right:#fff3d8;
@@ -132,7 +130,6 @@
       --deep:#99ffe7;
       --sub:#50c9ad;
       --muted:#277b6b;
-      --panel:rgba(0,20,16,.82);
       --panel-solid:#031a15;
       --bubble-left:#031a15;
       --bubble-right:#061f1a;
@@ -160,14 +157,14 @@
       width:100%;
       min-height:100%;
       background:var(--page-bg);
-      font-family:var(--font-main);
+      font-family:var(--ui-font);
       color:var(--ink);
     }
 
     body{overflow:hidden;}
 
     button,select,input,textarea{
-      font-family:var(--font-main);
+      font-family:var(--ui-font)!important;
     }
 
     .app{
@@ -188,6 +185,7 @@
       padding:18px;
       backdrop-filter:blur(18px);
       -webkit-backdrop-filter:blur(18px);
+      font-family:var(--ui-font)!important;
     }
 
     html[data-theme="terminal"] .editor{
@@ -201,6 +199,7 @@
       color:var(--deep);
       font-size:23px;
       letter-spacing:-.05em;
+      font-family:var(--ui-font)!important;
     }
 
     .editor p{
@@ -209,6 +208,7 @@
       font-size:13px;
       line-height:1.55;
       font-weight:700;
+      font-family:var(--ui-font)!important;
     }
 
     .control-row{
@@ -217,6 +217,7 @@
       align-items:center;
       gap:8px;
       margin-bottom:12px;
+      font-family:var(--ui-font)!important;
     }
 
     .control-label{
@@ -224,6 +225,7 @@
       font-size:13px;
       font-weight:900;
       min-width:78px;
+      font-family:var(--ui-font)!important;
     }
 
     .btn,.select{
@@ -236,6 +238,7 @@
       font-weight:900;
       box-shadow:0 8px 18px rgba(98,84,160,.12);
       cursor:pointer;
+      font-family:var(--ui-font)!important;
     }
 
     .select.small{
@@ -275,6 +278,7 @@
       color:var(--deep);
       font-size:13px;
       font-weight:900;
+      font-family:var(--ui-font)!important;
     }
 
     textarea{
@@ -293,6 +297,7 @@
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.9),
         0 10px 22px rgba(98,84,160,.10);
+      font-family:var(--ui-font)!important;
     }
 
     html[data-theme="terminal"] textarea{
@@ -318,6 +323,7 @@
       font-size:12px;
       line-height:1.65;
       font-weight:750;
+      font-family:var(--ui-font)!important;
     }
 
     html[data-theme="terminal"] .hint{
@@ -418,7 +424,7 @@
       top:0!important;
       transform:none!important;
       width:1080px!important;
-      height:1350px!important;
+      height:var(--capture-h)!important;
     }
 
     .deco{
@@ -504,12 +510,11 @@
       left:86px;
       right:86px;
       top:226px;
-      bottom:76px;
       z-index:5;
       display:flex;
       flex-direction:column;
       gap:30px;
-      overflow:hidden;
+      overflow:visible;
       font-family:var(--font-main);
     }
 
@@ -620,19 +625,20 @@
     .quote-card{
       position:relative;
       width:100%;
-      min-height:150px;
+      min-height:116px;
       height:auto;
       border-radius:var(--card-radius);
-      padding:66px 50px 46px;
+      padding:48px 42px 34px;
       background:var(--panel-solid);
       border:1px solid rgba(255,255,255,.8);
       box-shadow:0 18px 40px rgba(98,84,160,.13);
-      overflow:hidden;
+      overflow:visible;
       font-family:var(--font-main);
     }
 
     .quote-card.compact{
-      padding-top:42px;
+      padding:30px 42px 30px;
+      min-height:88px;
     }
 
     .quote-card-head.is-empty,
@@ -652,13 +658,13 @@
 
     .quote-card-head{
       position:absolute;
-      left:46px;
-      top:28px;
+      left:42px;
+      top:20px;
       display:flex;
       align-items:center;
       gap:8px;
       color:var(--sub);
-      font-size:22px;
+      font-size:20px;
       font-weight:760;
       outline:0;
       background:transparent!important;
@@ -666,10 +672,10 @@
 
     .quote-card-date{
       position:absolute;
-      right:46px;
-      top:30px;
+      right:42px;
+      top:22px;
       color:var(--sub);
-      font-size:20px;
+      font-size:18px;
       font-weight:720;
       outline:0;
       background:transparent!important;
@@ -678,7 +684,7 @@
     .quote-text{
       color:var(--deep);
       font-size:calc(34px * var(--narration-scale));
-      line-height:1.62;
+      line-height:1.55;
       font-weight:var(--narration-weight);
       font-style:italic;
       letter-spacing:-.035em;
@@ -722,7 +728,7 @@
       left:-20000px;
       top:0;
       width:1080px;
-      height:1350px;
+      height:var(--capture-h);
       overflow:hidden;
       background:transparent;
       z-index:-1;
@@ -735,7 +741,7 @@
       top:0!important;
       transform:none!important;
       width:1080px!important;
-      height:1350px!important;
+      height:var(--capture-h)!important;
     }
 
     .export-root *,
@@ -773,7 +779,6 @@
       -webkit-backdrop-filter:none!important;
     }
 
-    .hidden-file{display:none;}
     .editable{outline:none;}
 
     [contenteditable="true"]{
@@ -909,7 +914,8 @@ R:"{{user}} 대사"
 
         <b>안내</b><br>
         MESSAGE, TITLE, 시간, 날짜, PLATFORM, 하단 CREATOR/CHARACTER 부분은 터치해서 수정 가능합니다.<br>
-        서술 카드에서 MESSAGE와 날짜를 지우면 위쪽 공백도 자동으로 줄어듭니다.
+        서술 카드에서 MESSAGE와 날짜를 지우면 위쪽 공백도 자동으로 줄어듭니다.<br>
+        내용이 길어지면 캔버스 높이도 자동으로 늘어나며, 저장본에도 반영됩니다.
       </div>
     </aside>
 
@@ -941,7 +947,8 @@ R:"{{user}} 대사"
 
   <script>
     const CAPTURE_WIDTH = 1080;
-    const CAPTURE_HEIGHT = 1350;
+    const MIN_CAPTURE_HEIGHT = 1350;
+    let CURRENT_CAPTURE_HEIGHT = MIN_CAPTURE_HEIGHT;
 
     const root = document.documentElement;
     const sourceInput = document.getElementById("sourceInput");
@@ -959,6 +966,8 @@ R:"{{user}} 대사"
     const narrationSizeRange = document.getElementById("narrationSizeRange");
     const narrationSizeValue = document.getElementById("narrationSizeValue");
     const narrationWeightSelect = document.getElementById("narrationWeightSelect");
+
+    let heightTimer = null;
 
     function parseTextInput(text){
       const items = [];
@@ -1010,6 +1019,25 @@ R:"{{user}} 대사"
       return el.textContent.replace(/\u00a0/g," ").trim() === "";
     }
 
+    function updateStageHeightNow(){
+      const contentTop = quoteContent.offsetTop || 226;
+      const contentHeight = quoteContent.scrollHeight || quoteContent.getBoundingClientRect().height || 0;
+      const needed = Math.ceil(Math.max(MIN_CAPTURE_HEIGHT, contentTop + contentHeight + 120));
+
+      CURRENT_CAPTURE_HEIGHT = needed;
+      root.style.setProperty("--capture-h", needed + "px");
+      return needed;
+    }
+
+    function scheduleStageHeight(){
+      if(heightTimer) cancelAnimationFrame(heightTimer);
+      heightTimer = requestAnimationFrame(()=>{
+        heightTimer = requestAnimationFrame(()=>{
+          updateStageHeightNow();
+        });
+      });
+    }
+
     function refreshMetaVisibility(){
       document.querySelectorAll(".quote-card").forEach((card)=>{
         const head = card.querySelector(".quote-card-head");
@@ -1023,6 +1051,8 @@ R:"{{user}} 대사"
 
         card.classList.toggle("compact", headEmpty && dateEmpty);
       });
+
+      scheduleStageHeight();
     }
 
     function makeEditable(el){
@@ -1037,8 +1067,15 @@ R:"{{user}} 대사"
         }
       });
 
-      el.addEventListener("input",refreshMetaVisibility);
-      el.addEventListener("blur",refreshMetaVisibility);
+      el.addEventListener("input",()=>{
+        refreshMetaVisibility();
+        scheduleStageHeight();
+      });
+
+      el.addEventListener("blur",()=>{
+        refreshMetaVisibility();
+        scheduleStageHeight();
+      });
     }
 
     function renderItems(items){
@@ -1107,6 +1144,7 @@ R:"{{user}} 대사"
       });
 
       refreshMetaVisibility();
+      updateStageHeightNow();
     }
 
     function renderFromInput(){
@@ -1118,31 +1156,37 @@ R:"{{user}} 대사"
       const safeScale = Math.max(0.35, Math.min(1, scale));
       root.style.setProperty("--view-scale", safeScale);
       zoomValue.textContent = Math.round(safeScale * 100) + "%";
+      scheduleStageHeight();
     }
 
     function setBubbleSize(scale){
       const safeScale = Math.max(0.75, Math.min(1.4, scale));
       root.style.setProperty("--bubble-scale", safeScale);
       bubbleSizeValue.textContent = Math.round(safeScale * 100) + "%";
+      scheduleStageHeight();
     }
 
     function setNarrationSize(scale){
       const safeScale = Math.max(0.45, Math.min(1.4, scale));
       root.style.setProperty("--narration-scale", safeScale);
       narrationSizeValue.textContent = Math.round(safeScale * 100) + "%";
+      scheduleStageHeight();
     }
 
     function setBubbleWeight(weight){
       root.style.setProperty("--bubble-weight", weight);
+      scheduleStageHeight();
     }
 
     function setNarrationWeight(weight){
       root.style.setProperty("--narration-weight", weight);
+      scheduleStageHeight();
     }
 
     async function applyFont(fontValue){
       root.setAttribute("data-font", fontValue);
       await document.fonts.ready;
+      updateStageHeightNow();
     }
 
     setViewScale(Number(zoomRange.value) / 100);
@@ -1173,6 +1217,7 @@ R:"{{user}} 대사"
 
     themeSelect.addEventListener("change",()=>{
       root.setAttribute("data-theme", themeSelect.value);
+      scheduleStageHeight();
     });
 
     fontSelect.addEventListener("change",()=>{
@@ -1226,13 +1271,16 @@ R:"{{user}} 대사"
 
     function makeExportClone(){
       refreshMetaVisibility();
+      updateStageHeightNow();
 
       const exportRoot = document.createElement("div");
       exportRoot.className = "export-root";
+      exportRoot.style.height = CURRENT_CAPTURE_HEIGHT + "px";
 
       const clone = captureArea.cloneNode(true);
       clone.id = "captureExport";
       clone.classList.add("exporting");
+      clone.style.height = CURRENT_CAPTURE_HEIGHT + "px";
 
       cleanCloneForExport(clone);
 
@@ -1244,6 +1292,7 @@ R:"{{user}} 대사"
 
     saveBtn.addEventListener("click",async()=>{
       refreshMetaVisibility();
+      updateStageHeightNow();
       root.classList.add("saving-clean");
 
       if(document.activeElement && typeof document.activeElement.blur === "function"){
@@ -1257,6 +1306,7 @@ R:"{{user}} 대사"
       await document.fonts.ready;
       await waitForImages(captureArea);
       await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      updateStageHeightNow();
 
       const {exportRoot, clone} = makeExportClone();
 
@@ -1272,9 +1322,9 @@ R:"{{user}} 대사"
           allowTaint:true,
           logging:false,
           width:CAPTURE_WIDTH,
-          height:CAPTURE_HEIGHT,
+          height:CURRENT_CAPTURE_HEIGHT,
           windowWidth:CAPTURE_WIDTH,
-          windowHeight:CAPTURE_HEIGHT,
+          windowHeight:CURRENT_CAPTURE_HEIGHT,
           x:0,
           y:0,
           scrollX:0,
@@ -1284,7 +1334,7 @@ R:"{{user}} 대사"
         });
 
         const link = document.createElement("a");
-        link.download = "novel_excerpt_card_1080x1350.png";
+        link.download = "novel_excerpt_card_1080x" + CURRENT_CAPTURE_HEIGHT + ".png";
         link.href = canvas.toDataURL("image/png");
         link.click();
       }catch(error){
@@ -1300,6 +1350,11 @@ R:"{{user}} 대사"
       await document.fonts.ready;
       renderFromInput();
       refreshMetaVisibility();
+      updateStageHeightNow();
+    });
+
+    window.addEventListener("resize",()=>{
+      scheduleStageHeight();
     });
 
     renderFromInput();
