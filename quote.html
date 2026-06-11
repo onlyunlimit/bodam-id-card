@@ -731,7 +731,7 @@
       z-index:5;
       text-align:center;
       color:rgba(98,94,132,.34);
-      font-size:12px;
+      font-size:16px;
       font-weight:800;
       letter-spacing:.03em;
       outline:0;
@@ -808,8 +808,8 @@
 <body>
   <div class="app">
     <aside class="editor">
-      <h1>소설 발췌앱</h1>
-      <p>텍스트 또는 JSON을 넣으면 대사는 말풍선, 서술은 발췌 카드로 변환됩니다.</p>
+      <h1>소설/로그 발췌</h1>
+      <p>텍스트 또는 JSON을 넣으면 대사는 말풍선, 서술은 발췌 카드로 변환됩니다. 직접 터치해서 수정 가능 O</p>
 
       <div class="control-row">
         <select class="select" id="inputMode">
@@ -881,11 +881,11 @@
       </div>
 
       <label class="textarea-label">입력</label>
-      <textarea id="sourceInput" spellcheck="false">L:"꽃송이가 나를 삼킬 걸"
+      <textarea id="sourceInput" spellcheck="false">L:"캐릭터 대사"
 
-R:"알면서 난 뛰어들었어"
+R:"{{user}} 대사"
 
-*비가 그친 뒤의 공원은 이상할 만큼 조용했다. 젖은 잔디 위로 빛이 낮게 번졌고, 두 사람은 서로의 이름을 부르지 않은 채 오래 마주 보고 있었다.*</textarea>
+*너의 모습을 눈에 담았고, 너의 눈에는 나의 모습이 비쳐 있었다. 그 맑은 눈동자에 내가 담긴 그 순간부터 이미 너를 사랑했을지도 모른다.*</textarea>
 
       <div class="hint">
         <b>텍스트 형식</b><br>
@@ -917,12 +917,12 @@ R:"알면서 난 뛰어들었어"
               <div class="date editable" contenteditable="true" spellcheck="false">2023.08.21</div>
               <div class="subdate editable" contenteditable="true" spellcheck="false">6:00 PM</div>
             </div>
-            <div class="status editable" contenteditable="true" spellcheck="false">▮▮▮ 𖤐</div>
+            <div class="status editable" contenteditable="true" spellcheck="false">PLATFORM</div>
           </div>
 
           <div class="content" id="quoteContent"></div>
 
-          <div class="footer-credit editable" contenteditable="true" spellcheck="false">© QUOTE CARD MAKER · FICTION EXCERPT</div>
+          <div class="footer-credit editable" contenteditable="true" spellcheck="false">© CREATOR · CHARACTER</div>
         </section>
       </div>
     </main>
@@ -1188,12 +1188,12 @@ R:"알면서 난 뛰어들었어"
     inputMode.addEventListener("change",()=>{
       if(inputMode.value === "json"){
         sourceInput.value = JSON.stringify([
-          {"type":"dialogue","side":"left","label":"MESSAGE","text":"꽃송이가 나를 삼킬 걸"},
-          {"type":"dialogue","side":"right","label":"MESSAGE","text":"알면서 난 뛰어들었어"},
-          {"type":"narration","label":"MESSAGE","date":"23.08.21","text":"비가 그친 뒤의 공원은 이상할 만큼 조용했다. 젖은 잔디 위로 빛이 낮게 번졌고, 두 사람은 서로의 이름을 부르지 않은 채 오래 마주 보고 있었다.","image":true}
+          {"type":"dialogue","side":"left","label":"MESSAGE","text":"캐릭터 대사"},
+          {"type":"dialogue","side":"right","label":"MESSAGE","text":"{{user}} 대사"},
+          {"type":"narration","label":"MESSAGE","date":"23.08.21","text":"너의 모습을 눈에 담았고, 너의 눈에는 나의 모습이 비쳐 있었다. 그 맑은 눈동자에 내가 담긴 그 순간부터 이미 너를 사랑했을지도 모른다.","image":true}
         ],null,2);
       }else{
-        sourceInput.value = 'L:"꽃송이가 나를 삼킬 걸"\\n\\nR:"알면서 난 뛰어들었어"\\n\\n*비가 그친 뒤의 공원은 이상할 만큼 조용했다. 젖은 잔디 위로 빛이 낮게 번졌고, 두 사람은 서로의 이름을 부르지 않은 채 오래 마주 보고 있었다.*';
+        sourceInput.value = 'L:"캐릭터 대사"\\n\\nR:"{{user}} 대사"\\n\\n*너의 모습을 눈에 담았고, 너의 눈에는 나의 모습이 비쳐 있었다. 그 맑은 눈동자에 내가 담긴 그 순간부터 이미 너를 사랑했을지도 모른다.*';
       }
       renderFromInput();
     });
