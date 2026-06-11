@@ -649,6 +649,28 @@
       animation:zScan 4s linear infinite;
     }
 
+    /* 장식 OFF 시, 배경의 원형/추가 장식도 함께 제거 */
+    html[data-deco="off"][data-theme="cherry"] .quote-stage{
+      background:linear-gradient(160deg,var(--stage-bg1),var(--stage-bg2) 58%,var(--stage-bg3));
+      background-size:auto;
+    }
+
+    html[data-deco="off"][data-theme="loverobot"] .quote-stage{
+      background:linear-gradient(150deg,var(--stage-bg1) 0%,var(--stage-bg2) 46%,var(--stage-bg3) 100%);
+    }
+
+    html[data-deco="off"][data-theme="blackwhite"] .quote-stage{
+      background:linear-gradient(160deg,#000000 0%,#111111 58%,#1f1f1f 100%);
+    }
+
+    html[data-deco="off"][data-theme="yellowascii"] .quote-stage{
+      background:var(--stage-bg1);
+    }
+
+    html[data-deco="off"][data-theme="zombie"] .quote-stage{
+      background:linear-gradient(160deg,#020303 0%,#060707 35%,#020303 100%);
+    }
+
     .quote-stage.exporting{
       position:relative!important;
       left:0!important;
@@ -656,6 +678,23 @@
       transform:none!important;
       width:1080px!important;
       height:var(--capture-h)!important;
+    }
+
+    /* GIF 전용 안정화 */
+    .quote-stage.gif-exporting{
+      box-shadow:none!important;
+      image-rendering:auto!important;
+    }
+
+    .quote-stage.gif-exporting,
+    .quote-stage.gif-exporting *{
+      animation-play-state:paused!important;
+      transition:none!important;
+    }
+
+    .quote-stage.gif-exporting .noise-overlay,
+    .quote-stage.gif-exporting .static-overlay{
+      animation:none!important;
     }
 
     .deco{
@@ -1836,9 +1875,13 @@ R:"{{user}} 대사"
       return {exportRoot, clone};
     }
 
-    async function captureCanvas(target, scale=2){
+    function getCurrentPageBg(){
+      return getComputedStyle(root).getPropertyValue("--page-bg").trim() || "#ffffff";
+    }
+
+    async function captureCanvas(target, scale=2, backgroundColor=null){
       return await html2canvas(target,{
-        backgroundColor:null,
+        backgroundColor: backgroundColor,
         scale,
         useCORS:true,
         allowTaint:true,
@@ -1854,6 +1897,19 @@ R:"{{user}} 대사"
         imageTimeout:0,
         removeContainer:true
       });
+    }
+
+    function flattenCanvasForGif(sourceCanvas, fillColor){
+      const canvas = document.createElement("canvas");
+      canvas.width = sourceCanvas.width;
+      canvas.height = sourceCanvas.height;
+
+      const ctx = canvas.getContext("2d", {willReadFrequently:true});
+      ctx.fillStyle = fillColor || "#ffffff";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(sourceCanvas,0,0);
+
+      return canvas;
     }
 
     function resizeCanvas(sourceCanvas, targetWidth){
@@ -1965,7 +2021,7 @@ R:"{{user}} 대사"
       await waitForPaint();
 
       try{
-        const canvas = await captureCanvas(clone, 3);
+        const canvas = await captureCanvas(clone, 3, null);
         const link = document.createElement("a");
         link.download = "novel_excerpt_card_1080x" + CURRENT_CAPTURE_HEIGHT + ".png";
         link.href = canvas.toDataURL("image/png");
@@ -2007,6 +2063,7 @@ R:"{{user}} 대사"
         const made = makeExportClone();
         exportRoot = made.exportRoot;
         const clone = made.clone;
+        clone.classList.add("gif-exporting");
 
         hideAllAnimItems(clone);
         await waitForPaint();
@@ -2015,6 +2072,7 @@ R:"{{user}} 대사"
         const totalItems = items.length;
         const isZombie = root.getAttribute("data-theme") === "zombie";
         const workerUrl = await getGifWorkerUrl();
+        const matteColor = getCurrentPageBg();
 
         const gifHeight = Math.max(1, Math.round(CURRENT_CAPTURE_HEIGHT * (GIF_WIDTH / CAPTURE_WIDTH)));
 
@@ -2025,7 +2083,7 @@ R:"{{user}} 대사"
           height: gifHeight,
           workerScript: workerUrl,
           repeat: 0,
-          background: "#000000"
+          background: matteColor
         });
 
         gif.on("progress", function(progress){
@@ -2047,7 +2105,6 @@ R:"{{user}} 대사"
 
         for(let f=0; f<framePlan.length; f++){
           const step = framePlan[f];
-
           gifBtn.textContent = "프레임 캡쳐중... " + (f + 1) + "/" + framePlan.length;
 
           showItemsUntil(clone, step.count);
@@ -2060,12 +2117,15 @@ R:"{{user}} 대사"
             clone.querySelectorAll(".static-overlay").forEach(el=>{
               el.style.opacity = (f % 3 === 0) ? ".54" : ".24";
             });
+          }else{
+            clone.style.transform = "translateX(0px)";
           }
 
           await waitForPaint();
 
-          const sourceCanvas = await captureCanvas(clone, 1);
-          const smallCanvas = resizeCanvas(sourceCanvas, GIF_WIDTH);
+          const sourceCanvas = await captureCanvas(clone, 1, matteColor);
+          const flatCanvas = flattenCanvasForGif(sourceCanvas, matteColor);
+          const smallCanvas = resizeCanvas(flatCanvas, GIF_WIDTH);
 
           gif.addFrame(smallCanvas, {
             copy:true,
