@@ -509,7 +509,7 @@
       display:flex;
       flex-direction:column;
       gap:30px;
-      overflow:visible;
+      overflow:hidden;
       font-family:var(--font-main);
     }
 
@@ -620,15 +620,24 @@
     .quote-card{
       position:relative;
       width:100%;
-      min-height:0;
+      min-height:150px;
       height:auto;
       border-radius:var(--card-radius);
-      padding:46px 50px 48px;
+      padding:66px 50px 46px;
       background:var(--panel-solid);
       border:1px solid rgba(255,255,255,.8);
       box-shadow:0 18px 40px rgba(98,84,160,.13);
-      overflow:visible;
+      overflow:hidden;
       font-family:var(--font-main);
+    }
+
+    .quote-card.compact{
+      padding-top:42px;
+    }
+
+    .quote-card-head.is-empty,
+    .quote-card-date.is-empty{
+      display:none!important;
     }
 
     html[data-theme="pixel"] .quote-card,
@@ -641,10 +650,35 @@
       box-shadow:0 0 20px rgba(32,255,208,.12);
     }
 
+    .quote-card-head{
+      position:absolute;
+      left:46px;
+      top:28px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:var(--sub);
+      font-size:22px;
+      font-weight:760;
+      outline:0;
+      background:transparent!important;
+    }
+
+    .quote-card-date{
+      position:absolute;
+      right:46px;
+      top:30px;
+      color:var(--sub);
+      font-size:20px;
+      font-weight:720;
+      outline:0;
+      background:transparent!important;
+    }
+
     .quote-text{
       color:var(--deep);
       font-size:calc(34px * var(--narration-scale));
-      line-height:1.58;
+      line-height:1.62;
       font-weight:var(--narration-weight);
       font-style:italic;
       letter-spacing:-.035em;
@@ -719,6 +753,8 @@
 
     .export-root .bubble-head,
     .export-root .bubble-text,
+    .export-root .quote-card-head,
+    .export-root .quote-card-date,
     .export-root .quote-text,
     .export-root .footer-credit{
       background:transparent!important;
@@ -737,6 +773,7 @@
       -webkit-backdrop-filter:none!important;
     }
 
+    .hidden-file{display:none;}
     .editable{outline:none;}
 
     [contenteditable="true"]{
@@ -872,7 +909,7 @@ R:"{{user}} 대사"
 
         <b>안내</b><br>
         MESSAGE, TITLE, 시간, 날짜, PLATFORM, 하단 CREATOR/CHARACTER 부분은 터치해서 수정 가능합니다.<br>
-        서술 카드에는 라벨/날짜가 표시되지 않습니다.
+        서술 카드에서 MESSAGE와 날짜를 지우면 위쪽 공백도 자동으로 줄어듭니다.
       </div>
     </aside>
 
@@ -888,7 +925,7 @@ R:"{{user}} 대사"
             <div class="time editable" contenteditable="true" spellcheck="false">6:00</div>
             <div class="title-box">
               <div class="title editable" contenteditable="true" spellcheck="false">TITLE</div>
-              <div class="date editable" contenteditable="true" spellcheck="false">2026.06.11</div>
+              <div class="date editable" contenteditable="true" spellcheck="false">2023.08.21</div>
               <div class="subdate editable" contenteditable="true" spellcheck="false">6:00 PM</div>
             </div>
             <div class="status editable" contenteditable="true" spellcheck="false">PLATFORM</div>
@@ -968,6 +1005,26 @@ R:"{{user}} 대사"
       return items;
     }
 
+    function isBlank(el){
+      if(!el) return true;
+      return el.textContent.replace(/\u00a0/g," ").trim() === "";
+    }
+
+    function refreshMetaVisibility(){
+      document.querySelectorAll(".quote-card").forEach((card)=>{
+        const head = card.querySelector(".quote-card-head");
+        const date = card.querySelector(".quote-card-date");
+
+        const headEmpty = isBlank(head);
+        const dateEmpty = isBlank(date);
+
+        if(head) head.classList.toggle("is-empty", headEmpty);
+        if(date) date.classList.toggle("is-empty", dateEmpty);
+
+        card.classList.toggle("compact", headEmpty && dateEmpty);
+      });
+    }
+
     function makeEditable(el){
       el.setAttribute("contenteditable","true");
       el.setAttribute("spellcheck","false");
@@ -979,6 +1036,9 @@ R:"{{user}} 대사"
           el.blur();
         }
       });
+
+      el.addEventListener("input",refreshMetaVisibility);
+      el.addEventListener("blur",refreshMetaVisibility);
     }
 
     function renderItems(items){
@@ -1020,14 +1080,33 @@ R:"{{user}} 대사"
         const card = document.createElement("div");
         card.className = "quote-card";
 
+        const head = document.createElement("div");
+        head.className = "quote-card-head";
+
+        const label = document.createElement("span");
+        label.textContent = "MESSAGE";
+        makeEditable(label);
+
+        head.appendChild(label);
+
+        const date = document.createElement("div");
+        date.className = "quote-card-date";
+        date.textContent = "23.08.21";
+        makeEditable(date);
+
         const text = document.createElement("div");
         text.className = "quote-text";
         text.textContent = item.text;
         makeEditable(text);
 
+        card.appendChild(head);
+        card.appendChild(date);
         card.appendChild(text);
+
         quoteContent.appendChild(card);
       });
+
+      refreshMetaVisibility();
     }
 
     function renderFromInput(){
@@ -1110,6 +1189,8 @@ R:"{{user}} 대사"
           el.blur();
         }
       });
+      el.addEventListener("input",refreshMetaVisibility);
+      el.addEventListener("blur",refreshMetaVisibility);
     });
 
     async function waitForImages(target){
@@ -1136,7 +1217,7 @@ R:"{{user}} 대사"
         el.style.outline = "none";
       });
 
-      clone.querySelectorAll(".bubble-head,.bubble-text,.quote-text,.footer-credit").forEach((el)=>{
+      clone.querySelectorAll(".bubble-head,.bubble-text,.quote-card-head,.quote-card-date,.quote-text,.footer-credit").forEach((el)=>{
         el.style.background = "transparent";
         el.style.boxShadow = "none";
         el.style.outline = "none";
@@ -1144,6 +1225,8 @@ R:"{{user}} 대사"
     }
 
     function makeExportClone(){
+      refreshMetaVisibility();
+
       const exportRoot = document.createElement("div");
       exportRoot.className = "export-root";
 
@@ -1160,6 +1243,7 @@ R:"{{user}} 대사"
     }
 
     saveBtn.addEventListener("click",async()=>{
+      refreshMetaVisibility();
       root.classList.add("saving-clean");
 
       if(document.activeElement && typeof document.activeElement.blur === "function"){
@@ -1215,6 +1299,7 @@ R:"{{user}} 대사"
     window.addEventListener("load", async ()=>{
       await document.fonts.ready;
       renderFromInput();
+      refreshMetaVisibility();
     });
 
     renderFromInput();
