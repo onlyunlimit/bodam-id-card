@@ -1,28 +1,24 @@
-```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>홍성은 | Developer Portfolio</title>
+  <title>Hong Seong Eun | Developer Portfolio</title>
 
   <style>
     :root {
-      --bg: #f6f8fb;
-      --paper: #ffffff;
-      --paper-soft: #f9fbff;
-      --text: #1d2433;
-      --muted: #687386;
-      --line: #e3e8f2;
-      --primary: #315efb;
-      --primary-dark: #1737b8;
-      --primary-soft: #eef3ff;
-      --accent: #26b8a6;
-      --shadow: 0 18px 45px rgba(27, 42, 77, 0.10);
-      --radius-lg: 28px;
-      --radius-md: 18px;
-      --radius-sm: 12px;
-      --max: 1120px;
+      --bg: #b9d8df;
+      --bg-deep: #8fb6c1;
+      --orange: #ff4f1f;
+      --orange-dark: #db3510;
+      --black: #05070a;
+      --white: #f7f5ee;
+      --muted: rgba(5, 7, 10, 0.62);
+      --line: rgba(5, 7, 10, 0.18);
+      --paper: rgba(247, 245, 238, 0.78);
+      --glass: rgba(255, 255, 255, 0.32);
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.20);
+      --max: 1180px;
     }
 
     * {
@@ -37,12 +33,48 @@
       margin: 0;
       font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(49, 94, 251, 0.12), transparent 28%),
-        radial-gradient(circle at 85% 12%, rgba(38, 184, 166, 0.10), transparent 26%),
-        var(--bg);
-      color: var(--text);
-      line-height: 1.65;
+        linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,255,255,0.10) 1px, transparent 1px),
+        radial-gradient(circle at 16% 14%, rgba(255,255,255,0.30), transparent 26%),
+        radial-gradient(circle at 90% 10%, rgba(255,79,31,0.12), transparent 22%),
+        linear-gradient(135deg, var(--bg), var(--bg-deep));
+      background-size: 42px 42px, 42px 42px, auto, auto, auto;
+      color: var(--black);
+      line-height: 1.55;
+      letter-spacing: -0.03em;
       word-break: keep-all;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.16;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,0.08) 0,
+          rgba(255,255,255,0.08) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+      mix-blend-mode: overlay;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 998;
+      opacity: 0.18;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.35), transparent 12%),
+        radial-gradient(circle at 70% 70%, rgba(0,0,0,0.20), transparent 18%);
+      filter: blur(40px);
     }
 
     a {
@@ -50,429 +82,515 @@
       text-decoration: none;
     }
 
-    .wrap {
-      width: min(100% - 32px, var(--max));
-      margin: 0 auto;
+    .page {
+      width: min(100% - 28px, var(--max));
+      margin: 20px auto 48px;
+      position: relative;
+      border: 2px solid rgba(5,7,10,0.68);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0.03)),
+        rgba(185,216,223,0.72);
+      box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      background: rgba(246, 248, 251, 0.78);
-      border-bottom: 1px solid rgba(227, 232, 242, 0.75);
+    .page::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border: 2px solid var(--orange);
+      pointer-events: none;
+      z-index: 3;
     }
 
-    .nav {
-      height: 68px;
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,0.08), transparent 12%, transparent 88%, rgba(0,0,0,0.12)),
+        linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.12) 100%);
+      z-index: 1;
+    }
+
+    .inner {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      min-height: 100vh;
+    }
+
+    .side {
+      position: relative;
+      border-right: 2px solid rgba(5,7,10,0.68);
+      background: rgba(247,245,238,0.72);
+      padding: 24px 16px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      gap: 18px;
+      gap: 24px;
     }
 
-    .brand {
+    .side-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      background: var(--orange);
+      color: var(--white);
+      font-size: 24px;
+      font-weight: 1000;
+      letter-spacing: -0.08em;
+      box-shadow: 8px 8px 0 rgba(5,7,10,0.16);
+    }
+
+    .vertical-title {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 32px;
+      line-height: 0.9;
+      font-weight: 1000;
+      letter-spacing: -0.08em;
+      color: var(--black);
+      text-transform: uppercase;
+      margin: 10px 0;
+    }
+
+    .vertical-sub {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 11px;
+      line-height: 1.4;
+      letter-spacing: 0.08em;
+      color: rgba(5,7,10,0.58);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .barcode {
+      width: 64px;
+      height: 96px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          var(--black) 0 2px,
+          transparent 2px 5px,
+          var(--black) 5px 6px,
+          transparent 6px 10px
+        );
+      opacity: 0.92;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+    }
+
+    .side-nav {
+      margin-top: auto;
+      display: grid;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .side-nav a {
+      display: block;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 1000;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 8px 4px;
+      border: 1px solid rgba(5,7,10,0.24);
+      background: rgba(255,255,255,0.28);
+      transition: 0.18s ease;
+    }
+
+    .side-nav a:hover {
+      color: var(--white);
+      background: var(--black);
+    }
+
+    .content {
+      position: relative;
+      padding: 28px 34px 42px;
+    }
+
+    .top-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      border-bottom: 2px solid rgba(5,7,10,0.68);
+      padding: 0 0 16px;
+      margin-bottom: 40px;
+    }
+
+    .edition {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-weight: 900;
-      letter-spacing: -0.03em;
+      font-size: 13px;
+      font-weight: 1000;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--orange);
     }
 
-    .brand-mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      background: linear-gradient(135deg, var(--primary), #6d8bff);
-      box-shadow: 0 10px 24px rgba(49, 94, 251, 0.24);
-      font-size: 14px;
+    .edition::before {
+      content: "";
+      width: 34px;
+      height: 4px;
+      background: var(--orange);
+      display: block;
     }
 
-    .nav-links {
+    .top-meta {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .nav-links a {
-      padding: 9px 12px;
-      border-radius: 999px;
-      transition: 0.2s ease;
-    }
-
-    .nav-links a:hover {
-      color: var(--primary);
-      background: var(--primary-soft);
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: rgba(5,7,10,0.64);
     }
 
     .hero {
-      padding: 72px 0 34px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.25fr 0.75fr;
-      gap: 24px;
-      align-items: stretch;
-    }
-
-    .hero-card {
       position: relative;
-      overflow: hidden;
-      border-radius: var(--radius-lg);
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(249,251,255,0.92));
-      border: 1px solid rgba(227, 232, 242, 0.95);
-      box-shadow: var(--shadow);
-      padding: 42px;
+      padding: 28px 0 58px;
     }
 
-    .hero-card::after {
-      content: "";
-      position: absolute;
-      right: -90px;
-      bottom: -110px;
-      width: 280px;
-      height: 280px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(49,94,251,0.16), transparent 68%);
-      pointer-events: none;
-    }
-
-    .eyebrow {
-      display: inline-flex;
+    .hero-kicker {
+      display: flex;
+      justify-content: center;
       align-items: center;
-      gap: 8px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      background: var(--primary-soft);
-      color: var(--primary-dark);
-      font-size: 13px;
-      font-weight: 900;
-      margin-bottom: 22px;
+      gap: 12px;
+      text-align: center;
+      color: var(--orange);
+      font-weight: 1000;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
     }
 
-    .eyebrow::before {
-      content: "";
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 5px rgba(38,184,166,0.12);
+    .hero-kicker span:first-child,
+    .hero-kicker span:last-child {
+      width: 52px;
+      height: 3px;
+      background: var(--orange);
+      display: inline-block;
     }
 
-    h1 {
+    .hero-name {
+      text-align: center;
+      font-size: 30px;
+      font-weight: 1000;
+      color: var(--orange);
+      letter-spacing: -0.08em;
+      margin-bottom: -10px;
+    }
+
+    .poster-title {
+      position: relative;
+      z-index: 2;
       margin: 0;
-      font-size: clamp(38px, 6vw, 68px);
-      line-height: 1.02;
-      letter-spacing: -0.07em;
+      text-transform: uppercase;
+      font-size: clamp(74px, 13.4vw, 188px);
+      line-height: 0.78;
+      letter-spacing: -0.105em;
+      font-weight: 1000;
+      color: var(--orange);
+      text-align: center;
+      text-shadow:
+        4px 4px 0 rgba(5,7,10,0.08),
+        12px 20px 40px rgba(0,0,0,0.16);
     }
 
-    .hero-title span {
-      color: var(--primary);
+    .poster-title .line-2 {
+      display: block;
+      margin-top: 0.05em;
+    }
+
+    .hero-caption {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: -4px;
+      color: var(--white);
+      text-shadow: 2px 2px 0 var(--black);
+      font-size: clamp(22px, 3vw, 39px);
+      font-weight: 1000;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      text-transform: uppercase;
+    }
+
+    .hero-caption span {
+      color: var(--black);
+      text-shadow: none;
+      background: var(--white);
+      padding: 6px 10px 8px;
+      border: 2px solid var(--black);
+      box-shadow: 5px 5px 0 rgba(5,7,10,0.16);
     }
 
     .hero-desc {
-      max-width: 690px;
-      margin: 24px 0 0;
-      font-size: 18px;
-      color: #455066;
-      letter-spacing: -0.02em;
+      max-width: 760px;
+      margin: 28px auto 0;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      color: rgba(5,7,10,0.76);
     }
 
     .hero-actions {
       display: flex;
-      flex-wrap: wrap;
+      justify-content: center;
       gap: 10px;
-      margin-top: 30px;
+      flex-wrap: wrap;
+      margin-top: 28px;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 44px;
-      padding: 11px 16px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 900;
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--text);
-      transition: 0.22s ease;
+      min-height: 42px;
+      padding: 10px 16px;
+      border: 2px solid var(--black);
+      background: var(--white);
+      color: var(--black);
+      font-size: 13px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      box-shadow: 5px 5px 0 rgba(5,7,10,0.18);
+      transition: 0.18s ease;
     }
 
     .btn.primary {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #fff;
-      box-shadow: 0 14px 28px rgba(49,94,251,0.22);
+      background: var(--orange);
+      color: var(--white);
     }
 
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 24px rgba(27, 42, 77, 0.10);
+      transform: translate(-2px, -2px);
+      box-shadow: 8px 8px 0 rgba(5,7,10,0.22);
     }
 
-    .profile-card {
-      border-radius: var(--radius-lg);
-      background: #111827;
-      color: #fff;
-      box-shadow: var(--shadow);
-      padding: 28px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .profile-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(135deg, rgba(49,94,251,0.32), transparent 42%),
-        radial-gradient(circle at 80% 22%, rgba(38,184,166,0.24), transparent 26%);
-      pointer-events: none;
-    }
-
-    .profile-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .avatar {
-      width: 86px;
-      height: 86px;
-      border-radius: 28px;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.18);
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-      margin-bottom: 18px;
-    }
-
-    .profile-name {
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-      margin: 0;
-    }
-
-    .profile-role {
-      margin: 6px 0 22px;
-      color: rgba(255,255,255,0.72);
-      font-weight: 700;
-    }
-
-    .profile-list {
-      display: grid;
-      gap: 10px;
-      margin-top: 22px;
-    }
-
-    .profile-item {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 12px 0;
-      border-top: 1px solid rgba(255,255,255,0.12);
-      font-size: 14px;
-    }
-
-    .profile-item b {
-      color: rgba(255,255,255,0.58);
-      font-weight: 700;
-    }
-
-    .profile-item span {
-      text-align: right;
-      font-weight: 800;
-    }
-
-    .stats {
+    .summary-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin: 24px 0 0;
+      gap: 12px;
+      margin: 22px 0 0;
     }
 
-    .stat {
-      padding: 20px;
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.82);
-      border: 1px solid var(--line);
-      box-shadow: 0 12px 28px rgba(27,42,77,0.05);
+    .summary-card {
+      border: 2px solid var(--black);
+      background: rgba(247,245,238,0.72);
+      padding: 16px;
+      min-height: 112px;
+      box-shadow: 6px 6px 0 rgba(5,7,10,0.13);
     }
 
-    .stat strong {
+    .summary-card b {
       display: block;
-      font-size: 26px;
-      letter-spacing: -0.05em;
-      color: var(--primary);
+      color: var(--orange);
+      font-size: 30px;
+      font-weight: 1000;
       line-height: 1;
-      margin-bottom: 8px;
+      letter-spacing: -0.08em;
+      margin-bottom: 9px;
     }
 
-    .stat span {
-      color: var(--muted);
+    .summary-card span {
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 900;
+      line-height: 1.32;
+      text-transform: uppercase;
     }
 
     section {
-      padding: 52px 0;
+      padding: 56px 0;
+      border-top: 2px solid rgba(5,7,10,0.68);
     }
 
     .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
+      display: grid;
+      grid-template-columns: 240px 1fr;
       gap: 24px;
-      margin-bottom: 22px;
+      align-items: start;
+      margin-bottom: 26px;
     }
 
-    .section-kicker {
-      color: var(--primary);
-      font-size: 13px;
-      font-weight: 900;
+    .section-no {
+      color: var(--orange);
+      font-size: 16px;
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+    }
+
+    .section-label {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 1000;
       letter-spacing: 0.08em;
+      color: rgba(5,7,10,0.58);
       text-transform: uppercase;
-      margin-bottom: 8px;
     }
 
     h2 {
       margin: 0;
-      font-size: clamp(28px, 4vw, 42px);
-      line-height: 1.18;
-      letter-spacing: -0.055em;
+      font-size: clamp(42px, 6vw, 86px);
+      line-height: 0.86;
+      letter-spacing: -0.095em;
+      text-transform: uppercase;
     }
 
-    .section-desc {
-      max-width: 460px;
-      color: var(--muted);
-      margin: 0;
-      font-size: 15px;
-      font-weight: 600;
+    .section-copy {
+      margin: 14px 0 0;
+      max-width: 760px;
+      color: rgba(5,7,10,0.72);
+      font-size: 16px;
+      font-weight: 700;
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
-    }
-
-    .grid-3 {
+    .cards-3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
+      gap: 14px;
+    }
+
+    .cards-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
     }
 
     .card {
-      background: rgba(255,255,255,0.86);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-md);
-      padding: 24px;
-      box-shadow: 0 14px 34px rgba(27,42,77,0.06);
+      position: relative;
+      border: 2px solid var(--black);
+      background: rgba(247,245,238,0.72);
+      padding: 22px;
+      box-shadow: 7px 7px 0 rgba(5,7,10,0.14);
+      overflow: hidden;
+    }
+
+    .card.dark {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .card.orange {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      width: 42px;
+      height: 12px;
+      background: repeating-linear-gradient(90deg, currentColor 0 3px, transparent 3px 6px);
+      opacity: 0.18;
     }
 
     .card h3 {
+      position: relative;
+      z-index: 1;
       margin: 0 0 12px;
-      font-size: 21px;
-      letter-spacing: -0.045em;
-      line-height: 1.28;
+      font-size: 24px;
+      line-height: 1.05;
+      letter-spacing: -0.07em;
+      text-transform: uppercase;
     }
 
     .card p {
+      position: relative;
+      z-index: 1;
       margin: 0;
-      color: #4e596d;
+      color: rgba(5,7,10,0.72);
       font-size: 15px;
+      font-weight: 700;
     }
 
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      min-height: 30px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: var(--primary-soft);
-      color: var(--primary-dark);
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .tag.gray {
-      background: #f1f3f8;
-      color: #4d5667;
+    .card.dark p,
+    .card.orange p {
+      color: rgba(255,255,255,0.78);
     }
 
     .timeline {
-      position: relative;
       display: grid;
-      gap: 18px;
+      gap: 14px;
     }
 
     .timeline-item {
       display: grid;
-      grid-template-columns: 170px 1fr;
-      gap: 22px;
-      align-items: start;
-      padding: 24px;
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.9);
-      border: 1px solid var(--line);
-      box-shadow: 0 14px 34px rgba(27,42,77,0.06);
+      grid-template-columns: 220px 1fr;
+      gap: 20px;
+      border: 2px solid var(--black);
+      background: rgba(247,245,238,0.74);
+      box-shadow: 7px 7px 0 rgba(5,7,10,0.14);
     }
 
-    .date {
-      display: inline-flex;
-      width: fit-content;
-      padding: 8px 11px;
-      border-radius: 999px;
-      background: #111827;
-      color: #fff;
+    .date-panel {
+      background: var(--black);
+      color: var(--white);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 180px;
+    }
+
+    .date-panel strong {
+      font-size: 25px;
+      line-height: 0.95;
+      letter-spacing: -0.075em;
+      color: var(--orange);
+    }
+
+    .date-panel span {
       font-size: 12px;
-      font-weight: 900;
-      letter-spacing: -0.01em;
+      font-weight: 1000;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.58);
+    }
+
+    .timeline-body {
+      padding: 22px 22px 24px 0;
     }
 
     .timeline-body h3 {
-      margin: 0 0 6px;
-      font-size: 22px;
-      letter-spacing: -0.045em;
+      margin: 0;
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: 0.92;
+      letter-spacing: -0.09em;
+      text-transform: uppercase;
     }
 
-    .timeline-body .meta {
-      color: var(--primary);
-      font-weight: 900;
-      margin-bottom: 12px;
+    .meta {
+      margin-top: 8px;
+      color: var(--orange-dark);
+      font-weight: 1000;
+      text-transform: uppercase;
+      font-size: 14px;
     }
 
     .bullets {
+      margin: 18px 0 0;
       padding: 0;
-      margin: 14px 0 0;
       list-style: none;
       display: grid;
-      gap: 9px;
-      color: #4e596d;
+      gap: 8px;
+      color: rgba(5,7,10,0.74);
       font-size: 15px;
+      font-weight: 700;
     }
 
     .bullets li {
@@ -484,170 +602,199 @@
       content: "";
       position: absolute;
       left: 0;
-      top: 0.72em;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
+      top: 0.68em;
+      width: 8px;
+      height: 8px;
+      background: var(--orange);
     }
 
-    .project {
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 18px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      background: rgba(5,7,10,0.08);
+      border: 1px solid rgba(5,7,10,0.28);
+      color: var(--black);
+      font-size: 12px;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .dark .tag,
+    .orange .tag {
+      border-color: rgba(255,255,255,0.34);
+      background: rgba(255,255,255,0.10);
+      color: var(--white);
+    }
+
+    .project-card {
+      min-height: 100%;
       display: flex;
       flex-direction: column;
-      min-height: 100%;
     }
 
     .project-top {
       display: flex;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 18px;
-      align-items: start;
-      margin-bottom: 12px;
+      gap: 16px;
+      margin-bottom: 14px;
     }
 
-    .project-badge {
+    .badge {
       flex: 0 0 auto;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: #111827;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 900;
+      border: 2px solid var(--black);
+      background: var(--white);
+      padding: 7px 9px;
+      font-size: 11px;
+      font-weight: 1000;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--black);
     }
 
-    .project h3 {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    .project p {
-      margin-top: 12px;
-    }
-
-    .skills-wrap {
+    .skill-layout {
       display: grid;
-      grid-template-columns: 0.8fr 1.2fr;
-      gap: 18px;
+      grid-template-columns: 0.72fr 1.28fr;
+      gap: 14px;
     }
 
-    .skill-panel {
-      background: #111827;
-      color: #fff;
-      border-radius: var(--radius-md);
-      padding: 26px;
-      box-shadow: var(--shadow);
+    .big-type-card {
+      background: var(--orange);
+      border: 2px solid var(--black);
+      color: var(--white);
+      padding: 24px;
+      box-shadow: 7px 7px 0 rgba(5,7,10,0.14);
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    .skill-panel h3 {
-      margin: 0 0 10px;
-      font-size: 24px;
-      letter-spacing: -0.05em;
+    .big-type-card strong {
+      font-size: clamp(54px, 7vw, 92px);
+      line-height: 0.78;
+      letter-spacing: -0.105em;
+      text-transform: uppercase;
     }
 
-    .skill-panel p {
-      margin: 0;
-      color: rgba(255,255,255,0.68);
+    .big-type-card p {
+      margin: 20px 0 0;
+      font-size: 15px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.82);
     }
 
     .skill-groups {
       display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 14px;
     }
 
     .skill-group {
-      background: rgba(255,255,255,0.9);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-md);
-      padding: 20px;
+      border: 2px solid var(--black);
+      background: rgba(247,245,238,0.74);
+      padding: 18px;
+      box-shadow: 7px 7px 0 rgba(5,7,10,0.12);
     }
 
-    .skill-group h4 {
+    .skill-group h3 {
       margin: 0 0 12px;
-      font-size: 16px;
-      letter-spacing: -0.03em;
+      font-size: 20px;
+      letter-spacing: -0.06em;
+      text-transform: uppercase;
     }
 
-    .cert-list {
+    .cert-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 14px;
     }
 
     .cert {
+      border: 2px solid var(--black);
+      background: rgba(247,245,238,0.76);
       padding: 18px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--line);
-      background: #fff;
-      box-shadow: 0 12px 28px rgba(27,42,77,0.05);
+      min-height: 132px;
+      box-shadow: 7px 7px 0 rgba(5,7,10,0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    .cert strong {
-      display: block;
-      font-size: 16px;
-      letter-spacing: -0.03em;
-      margin-bottom: 8px;
+    .cert b {
+      font-size: 22px;
+      line-height: 1.02;
+      letter-spacing: -0.07em;
+      text-transform: uppercase;
     }
 
     .cert span {
-      color: var(--muted);
+      color: rgba(5,7,10,0.62);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 900;
     }
 
-    .essay {
+    .story-grid {
       display: grid;
-      grid-template-columns: 0.7fr 1.3fr;
-      gap: 18px;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 14px;
       align-items: start;
     }
 
-    .quote-card {
+    .quote {
       position: sticky;
-      top: 92px;
-      border-radius: var(--radius-md);
-      padding: 28px;
-      background:
-        linear-gradient(135deg, rgba(49,94,251,0.94), rgba(23,55,184,0.96));
-      color: #fff;
-      box-shadow: 0 18px 42px rgba(49,94,251,0.22);
+      top: 20px;
+      background: var(--black);
+      color: var(--white);
+      border: 2px solid var(--black);
+      padding: 24px;
+      box-shadow: 7px 7px 0 rgba(5,7,10,0.14);
     }
 
-    .quote-card h3 {
-      margin: 0;
-      font-size: 28px;
-      line-height: 1.25;
-      letter-spacing: -0.055em;
+    .quote strong {
+      display: block;
+      color: var(--orange);
+      font-size: clamp(42px, 5vw, 70px);
+      line-height: 0.82;
+      letter-spacing: -0.1em;
+      text-transform: uppercase;
     }
 
-    .quote-card p {
-      margin: 16px 0 0;
-      color: rgba(255,255,255,0.78);
-      font-weight: 600;
-    }
-
-    .essay-list {
-      display: grid;
-      gap: 14px;
+    .quote p {
+      color: rgba(255,255,255,0.74);
+      font-weight: 800;
+      margin: 18px 0 0;
     }
 
     details {
-      background: rgba(255,255,255,0.9);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-md);
-      box-shadow: 0 12px 30px rgba(27,42,77,0.05);
-      overflow: hidden;
+      border: 2px solid var(--black);
+      background: rgba(247,245,238,0.76);
+      box-shadow: 7px 7px 0 rgba(5,7,10,0.12);
+      margin-bottom: 12px;
     }
 
     summary {
       cursor: pointer;
-      padding: 20px 22px;
-      font-weight: 900;
-      letter-spacing: -0.035em;
       list-style: none;
+      padding: 18px 20px;
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -0.07em;
+      text-transform: uppercase;
       display: flex;
-      justify-content: space-between;
-      gap: 20px;
       align-items: center;
+      justify-content: space-between;
+      gap: 18px;
     }
 
     summary::-webkit-details-marker {
@@ -660,10 +807,11 @@
       height: 28px;
       display: grid;
       place-items: center;
-      border-radius: 999px;
-      background: var(--primary-soft);
-      color: var(--primary);
-      font-weight: 900;
+      background: var(--orange);
+      color: var(--white);
+      border: 2px solid var(--black);
+      font-size: 18px;
+      line-height: 1;
       flex: 0 0 auto;
     }
 
@@ -672,724 +820,770 @@
     }
 
     .detail-body {
-      padding: 0 22px 22px;
-      color: #4e596d;
+      border-top: 2px solid rgba(5,7,10,0.28);
+      padding: 18px 20px 20px;
+      color: rgba(5,7,10,0.72);
+      font-weight: 700;
       font-size: 15px;
     }
 
-    .contact {
-      padding-bottom: 80px;
-    }
-
-    .contact-card {
-      border-radius: var(--radius-lg);
-      background: #111827;
-      color: #fff;
-      padding: 34px;
+    .contact-box {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 24px;
-      align-items: center;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      position: relative;
+      grid-template-columns: 1fr 0.86fr;
+      gap: 14px;
+      border: 2px solid var(--black);
+      background: var(--black);
+      color: var(--white);
+      padding: 24px;
+      box-shadow: 7px 7px 0 rgba(5,7,10,0.14);
     }
 
-    .contact-card::after {
-      content: "";
-      position: absolute;
-      right: -100px;
-      top: -90px;
-      width: 270px;
-      height: 270px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(38,184,166,0.25), transparent 70%);
+    .contact-title {
+      margin: 0;
+      color: var(--orange);
+      font-size: clamp(56px, 8vw, 110px);
+      line-height: 0.78;
+      letter-spacing: -0.105em;
+      text-transform: uppercase;
     }
 
-    .contact-card > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    .contact-card h2 {
-      color: #fff;
-    }
-
-    .contact-card p {
-      margin: 14px 0 0;
-      color: rgba(255,255,255,0.72);
-      max-width: 680px;
+    .contact-box p {
+      color: rgba(255,255,255,0.74);
+      font-weight: 800;
+      max-width: 640px;
     }
 
     .contact-links {
       display: grid;
       gap: 10px;
+      align-content: center;
     }
 
-    .contact-link {
+    .contact-links a {
+      border: 2px solid rgba(255,255,255,0.42);
+      color: var(--white);
       padding: 14px 16px;
-      border-radius: var(--radius-sm);
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.86);
-      font-weight: 800;
-      transition: 0.2s ease;
+      font-size: 14px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      transition: 0.18s ease;
+      background: rgba(255,255,255,0.06);
     }
 
-    .contact-link:hover {
-      background: rgba(255,255,255,0.14);
-      transform: translateX(4px);
+    .contact-links a:hover {
+      background: var(--orange);
+      border-color: var(--orange);
+      transform: translateX(5px);
     }
 
     footer {
-      padding: 24px 0 40px;
-      color: var(--muted);
-      text-align: center;
-      font-size: 13px;
-      font-weight: 700;
+      position: relative;
+      z-index: 2;
+      border-top: 2px solid rgba(5,7,10,0.68);
+      padding: 20px 0 0;
+      margin-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      color: rgba(5,7,10,0.64);
     }
 
-    .to-top {
+    .top-button {
       position: fixed;
-      right: 22px;
-      bottom: 22px;
-      width: 44px;
-      height: 44px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--primary);
+      right: 24px;
+      bottom: 24px;
+      width: 48px;
+      height: 48px;
       display: grid;
       place-items: center;
-      font-weight: 900;
-      box-shadow: 0 14px 28px rgba(27,42,77,0.12);
+      border: 2px solid var(--black);
+      background: var(--orange);
+      color: var(--white);
+      font-weight: 1000;
+      box-shadow: 6px 6px 0 rgba(5,7,10,0.20);
+      z-index: 100;
       opacity: 0;
       pointer-events: none;
-      transition: 0.2s ease;
-      z-index: 40;
+      transition: 0.18s ease;
     }
 
-    .to-top.show {
+    .top-button.show {
       opacity: 1;
       pointer-events: auto;
     }
 
-    @media (max-width: 900px) {
-      .nav {
-        height: auto;
-        padding: 14px 0;
-        align-items: flex-start;
-      }
-
-      .nav-links {
-        display: none;
-      }
-
-      .hero {
-        padding-top: 44px;
-      }
-
-      .hero-grid,
-      .grid-2,
-      .grid-3,
-      .skills-wrap,
-      .essay,
-      .contact-card {
+    @media (max-width: 980px) {
+      .inner {
         grid-template-columns: 1fr;
       }
 
-      .hero-card {
-        padding: 30px 24px;
+      .side {
+        position: relative;
+        flex-direction: row;
+        justify-content: space-between;
+        border-right: 0;
+        border-bottom: 2px solid rgba(5,7,10,0.68);
+        padding: 16px;
       }
 
-      .stats,
-      .cert-list {
-        grid-template-columns: repeat(2, 1fr);
+      .vertical-title,
+      .vertical-sub,
+      .barcode {
+        display: none;
+      }
+
+      .side-nav {
+        margin-top: 0;
+        display: flex;
+        width: auto;
+        overflow-x: auto;
+        max-width: calc(100vw - 132px);
+      }
+
+      .side-nav a {
+        min-width: max-content;
+        padding: 8px 10px;
+      }
+
+      .content {
+        padding: 24px 22px 36px;
+      }
+
+      .page::before {
+        inset: 9px;
+      }
+
+      .summary-grid,
+      .cards-3,
+      .cards-2,
+      .skill-layout,
+      .story-grid,
+      .contact-box {
+        grid-template-columns: 1fr;
       }
 
       .section-head {
-        display: block;
-      }
-
-      .section-desc {
-        margin-top: 12px;
+        grid-template-columns: 1fr;
+        gap: 10px;
       }
 
       .timeline-item {
         grid-template-columns: 1fr;
       }
 
-      .quote-card {
+      .timeline-body {
+        padding: 22px;
+      }
+
+      .date-panel {
+        min-height: auto;
+        gap: 24px;
+      }
+
+      .cert-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .quote {
         position: relative;
         top: auto;
       }
     }
 
-    @media (max-width: 560px) {
-      .wrap {
-        width: min(100% - 22px, var(--max));
+    @media (max-width: 620px) {
+      .page {
+        width: min(100% - 16px, var(--max));
+        margin-top: 8px;
       }
 
-      .hero-card,
-      .profile-card,
-      .contact-card {
-        border-radius: 22px;
+      .content {
+        padding: 18px 16px 32px;
       }
 
-      .stats,
-      .cert-list {
+      .top-line {
+        align-items: flex-start;
+        flex-direction: column;
+        margin-bottom: 26px;
+      }
+
+      .poster-title {
+        font-size: clamp(62px, 21vw, 112px);
+      }
+
+      .hero-caption {
+        margin-top: 8px;
+      }
+
+      .summary-grid,
+      .cert-grid,
+      .skill-groups {
         grid-template-columns: 1fr;
-      }
-
-      .card,
-      .timeline-item,
-      .skill-group,
-      .quote-card {
-        padding: 20px;
       }
 
       section {
         padding: 42px 0;
       }
-    }
-
-    @media print {
-      .topbar,
-      .to-top,
-      .hero-actions,
-      footer {
-        display: none;
-      }
-
-      body {
-        background: #fff;
-      }
 
       .card,
-      .timeline-item,
-      .profile-card,
-      .hero-card,
-      .contact-card,
+      .skill-group,
       .cert,
-      .skill-group {
-        box-shadow: none;
+      .big-type-card,
+      .quote,
+      .contact-box {
+        box-shadow: 5px 5px 0 rgba(5,7,10,0.12);
       }
     }
   </style>
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="wrap nav">
-      <a href="#home" class="brand" aria-label="홈으로 이동">
-        <span class="brand-mark">SE</span>
-        <span>홍성은 Portfolio</span>
-      </a>
+  <div class="page" id="top">
+    <div class="inner">
+      <aside class="side">
+        <a href="#top" class="side-logo" aria-label="홈">SE</a>
 
-      <nav class="nav-links" aria-label="포트폴리오 메뉴">
-        <a href="#about">About</a>
-        <a href="#experience">Experience</a>
-        <a href="#projects">Projects</a>
-        <a href="#skills">Skills</a>
-        <a href="#certs">Certifications</a>
-        <a href="#story">Story</a>
-        <a href="#contact">Contact</a>
-      </nav>
-    </div>
-  </header>
+        <div class="vertical-title">DEV PORTFOLIO</div>
 
-  <main id="home">
-    <section class="hero">
-      <div class="wrap">
-        <div class="hero-grid">
-          <article class="hero-card">
-            <div class="eyebrow">Operation-minded Web Developer</div>
-            <h1 class="hero-title">
-              문제의 원인을 찾고,<br />
-              더 안정적인 <span>시스템</span>을 만듭니다.
-            </h1>
-            <p class="hero-desc">
-              그룹웨어 및 사내 업무 시스템 유지보수/기능개발 경험을 바탕으로
-              사용자 VOC, 운영 이슈, 웹·모바일 환경 차이, DB 흐름을 함께 고려하는 개발자 홍성은입니다.
-              단순 구현보다 구조를 이해하고 개선 포인트를 찾는 과정에 강점이 있습니다.
-            </p>
+        <div class="barcode" aria-hidden="true"></div>
 
-            <div class="hero-actions">
-              <a class="btn primary" href="#projects">프로젝트 보기</a>
-              <a class="btn" href="#experience">경력 보기</a>
-              <a class="btn" href="#contact">연락처 수정하기</a>
+        <div class="vertical-sub">
+          OPERATION · MAINTENANCE · BACKEND · DATABASE · USER VOC · SERVICE IMPROVEMENT
+        </div>
+
+        <nav class="side-nav" aria-label="포트폴리오 메뉴">
+          <a href="#about">About</a>
+          <a href="#exp">Exp</a>
+          <a href="#projects">Project</a>
+          <a href="#skills">Skill</a>
+          <a href="#story">Story</a>
+          <a href="#contact">Contact</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <div class="top-line">
+          <div class="edition">Limited Career Edition</div>
+          <div class="top-meta">
+            <span>Hong Seong Eun</span>
+            <span>Web Developer</span>
+            <span>2026 Portfolio</span>
+          </div>
+        </div>
+
+        <section class="hero" aria-label="메인 소개">
+          <div class="hero-kicker">
+            <span></span>
+            <b>DEVELOPER PORTFOLIO</b>
+            <span></span>
+          </div>
+
+          <div class="hero-name">HONG SEONG EUN</div>
+
+          <h1 class="poster-title">
+            ON THE
+            <span class="line-2">SYSTEM</span>
+          </h1>
+
+          <div class="hero-caption">
+            <span>Fix The Flow</span>
+            Backend · Operation · Improvement
+          </div>
+
+          <p class="hero-desc">
+            문제의 증상보다 원인을 먼저 정리하고, 운영 환경과 사용자 관점을 함께 고려해
+            더 안정적인 시스템을 만드는 개발자입니다. 그룹웨어 및 사내 업무 시스템 유지보수,
+            기능 개선, DB 처리, 웹·모바일 환경 이슈 대응 경험을 보유하고 있습니다.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn primary" href="#projects">View Projects</a>
+            <a class="btn" href="#exp">View Experience</a>
+            <a class="btn" href="#contact">Contact</a>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-card">
+              <b>1.9Y</b>
+              <span>Groupware Maintenance & Development</span>
             </div>
-          </article>
+            <div class="summary-card">
+              <b>ASP</b>
+              <span>ASP.NET / C# Based Work System</span>
+            </div>
+            <div class="summary-card">
+              <b>DB</b>
+              <span>MSSQL · Stored Procedure · MySQL</span>
+            </div>
+            <div class="summary-card">
+              <b>VOC</b>
+              <span>User Issue Analysis & Service Improvement</span>
+            </div>
+          </div>
+        </section>
 
-          <aside class="profile-card">
-            <div class="profile-inner">
-              <div class="avatar">SE</div>
-              <p class="profile-name">홍성은</p>
-              <p class="profile-role">Web Developer · IT Operations · Backend</p>
+        <section id="about">
+          <div class="section-head">
+            <div>
+              <div class="section-no">01</div>
+              <div class="section-label">About Me</div>
+            </div>
 
-              <div class="profile-list">
-                <div class="profile-item">
-                  <b>Career</b>
-                  <span>1년 9개월</span>
-                </div>
-                <div class="profile-item">
-                  <b>Company</b>
-                  <span>가온아이 / 웹개발</span>
-                </div>
-                <div class="profile-item">
-                  <b>Education</b>
-                  <span>배화여자대학교 스마트IT과</span>
-                </div>
-                <div class="profile-item">
-                  <b>Focus</b>
-                  <span>운영 안정화 · 기능 개선 · DB</span>
+            <div>
+              <h2>Root Cause First</h2>
+              <p class="section-copy">
+                저는 단순히 결과를 만드는 것보다 문제의 원인을 이해하고 해결하는 과정에서
+                더 큰 성취감을 느낍니다. 새로운 환경이나 기술을 접했을 때 먼저 구조와 흐름을 파악하고,
+                그 위에서 개선 방향을 찾는 방식으로 일합니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="cards-3">
+            <article class="card dark">
+              <h3>Problem Analysis</h3>
+              <p>
+                오류가 발생하면 증상만 수정하지 않고 로그, 데이터 흐름, 실행 환경을 함께 확인합니다.
+                웹과 모바일 환경 차이로 인한 오류를 분석하고 로직을 수정한 경험이 있습니다.
+              </p>
+            </article>
+
+            <article class="card">
+              <h3>Operation Mind</h3>
+              <p>
+                전자결재, 일정관리, 전자우편, 게시판, 관리자 페이지 등 실제 업무 시스템을 운영하며
+                사용자 VOC 기반 오류 분석과 기능 개선을 수행했습니다.
+              </p>
+            </article>
+
+            <article class="card orange">
+              <h3>Growth Attitude</h3>
+              <p>
+                업무와 학습을 병행하며 정보처리기사, SQLD 등 자격을 취득했고,
+                부족한 부분은 스스로 학습하며 기술 이해도를 높여왔습니다.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="exp">
+          <div class="section-head">
+            <div>
+              <div class="section-no">02</div>
+              <div class="section-label">Work Experience</div>
+            </div>
+
+            <div>
+              <h2>Real Service Operation</h2>
+              <p class="section-copy">
+                1년 9개월 동안 그룹웨어 및 사내 업무 시스템 유지보수와 기능개발을 수행했습니다.
+                운영 중 발생하는 기능 오류 분석, 긴급 장애 대응, 레거시 코드 분석, 사용자 VOC 기반 개선을 경험했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <article class="timeline-item">
+              <div class="date-panel">
+                <strong>2023.03<br />2024.11</strong>
+                <span>GaonI · Web Development</span>
+              </div>
+
+              <div class="timeline-body">
+                <h3>Groupware System</h3>
+                <div class="meta">ASP.NET 기반 그룹웨어 및 사내 업무 시스템 유지보수 / 기능개발</div>
+
+                <ul class="bullets">
+                  <li>전자결재, 일정관리, 전자우편, 게시판, 관리자 페이지 등 업무 시스템 운영 지원</li>
+                  <li>운영 중 발생한 기능 오류 분석 및 긴급 장애 대응 수행</li>
+                  <li>사용자 VOC 기반 기능 개선 및 운영 안정화 작업 수행</li>
+                  <li>레거시 코드 분석 및 기존 기능 유지보수 수행</li>
+                  <li>웹/모바일 일정관리 기능 유지보수 및 오류 수정</li>
+                </ul>
+
+                <div class="tag-row">
+                  <span class="tag">ASP.NET Web Forms</span>
+                  <span class="tag">C#</span>
+                  <span class="tag">JavaScript</span>
+                  <span class="tag">HTML/CSS</span>
+                  <span class="tag">MSSQL</span>
+                  <span class="tag">Stored Procedure</span>
+                  <span class="tag">jQuery</span>
+                  <span class="tag">Git</span>
+                  <span class="tag">Redmine</span>
                 </div>
               </div>
-            </div>
-          </aside>
-        </div>
+            </article>
 
-        <div class="stats" aria-label="핵심 지표">
-          <div class="stat">
-            <strong>1.9Y</strong>
-            <span>그룹웨어 운영/개발 경력</span>
+            <article class="timeline-item">
+              <div class="date-panel">
+                <strong>KEY<br />RESULTS</strong>
+                <span>Maintenance · Customizing · Performance</span>
+              </div>
+
+              <div class="timeline-body">
+                <h3>Operation Improvements</h3>
+                <div class="meta">전자결재 · 일정관리 · 메일 · 포털 · 데이터 처리 개선</div>
+
+                <ul class="bullets">
+                  <li>결재 양식 기능 개선 및 스크립트 양식 개발</li>
+                  <li>수정이력 비교 및 변경내용 강조 기능 구현</li>
+                  <li>일정 색상 설정 기능 및 모바일 연동 개발</li>
+                  <li>메일 업로드/가져오기 기능 분리로 업로드 속도 향상 및 오류 발생 감소</li>
+                  <li>CSV 기반 데이터 처리 방식 적용으로 다운로드 시간을 약 2분에서 약 15초 수준으로 단축</li>
+                </ul>
+              </div>
+            </article>
           </div>
-          <div class="stat">
-            <strong>5+</strong>
-            <span>운영 기능 개선 영역</span>
-          </div>
-          <div class="stat">
-            <strong>15s</strong>
-            <span>CSV 다운로드 성능 개선</span>
-          </div>
-          <div class="stat">
-            <strong>4</strong>
-            <span>취득/합격 자격</span>
-          </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <section id="about">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">About</div>
-            <h2>운영 관점으로 문제를 분석하는 개발자</h2>
-          </div>
-          <p class="section-desc">
-            사용자가 실제로 마주하는 불편과 시스템 내부의 원인을 함께 바라보며,
-            안정적인 운영과 개선 가능한 구조를 만드는 데 집중합니다.
-          </p>
-        </div>
-
-        <div class="grid-3">
-          <article class="card">
-            <h3>Root Cause Analysis</h3>
-            <p>
-              문제가 발생하면 단순히 증상을 수정하기보다 로그, 데이터 흐름, 환경 차이를 확인하며
-              원인을 먼저 정리합니다. 웹에서는 정상 동작하지만 모바일에서 오류가 발생한 사례도
-              로직을 재분석하여 해결한 경험이 있습니다.
-            </p>
-          </article>
-
-          <article class="card">
-            <h3>Service Operation</h3>
-            <p>
-              전자결재, 일정관리, 전자우편, 게시판, 관리자 페이지 등 사내 업무 시스템을 운영하며
-              사용자 VOC 기반 오류 분석, 장애 대응, 기능 개선을 수행했습니다.
-            </p>
-          </article>
-
-          <article class="card">
-            <h3>Process Improvement</h3>
-            <p>
-              운영 과정에서 반복되는 불편과 개선 포인트를 발견하고,
-              사용성과 관리 효율을 높이는 방향으로 기능을 정리하고 개선하는 데 강점이 있습니다.
-            </p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="experience">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Experience</div>
-            <h2>실무 경력</h2>
-          </div>
-          <p class="section-desc">
-            ASP.NET/C# 기반 그룹웨어 및 사내 업무 시스템 유지보수와 기능개발을 담당했습니다.
-          </p>
-        </div>
-
-        <div class="timeline">
-          <article class="timeline-item">
+        <section id="projects">
+          <div class="section-head">
             <div>
-              <span class="date">2023.03 - 2024.11</span>
+              <div class="section-no">03</div>
+              <div class="section-label">Projects</div>
             </div>
-            <div class="timeline-body">
-              <h3>가온아이</h3>
-              <div class="meta">웹개발 · 그룹웨어 및 사내 업무 시스템 유지보수 / 기능개발</div>
+
+            <div>
+              <h2>Build & Report</h2>
+              <p class="section-copy">
+                관리자 시스템, 데이터 집계, 통계 시각화, AI 요약, PDF 리포트 자동화 등
+                운영 효율을 높이는 기능을 중심으로 프로젝트를 수행했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="cards-2">
+            <article class="card project-card">
+              <div class="project-top">
+                <div>
+                  <h3>JOYN</h3>
+                  <div class="meta">AI 기반 커뮤니티 플랫폼</div>
+                </div>
+                <span class="badge">Team 5</span>
+              </div>
+
               <p>
-                ASP.NET 기반 그룹웨어 시스템에서 전자결재, 일정관리, 전자우편, 게시판,
-                관리자 페이지 등 업무 시스템의 유지보수와 기능 개선을 수행했습니다.
-                사용자 VOC 기반 오류 분석과 운영 안정화 작업을 담당하며, 레거시 코드 분석 및
-                기존 기능 유지보수 경험을 쌓았습니다.
+                실시간 채팅, 투표, 화면 공유, 구독 결제, 관리자 시스템을 포함한 통합 웹 서비스입니다.
+                관리자 시스템 및 AI 요약 기능 개발을 담당했습니다.
               </p>
 
               <ul class="bullets">
-                <li>전자결재 양식 기능 개선, 수정이력 비교 및 변경내용 강조 기능 구현</li>
-                <li>일정 색상 설정, 모바일 연동, 참석자 초대 및 일정 참여 기능 개선</li>
-                <li>메일 업로드/가져오기 기능 분리로 업로드 오류 감소 및 처리 흐름 개선</li>
-                <li>전자설문 응답 및 엑셀 다운로드 기능 개선으로 다운로드 시간 약 2분에서 약 15초 수준으로 단축</li>
-                <li>MSSQL, Stored Procedure 기반 데이터 처리 및 운영 기능 유지보수 수행</li>
+                <li>회원, 방, 게시글, 파일 통합 관리 관리자 페이지 설계</li>
+                <li>FORCEQUIT 상태값 및 Audit Log 구조 구현</li>
+                <li>JPQL 기반 결제/매출 통계 집계 및 CSV 다운로드 구현</li>
+                <li>GPT-4.1 API 연동 채팅 3줄 요약 및 참여자 분석 기능 개발</li>
+                <li>JFreeChart + iText7 기반 AI PDF 리포트 자동 생성 기능 구현</li>
               </ul>
 
               <div class="tag-row">
-                <span class="tag">ASP.NET Web Forms</span>
-                <span class="tag">C#</span>
-                <span class="tag">JavaScript</span>
-                <span class="tag">MSSQL</span>
-                <span class="tag">Stored Procedure</span>
-                <span class="tag">jQuery</span>
-                <span class="tag">Git</span>
-                <span class="tag">Redmine</span>
+                <span class="tag">Java</span>
+                <span class="tag">Spring Boot 3</span>
+                <span class="tag">Spring Security</span>
+                <span class="tag">JPA</span>
+                <span class="tag">MySQL</span>
+                <span class="tag">GPT-4.1 API</span>
+                <span class="tag">JFreeChart</span>
+                <span class="tag">iText7</span>
+                <span class="tag">CSV</span>
               </div>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
+            </article>
 
-    <section id="projects">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Projects</div>
-            <h2>주요 프로젝트</h2>
-          </div>
-          <p class="section-desc">
-            관리자 기능, 데이터 흐름, 통계, AI 요약, 운영 리포팅을 중심으로 구현한 프로젝트입니다.
-          </p>
-        </div>
-
-        <div class="grid-2">
-          <article class="card project">
-            <div class="project-top">
-              <div>
-                <h3>JOYN</h3>
-                <p class="meta">AI 기반 커뮤니티 플랫폼</p>
+            <article class="card project-card dark">
+              <div class="project-top">
+                <div>
+                  <h3>404cafe</h3>
+                  <div class="meta">스터디카페 통합관리 시스템</div>
+                </div>
+                <span class="badge">Team 6</span>
               </div>
-              <span class="project-badge">Team 5</span>
-            </div>
 
-            <p>
-              실시간 채팅, 투표, 화면 공유, 구독 결제, 관리자 시스템을 포함한 통합 웹 서비스입니다.
-              관리자 시스템 및 AI 요약 기능 개발을 담당했으며, 운영 효율성과 데이터 기반 의사결정을
-              지원하는 구조를 설계했습니다.
-            </p>
+              <p>
+                좌석 예약, 스터디룸, 카페 주문, 자원 대여, 커뮤니티, 관리자 페이지로 구성된
+                스터디카페 통합 관리 시스템입니다. 관리자 기능 개발을 담당했습니다.
+              </p>
 
-            <ul class="bullets">
-              <li>회원, 방, 게시글, 파일을 통합 관리하는 관리자 페이지 설계</li>
-              <li>FORCEQUIT 상태값 및 Audit Log 구조 구현</li>
-              <li>JPQL 기반 결제/매출 통계 집계 및 CSV 다운로드 구현</li>
-              <li>GPT-4.1 API 연동으로 채팅 3줄 요약 및 참여자 분석 기능 개발</li>
-              <li>JFreeChart + iText7 기반 AI PDF 리포트 자동 생성 구현</li>
-            </ul>
+              <ul class="bullets">
+                <li>아이디/전화번호 조건 검색 쿼리 및 회원정보 수정 이력 저장</li>
+                <li>호출 내역 조회 및 최신 호출 상태 반영 로직 구현</li>
+                <li>성별/자원 사용 현황 집계 쿼리 설계 및 그래프 시각화</li>
+                <li>CSV Export 기반 관리자 리포팅 구현</li>
+                <li>자원 반납 승인, 신고 처리, 관리자 답변 등록 등 운영 프로세스 구현</li>
+              </ul>
 
-            <div class="tag-row">
-              <span class="tag">Java</span>
-              <span class="tag">Spring Boot 3</span>
-              <span class="tag">Spring Security</span>
-              <span class="tag">JPA</span>
-              <span class="tag">MySQL</span>
-              <span class="tag">GPT-4.1 API</span>
-              <span class="tag">iText7</span>
-              <span class="tag">CSV</span>
-            </div>
-          </article>
-
-          <article class="card project">
-            <div class="project-top">
-              <div>
-                <h3>404cafe</h3>
-                <p class="meta">스터디카페 통합관리 시스템</p>
-              </div>
-              <span class="project-badge">Team 6</span>
-            </div>
-
-            <p>
-              좌석 예약, 스터디룸, 카페 주문, 자원 대여, 커뮤니티, 관리자 페이지로 구성된
-              스터디카페 통합 관리 시스템입니다. 관리자 기능 개발을 담당하며 회원관리,
-              호출관리, 통계관리, 자원관리 기능을 구현했습니다.
-            </p>
-
-            <ul class="bullets">
-              <li>아이디/전화번호 조건 검색 쿼리 및 회원 정보 수정 이력 저장</li>
-              <li>호출 내역 조회 및 최신 호출 상태 반영 로직 구현</li>
-              <li>성별/자원 사용 현황 집계 쿼리 설계 및 그래프 시각화</li>
-              <li>CSV Export 기반 관리자 리포팅 기능 구현</li>
-              <li>자원 반납 승인, 신고 처리, 관리자 답변 등록 등 운영 프로세스 구현</li>
-            </ul>
-
-            <div class="tag-row">
-              <span class="tag">Java</span>
-              <span class="tag">Swing</span>
-              <span class="tag">MySQL</span>
-              <span class="tag">CSV</span>
-              <span class="tag">Singleton Pattern</span>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="skills">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Skills</div>
-            <h2>기술 스택</h2>
-          </div>
-          <p class="section-desc">
-            실무 운영 경험과 교육 과정을 통해 백엔드, 프론트엔드, DB, AI API 활용 역량을 확장하고 있습니다.
-          </p>
-        </div>
-
-        <div class="skills-wrap">
-          <aside class="skill-panel">
-            <h3>기술은 문제를 정확히 이해하기 위한 도구라고 생각합니다.</h3>
-            <p>
-              새로운 업무를 맡으면 먼저 전체 구조와 흐름을 파악하고,
-              필요한 기술을 학습하며 해결 방법을 찾습니다.
-            </p>
-          </aside>
-
-          <div class="skill-groups">
-            <div class="skill-group">
-              <h4>Backend & Server</h4>
               <div class="tag-row">
-                <span class="tag gray">ASP.NET</span>
-                <span class="tag gray">C#</span>
-                <span class="tag gray">Java</span>
-                <span class="tag gray">Spring Boot</span>
-                <span class="tag gray">JSP</span>
-                <span class="tag gray">FastAPI</span>
+                <span class="tag">Java</span>
+                <span class="tag">Swing</span>
+                <span class="tag">MySQL</span>
+                <span class="tag">CSV</span>
+                <span class="tag">Singleton Pattern</span>
               </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="skills">
+          <div class="section-head">
+            <div>
+              <div class="section-no">04</div>
+              <div class="section-label">Skills</div>
             </div>
 
-            <div class="skill-group">
-              <h4>Frontend</h4>
-              <div class="tag-row">
-                <span class="tag gray">HTML</span>
-                <span class="tag gray">CSS</span>
-                <span class="tag gray">JavaScript</span>
-                <span class="tag gray">jQuery</span>
-                <span class="tag gray">React</span>
-              </div>
-            </div>
-
-            <div class="skill-group">
-              <h4>Database & Data</h4>
-              <div class="tag-row">
-                <span class="tag gray">MSSQL</span>
-                <span class="tag gray">MySQL</span>
-                <span class="tag gray">Oracle</span>
-                <span class="tag gray">Stored Procedure</span>
-                <span class="tag gray">JPQL</span>
-                <span class="tag gray">CSV</span>
-              </div>
-            </div>
-
-            <div class="skill-group">
-              <h4>Tools & AI</h4>
-              <div class="tag-row">
-                <span class="tag gray">Git</span>
-                <span class="tag gray">Redmine</span>
-                <span class="tag gray">GPT API</span>
-                <span class="tag gray">OpenCV</span>
-                <span class="tag gray">Elasticsearch</span>
-                <span class="tag gray">JFreeChart</span>
-                <span class="tag gray">iText7</span>
-              </div>
+            <div>
+              <h2>Tech Stack</h2>
+              <p class="section-copy">
+                실무 운영 경험과 교육 과정을 통해 백엔드, 프론트엔드, 데이터베이스,
+                AI API 활용 역량을 확장하고 있습니다.
+              </p>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <section id="certs">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Certifications & Education</div>
-            <h2>자격 및 교육</h2>
-          </div>
-          <p class="section-desc">
-            업무와 학습을 병행하며 기술 이해도를 꾸준히 높이고 있습니다.
-          </p>
-        </div>
+          <div class="skill-layout">
+            <aside class="big-type-card">
+              <strong>CODE<br />FLOW<br />DATA</strong>
+              <p>
+                기술은 단순 구현 도구가 아니라 문제의 원인을 더 정확히 이해하기 위한 수단이라고 생각합니다.
+              </p>
+            </aside>
 
-        <div class="cert-list">
-          <div class="cert">
-            <strong>정보처리기사</strong>
-            <span>2025.06 최종합격</span>
-          </div>
-          <div class="cert">
-            <strong>SQLD</strong>
-            <span>2023.12 최종합격</span>
-          </div>
-          <div class="cert">
-            <strong>컴퓨터활용능력 1급</strong>
-            <span>2021.08 최종합격</span>
-          </div>
-          <div class="cert">
-            <strong>리눅스마스터 1급</strong>
-            <span>2026.04 1차합격</span>
-          </div>
-        </div>
-
-        <div style="height: 18px;"></div>
-
-        <article class="timeline-item">
-          <div>
-            <span class="date">2025.06 - 2025.12</span>
-          </div>
-          <div class="timeline-body">
-            <h3>솔데스크</h3>
-            <div class="meta">자바·파이썬·ChatGPT를 활용한 AI 개발자 양성 과정</div>
-            <p>
-              HTML/CSS/JavaScript, Java, MySQL, Spring Boot, MyBatis, Oracle,
-              React, Node.js, Python, FastAPI, Web Scraping, ChatGPT API, OpenCV,
-              Elasticsearch, 데이터 분석 및 시각화 과정을 학습했습니다.
-            </p>
-          </div>
-        </article>
-
-        <div style="height: 18px;"></div>
-
-        <article class="timeline-item">
-          <div>
-            <span class="date">2020.03 - 2022.02</span>
-          </div>
-          <div class="timeline-body">
-            <h3>배화여자대학교</h3>
-            <div class="meta">스마트IT과 졸업</div>
-            <p>
-              IT 전공 기반을 바탕으로 웹 개발, 데이터베이스, 프로그래밍 기초 역량을 쌓았습니다.
-            </p>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section id="story">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Career Story</div>
-            <h2>자기소개</h2>
-          </div>
-          <p class="section-desc">
-            공개 포트폴리오에서 읽기 쉽도록 자기소개서 내용을 핵심 중심으로 정리했습니다.
-          </p>
-        </div>
-
-        <div class="essay">
-          <aside class="quote-card">
-            <h3>“구조를 이해하고, 원인을 찾고, 개선으로 연결합니다.”</h3>
-            <p>
-              단순히 결과를 만드는 것보다 문제의 원인을 이해하고 해결하는 과정에서 더 큰 성취감을 느낍니다.
-            </p>
-          </aside>
-
-          <div class="essay-list">
-            <details open>
-              <summary>성장과정</summary>
-              <div class="detail-body">
-                저는 단순히 결과를 만드는 것보다 문제의 원인을 이해하고 해결하는 과정에서 더 큰 성취감을 느끼며 성장해왔습니다.
-                새로운 환경이나 기술을 접했을 때도 먼저 구조와 흐름을 이해하려 노력했고,
-                이러한 습관은 자연스럽게 문제를 분석하고 개선 방향을 고민하는 태도로 이어졌습니다.
-                재직 기간 동안에도 업무와 학습을 병행하며 정보처리기사, SQLD 등의 자격증을 취득했고,
-                부족한 부분은 스스로 보완하며 기술적 이해도를 높이고자 노력했습니다.
+            <div class="skill-groups">
+              <div class="skill-group">
+                <h3>Backend</h3>
+                <div class="tag-row">
+                  <span class="tag">ASP.NET</span>
+                  <span class="tag">C#</span>
+                  <span class="tag">Java</span>
+                  <span class="tag">Spring Boot</span>
+                  <span class="tag">JSP</span>
+                  <span class="tag">FastAPI</span>
+                </div>
               </div>
-            </details>
 
-            <details>
-              <summary>성격 및 장단점</summary>
-              <div class="detail-body">
-                저는 문제가 발생하면 원인을 먼저 정리하고, 새로운 환경에서도 빠르게 적응하며 해결 방법을 찾는 편입니다.
-                업무 수행 시 단순히 증상을 확인하는 것보다 원인을 파악하고 해결 방법을 찾는 과정에 집중합니다.
-                반면 완성도를 높이려는 성향으로 세부적인 부분에 시간을 많이 쓰는 경우가 있어,
-                우선순위를 정하고 일정 기준을 세워 업무 효율을 높이려 노력하고 있습니다.
+              <div class="skill-group">
+                <h3>Frontend</h3>
+                <div class="tag-row">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                  <span class="tag">JavaScript</span>
+                  <span class="tag">jQuery</span>
+                  <span class="tag">React</span>
+                </div>
               </div>
-            </details>
 
-            <details>
-              <summary>지원동기</summary>
-              <div class="detail-body">
-                유지보수 및 운영 업무를 수행하며 시스템은 단순히 개발하는 것보다 안정적으로 운영되고
-                사용자가 편리하게 활용할 수 있도록 만드는 과정이 중요하다는 점을 배웠습니다.
-                그룹웨어 및 업무 시스템 운영 과정에서 사용자 VOC 기반 기능 개선, 운영 이슈 대응,
-                웹·모바일 환경 차이 분석, DB 유지보수 등을 수행하며 사용자 관점과 시스템 관점을 함께 고려하는 시각을 키웠습니다.
+              <div class="skill-group">
+                <h3>Database</h3>
+                <div class="tag-row">
+                  <span class="tag">MSSQL</span>
+                  <span class="tag">MySQL</span>
+                  <span class="tag">Oracle</span>
+                  <span class="tag">Stored Procedure</span>
+                  <span class="tag">JPQL</span>
+                  <span class="tag">CSV</span>
+                </div>
               </div>
-            </details>
 
-            <details>
-              <summary>입사 후 포부</summary>
-              <div class="detail-body">
-                입사 후에는 먼저 업무 프로세스와 시스템 구조를 빠르게 이해하며 조직에 안정적으로 적응하겠습니다.
-                이후에는 운영과 유지보수 경험을 바탕으로 사용자 요구사항을 정확히 이해하고,
-                다양한 환경에서 발생하는 문제를 분석하며 서비스 개선에 기여하고 싶습니다.
-                단순히 요청받은 업무를 수행하는 것에 그치지 않고 운영 과정에서 발생하는 불편과 개선 포인트를 먼저 찾고 제안하는 구성원이 되겠습니다.
+              <div class="skill-group">
+                <h3>Tools & AI</h3>
+                <div class="tag-row">
+                  <span class="tag">Git</span>
+                  <span class="tag">Redmine</span>
+                  <span class="tag">GPT API</span>
+                  <span class="tag">OpenCV</span>
+                  <span class="tag">Elasticsearch</span>
+                  <span class="tag">JFreeChart</span>
+                  <span class="tag">iText7</span>
+                </div>
               </div>
-            </details>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <section id="contact" class="contact">
-      <div class="wrap">
-        <div class="contact-card">
-          <div>
-            <div class="section-kicker" style="color: rgba(255,255,255,0.62);">Contact</div>
-            <h2>함께 더 안정적인 서비스를 만들고 싶습니다.</h2>
-            <p>
-              아래 이메일, GitHub, Notion 링크는 배포 전 본인 정보로 수정해 주세요.
-              공개 포트폴리오에는 주소와 휴대폰 번호를 노출하지 않는 것을 권장합니다.
-            </p>
+        <section id="certs">
+          <div class="section-head">
+            <div>
+              <div class="section-no">05</div>
+              <div class="section-label">Certification & Education</div>
+            </div>
+
+            <div>
+              <h2>Keep Learning</h2>
+              <p class="section-copy">
+                업무와 학습을 병행하며 기술적 이해도를 꾸준히 높이고 있습니다.
+              </p>
+            </div>
           </div>
 
-          <div class="contact-links">
-            <a class="contact-link" href="mailto:your.email@example.com">your.email@example.com</a>
-            <a class="contact-link" href="https://github.com/your-github-id" target="_blank" rel="noopener">GitHub 바로가기</a>
-            <a class="contact-link" href="https://www.notion.so/your-portfolio" target="_blank" rel="noopener">Notion / Resume 링크</a>
+          <div class="cert-grid">
+            <div class="cert">
+              <b>정보처리기사</b>
+              <span>2025.06 최종합격</span>
+            </div>
+
+            <div class="cert">
+              <b>SQLD</b>
+              <span>2023.12 최종합격</span>
+            </div>
+
+            <div class="cert">
+              <b>컴퓨터활용능력 1급</b>
+              <span>2021.08 최종합격</span>
+            </div>
+
+            <div class="cert">
+              <b>리눅스마스터 1급</b>
+              <span>2026.04 1차합격</span>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
-  </main>
 
-  <a href="#home" class="to-top" id="toTop" aria-label="맨 위로 이동">↑</a>
+          <div style="height: 14px;"></div>
 
-  <footer>
-    © 2026 Hong Seong Eun. Built with HTML, CSS, JavaScript.
-  </footer>
+          <div class="timeline">
+            <article class="timeline-item">
+              <div class="date-panel">
+                <strong>2025.06<br />2025.12</strong>
+                <span>Soldesk Education</span>
+              </div>
+
+              <div class="timeline-body">
+                <h3>AI Developer Course</h3>
+                <div class="meta">자바 · 파이썬 · ChatGPT를 활용한 AI 개발자 양성 과정</div>
+                <ul class="bullets">
+                  <li>HTML, CSS, JavaScript 기반 정적 웹 서비스 구현</li>
+                  <li>Java, Spring Boot, MyBatis, Oracle 연동 웹 애플리케이션 구현</li>
+                  <li>React, Node.js, Python 기반 Front-End / Back-End 서비스 구축</li>
+                  <li>FastAPI, MySQL, Web Scraping, 데이터 분석 및 시각화 학습</li>
+                  <li>ChatGPT API, OpenCV, Elasticsearch 활용</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="timeline-item">
+              <div class="date-panel">
+                <strong>2020.03<br />2022.02</strong>
+                <span>Baewha Women's University</span>
+              </div>
+
+              <div class="timeline-body">
+                <h3>Smart IT</h3>
+                <div class="meta">배화여자대학교 스마트IT과 졸업</div>
+                <p class="section-copy" style="margin-top: 12px;">
+                  IT 전공 기반을 바탕으로 웹 개발, 데이터베이스, 프로그래밍 기초 역량을 쌓았습니다.
+                </p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="story">
+          <div class="section-head">
+            <div>
+              <div class="section-no">06</div>
+              <div class="section-label">Career Story</div>
+            </div>
+
+            <div>
+              <h2>Why I Work</h2>
+              <p class="section-copy">
+                공개 포트폴리오에서 읽기 쉽도록 자기소개서 내용을 핵심 중심으로 정리했습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="story-grid">
+            <aside class="quote">
+              <strong>Fix<br />Before<br />Build</strong>
+              <p>
+                단순히 요청받은 업무를 수행하는 것에서 그치지 않고,
+                운영 과정에서 발생하는 불편과 개선 포인트를 먼저 찾고 제안하는 개발자로 성장하고 싶습니다.
+              </p>
+            </aside>
+
+            <div>
+              <details open>
+                <summary>성장과정</summary>
+                <div class="detail-body">
+                  저는 단순히 결과를 만드는 것보다 문제의 원인을 이해하고 해결하는 과정에서 더 큰 성취감을 느끼며 성장해왔습니다.
+                  새로운 환경이나 기술을 접했을 때도 먼저 구조와 흐름을 이해하려 노력했고,
+                  이러한 습관은 자연스럽게 문제를 분석하고 개선 방향을 고민하는 태도로 이어졌습니다.
+                  재직 기간 동안에도 업무와 학습을 병행하며 정보처리기사, SQLD 등의 자격증을 취득했고,
+                  부족한 부분은 스스로 보완하며 기술적 이해도를 높이고자 노력했습니다.
+                </div>
+              </details>
+
+              <details>
+                <summary>성격 및 장단점</summary>
+                <div class="detail-body">
+                  저는 문제가 발생하면 원인을 먼저 정리하고, 새로운 환경에서도 빠르게 적응하며 해결 방법을 찾는 편입니다.
+                  업무 수행 시 단순히 증상을 확인하는 것보다 원인을 파악하고 해결 방법을 찾는 과정에 집중합니다.
+                  반면 완성도를 높이려는 성향으로 세부적인 부분에 시간을 많이 쓰는 경우가 있습니다.
+                  이를 보완하기 위해 우선순위를 정하고 일정 기준을 세워 업무 효율을 높이려 노력하고 있습니다.
+                </div>
+              </details>
+
+              <details>
+                <summary>지원동기</summary>
+                <div class="detail-body">
+                  유지보수 및 운영 업무를 수행하며 시스템은 단순히 개발하는 것보다 안정적으로 운영되고
+                  사용자가 편리하게 활용할 수 있도록 만드는 과정이 중요하다는 점을 배웠습니다.
+                  그룹웨어 및 업무 시스템 운영 과정에서 사용자 VOC 기반 기능 개선, 운영 이슈 대응,
+                  웹·모바일 환경 차이 분석, DB 유지보수 등을 수행하며 사용자 관점과 시스템 관점을 함께 고려하는 시각을 키울 수 있었습니다.
+                </div>
+              </details>
+
+              <details>
+                <summary>입사 후 포부</summary>
+                <div class="detail-body">
+                  입사 후에는 먼저 업무 프로세스와 시스템 구조를 빠르게 이해하며 조직에 안정적으로 적응하겠습니다.
+                  이후에는 운영과 유지보수 경험을 바탕으로 사용자 요구사항을 정확히 이해하고,
+                  다양한 환경에서 발생하는 문제를 분석하며 서비스 개선에 기여하고 싶습니다.
+                  또한 요청받은 업무를 수행하는 것에 그치지 않고 운영 과정에서 발생하는 불편과 개선 포인트를 먼저 찾고 제안하는 구성원이 되겠습니다.
+                </div>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact">
+          <div class="contact-box">
+            <div>
+              <h2 class="contact-title">Contact<br />Point</h2>
+              <p>
+                아래 이메일, GitHub, Notion 링크는 배포 전에 본인 정보로 수정해 주세요.
+                공개 GitHub Pages에는 주소와 휴대폰 번호를 노출하지 않는 것을 권장합니다.
+              </p>
+            </div>
+
+            <div class="contact-links">
+              <a href="mailto:your.email@example.com">your.email@example.com</a>
+              <a href="https://github.com/your-github-id" target="_blank" rel="noopener">GitHub</a>
+              <a href="https://www.notion.so/your-portfolio" target="_blank" rel="noopener">Notion / Resume</a>
+            </div>
+          </div>
+        </section>
+
+        <footer>
+          <span>© 2026 Hong Seong Eun Portfolio</span>
+          <span>HTML · CSS · JavaScript / GitHub Pages Ready</span>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <a href="#top" class="top-button" id="topButton" aria-label="맨 위로 이동">↑</a>
 
   <script>
-    const toTop = document.getElementById("toTop");
+    const topButton = document.getElementById("topButton");
 
     window.addEventListener("scroll", () => {
       if (window.scrollY > 420) {
-        toTop.classList.add("show");
+        topButton.classList.add("show");
       } else {
-        toTop.classList.remove("show");
+        topButton.classList.remove("show");
       }
     });
   </script>
 </body>
 </html>
-```
