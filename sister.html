@@ -1244,8 +1244,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 36px;
-      padding: 8px 12px;
+      min-height: 38px;
+      padding: 9px 13px;
       border: 2px solid var(--black);
       background: var(--white);
       color: var(--black);
@@ -1269,63 +1269,60 @@
     }
 
     .joyn-gallery {
+      display: none;
+      grid-column: 1 / -1;
+      width: 100%;
+      margin-top: 28px;
       position: relative;
       z-index: 4;
-      display: none;
-      margin-top: 18px;
-      padding: 14px;
-      border: 2px solid var(--black);
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(255,255,255,0.14) 1px, transparent 1px),
-        rgba(185,216,223,0.86);
-      background-size: 28px 28px, 28px 28px, auto;
-      box-shadow: inset 0 0 0 2px rgba(255,79,31,0.72);
-      cursor: default;
     }
 
     .joyn-gallery.is-open {
       display: block;
-      animation: joynGalleryOpen 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: joynGalleryOpen 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
-    .joyn-gallery-head {
+    .joyn-gallery-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
       margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(5,7,10,0.68);
     }
 
-    .joyn-gallery-head strong {
-      display: block;
+    .joyn-gallery-top strong {
       color: var(--orange);
-      font-size: clamp(24px, 4vw, 42px);
-      line-height: 0.85;
-      letter-spacing: -0.095em;
+      font-size: clamp(36px, 7vw, 86px);
+      line-height: 0.82;
+      letter-spacing: -0.105em;
       text-transform: uppercase;
     }
 
-    .joyn-gallery-head span {
-      display: block;
-      margin-top: 7px;
-      color: rgba(5,7,10,0.66);
-      font-size: 12px;
-      font-weight: 1000;
-      text-transform: uppercase;
+    .joyn-gallery-top span {
+      max-width: 360px;
+      color: rgba(5,7,10,0.68);
+      font-size: 13px;
+      font-weight: 900;
+      text-align: right;
     }
 
     .joyn-gallery-scroll {
       display: grid;
       grid-auto-flow: column;
-      grid-auto-columns: minmax(260px, 82%);
-      gap: 12px;
+      grid-auto-columns: 100%;
+      gap: 18px;
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scroll-snap-type: x mandatory;
-      padding: 4px 4px 16px;
+      padding: 2px 2px 18px;
       scrollbar-color: var(--orange) rgba(247,245,238,0.52);
       scrollbar-width: thin;
     }
 
     .joyn-gallery-scroll::-webkit-scrollbar {
-      height: 12px;
+      height: 13px;
     }
 
     .joyn-gallery-scroll::-webkit-scrollbar-track {
@@ -1339,90 +1336,34 @@
     }
 
     .joyn-slide {
-      position: relative;
       margin: 0;
+      width: 100%;
       scroll-snap-align: center;
-      border: 2px solid var(--black);
-      background: rgba(247,245,238,0.76);
-      box-shadow: 5px 5px 0 rgba(5,7,10,0.16);
-      aspect-ratio: 16 / 9;
-      overflow: hidden;
+      background: rgba(247,245,238,0.28);
     }
 
     .joyn-slide img {
       display: block;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: rgba(255,255,255,0.26);
+      height: auto;
+      max-height: min(78vh, 760px);
+      object-fit: contain;
     }
 
-    .joyn-slide-no {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      z-index: 2;
-      display: inline-flex;
-      align-items: center;
-      min-height: 28px;
-      padding: 4px 8px;
-      border: 2px solid var(--black);
-      background: var(--orange);
-      color: var(--white);
-      font-size: 12px;
-      font-weight: 1000;
-    }
-
-    .joyn-slide-fallback {
-      display: none;
-      width: 100%;
-      height: 100%;
-      place-items: center;
-      text-align: center;
-      padding: 22px;
-      color: var(--black);
-      font-weight: 1000;
-      font-size: 22px;
-      line-height: 1.1;
-      letter-spacing: -0.06em;
-      background:
-        radial-gradient(circle at 80% 18%, rgba(255,79,31,0.18), transparent 28%),
-        rgba(247,245,238,0.76);
-    }
-
-    .joyn-slide-fallback small {
-      display: block;
-      margin-top: 10px;
-      color: rgba(5,7,10,0.54);
-      font-size: 12px;
-      letter-spacing: 0;
-      line-height: 1.35;
-    }
-
-    .joyn-gallery-foot {
+    .joyn-gallery-controls {
       display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-      margin-top: 10px;
-      color: rgba(5,7,10,0.66);
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .joyn-gallery-foot div {
-      display: flex;
+      justify-content: flex-end;
       gap: 8px;
-      flex: 0 0 auto;
+      margin-top: 10px;
     }
 
     .joyn-arrow {
-      min-width: 42px;
-      height: 38px;
+      min-width: 48px;
+      height: 42px;
       border: 2px solid var(--black);
       background: var(--white);
       color: var(--black);
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 1000;
       cursor: pointer;
       box-shadow: 4px 4px 0 rgba(5,7,10,0.16);
@@ -1438,8 +1379,8 @@
     @keyframes joynGalleryOpen {
       from {
         opacity: 0;
-        transform: translateY(14px);
-        filter: blur(6px);
+        transform: translateY(18px);
+        filter: blur(8px);
       }
       to {
         opacity: 1;
@@ -1449,13 +1390,22 @@
     }
 
     @media (max-width: 620px) {
-      .joyn-gallery-scroll {
-        grid-auto-columns: 88%;
+      .joyn-gallery-top {
+        display: block;
       }
 
-      .joyn-gallery-foot {
-        align-items: flex-start;
-        flex-direction: column;
+      .joyn-gallery-top span {
+        display: block;
+        margin-top: 8px;
+        text-align: left;
+      }
+
+      .joyn-gallery-scroll {
+        gap: 12px;
+      }
+
+      .joyn-slide img {
+        max-height: 72vh;
       }
     }
 
@@ -1717,168 +1667,6 @@
                 <button type="button" class="joyn-btn" id="joynGalleryBtn">View 21 Images</button>
                 <a class="joyn-btn github" href="https://github.com/Imtheherstory/joyn" target="_blank" rel="noopener" id="joynGithubLink">GitHub Page</a>
               </div>
-
-              <div class="joyn-gallery" id="joynGallery" aria-hidden="true">
-                <div class="joyn-gallery-head">
-                  <strong>JOYN Screens</strong>
-                </div>
-
-                <div class="joyn-gallery-scroll" id="joynGalleryScroll" tabindex="0">
-                  <figure class="joyn-slide">
-                    <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-0.png" alt="JOYN 프로젝트 화면 1" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-1.png" alt="JOYN 프로젝트 화면 2" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-2.png" alt="JOYN 프로젝트 화면 3" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-3.png" alt="JOYN 프로젝트 화면 4" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 05</span>
-                    <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-4.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-5.png" alt="JOYN 프로젝트 화면 6" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-6.png" alt="JOYN 프로젝트 화면 7" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-7.png" alt="JOYN 프로젝트 화면 8" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 09</span>
-                    <img src="assets/joyn/joyn-09.png" alt="JOYN 프로젝트 화면 9" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 09
-                      <small>assets/joyn/joyn-09.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 10</span>
-                    <img src="assets/joyn/joyn-10.png" alt="JOYN 프로젝트 화면 10" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 10
-                      <small>assets/joyn/joyn-10.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 11</span>
-                    <img src="assets/joyn/joyn-11.png" alt="JOYN 프로젝트 화면 11" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 11
-                      <small>assets/joyn/joyn-11.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 12</span>
-                    <img src="assets/joyn/joyn-12.png" alt="JOYN 프로젝트 화면 12" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 12
-                      <small>assets/joyn/joyn-12.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 13</span>
-                    <img src="assets/joyn/joyn-13.png" alt="JOYN 프로젝트 화면 13" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 13
-                      <small>assets/joyn/joyn-13.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 14</span>
-                    <img src="assets/joyn/joyn-14.png" alt="JOYN 프로젝트 화면 14" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 14
-                      <small>assets/joyn/joyn-14.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 15</span>
-                    <img src="assets/joyn/joyn-15.png" alt="JOYN 프로젝트 화면 15" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 15
-                      <small>assets/joyn/joyn-15.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 16</span>
-                    <img src="assets/joyn/joyn-16.png" alt="JOYN 프로젝트 화면 16" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 16
-                      <small>assets/joyn/joyn-16.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 17</span>
-                    <img src="assets/joyn/joyn-17.png" alt="JOYN 프로젝트 화면 17" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 17
-                      <small>assets/joyn/joyn-17.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 18</span>
-                    <img src="assets/joyn/joyn-18.png" alt="JOYN 프로젝트 화면 18" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 18
-                      <small>assets/joyn/joyn-18.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 19</span>
-                    <img src="assets/joyn/joyn-19.png" alt="JOYN 프로젝트 화면 19" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 19
-                      <small>assets/joyn/joyn-19.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 20</span>
-                    <img src="assets/joyn/joyn-20.png" alt="JOYN 프로젝트 화면 20" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 20
-                      <small>assets/joyn/joyn-20.png</small>
-                    </figcaption>
-                  </figure>
-                  <figure class="joyn-slide">
-                    <span class="joyn-slide-no">JOYN 21</span>
-                    <img src="assets/joyn/joyn-21.png" alt="JOYN 프로젝트 화면 21" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-                    <figcaption class="joyn-slide-fallback">
-                      JOYN SCREEN 21
-                      <small>assets/joyn/joyn-21.png</small>
-                    </figcaption>
-                  </figure>
-                </div>
-
-                <div class="joyn-gallery-foot">
-                  <span>이미지는 <b>assets/joyn/joyn-01.png ~ joyn-21.png</b> 경로에 넣으면 표시됩니다.</span>
-                  <div>
-                    <button type="button" class="joyn-arrow" id="joynPrev">←</button>
-                    <button type="button" class="joyn-arrow" id="joynNext">→</button>
-                  </div>
-                </div>
-              </div>
             </article>
 
             <article class="card project-card dark">
@@ -1911,6 +1699,83 @@
                 <span class="tag">Singleton Pattern</span>
               </div>
             </article>
+          </div>
+          <div class="joyn-gallery" id="joynGallery" aria-hidden="true">
+            <div class="joyn-gallery-top">
+              <strong>JOYN Screens</strong>
+              <span>좌우로 스크롤해서 21장의 프로젝트 이미지를 확인할 수 있습니다.</span>
+            </div>
+
+            <div class="joyn-gallery-scroll" id="joynGalleryScroll" tabindex="0" aria-label="JOYN 프로젝트 이미지 가로 스크롤 영역">
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-0.png" alt="JOYN 프로젝트 화면 1" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-1.png" alt="JOYN 프로젝트 화면 2" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-2.png" alt="JOYN 프로젝트 화면 3" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-3.png" alt="JOYN 프로젝트 화면 4" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-4.png" alt="JOYN 프로젝트 화면 5" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-5.png" alt="JOYN 프로젝트 화면 6" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-6.png" alt="JOYN 프로젝트 화면 7" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-7.png" alt="JOYN 프로젝트 화면 8" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-8.png" alt="JOYN 프로젝트 화면 9" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-9.png" alt="JOYN 프로젝트 화면 10" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-10.png" alt="JOYN 프로젝트 화면 11" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-11.png" alt="JOYN 프로젝트 화면 12" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-12.png" alt="JOYN 프로젝트 화면 13" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-13.png" alt="JOYN 프로젝트 화면 14" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-14.png" alt="JOYN 프로젝트 화면 15" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-15.png" alt="JOYN 프로젝트 화면 16" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-16.png" alt="JOYN 프로젝트 화면 17" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-17.png" alt="JOYN 프로젝트 화면 18" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-18.png" alt="JOYN 프로젝트 화면 19" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-19.png" alt="JOYN 프로젝트 화면 20" loading="lazy" />
+              </figure>
+              <figure class="joyn-slide">
+                <img src="https://raw.githubusercontent.com/onlyunlimit/bodam-id-card/refs/heads/main/180899f11f8dfba37ac06f09f2a118ba-20.png" alt="JOYN 프로젝트 화면 21" loading="lazy" />
+              </figure>
+            </div>
+
+            <div class="joyn-gallery-controls">
+              <button type="button" class="joyn-arrow" id="joynPrev" aria-label="이전 이미지">←</button>
+              <button type="button" class="joyn-arrow" id="joynNext" aria-label="다음 이미지">→</button>
+            </div>
           </div>
         </section>
 
@@ -2185,7 +2050,7 @@
 
       if (isOpen) {
         setTimeout(() => {
-          joynGallery.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          joynGallery.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 80);
       }
     }
@@ -2194,7 +2059,7 @@
       if (!joynGalleryScroll) return;
 
       joynGalleryScroll.scrollBy({
-        left: joynGalleryScroll.clientWidth * 0.84 * direction,
+        left: joynGalleryScroll.clientWidth * direction,
         behavior: "smooth"
       });
     }
@@ -2209,16 +2074,11 @@
       });
     }
 
-    [joynGalleryBtn, joynGallery, joynPrev, joynNext].forEach((el) => {
-      if (el) {
-        el.addEventListener("click", (event) => {
-          event.stopPropagation();
-        });
-      }
-    });
-
     if (joynGalleryBtn) {
-      joynGalleryBtn.addEventListener("click", toggleJoynGallery);
+      joynGalleryBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleJoynGallery();
+      });
     }
 
     if (joynGithubLink) {
@@ -2226,6 +2086,12 @@
         event.stopPropagation();
       });
     }
+
+    [joynGallery, joynPrev, joynNext].forEach((el) => {
+      if (el) {
+        el.addEventListener("click", (event) => event.stopPropagation());
+      }
+    });
 
     if (joynPrev) {
       joynPrev.addEventListener("click", () => scrollJoynGallery(-1));
