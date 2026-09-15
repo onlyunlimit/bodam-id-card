@@ -1,0 +1,10 @@
+# Original character prompts and personal materials are local-only.
+/caveduck/
+/private/
+/dist/
+/node_modules/
+/test-results/
+/playwright-report/
+.DS_Store
+*.log
+.env*
