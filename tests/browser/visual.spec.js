@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 
 test('Real portraits render and desktop, tablet, phone layouts stay within bounds',async({page})=>{
   test.setTimeout(90000);
-  await page.goto('/');
+  await page.goto('/portal.html');
   await page.locator('#personnel').scrollIntoViewIfNeeded();
-  await page.locator('#viewer-toggle').click();
+  await page.locator('#viewer-toggle').click();await page.locator('#login-submit').click();await expect(page.locator('#staff-login')).not.toBeVisible();
   await expect.poll(()=>page.locator('.portrait').evaluateAll(imgs=>imgs.filter(i=>i.complete&&i.naturalWidth>0).length),{timeout:20000}).toBe(4);
   await page.evaluate(()=>document.fonts.ready);
   await page.locator('[data-team="all"]').click();

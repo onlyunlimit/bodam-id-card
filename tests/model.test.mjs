@@ -43,10 +43,13 @@ test('All five incident categories tally, resolve and reopen consistently', () =
   assert.equal(isIncident({...records[0],x:500}),false);
 });
 test('Curated character records have unique identities and real source links', () => {
-  assert.equal(characters.length,22);assert.equal(new Set(characters.map(c=>c.id)).size,22);
+  assert.equal(characters.length,23);assert.equal(new Set(characters.map(c=>c.id)).size,23);
   for(const c of characters) {
     assert.ok(teams.some(t=>t.id===c.team));assert.ok(c.bio&&c.ability&&c.notes);
-    assert.equal(new URL(c.link).host,'ko.cvdk.io');
+    if(c.id==='yeomyeong')assert.equal(c.link,null);
+    else assert.equal(new URL(c.link).host,'ko.cvdk.io');
+    assert.ok(c.gallery?.length);
+    assert.equal(c.gallery[0].url,c.portrait);
     assert.ok(['cdn.caveduck.io','storage.googleapis.com'].includes(new URL(c.portrait).host));
     assert.ok(!JSON.stringify(c).includes('{{user}}'));
   }

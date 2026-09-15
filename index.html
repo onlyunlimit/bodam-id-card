@@ -1,87 +1,16 @@
 <!doctype html>
-<html lang="ko" data-theme="control">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0c1115">
-  <meta name="description" content="국가 각성자 통합관리청 SGIA — onlyunlimit의 세계관, 요원 기록과 게이트 관제 아카이브.">
-  <title>SGIA · 국가 각성자 통합관리청 | onlyunlimit</title>
-  <link rel="icon" href="assets/emblem.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/site.css">
-  <script type="module" src="assets/app.js"></script>
-</head>
+<html lang="ko">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#070b0f"><meta name="description" content="SGIA 국가 각성자 통합관리청 — 경계 너머의 기록에 접속합니다."><title>SGIA — 경계에 접속하다 | onlyunlimit</title><link rel="icon" href="assets/emblem.svg"><link rel="stylesheet" href="assets/intro.css"><script type="module" src="assets/intro.js"></script></head>
 <body>
-<a class="skip-link" href="#main">본문으로 이동</a>
-<div class="cursor-halo" aria-hidden="true"></div>
-<aside class="sidebar" aria-label="주 메뉴">
-  <a class="brand" href="#overview" aria-label="SGIA 홈"><img src="assets/emblem.svg" alt="" width="42" height="42"><span>SGIA<small>INTEGRATED ADMINISTRATION</small></span></a>
-  <div class="nav-caption">CENTRAL CONTROL</div>
-  <nav class="main-nav">
-    <a class="active" href="#overview"><span class="nav-icon">◫</span> 통합 관제 <span class="nav-index">01</span></a>
-    <a href="#personnel"><span class="nav-icon">▤</span> 요원 아카이브 <span class="nav-index">02</span></a>
-    <a href="#operations"><span class="nav-icon">⌁</span> 부서별 활동 <span class="nav-index">03</span></a>
-    <a href="#incidents"><span class="nav-icon">◎</span> 사건 기록실 <span class="nav-index">04</span></a>
-    <a href="#resources"><span class="nav-icon">⊞</span> 행정 지원 <span class="nav-index">05</span></a>
-  </nav>
-  <div class="sidebar-note"><span class="eyebrow">OUR MISSION</span><p>경계 너머의 위협으로부터<br>당신의 오늘을 지킵니다.</p><div class="mini-line"></div><small>SENTINEL & GUIDE<br>INTEGRATED ADMINISTRATION</small></div>
-  <div class="sidebar-bottom"><span class="status-dot"></span> SGIA NETWORK ONLINE<small>onlyunlimit © <span id="year">2026</span><br>WORLD ARCHIVE / VOL. 01</small></div>
-</aside>
-<div class="workspace">
-  <header class="topbar">
-    <div class="breadcrumb">국가 각성자 통합관리청 <span>/</span> <strong>통합 관제 포털</strong></div>
-    <div class="top-actions"><span class="connection"><i class="status-dot"></i> 연결 정상</span><button id="sound-toggle" class="sound-button" aria-pressed="false" aria-label="관제실 BGM 켜기"><span class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="sound-label">BGM OFF</span></button><button id="viewer-toggle" class="viewer-button" aria-pressed="false"><span class="viewer-icon">◇</span><span id="viewer-label">외부인 뷰어</span><span>⇄</span></button></div>
-  </header>
-  <main id="main">
-    <section id="overview" class="overview section-anchor">
-      <div class="page-kicker"><span><i class="status-dot"></i> CENTRAL MONITORING SYSTEM</span><span class="mono">SEOUL HQ <span class="muted">/</span> <span id="date">----.--.--</span></span></div>
-      <div class="hero">
-        <div class="hero-copy"><div class="eyebrow">BEYOND THE GATE, WITHIN YOUR REACH.</div><h1>일상을 지키는,<br><span>보이지 않는 최전선.</span></h1><p>각성의 순간부터, 게이트 너머의 미지까지.<br>국가 각성자 통합관리청이 함께합니다.</p><a class="primary-button" href="#personnel">SGIA 요원 아카이브 <span>↗</span></a><div class="hero-bottom"><span class="tiny-emblem">✳</span><span>WE WATCH THE UNKNOWN.<br><b>SO YOU CAN LIVE THE ORDINARY.</b></span></div></div>
-        <div class="radar-panel">
-          <div class="panel-topline"><span><i class="status-dot"></i> GATE SURVEILLANCE</span><span class="sim-label">SIMULATION</span></div>
-          <div class="radar" id="radar" role="img" aria-label="서울 구역의 가상 게이트와 사건 신호를 표시하는 레이더">
-            <svg class="radar-map" viewBox="0 0 440 340" aria-hidden="true"><defs><pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" stroke="currentColor" stroke-width=".5"/></pattern></defs><rect width="440" height="340" fill="url(#grid)"/><g fill="none" stroke="currentColor"><path d="M24 106L78 127 106 98 151 120 166 80 211 104 237 72 278 106 315 91 345 137 412 126M42 222L91 205 130 231 171 211 224 239 268 206 313 222 355 199 409 211M91 41L99 100 81 163 117 223 101 285M183 31L166 80 185 133 171 211 188 301M276 29L260 116 288 154 268 206 294 308M350 47L345 137 368 168 355 199 369 287" opacity=".4"/><path d="M-20 179C72 129 92 194 159 158S257 209 298 166 375 164 460 119" stroke-width="10" opacity=".2"/><circle cx="220" cy="170" r="142"/><circle cx="220" cy="170" r="101"/><circle cx="220" cy="170" r="57"/><path d="M220 15V325M63 170H377" stroke-dasharray="3 7"/></g></svg>
-            <div class="radar-sweep"></div><div class="radar-center"><i></i><span>SGIA HQ</span></div><span class="compass north">N</span><span class="compass east">E</span><span class="compass west">W</span><span class="compass south">S</span><div id="radar-blips"></div><span class="map-label label-1">MAPO</span><span class="map-label label-2">GANGNAM</span><span class="map-label label-3">YONGSAN</span>
-          </div>
-          <div class="radar-footer"><span>37°33′59.0″N &nbsp; 126°58′41.0″E</span><span><i class="signal-dot"></i> <b id="radar-count">00</b> SIGNALS</span></div>
-        </div>
-      </div>
-      <div class="system-strip"><span class="system-tag">SYSTEM NOTICE</span><span id="system-message">외부인 접속 모드입니다. 일부 요원 정보의 열람이 제한됩니다.</span><span class="system-number">SGIA / 001</span></div>
-      <div class="stats-grid">
-        <div class="stat"><div class="stat-top">관측 중인 게이트 <span>⌁</span></div><div><strong id="stat-gates">00</strong><span class="stat-unit">GATES</span></div><small><i class="status-dot amber"></i> 통제 구역 모니터링 중</small></div>
-        <div class="stat"><div class="stat-top">활동 중인 부서 <span>◈</span></div><div><strong id="stat-teams">00</strong><span class="stat-unit">/ 05 UNITS</span></div><small id="activity-caption">한국 표준시 · 시간표 기준</small></div>
-        <div class="stat"><div class="stat-top">서울 현재 날씨 <span id="weather-icon">☁</span></div><div><strong id="weather-temp">—</strong><span class="stat-unit">°C</span></div><small id="weather-status">기상 데이터 수신 중</small></div>
-        <div class="stat clock-stat"><div class="stat-top">본부 표준 시각 <span>◷</span></div><div><strong id="clock">00:00:00</strong></div><small>SEOUL, KR <span class="accent">UTC +09:00</span></small></div>
-      </div>
-    </section>
-    <section id="personnel" class="section-anchor personnel-section">
-      <div class="section-heading"><div><div class="eyebrow">01 / PERSONNEL ARCHIVE</div><h2>선을 지키는 사람들<span class="heading-dot">.</span></h2></div><span class="section-note" id="archive-access">PUBLIC ACCESS · 제한 열람</span></div>
-      <div class="archive-toolbar"><div id="team-tabs" class="team-tabs" role="group" aria-label="소속별 요원 필터"></div><label class="search-box"><span>⌕</span><input id="character-search" type="search" placeholder="코드네임 검색" aria-label="요원 검색" autocomplete="off"></label></div>
-      <div class="team-intro"><div><span id="team-number" class="mono accent">UNIT 01</span><h3 id="team-title">오리진 <span>ORIGIN</span></h3><p id="team-description"></p></div><span class="team-status" id="selected-team-status"></span></div>
-      <p class="card-instructions"><span>↔ 옆으로 밀거나 클릭해 카드 뒤집기</span><span>◉ 0.8초 꾹 눌러 캐릭터로 이동</span></p>
-      <div id="character-grid" class="character-grid"></div><p id="empty-search" class="empty-state" hidden>일치하는 요원이 없습니다. 다른 코드네임으로 검색해 주세요.</p>
-      <div class="archive-footnote"><span>INFORMATION IS A PRIVILEGE. HANDLE WITH CARE.</span><span id="result-count">04 RECORDS</span></div>
-    </section>
-    <div class="operations-grid" id="operations">
-      <section class="panel section-anchor"><div class="panel-heading"><div><div class="eyebrow">02 / UNIT OPERATIONS</div><h2>부서별 활동</h2></div><span class="live-label"><i class="status-dot"></i> KST SYNC</span></div><div id="department-list"></div><details class="schedule-details"><summary>오늘의 부서별 시간표 <span>＋</span></summary><div id="schedule-list"></div><p class="muted">일과가 지정되지 않은 시간은 휴식 또는 업무 외 시간으로 표시됩니다.</p></details></section>
-      <section class="panel news-panel"><div class="panel-heading"><div><div class="eyebrow">03 / AGENCY BULLETIN</div><h2>관제 브리핑</h2></div><button id="refresh-news" class="icon-button" aria-label="새 가상 뉴스 보기">↻</button></div><div class="news-feature"><span class="news-tag">SGIA NEWSROOM</span><h3 id="news-headline"></h3><p id="news-detail"></p><span class="mono muted" id="news-time"></span></div><div id="news-list"></div><div class="panel-footnote">세계관 속 가상 뉴스 · 45초마다 새 브리핑</div></section>
-    </div>
-    <section id="incidents" class="section-anchor incident-section">
-      <div class="section-heading"><div><div class="eyebrow">04 / INCIDENT MANAGEMENT</div><h2>사건 기록실<span class="heading-dot">.</span></h2></div><span class="sim-label">TRAINING SIMULATION</span></div>
-      <div id="incident-locked" class="locked-panel"><span class="lock-symbol">▣</span><div><h3>이 기록은 직원에게만 공개됩니다.</h3><p>신고 접수부터 해결 도장까지. SGIA의 하루를 직접 경험하세요.</p></div><button class="outline-button" id="enter-staff">직원용 단말 접속 <span>↗</span></button></div>
-      <div id="incident-workspace" hidden>
-        <div class="incident-overview" id="incident-stats"></div>
-        <div class="incident-toolbar"><div class="filter-group"><label>분류 <select id="incident-type"><option value="all">모든 사건</option><option>게이트</option><option>괴물</option><option>사건 발생</option><option>미등록 각성자</option><option>테러</option></select></label><label>처리 <select id="incident-status"><option value="all">전체 기록</option><option value="open">처리 대기</option><option value="resolved">해결 완료</option></select></label></div><button class="outline-button" id="new-incident">＋ 새 모의 신고 접수</button></div>
-        <div id="incident-list"></div><div class="incident-pagination"><span id="incident-page-info"></span><div><button id="incident-prev" aria-label="이전 사건 페이지">← 이전</button><button id="incident-next" aria-label="다음 사건 페이지">다음 →</button></div></div><p class="panel-footnote">모의 사건 기록과 해결 도장은 이 브라우저에 보관됩니다.</p>
-      </div>
-    </section>
-    <section id="resources" class="section-anchor resources-section"><div class="section-heading"><div><div class="eyebrow">05 / ADMINISTRATIVE SERVICES</div><h2>당신의 다음 업무</h2></div><span class="section-note">SGIA CONNECTED SERVICES</span></div><div class="resource-grid"><a href="sgia.html" class="resource-card"><span class="resource-icon">▤</span><span class="eyebrow">PERSONNEL ID</span><h3>각성자 등록증</h3><p>나의 SGIA 신분증 만들기</p><span class="resource-arrow">↗</span></a><a href="monster.html" class="resource-card"><span class="resource-icon">⌘</span><span class="eyebrow">ENTITY RECORD</span><h3>괴물 관리 기록</h3><p>미확인 개체 프로필 작성하기</p><span class="resource-arrow">↗</span></a><a href="team.html" class="resource-card"><span class="resource-icon">⊞</span><span class="eyebrow">UNIT REGISTRATION</span><h3>팀 프로필</h3><p>새로운 팀과 작전 명부 구성하기</p><span class="resource-arrow">↗</span></a></div></section>
-    <details class="world-guide"><summary><span>SGIA에 처음 방문하셨나요?</span><span>세계관 안내 ＋</span></summary><div class="world-grid"><article><span class="eyebrow">THE AWAKENING</span><h3>각성은 축복이자 저주.</h3><p>수십 년 전, 게이트의 출현과 함께 각성자가 나타났습니다. 센티넬은 초감각과 전투 능력을 얻는 대신 과부하와 폭주의 위험을 지닙니다. 가이드는 이들의 감각과 힘을 안정시키는 존재입니다.</p></article><article><span class="eyebrow">THE ADMINISTRATION</span><h3>혼란 속에서 세워진 질서.</h3><p>국가 각성자 통합관리청은 각성자 등록과 등급 판정, 가이드 배치, 게이트 대응을 담당합니다. 중앙 통제 본부, 센티넬 관리국, 가이드 관리국과 각 현장 팀이 도시의 일상을 유지합니다.</p></article><article><span class="eyebrow">THE UNKNOWN</span><h3>경계 너머에 남겨진 것들.</h3><p>게이트는 E급부터 S급까지 분류됩니다. 오래 유지된 게이트는 현실을 침식하며, 때로는 익숙한 분류로 설명할 수 없는 존재가 돌아오기도 합니다.</p><a href="https://ko.cvdk.io/c/DqJ1kACZQt-ILpdjpQdvEQ?rc=bnythhG7GX" target="_blank" rel="noopener noreferrer">괴물 페르소나 생성 도우미 ↗</a></article></div></details>
-    <footer><div class="footer-brand">SGIA<span>국가 각성자 통합관리청</span></div><p>onlyunlimit의 창작 세계관 · 직원 뷰어는 로그인 없는 체험 모드입니다.<br>게이트·사건·뉴스는 가상 정보이며, 시각과 날씨는 현실 기준입니다.</p><a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Weather by Open-Meteo ↗</a><a href="bodam.html">보담 아카이브 ↗</a></footer>
-  </main>
-  <div class="terminal-bar"><span><i class="status-dot"></i> <b id="terminal-mode">PUBLIC TERMINAL</b> <span class="terminal-extra">/ SGIA-SEOUL-001</span></span><div><label for="terminal-theme">단말 스타일</label><select id="terminal-theme"><option value="control">관제실</option><option value="field">현장 단말</option><option value="paper">문서 열람</option></select><button id="motion-toggle" aria-pressed="false">모션 ON</button></div></div>
-</div>
-<dialog id="dossier" aria-labelledby="dossier-title"><button class="dialog-close" aria-label="상세 기록 닫기">×</button><div id="dossier-content"></div></dialog>
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
-<noscript><div class="noscript">관제 시스템을 이용하려면 JavaScript를 켜 주세요. <a href="sgia.html">각성자 등록증</a> · <a href="monster.html">괴물 기록</a> · <a href="team.html">팀 프로필</a></div></noscript>
-</body>
-</html>
+<canvas id="gate-particles" aria-hidden="true"></canvas><div class="intro-grain" aria-hidden="true"></div><div class="intro-scanline" aria-hidden="true"></div>
+<header class="intro-header"><a href="index.html" class="intro-brand"><img src="assets/emblem.svg" alt="" width="36" height="36"><b>SGIA</b><span>국가 각성자 통합관리청</span></a><div class="intro-controls"><button id="intro-motion" aria-pressed="false">모션 ON</button><button id="intro-sound" aria-pressed="true">접속음 ON</button></div></header>
+<main class="threshold">
+  <div class="threshold-top"><span><i></i> RESTRICTED NETWORK · 001</span><span>SEOUL HQ <time id="intro-clock"></time></span></div>
+  <div class="gate-art" aria-hidden="true"><div class="gate-orbit orbit-a"></div><div class="gate-orbit orbit-b"></div><div class="gate-orbit orbit-c"></div><div class="gate-aperture"><div></div></div><span class="gate-coordinate coordinate-a">37.5665° N<br>126.9780° E</span><span class="gate-coordinate coordinate-b">GATE ORIGIN<br>SIGNAL DETECTED</span><span class="gate-cross">＋</span></div>
+  <div class="threshold-copy"><p class="threshold-label">SENTINEL & GUIDE<br>INTEGRATED ADMINISTRATION</p><h1>THE OTHER<br><span>SIDE</span><em>OF ORDINARY.</em></h1><p class="threshold-korean">당신이 모르는 세계도,<br>당신의 세계입니다.</p></div>
+  <div class="entry-console"><div class="entry-prompt"><span class="entry-number">[ 01 — ACCESS REQUEST ]</span><h2>접속하시겠습니까?</h2><p>경계 너머의 기록이 당신을 기다립니다.</p></div><a id="connect" href="portal.html" class="connect-button"><span class="connect-mark">↗</span><span>접속하기<small>ESTABLISH CONNECTION</small></span><span class="connect-indicator">●</span></a><div class="connection-log" id="connection-log" role="status" aria-live="polite"><span>SYS /</span> 외부인 열람 채널 대기 중<span class="blink">_</span></div></div>
+  <div class="threshold-bottom"><span>WE WATCH THE UNKNOWN.</span><span>SO YOU CAN LIVE THE ORDINARY.</span></div>
+</main>
+<footer class="intro-footer"><span>ONLYUNLIMIT / WORLD ARCHIVE</span><span>창작 세계관 · 실제 기관이 아닙니다.</span><a href="portal.html">연출 건너뛰기 →</a></footer>
+<div class="connection-overlay" aria-hidden="true"><span>CONNECTION ESTABLISHED</span><b>ACCESS GRANTED</b></div>
+</body></html>

@@ -14,7 +14,7 @@ test('Deployment contains only public assets, never original prompts or personal
   }
   const files=await walk(output);
   assert.ok(files.includes('index.html'));
-  for(const name of ['monster.html','sgia.html','team.html','assets/characters.js'])assert.ok(files.includes(name));
+  for(const name of ['portal.html','monster.html','sgia.html','team.html','assets/characters.js'])assert.ok(files.includes(name));
   assert.ok(files.every(f=>!/(caveduck\/|private\/|jy\.html|180899|KakaoTalk|\.md$|\.git)/i.test(f)));
   const ignore=await readFile(path.join(root,'.gitignore'),'utf8');
   assert.ok(ignore.includes('/caveduck/'));assert.ok(ignore.includes('/private/'));

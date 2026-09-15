@@ -1,3 +1,6 @@
+import { chirp } from './audio.js';
+import { initExperiences } from './experiences.js';
+import { teamLogos } from './media.js';
 import { characters } from './characters.js';
 import { teams, activityFor, scheduleFor, koreaTime, formatMinutes, generateIncident, isIncident, tally } from './model.js';
 
@@ -64,11 +67,6 @@ $('#team-tabs').addEventListener('click', event => {
 });
 $('#character-search').addEventListener('input', renderCards);
 function portraitMarkup(character, modal = false) {
-  if (!staff) {
-    const horns = character.id === 'ibex' ? '<path d="M93 98Q52 62 68 13Q80 54 112 64M149 64Q181 49 190 14Q209 67 166 100"/>' : '';
-    const headset = character.id === 'bug' ? '<path d="M83 110Q69 39 128 33Q190 39 176 110" fill="none" stroke-width="10"/><path d="M75 87h15v48H75zM170 87h15v48h-15z"/>' : '';
-    return `<svg class="public-silhouette" viewBox="0 0 260 360" aria-hidden="true"><g fill="currentColor" stroke="var(--silhouette-edge)" stroke-width="1">${horns}<path d="M91 87Q80 60 101 47L115 36 124 41 139 32 158 47Q178 53 172 92L168 124 153 147 151 170 175 184Q220 192 231 231L254 360H6L28 231Q39 197 85 184L109 170 107 147 92 124Z"/>${headset}<path d="M85 184l27 57 18-33 18 33 27-57M130 208v152M50 252l-8 108M210 252l8 108" fill="none"/></g></svg>`;
-  }
   return `<span class="portrait-fallback" aria-hidden="true"></span><img class="portrait" src="${escape(character.portrait)}" alt="${staff ? escape(character.name)+' 인물 이미지' : ''}" ${modal ? '' : 'loading="lazy"'} draggable="false" referrerpolicy="no-referrer">`;
 }
 function installImageFallbacks(container) {
@@ -88,18 +86,20 @@ function installImageFallbacks(container) {
 function renderCards() {
   activeGesture?.();
   const team = teamById(selectedTeam);
+  $('#personnel').dataset.team = selectedTeam;
+  document.dispatchEvent(new CustomEvent('sgia:team', {detail: {team: selectedTeam}}));
   $('#team-number').textContent = team ? `UNIT ${pad(teams.indexOf(team)+1)} / ${team.department}` : 'ALL UNITS / INTEGRATED ARCHIVE';
-  $('#team-title').innerHTML = team ? `${team.name} <span>${team.en}</span>` : '통합 요원 기록 <span>ALL PERSONNEL</span>';
+  $('#team-title').innerHTML = team ? `${teamLogos[team.id]?`<img class="team-logo" src="${teamLogos[team.id]}" alt="${team.name} 로고">`:''}${team.name} <span>${team.en}</span>` : '통합 요원 기록 <span>ALL PERSONNEL</span>';
   $('#team-description').textContent = team ? staff ? team.staff : team.description : '각 부서의 요원과 외부 감시 대상 기록을 한곳에서 확인합니다.';
   const query = $('#character-search').value.trim().toLocaleLowerCase();
   const list = characters.filter(c => (selectedTeam==='all'||c.team===selectedTeam) && `${c.code} ${staff?c.name:''}`.toLocaleLowerCase().includes(query));
   $('#character-grid').innerHTML = list.map(c => {
     const t = teamById(c.team);
-    return `<article class="character-card ${staff?'staff':'public'}" style="--team-color:${t.color}" data-character="${c.id}">
+    return `<article class="character-card ${staff?'staff':'public'}" style="--team-color:${t.color}" data-unit="${c.team}" data-character="${c.id}">
       <button class="card-turner" aria-label="${escape(c.code)} 카드 뒤집기. 길게 누르면 캐릭터 페이지로 이동" aria-pressed="false">
-      <span class="card-rotator"><span class="card-face card-front" aria-hidden="false"><span class="card-top"><span>${t.en}</span><span>${staff ? escape(c.rank)+' / CLASS' : 'RESTRICTED'}</span></span><span class="portrait-wrap">${portraitMarkup(c)}<span class="scan-lines"></span></span>${staff?'':'<span class="classified">IDENTITY CLASSIFIED</span>'}<span class="card-bottom"><span class="card-unit">SGIA ${c.team==='orpe'?'WATCHLIST':'PERSONNEL'} / ${pad(characters.indexOf(c)+1)}</span><strong class="card-code">${escape(c.code)}</strong>${staff?`<span class="card-name">${escape(c.name)}</span>`:''}<span class="card-meta"><span>${staff?escape(c.role):'PERSONAL DATA ENCRYPTED'}</span><span>↔ FLIP</span></span></span></span>
+      <span class="card-rotator"><span class="card-face card-front" aria-hidden="false"><span class="card-top"><span>${c.team==='orpe'?'WANTED / ORPÉ':t.en}</span><span>${staff ? escape(c.rank)+' / CLASS' : 'RESTRICTED'}</span></span><span class="portrait-wrap">${portraitMarkup(c)}<span class="scan-lines"></span></span>${staff?'':'<span class="classified">IDENTITY CLASSIFIED</span>'}<span class="card-bottom"><span class="card-unit">SGIA ${c.team==='orpe'?'WATCHLIST':'PERSONNEL'} / ${pad(characters.indexOf(c)+1)}</span><strong class="card-code">${escape(c.code)}</strong>${staff?`<span class="card-name">${escape(c.name)}</span>`:''}<span class="card-meta"><span>${staff?escape(c.role):'PERSONAL DATA ENCRYPTED'}</span><span>↔ FLIP</span></span></span></span>
       <span class="card-face card-back" aria-hidden="true"><span class="eyebrow">${staff?'INTERNAL PERSONNEL RECORD':'PUBLIC PERSONNEL RECORD'}</span><strong>${escape(c.code)}</strong><span class="back-copy">${staff?`${escape(c.name)} · ${c.age}세<br>${escape(c.role)}`:`소속: ${t.name}. ${t.description} 개인 신상과 작전 세부사항은 직원용 단말에서 열람할 수 있습니다.`}</span>${staff?`<span class="back-fields"><span><small>ABILITY</small>${escape(c.ability)}</span><span><small>LOCATION</small>${escape(c.location)}</span></span>`:''}<span class="back-classified">${staff?'AUTHORIZED / INTERNAL VIEW':'ACCESS LEVEL / PUBLIC'}<br>HOLD TO CONNECT ↗</span></span></span><span class="hold-progress" aria-hidden="true"></span></button>
-      <div class="card-actions"><button data-dossier="${c.id}">${staff?'상세 기록 ＋':'직원 열람 ◇'}</button><a href="${escape(c.link)}" target="_blank" rel="noopener noreferrer" aria-label="${escape(c.code)} 캐릭터 페이지 새 탭에서 열기">캐릭터 ↗</a></div></article>`;
+      <div class="card-actions"><button data-dossier="${c.id}">${staff?'상세 기록 ＋':'직원 열람 ◇'}</button>${c.link?`<a href="${escape(c.link)}" target="_blank" rel="noopener noreferrer" aria-label="${escape(c.code)} 캐릭터 페이지 새 탭에서 열기">캐릭터 ↗</a>`:'<span class="coming-soon">COMING SOON</span>'}</div></article>`;
   }).join('');
   $('#empty-search').hidden = list.length !== 0;
   $('#result-count').textContent = `${pad(list.length)} RECORDS`;
@@ -127,7 +127,7 @@ function setupCardGesture(card) {
     timer=setTimeout(() => {
       if (!start || dragged) return;
       held=true; suppressClick=true; clearHold();
-      window.location.assign(character.link);
+      if(character.link) window.location.assign(character.link); else toast('여명은 출시 준비 중입니다. 프로필을 먼저 만나보세요.');
     }, 800);
   });
   button.addEventListener('pointermove', event => {
@@ -159,7 +159,7 @@ function setStaff(value) {
   staff=value;
   document.body.dataset.viewer = staff?'staff':'public';
   $('#viewer-toggle').setAttribute('aria-pressed', String(staff));
-  $('#viewer-label').textContent=staff?'직원용 뷰어':'외부인 뷰어';
+  $('#viewer-label').textContent=staff?'로그아웃':'직원 로그인';
   $('#terminal-mode').textContent=staff?'STAFF TERMINAL':'PUBLIC TERMINAL';
   $('#archive-access').textContent=staff?'INTERNAL ACCESS · 상세 열람':'PUBLIC ACCESS · 제한 열람';
   $('#system-message').textContent=staff?'직원용 단말에 접속했습니다. 요원 기록과 사건 처리 업무를 열람할 수 있습니다.':'외부인 접속 모드입니다. 일부 요원 정보의 열람이 제한됩니다.';
@@ -168,20 +168,57 @@ function setStaff(value) {
   $('#character-search').placeholder=staff?'이름 · 코드네임 검색':'코드네임 검색';
   if(!staff) $('#character-search').value='';
   renderCards(); renderDepartments(); renderIncidents(); updateSelectedActivity();
+  document.dispatchEvent(new CustomEvent('sgia:viewer',{detail:{staff}}));
   toast(staff?'접속 승인. SGIA 직원용 단말에 오신 것을 환영합니다.':'외부인 뷰어로 전환했습니다.');
 }
-$('#viewer-toggle').addEventListener('click', () => setStaff(!staff));
-$('#enter-staff').addEventListener('click', () => setStaff(true));
-$('#character-grid').addEventListener('click', event => {
-  const button=event.target.closest('[data-dossier]');
-  if (!button) return;
-  const character=characters.find(c=>c.id===button.dataset.dossier);
+let pendingDossier=null, loginAttempt=0;
+function requestStaff(characterId=null) {
+  if(staff){if(characterId)openDossier(characterId);return;}
+  pendingDossier=characterId;
+  $('#login-progress').textContent='발급된 체험용 사원증으로 접속합니다.';
+  $('#login-submit').disabled=false;
+  $('#login-submit').textContent='사원증 태그 · 로그인';
+  $('#staff-login').showModal();
+}
+$('#viewer-toggle').addEventListener('click',()=>staff?setStaff(false):requestStaff());
+$('#enter-staff').addEventListener('click',()=>requestStaff());
+document.addEventListener('sgia:request-login',()=>requestStaff());
+$('#login-cancel').addEventListener('click',()=>$('#staff-login').close());
+$('#staff-login').addEventListener('close',()=>{loginAttempt++;$('#staff-login').classList.remove('authenticating');});
+$('#login-form').addEventListener('submit',async event=>{
+  event.preventDefault();if($('#login-submit').disabled)return;
+  const attempt=++loginAttempt;
+  $('#login-submit').disabled=true;
+  $('#staff-login').classList.add('authenticating');
+  chirp(1080);
+  for(const line of ['사원증 인식 중…','본부 접근 채널 확인…','직원 열람 권한 승인']){
+    if(attempt!==loginAttempt||!$('#staff-login').open)return;
+    $('#login-progress').textContent=line;
+    await new Promise(resolve=>setTimeout(resolve,motionOff?70:380));
+  }
+  if(attempt!==loginAttempt||!$('#staff-login').open)return;
+  const target=pendingDossier;pendingDossier=null;
+  $('#staff-login').close();setStaff(true);
+  if(target)openDossier(target);
+});
+$('#character-grid').addEventListener('click', event=>{
+  const button=event.target.closest('[data-dossier]');if(!button)return;
+  if(!staff)requestStaff(button.dataset.dossier);else openDossier(button.dataset.dossier);
+});
+function openDossier(id) {
+  if(!staff)return;
+  const character=characters.find(c=>c.id===id);if(!character)return;
   dossierCharacterId=character.id;
-  if(!staff) setStaff(true);
   const t=teamById(character.team);
-  $('#dossier-content').innerHTML=`<div class="dossier-grid"><div class="dossier-photo">${portraitMarkup(character,true)}</div><div class="dossier-details"><div class="eyebrow">SGIA / ${t.en} / INTERNAL RECORD</div><h2 id="dossier-title">${escape(character.code)}</h2><h3>${escape(character.name)}</h3><p>${escape(character.bio)}</p><dl class="dossier-facts"><div><dt>분류 / 등급</dt><dd>${escape(character.rank)}</dd></div><div><dt>나이</dt><dd>${character.age}세</dd></div><div><dt>역할</dt><dd>${escape(character.role)}</dd></div><div><dt>배치 / 위치</dt><dd>${escape(character.location)}</dd></div></dl><h4>ABILITY / 능력 기록</h4><p>${escape(character.ability)}</p><h4>IDENTIFICATION / 외형</h4><p>${escape(character.appearance)}</p><h4>FIELD NOTES / 관찰 기록</h4><p>${escape(character.notes)}</p><a class="primary-button" href="${escape(character.link)}" target="_blank" rel="noopener noreferrer">캐릭터와 만나기 <span>↗</span></a></div></div>`;
+  $('#dossier-content').innerHTML=`<div class="dossier-grid"><div class="dossier-media"><div class="dossier-photo">${portraitMarkup(character,true)}</div><div class="gallery-tabs" role="group" aria-label="기록 이미지 선택">${(character.gallery||[]).map((image,i)=>`<button data-gallery="${i}" aria-pressed="${i===0}">${escape(image.label)}</button>`).join('')}</div></div><div class="dossier-details"><div class="eyebrow">SGIA / ${t.en} / INTERNAL RECORD</div><h2 id="dossier-title">${escape(character.code)}</h2><h3>${escape(character.name)}</h3><p>${escape(character.bio)}</p><dl class="dossier-facts"><div><dt>분류 / 등급</dt><dd>${escape(character.rank)}</dd></div><div><dt>나이</dt><dd>${character.age}세</dd></div><div><dt>역할</dt><dd>${escape(character.role)}</dd></div><div><dt>배치 / 위치</dt><dd>${escape(character.location)}</dd></div></dl><h4>ABILITY / 능력 기록</h4><p>${escape(character.ability)}</p><h4>IDENTIFICATION / 외형</h4><p>${escape(character.appearance)}</p><h4>FIELD NOTES / 관찰 기록</h4><p>${escape(character.notes)}</p>${character.link?`<a class="primary-button" href="${escape(character.link)}" target="_blank" rel="noopener noreferrer">캐릭터와 만나기 <span>↗</span></a>`:'<p class="coming-soon">COMING SOON · 출시 준비 중</p>'}</div></div>`;
   installImageFallbacks($('#dossier-content'));
   $('#dossier').showModal();
+}
+$('#dossier-content').addEventListener('click',event=>{
+  const button=event.target.closest('[data-gallery]');if(!button||!staff)return;
+  const c=characters.find(c=>c.id===dossierCharacterId);const selected=c.gallery[Number(button.dataset.gallery)];if(!selected)return;
+  const photo=$('#dossier .dossier-photo');photo.innerHTML=portraitMarkup({...c,portrait:selected.url},true);installImageFallbacks(photo);
+  document.querySelectorAll('[data-gallery]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
 });
 $('.dialog-close').addEventListener('click', () => $('#dossier').close());
 $('#dossier').addEventListener('close', () => {
@@ -334,8 +371,9 @@ document.addEventListener('pointermove',event=>{
 document.documentElement.addEventListener('pointerleave',()=>{halo.style.opacity='0';});
 if('IntersectionObserver' in window){
   const observer=new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting){document.querySelectorAll('.main-nav a').forEach(a=>a.classList.toggle('active',a.hash===`#${e.target.id}`));}}, {rootMargin:'-15% 0px -60% 0px',threshold:0});
-  ['overview','personnel','operations','incidents','resources'].forEach(id=>observer.observe(document.getElementById(id)));
+  ['overview','personnel','operations','incidents','community','history','resources'].forEach(id=>observer.observe(document.getElementById(id)));
 }
+initExperiences({isStaff:()=>staff, toast, readStorage, saveStorage, motionOff:()=>motionOff});
 renderTabs();renderCards();renderSignals();tick();renderNews();fetchWeather();
 setInterval(tick,1000);
 setInterval(()=>{if(!document.hidden)fetchWeather();},15*60*1000);
