@@ -88,6 +88,7 @@ async function secureForm(form, submit) {
     widget = ts.render($('.captcha-widget', form), {
       sitekey: serviceConfig.turnstileSiteKey,
       action: 'community',
+      size: 'compact',
       theme: document.documentElement.dataset.theme,
       callback: (value) => {
         token = value;
