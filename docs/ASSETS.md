@@ -1,0 +1,22 @@
+# 이미지·시각 자료
+
+## 사원증 프레임
+
+- 파일: `assets/art/id-frame.png`
+- 생성: 내장 image_gen 도구 (CLI/API 키 방식 사용 안 함)
+- 적용: `assets/portal.css`의 카드 앞면 테두리에 CSS mask를 적용합니다. 이미지의 중앙과 외곽은 표시하지 않습니다.
+- 건물 배경 생성안은 사용자의 수정 요청에 따라 프로젝트에서 제거했습니다. 배경/건축 이미지는 배포하지 않습니다.
+
+최종 생성 프롬프트:
+
+> Use case: product-mockup. Asset type: isolated transparent portrait ID card FRAME overlay, a small reusable website asset, NOT background art. Render one elegant slim rounded rectangle premium SGIA-style identity card border in brushed platinum, precision engraved microline accents at the four corners, very subtle pearlescent holographic refraction along edges only. Front-on orthographic, perfectly symmetrical and centered, approximately 2:3 portrait ratio. Very thin border around a large completely transparent EMPTY center; outside also completely transparent alpha. No card content, no lettering, no person, no photo, no scene, no background, no shadows outside border, no logos. Single frame only, restrained and professional government technology identity aesthetic. Delicate steel-blue and silver highlights, realistic fine surface material.
+
+생성 결과의 투명도는 프롬프트만으로 보장되지 않아 실제 UI에서는 CSS 마스크로 중앙과 외곽을 제거했습니다.
+
+## 기타
+
+- 인물 및 기존 팀 로고: 사용자가 제공한 `image.md`의 공개 이미지 URL
+- SGIA 문장: 기존 벡터 자산을 수정한 `assets/emblem.svg`
+- 지도: OpenStreetMap 타일 + Leaflet, 지도에 출처 표시
+- 레이더·날씨·시각·구조도: 수치와 연동한 SVG/CSS UI
+- Leaflet BSD 2-Clause 고지는 `assets/vendor/leaflet.js` 첫머리에 포함

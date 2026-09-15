@@ -21,3 +21,13 @@ test('Deployment contains only public assets, never original prompts or personal
   const workflow=await readFile(path.join(root,'.github/workflows/pages.yml'),'utf8');
   assert.ok(workflow.includes('path: dist'));assert.ok(workflow.includes('workflow_dispatch:'));assert.ok(!workflow.includes('push:'));
 });
+
+test('Public service config contains no server keys, backend or rejected background images',async()=>{
+  const config=await readFile(path.join(root,'assets/service-config.js'),'utf8');
+  assert.ok(!/ADMIN_KEY|PASSWORD_PEPPER|IP_KEY|TURNSTILE_SECRET/.test(config));
+  const entries=await readdir(path.join(root,'dist'));
+  assert.ok(!entries.includes('backend'));
+  const art=await readdir(path.join(root,'assets/art'));
+  assert.ok(!art.some(name=>name.includes('headquarters')));
+  assert.ok(entries.includes('manual.html')&&entries.includes('community.html'));
+});

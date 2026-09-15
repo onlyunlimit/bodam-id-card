@@ -4,7 +4,7 @@ import path from 'node:path';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
 // Explicit public entries. Never copy the repository root or raw Markdown.
-export const publicEntries = ['index.html', 'portal.html', 'monster.html', 'sgia.html', 'team.html',
+export const publicEntries = ['index.html', 'portal.html', 'departments.html', 'origin.html', 'beacon.html', 'shield.html', 'entertainment.html', 'lucky.html', 'obsidus.html', 'orpe.html', 'records.html', 'headquarters.html', 'manual.html', 'community.html', 'monster.html', 'sgia.html', 'team.html',
   'bodam.html', 'quote.html', 'setlog.html', 'character', 'school', 'idcard', 'bgm', 'assets'];
 const extensions = new Set(['.html', '.css', '.js', '.json', '.svg', '.webp', '.png', '.jpg', '.mp3', '.woff2']);
 async function validate(dir) {

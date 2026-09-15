@@ -1,17 +1,52 @@
 import { test, expect } from '@playwright/test';
-
-test('Real portraits render and desktop, tablet, phone layouts stay within bounds',async({page})=>{
-  test.setTimeout(90000);
-  await page.goto('/portal.html');
-  await page.locator('#personnel').scrollIntoViewIfNeeded();
-  await page.locator('#viewer-toggle').click();await page.locator('#login-submit').click();await expect(page.locator('#staff-login')).not.toBeVisible();
-  await expect.poll(()=>page.locator('.portrait').evaluateAll(imgs=>imgs.filter(i=>i.complete&&i.naturalWidth>0).length),{timeout:20000}).toBe(4);
-  await page.evaluate(()=>document.fonts.ready);
-  await page.locator('[data-team="all"]').click();
-  for(const width of [320,390,768,1024,1440]) {
-    await page.setViewportSize({width,height:900});
-    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),`${width}px body width`).toBe(true);
-    const clipped=await page.locator('.card-back').evaluateAll(cards=>cards.filter(c=>c.scrollHeight>c.clientHeight+2).map(c=>({height:c.clientHeight,scroll:c.scrollHeight,text:c.textContent.slice(0,90)})));
-    expect(clipped,`${width}px card backs`).toEqual([]);
+test('All new pages render without browser errors at desktop and narrow mobile sizes', async ({
+  page,
+}) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const file of [
+      'index',
+      'portal',
+      'departments',
+      'beacon',
+      'origin',
+      'shield',
+      'headquarters',
+      'entertainment',
+      'lucky',
+      'obsidus',
+      'records',
+      'orpe',
+      'manual',
+      'community',
+    ]) {
+      await page.goto('/' + file + '.html');
+      await expect(page.locator('h1')).toBeVisible();
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        width + ' ' + file,
+      ).toBe(true);
+    }
   }
+  expect(errors).toEqual([]);
+});
+test('Long profile backs and a messenger fit at mobile width', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/beacon.html');
+  await page.locator('#viewer-toggle').click();
+  await page.locator('#login-submit').click();
+  await expect(page.locator('body')).toHaveAttribute('data-viewer', 'staff');
+  await page.locator('.messenger-launch').click();
+  await page.locator('.card-turner').first().click();
+  const back = page.locator('.card-face.back').first();
+  expect(await back.evaluate((e) => e.scrollHeight <= e.clientHeight + 2)).toBe(true);
+  await page.locator('[data-dossier]').first().click();
+  await expect(page.locator('.dossier-photo')).toBeVisible();
+  expect(
+    await page.locator('#document-dialog').evaluate((e) => e.scrollWidth <= e.clientWidth + 1),
+  ).toBe(true);
 });

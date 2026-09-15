@@ -1,0 +1,13 @@
+{
+  "$schema":"node_modules/wrangler/config-schema.json",
+  "name":"sgia-community",
+  "main":"worker.js",
+  "account_id":"a05c2af76604916c192cdad5a4c8c187",
+  "compatibility_date":"2026-09-15",
+  "workers_dev":true,
+  "preview_urls":false,
+  "d1_databases":[{"binding":"DB","database_name":"sgia-community","database_id":"f1839ace-e14f-4dba-bdbe-97dd2e479e94","migrations_dir":"migrations"}],
+  "vars":{"PUBLIC_ORIGIN":"https://onlyunlimit.github.io","TURNSTILE_HOSTNAME":"onlyunlimit.github.io"},
+  "triggers":{"crons":["17 18 * * *"]},
+  "observability":{"enabled":false}
+}
