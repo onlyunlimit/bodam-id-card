@@ -1,0 +1,17 @@
+{
+  "name": "onlyunlimit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "onlyunlimit — SGIA world and character archive",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/serve.mjs",
+    "preview": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}
