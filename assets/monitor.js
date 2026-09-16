@@ -1,3 +1,4 @@
+import { sealedArchive, mountReceiver, interceptTerminal } from './hardware.js';
 import { openTransmission, requestTransmission } from './transmissions.js';
 import { emergencyAlert, openIncident } from './incident-ui.js';
 import { listen, every, delay, onDispose, routeSignal } from './lifecycle.js';
@@ -368,9 +369,13 @@ export function renderRecords() {
     if (document.hidden && context) sound();
   });
 
+  mountReceiver();
   update();
 }
 export function renderOrpe(target = $('#main')) {
+  sealedArchive(target, () => renderOrpeContent(target));
+}
+function renderOrpeContent(target) {
   const az = characters.find((c) => c.team === 'orpe');
   target.innerHTML =
     heading(
@@ -435,11 +440,7 @@ export function renderOrpe(target = $('#main')) {
   };
   $('#threat-log').onclick = () => {
     if (!state.staff) return login(() => $('#threat-log').click());
-    modal(
-      'ORPÉ / INTERCEPTED FILE',
-      `<pre class="terminal-log">${esc($('#intrusion-log').textContent)}\n\nSTATUS: QUARANTINED\n접근 토큰 불일치. 감청 원본 무결성 검증 필요.</pre>`,
-      'orpe',
-    );
+    interceptTerminal($('#intrusion-log').textContent);
   };
   track();
   every(() => {

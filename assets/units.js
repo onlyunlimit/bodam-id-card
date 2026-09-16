@@ -44,7 +44,7 @@ export function renderDirectory(entertainment = false) {
     `<div class="directory-grid ${entertainment ? 'ent-directory' : ''}">${list
       .map(
         (t, i) =>
-          `<a href="${t.id}.html" class="directory-card" data-team="${t.id}"><span class="eyebrow">${entertainment ? (t.id === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND') : 'DIRECTORATE 0' + (i + 1)}</span><div class="directory-visual" aria-hidden="true"><span class="directory-number">0${i + 1}</span>${characters
+          `<a href="${entertainment ? (t.id === 'lucky' ? 'elysian' : 'hunterwind') : t.id}.html" class="directory-card" data-team="${t.id}"><span class="eyebrow">${entertainment ? (t.id === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND') : 'DIRECTORATE 0' + (i + 1)}</span><div class="directory-visual" aria-hidden="true"><span class="directory-number">0${i + 1}</span>${characters
             .filter((c) => c.team === t.id)
             .slice(0, 3)
             .map((c) => `<img src="${c.portrait}" alt="" loading="lazy">`)
@@ -64,12 +64,13 @@ export function renderDirectory(entertainment = false) {
 export function detailImage(c) {
   return c.gallery?.find((g) => /서브|상세|현장|야근|역안/.test(g.label))?.url || c.portrait;
 }
-function dossier(c) {
-  if (!state.staff) return login(() => dossier(c));
+export function dossier(c) {
+  if (!state.staff && !['lucky', 'obsidus'].includes(c.team)) return login(() => dossier(c));
+  const artist = ['lucky', 'obsidus'].includes(c.team);
   const historic = (c.gallery || []).filter((g) => /과거/.test(g.label));
   const dialog = modal(
     c.code,
-    `<section class="profile-stage" data-team="${c.team}"><div class="profile-filebar"><span>SGIA / ${esc(c.code)} / ${visualSignature(c).number}</span><span>${c.team === 'orpe' ? 'RESTRICTED / EYES ONLY' : 'PERSONNEL / VERIFIED'}</span></div><div class="profile-editorial-title" aria-hidden="true">${c.team === 'orpe' ? 'SEALED.' : ['lucky', 'obsidus'].includes(c.team) ? 'ON RECORD.' : 'PERSONNEL.'}</div><div class="dossier-layout"><div class="profile-visual"><div class="profile-photo-window"><span class="profile-windowbar">${esc(c.code)}.ID <i>IDENTITY / SCAN</i></span><img class="dossier-photo" src="${detailImage(c)}" alt="${esc(c.name)} 상세 프로필">${scanMarkup({ ...c, portrait: detailImage(c) })}</div><div class="profile-photo-index"><span class="barcode"></span><span>${visualSignature(c).number} / ${esc(c.code)}</span></div>${historic.length ? `<details class="past-record"><summary>과거 기록 이미지</summary>${historic.map((g) => `<figure><img src="${g.url}" alt="${esc(g.label)}" loading="lazy"><figcaption>${esc(g.label)}</figcaption></figure>`).join('')}</details>` : ''}</div><div class="profile-document"><p class="eyebrow">${teams.find((t) => t.id === c.team).en} / PERSONNEL FILE</p><h3>${esc(personName(c))}${language() !== 'en' ? `<small class="fixed-code"> ${esc(c.code)}</small>` : ''}</h3><p>${esc(c.bio)}</p><dl class="facts">${[
+    `<section class="profile-stage" data-team="${c.team}"><div class="profile-filebar"><span>${artist ? (c.team === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND') : 'SGIA'} / ${esc(c.code)} / ${visualSignature(c).number}</span><span>${c.team === 'orpe' ? 'RESTRICTED / EYES ONLY' : artist ? 'ARTIST / OFFICIAL PROFILE' : 'PERSONNEL / VERIFIED'}</span></div><div class="dossier-layout"><div class="profile-visual"><div class="profile-photo-window"><span class="profile-windowbar">${esc(c.code)} <i>${artist ? 'EDITORIAL / PORTRAIT' : 'IDENTITY / SCAN'}</i></span><img class="dossier-photo" src="${detailImage(c)}" alt="${esc(c.name)} 상세 프로필">${scanMarkup({ ...c, portrait: detailImage(c) })}</div><div class="profile-photo-index"><span class="barcode"></span><span>${visualSignature(c).number} / ${esc(c.code)}</span></div>${historic.length ? `<details class="past-record"><summary>과거 기록 이미지</summary>${historic.map((g) => `<figure><img src="${g.url}" alt="${esc(g.label)}" loading="lazy"><figcaption>${esc(g.label)}</figcaption></figure>`).join('')}</details>` : ''}</div><div class="profile-document"><p class="eyebrow">${teams.find((t) => t.id === c.team).en} / ${artist ? 'ARTIST PROFILE' : 'PERSONNEL FILE'}</p><h3>${esc(personName(c))}${language() !== 'en' ? `<small class="fixed-code"> ${esc(c.code)}</small>` : ''}</h3><p>${esc(c.bio)}</p><dl class="facts">${[
       ['등급', c.rank],
       ['나이', c.age + '세'],
       ['역할', c.role],
@@ -81,7 +82,7 @@ function dossier(c) {
       .map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`)
       .join(
         '',
-      )}</dl>${c.link ? `<a class="primary" href="${c.link}" target="_blank" rel="noopener noreferrer">캐릭터 접속 ↗</a>` : '<span class="coming-soon">COMING SOON</span>'}<div class="profile-signature" aria-hidden="true">${esc(c.code)}<small>SGIA / FILE ${visualSignature(c).number}</small></div></div></div></section>`,
+      )}</dl>${c.link ? `<a class="primary" href="${c.link}" target="_blank" rel="noopener noreferrer">캐릭터 접속 ↗</a>` : '<span class="coming-soon">COMING SOON</span>'}</div></div></section>`,
     c.team,
   );
   openSequence(dialog, c);

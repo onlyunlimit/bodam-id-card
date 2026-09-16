@@ -16,6 +16,8 @@ test('All new pages render without browser errors at desktop and narrow mobile s
       'shield',
       'headquarters',
       'entertainment',
+      'elysian',
+      'hunterwind',
       'lucky',
       'obsidus',
       'records',

@@ -1,3 +1,4 @@
+import { renderAgency } from './agencies.js';
 import { installFacilityTranslations } from './facility-i18n.js';
 import { installVoiceTranslations } from './voice-i18n.js';
 import { installInterfaceTranslations } from './interface-i18n.js';
@@ -18,6 +19,7 @@ const titles = {
   manual: '세계관 안내서',
   community: '커뮤니티',
   unit: '부서 정보',
+  agency: '아티스트',
 };
 const routes = {
   portal: 'overview',
@@ -29,8 +31,10 @@ const routes = {
   origin: 'unit',
   beacon: 'unit',
   shield: 'unit',
-  lucky: 'unit',
-  obsidus: 'unit',
+  lucky: 'agency',
+  obsidus: 'agency',
+  elysian: 'agency',
+  hunterwind: 'agency',
   headquarters: 'overview',
   orpe: 'records',
 };
@@ -58,7 +62,9 @@ function route(url = location.href, push = false) {
       ? ['lucky', 'obsidus'].includes(unit)
         ? 'entertainment'
         : 'departments'
-      : page;
+      : page === 'agency'
+        ? 'entertainment'
+        : page;
   $$('.site-nav a').forEach((a) =>
     routes[a.pathname.split('/').pop().replace('.html', '')] === nav
       ? a.setAttribute('aria-current', 'page')
@@ -72,6 +78,7 @@ function route(url = location.href, push = false) {
     manual: renderManual,
     community: renderCommunity,
     unit: () => renderUnit(unit),
+    agency: () => renderAgency(['elysian', 'lucky'].includes(unit) ? 'elysian' : 'hunterwind'),
   };
   render[page]();
   if (page === 'overview' || page === 'records') {

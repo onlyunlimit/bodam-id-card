@@ -24,6 +24,10 @@ test('Manual covers core lore, searches and headquarters shows all 18 floors', a
 });
 test('ORPE is a dark classified file with trace footprints and pause control', async ({ page }) => {
   await page.goto('/orpe.html');
+  await page.locator('#open-sealed').click();
+  await page.locator('#archive-pin').fill('0826');
+  await page.locator('[data-key=ENTER]').click();
+  await expect(page.locator('#open-sealed')).toHaveCount(0);
   await expect(page.locator('.classified-header')).toContainText('TOP SECRET');
   await expect(page.locator('.threat-class')).toContainText('UNMEASURABLE');
   await page.locator('#track-az').click();

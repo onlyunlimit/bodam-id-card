@@ -41,10 +41,10 @@ test('Login cancellation stays public, staff persists across pages, photo roles 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/beacon.html');
   const card = page.locator('[data-character="binjo"]');
-  const front = await card.locator('.id-photo img').getAttribute('src');
-  expect(await card.locator('.id-photo img').evaluate((e) => getComputedStyle(e).filter)).toContain(
-    'blur(11px)',
-  );
+  const front = await card.locator('.id-photo > img').getAttribute('src');
+  expect(
+    await card.locator('.id-photo > img').evaluate((e) => getComputedStyle(e).filter),
+  ).toContain('blur(11px)');
   await page.locator('#viewer-toggle').click();
   await page.locator('#login-submit').click();
   await page.keyboard.press('Escape');

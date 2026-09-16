@@ -1,3 +1,4 @@
+import { enhanceManual } from './manual-visuals.js';
 import { tr } from './i18n.js';
 import { floorPlans } from './floor-plans.js';
 import { listen, every, delay, onDispose, routeSignal } from './lifecycle.js';
@@ -215,6 +216,7 @@ export function renderManual() {
       .join(
         '',
       )}</tbody></table></div><p class="muted">개별 인물의 SS·ERROR 표기는 원본 프로필의 별도 표기를 유지합니다.</p></div></section><section class="guide-entry" id="commands" data-search="명령어 OOC 메세지 단톡방 출력 게이트"><span class="guide-number">16</span><div><p class="eyebrow">CHARACTER CHAT COMMANDS</p><h2>명령어</h2><p>캐릭터 대화창에서 사용하는 명령어입니다. 홈페이지에서는 복사만 수행합니다.</p><div class="command-list">${commands.map(([cmd, d]) => `<button data-copy="${esc(cmd)}"><code>${esc(cmd)}</code><span>${d}</span><small>복사 ↗</small></button>`).join('')}</div><p>여러 명령어를 혼합할 수 있습니다. /html을 함께 입력하면 HTML 출력 반영을 요청할 수 있습니다.</p></div></section><p id="manual-empty" hidden>검색 결과가 없습니다.</p></div></div>`;
+  enhanceManual(guideEntries);
   const filter = () => {
     const q = $('#manual-search').value.trim().toLowerCase();
     $$('[data-search]').forEach(

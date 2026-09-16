@@ -195,7 +195,7 @@ export function initShell(title, page) {
   tick();
   $('#network-log').onclick = showActivityLog;
   $('#activity-open').onclick = showActivityLog;
-  const audio = new Audio('bgm/main.mp3');
+  const audio = new Audio('bgm/sgia.mp3');
   audio.id = 'ambient-audio';
   document.body.append(audio);
   audio.loop = true;

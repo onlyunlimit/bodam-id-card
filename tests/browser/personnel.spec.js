@@ -16,6 +16,10 @@ test('BUG opens a cancellable fault sequence and AZ opens a classified record', 
   await expect(page.locator('.profile-stage')).toHaveAttribute('data-subject', 'bug');
   await page.keyboard.press('Escape');
   await page.goto('/records.html');
+  await page.locator('#open-sealed').click();
+  await page.locator('#archive-pin').fill('0826');
+  await page.locator('[data-key=ENTER]').click();
+  await expect(page.locator('#open-sealed')).toHaveCount(0);
   await page.locator('[data-character=az] .card-turner').click();
   await expect(page.locator('.profile-acquisition')).toHaveAttribute('data-mode', 'classified');
   await expect(page.locator('.profile-acquisition')).toHaveCount(0);
