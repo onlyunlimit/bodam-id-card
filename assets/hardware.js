@@ -1,6 +1,6 @@
 import { $, $$, esc, modal, state, logActivity } from './runtime.js';
 import { delay, every, listen } from './lifecycle.js';
-import { chirp } from './audio.js';
+import { chirp, keyClick } from './audio.js';
 import { tr, registerCopy } from './i18n.js';
 [
   ['기밀 파일 열기', 'Open sealed file', '機密ファイルを開く', '打开机密文件'],
@@ -26,7 +26,12 @@ const beep = (pitch = 850) => {
   if ($('#sound-toggle')?.getAttribute('aria-pressed') === 'true') chirp(pitch);
 };
 export function sealedArchive(target, open) {
-  target.innerHTML = `<section class="sealed-vault"><div class="vault-heading"><span class="eyebrow">COUNTERINTELLIGENCE / STORAGE 04</span><h2>외부 위협 정보</h2><p>비인가 조직 · 관측 자료의 외부 반출을 금합니다.</p></div><button id="open-sealed" class="sealed-folder" aria-label="기밀 파일 열기"><span class="folder-spine">ORPÉ / 0826 / ARCHIVE</span><span class="folder-class">RESTRICTED<br>INTELLIGENCE</span><span class="folder-title">SUBJECT<br><b>AZ</b></span><span class="folder-stamp">SEALED</span><span class="folder-bottom"><i class="barcode"></i>ACCESS CODE REQUIRED <b>열람 요청 ↗</b></span></button><div class="vault-ledger"><span>ARCHIVE / 01</span><div>ORPÉ</div><p>접근 기록 보존 · 신원 대조</p><span class="vault-bars" aria-hidden="true"></span></div></section>`;
+  target.innerHTML = `<section class="sealed-vault forensic-desk"><header class="vault-heading"><span class="eyebrow">COUNTERINTELLIGENCE / RESTRICTED NETWORK</span><h2>외부 위협 정보</h2><p>비인가 조직 · 관측 자료의 외부 반출을 금합니다.</p></header><div class="evidence-board"><svg class="evidence-links" viewBox="0 0 800 430" preserveAspectRatio="none" aria-hidden="true"><path d="M100 100L450 220L680 70M450 220L150 340M450 220L670 360"/></svg><div class="evidence-note note-a"><span>01 / INTERCEPT</span><pre aria-hidden="true">SIGNAL ...... LOST
+VOICEPRINT .. DUPLICATE
+SOURCE ...... UNKNOWN
+
+▓▒░  ░▒▓  ▓░▒
+▒░▓  ▓▒░  ░▓▒</pre><b>UNVERIFIED</b></div><div class="evidence-note note-b"><span>02 / OBSERVATION</span><div class="evidence-wave" aria-hidden="true"></div><small>37° N / 127° E<br>SEOUL SECTOR</small></div><button id="open-sealed" class="sealed-folder" aria-label="기밀 파일 열기"><span class="folder-spine">ORPÉ / ARCHIVE 04</span><span class="folder-class">RESTRICTED<br>INTELLIGENCE</span><span class="folder-title">CASE FILE<br><b>ORPÉ</b></span><span class="folder-stamp">SEALED</span><span class="folder-bottom"><i class="barcode"></i>SUBJECT / AZ <b>열람 요청 ↗</b></span></button><div class="evidence-note note-c"><span>03 / CROSS-CHECK</span><div class="redacted-lines" aria-hidden="true"><i></i><i></i><i></i></div><small>CHAIN OF CUSTODY<br>RECORD RETAINED</small></div></div><footer class="vault-audit"><span>● RECORD LOCKED</span><span>ACCESS LOG / MONITORED</span><span>INDEX 04—001</span></footer></section>`;
   $('#open-sealed').onclick = () => keypad(open);
 }
 function keypad(open) {
@@ -74,7 +79,7 @@ function keypad(open) {
     sequence.className = 'archive-release';
     sequence.innerHTML = `<div class="release-toasts" role="status"></div><div class="release-pages" aria-hidden="true">${Array.from({ length: 6 }, (_, i) => `<span style="--sheet:${i}"><b>ORPÉ / ${String(i + 1).padStart(3, '0')}</b><i></i><i></i><i></i><strong>VERIFIED</strong></span>`).join('')}</div>`;
     $('.keypad-device').append(sequence);
-    ['KEY ACCEPTED', 'INDEX RESTORED', 'FILE UNSEALED'].forEach((s, i) =>
+    ['ACCESS VERIFIED', 'EVIDENCE INDEX RESTORED', 'FILE UNSEALED'].forEach((s, i) =>
       later(
         () => {
           const e = document.createElement('span');
@@ -99,7 +104,7 @@ function keypad(open) {
       (b.onclick = () => {
         if (busy) return;
         const k = b.dataset.key;
-        beep(650);
+        keyClick();
         if (k === 'ENTER') submit();
         else if (k === 'DEL') input.value = input.value.slice(0, -1);
         else if (input.value.length < 4) input.value += k;
@@ -107,6 +112,7 @@ function keypad(open) {
   );
   input.oninput = () => (input.value = input.value.replace(/\D/g, '').slice(0, 4));
   input.onkeydown = (e) => {
+    if (/^[0-9]$/.test(e.key) || ['Backspace', 'Enter'].includes(e.key)) keyClick();
     if (e.key === 'Enter') {
       e.preventDefault();
       submit();

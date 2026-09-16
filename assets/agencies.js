@@ -44,3 +44,18 @@ export function renderAgency(agency) {
   };
   $$('[data-gallery-index]').forEach((b) => (b.onclick = () => show(+b.dataset.galleryIndex)));
 }
+
+export function renderAgencyDirectory() {
+  $('#main').innerHTML =
+    heading(
+      'ENTERTAINMENT / ARTIST LABELS',
+      '헌터 엔터테인먼트',
+      '각성관과 기획사가 함께 운용하는 공식 헌터 크루.',
+    ) +
+    `<div class="label-directory">${['lucky', 'obsidus']
+      .map((team, i) => {
+        const people = characters.filter((c) => c.team === team);
+        return `<a class="directory-card label-showcase ${team}" href="${i ? 'hunterwind' : 'elysian'}.html"><div class="label-top"><span>${i ? 'HUNTERWIND' : 'ELYSIAN'} / ARTIST MANAGEMENT</span><b>0${i + 1}</b></div><div class="label-portraits">${people.map((c, j) => `<span style="--person:${j}"><img src="${detailImage(c)}" alt="${esc(personName(c))}"></span>`).join('')}</div><img class="label-wordmark" src="${teamLogos[team]}" alt="${i ? 'OBSIDUS' : 'LUCKY TRICK'}"><div class="label-bottom"><h2>${i ? '옵시더스' : '럭키트릭'}</h2><span>${i ? 'METAL / DUST / STAGE' : 'LIGHT / LUCK / STAGE'}</span><b>↗</b></div></a>`;
+      })
+      .join('')}</div>`;
+}

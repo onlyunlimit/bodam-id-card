@@ -193,7 +193,17 @@ export function isIncident(item) {
     typeof item.id === 'string' &&
     item.id.length < 80 &&
     incidentTypes.includes(item.type) &&
-    locations.includes(item.location) &&
+    (locations.includes(item.location) ||
+      (item.manual === true &&
+        typeof item.location === 'string' &&
+        item.location.trim().length > 0 &&
+        item.location.length <= 140)) &&
+    (item.coordinates === undefined ||
+      (Array.isArray(item.coordinates) &&
+        item.coordinates.length === 2 &&
+        item.coordinates.every(Number.isFinite) &&
+        Math.abs(item.coordinates[0]) <= 90 &&
+        Math.abs(item.coordinates[1]) <= 180)) &&
     ['D', 'C', 'B', 'A'].includes(item.grade) &&
     (descriptions[item.type].includes(item.detail) ||
       (item.manual === true &&

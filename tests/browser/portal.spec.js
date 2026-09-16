@@ -41,7 +41,7 @@ test('Login cancellation stays public, staff persists across pages, photo roles 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/beacon.html');
   const card = page.locator('[data-character="binjo"]');
-  const front = await card.locator('.id-photo > img').getAttribute('src');
+  const front = await card.locator('.id-photo > img').getAttribute('data-image-url');
   expect(
     await card.locator('.id-photo > img').evaluate((e) => getComputedStyle(e).filter),
   ).toContain('blur(11px)');
@@ -59,7 +59,7 @@ test('Login cancellation stays public, staff persists across pages, photo roles 
     'hidden',
   );
   await card.locator('.card-turner').click();
-  expect(await page.locator('.dossier-photo').getAttribute('src')).not.toBe(front);
+  expect(await page.locator('.dossier-photo').getAttribute('data-image-url')).not.toBe(front);
   await expect(page.locator('[data-gallery]')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await page.goto('/origin.html');
@@ -97,8 +97,11 @@ test('Records require viewer entry, frequency changes, English seals persist and
   await page.locator('#frequency').fill('80');
   await expect(page.locator('#signal-quality')).toHaveText('신호 불안정');
   await page.locator('[data-resolve]').first().click();
+  await expect(page.locator('.stamp')).toHaveCount(0);
+  await page.locator('#incident-status').selectOption('resolved');
   await expect(page.locator('.stamp').first()).toContainText('RESOLVED');
   await page.reload();
+  await page.locator('#incident-status').selectOption('resolved');
   await expect(page.locator('.stamp').first()).toBeVisible();
   await page.locator('[data-reopen]').first().click();
   await expect(page.locator('.stamp')).toHaveCount(0);

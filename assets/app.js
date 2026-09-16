@@ -1,4 +1,6 @@
-import { renderAgency } from './agencies.js';
+import { initImageSurfaces } from './image-surfaces.js';
+import { initForensicCursor } from './forensics.js';
+import { renderAgency, renderAgencyDirectory } from './agencies.js';
 import { installFacilityTranslations } from './facility-i18n.js';
 import { installVoiceTranslations } from './voice-i18n.js';
 import { installInterfaceTranslations } from './interface-i18n.js';
@@ -44,6 +46,8 @@ installInterfaceTranslations();
 installVoiceTranslations();
 installFacilityTranslations();
 initShell('SGIA', 'overview');
+initImageSurfaces();
+initForensicCursor();
 initI18n();
 function route(url = location.href, push = false) {
   const u = new URL(url, location.href),
@@ -73,7 +77,7 @@ function route(url = location.href, push = false) {
   const render = {
     overview: renderOverview,
     departments: () => renderDirectory(),
-    entertainment: () => renderDirectory(true),
+    entertainment: renderAgencyDirectory,
     records: renderRecords,
     manual: renderManual,
     community: renderCommunity,

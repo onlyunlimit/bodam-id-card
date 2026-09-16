@@ -1,3 +1,17 @@
+import { evidenceIndex, mountEvidenceIndex } from './evidence.js';
+import { registerCopy } from './i18n.js';
+[
+  ['현장 위치', 'Incident locations', '現場位置', '现场位置'],
+  ['위도', 'Latitude', '緯度', '纬度'],
+  ['경도', 'Longitude', '経度', '经度'],
+  ['좌표 적용', 'Apply coordinates', '座標を適用', '应用坐标'],
+  [
+    '지도를 눌러 발생 위치를 지정하세요.',
+    'Click the map to mark the incident location.',
+    '地図を押して発生位置を指定してください。',
+    '点击地图标记发生位置。',
+  ],
+].forEach((row) => registerCopy(...row));
 import { sealedArchive, mountReceiver, interceptTerminal } from './hardware.js';
 import { openTransmission, requestTransmission } from './transmissions.js';
 import { emergencyAlert, openIncident } from './incident-ui.js';
@@ -38,6 +52,8 @@ export function createMap(element, signals = incidents) {
   }
   const map = L.map(element, {
     scrollWheelZoom: false,
+    zoomAnimation: false,
+    fadeAnimation: state.motion,
     zoomControl: true,
     attributionControl: true,
   }).setView([37.553, 127.005], 11);
@@ -51,34 +67,44 @@ export function createMap(element, signals = incidents) {
   tiles.on('tileerror', () => {
     if (++failed === 3) toast('지도 배경 연결 대기 중입니다. 관측 신호는 계속 표시됩니다.');
   });
-  for (const [i, s] of signals.filter((x) => !x.resolvedAt).entries()) {
-    const pos = locations[s.location] || [37.55, 127.0];
-    const risk = {
-      A: ['#ec4f64', 1700],
-      B: ['#eea455', 1050],
-      C: ['#d3bc62', 600],
-      D: ['#55bbaa', 280],
-    }[s.grade] || ['#eea455', 600];
-    L.circle(pos, {
-      radius: risk[1],
-      color: risk[0],
-      weight: 1,
-      fillColor: risk[0],
-      fillOpacity: 0.13,
-    })
-      .addTo(map)
-      .bindPopup(esc(s.location) + ' / ' + s.grade);
-    const marker = L.circleMarker([pos[0] + (i % 3) * 0.002, pos[1] + (i % 2) * 0.003], {
-      radius: s.type === '게이트' ? 9 : 6,
-      color: risk[0],
-      weight: 2,
-      fillOpacity: 0.3,
-    }).addTo(map);
-    marker.bindPopup(
-      `<b>${esc(s.grade)} / ${esc(s.type)}</b><p>${esc(s.location)}</p><small>SGIA / FIELD OBSERVATION</small>`,
-    );
-  }
-  onDispose(() => map.remove());
+  const layer = L.layerGroup().addTo(map);
+  map.syncSignals = (items) => {
+    layer.clearLayers();
+    for (const s of items.filter((x) => !x.resolvedAt)) {
+      const pos = s.coordinates || locations[s.location] || [37.55, 127.0];
+      const risk = {
+        A: ['#c93d4e', 1700],
+        B: ['#d99b64', 1050],
+        C: ['#c8b97a', 600],
+        D: ['#56d3dc', 280],
+      }[s.grade];
+      L.circle(pos, { radius: risk[1], color: risk[0], weight: 1, fillOpacity: 0.12 }).addTo(layer);
+      const marker = L.marker(pos, {
+        icon: L.divIcon({
+          className: 'incident-pin',
+          html: `<span style="--pin-color:${risk[0]}" data-map-incident="${esc(s.id)}"><i></i><b>${esc(s.grade)}</b></span>`,
+          iconSize: [30, 38],
+          iconAnchor: [15, 34],
+        }),
+      }).addTo(layer);
+      marker.bindPopup(
+        `<div class="map-detection"><small>TARGET VERIFIED / ${esc(s.id)}</small><b>${esc(s.type)} · ${esc(s.grade)}</b><span>${esc(s.location)}</span><p>${esc(s.detail)}</p><code>${pos[0].toFixed(5)}, ${pos[1].toFixed(5)}</code></div>`,
+      );
+    }
+  };
+  map.syncSignals(signals);
+  let released = false;
+  const release = () => {
+    if (!released) {
+      released = true;
+      map.remove();
+    }
+  };
+  const unregister = onDispose(release);
+  map.release = () => {
+    unregister();
+    release();
+  };
   return map;
 }
 function gauge(value, max, label) {
@@ -216,8 +242,20 @@ export function renderRecords() {
   let page = 0;
   $('#main').innerHTML =
     heading('INCIDENT ARCHIVE / RESPONSE', '사건 기록실', '신고 접수 · 현장 대응 · 종결 기록') +
-    `<div class="access-lock" id="records-lock"><img src="assets/art/silver-emblem.webp" alt=""><h2>직원 열람 채널</h2><p>신고 기록과 처리 업무는 직원 채널에서 열람할 수 있습니다.</p><button class="primary" id="records-login">직원 로그인</button></div><section id="records-workspace" hidden><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><svg class="wave" viewBox="0 0 180 40" aria-hidden="true"><path d="M0 20H25L30 8L35 35L40 17H60L65 2L70 38L75 20H110L115 10L120 32L125 20H180" fill="none" stroke="currentColor"/></svg><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open">처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p class="muted">단말 기록은 현재 브라우저에 보관됩니다.</p></section>`;
+    `<div class="access-lock" id="records-lock"><img src="assets/art/silver-emblem.webp" alt=""><h2>직원 열람 채널</h2><p>신고 기록과 처리 업무는 직원 채널에서 열람할 수 있습니다.</p><button class="primary" id="records-login">직원 로그인</button></div><section id="records-workspace" hidden><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><svg class="wave" viewBox="0 0 180 40" aria-hidden="true"><path d="M0 20H25L30 8L35 35L40 17H60L65 2L70 38L75 20H110L115 10L120 32L125 20H180" fill="none" stroke="currentColor"/></svg><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p class="muted">단말 기록은 현재 브라우저에 보관됩니다.</p></section>`;
+  const rack = document.createElement('aside');
+  rack.className = 'records-rack';
+  const receiver = $('.receiver');
+  receiver.replaceWith(rack);
+  rack.append(receiver);
+  rack.insertAdjacentHTML(
+    'beforeend',
+    '<section class="records-location-panel panel"><div class="section-title"><h2>현장 위치</h2><span class="eyebrow">LIVE / OPEN CASES</span></div><div id="records-map" class="seoul-map"></div></section>',
+  );
+  const recordMap = createMap($('#records-map'));
   const update = () => {
+    recordMap?.syncSignals(incidents);
+    if (state.staff) delay(() => recordMap?.invalidateSize(), 60);
     $('#records-lock').hidden = state.staff;
     $('#records-workspace').hidden = !state.staff;
     if (!state.staff) {
@@ -246,7 +284,7 @@ export function renderRecords() {
         .slice(page * 6, page * 6 + 6)
         .map(
           (i) =>
-            `<article class="case-file ${i.resolvedAt ? 'closed' : ''}" data-incident="${esc(i.id)}" tabindex="0" aria-label="${esc(i.location)} 기록 열람"><div class="case-tab"><b>${i.grade}</b><span>${i.type}</span></div><div class="case-content"><small class="mono">${esc(i.id)}</small><h3>${i.location}</h3><p>${esc(i.detail)}</p><time>접수 ${koreaTime(new Date(i.created)).date} ${koreaTime(new Date(i.created)).clock}</time></div><div class="case-action">${i.resolvedAt ? `<span class="stamp">RESOLVED<small>SGIA · CASE CLOSED</small></span><button data-reopen="${i.id}" class="subtle">다시 열기</button>` : `<button data-resolve="${i.id}">종결 승인 ↗</button>`}</div></article>`,
+            `<article class="case-file ${i.resolvedAt ? 'closed' : ''}" data-incident="${esc(i.id)}" tabindex="0" aria-label="${esc(i.location)} 기록 열람"><div class="case-tab"><b>${i.grade}</b><span>${i.type}</span></div><div class="case-content"><small class="mono">${esc(i.id)}</small><h3>${esc(i.location)}</h3><p>${esc(i.detail)}</p><time>접수 ${koreaTime(new Date(i.created)).date} ${koreaTime(new Date(i.created)).clock}</time></div><div class="case-action">${i.resolvedAt ? `<span class="stamp">RESOLVED<small>SGIA · CASE CLOSED</small></span><button data-reopen="${i.id}" class="subtle">다시 열기</button>` : `<button data-resolve="${i.id}">종결 승인 ↗</button>`}</div></article>`,
         )
         .join('') || '<p class="empty-state">해당 기록이 없습니다.</p>';
   };
@@ -277,16 +315,39 @@ export function renderRecords() {
   $('#new-incident').onclick = () => {
     if (!state.staff) return login();
     if (incidents.length >= 100) return toast('기록함에 최대 100건을 보관합니다.');
-    modal(
+    const reportDialog = modal(
       '신고서 작성',
-      `<form id="incident-form" class="board-form"><div class="form-row"><label>신고자<input name="reporter" maxlength="40" required></label><label>발생 시각<input name="occurred" type="datetime-local" value="${koreaTime().date.replaceAll('.', '-')}T${koreaTime().clock.slice(0, 5)}" required></label></div><div class="form-row"><label>발생 위치<select name="location">${Object.keys(
-        locations,
-      )
-        .map((x) => `<option value="${x}">${x}</option>`)
-        .join(
-          '',
-        )}</select></label><label>구역<input name="zone" maxlength="80" required></label></div><div class="form-row"><label>유형<select name="type">${incidentTypes.map((t) => `<option value="${t}">${t}</option>`).join('')}</select></label><label>위험 등급<select name="grade"><option>D</option><option>C</option><option>B</option><option>A</option></select></label></div><div class="form-row"><label>지원 요청 팀<select name="support"><option value="비콘">비콘</option><option value="실드">실드</option><option value="오리진">오리진</option></select></label><label>필요 인원<input name="personnel" type="number" min="1" max="30" value="2" required></label></div><label>상황 설명<textarea name="detail" minlength="5" maxlength="1500" required></textarea></label><label>추가 요청사항<textarea name="requests" maxlength="500"></textarea></label><button class="primary">신고 접수</button></form>`,
+      `<form id="incident-form" class="board-form"><div class="form-row"><label>신고자<input name="reporter" maxlength="40" required></label><label>발생 시각<input name="occurred" type="datetime-local" value="${koreaTime().date.replaceAll('.', '-')}T${koreaTime().clock.slice(0, 5)}" required></label></div><div class="form-row"><label>발생 위치<input name="location" maxlength="140" value="성수동 폐공장" required></label><label>구역<input name="zone" maxlength="80" required></label></div><div class="report-map-field"><p>지도를 눌러 발생 위치를 지정하세요.</p><div id="report-map" class="seoul-map" aria-label="신고 위치 선택 지도"></div><div class="coordinate-inputs"><label>위도<input name="latitude" type="number" step="any" min="-90" max="90" value="37.5445" required></label><label>경도<input name="longitude" type="number" step="any" min="-180" max="180" value="127.0557" required></label><button type="button" id="apply-coordinate">좌표 적용</button></div></div><div class="form-row"><label>유형<select name="type">${incidentTypes.map((t) => `<option value="${t}">${t}</option>`).join('')}</select></label><label>위험 등급<select name="grade"><option>D</option><option>C</option><option>B</option><option>A</option></select></label></div><div class="form-row"><label>지원 요청 팀<select name="support"><option value="비콘">비콘</option><option value="실드">실드</option><option value="오리진">오리진</option></select></label><label>필요 인원<input name="personnel" type="number" min="1" max="30" value="2" required></label></div><label>상황 설명<textarea name="detail" minlength="5" maxlength="1500" required></textarea></label><label>추가 요청사항<textarea name="requests" maxlength="500"></textarea></label><button class="primary">신고 접수</button></form>`,
     );
+    const picker = createMap($('#report-map'), []);
+    let selected = [37.5445, 127.0557],
+      pin;
+    if (picker) {
+      picker.setView(selected, 13);
+      pin = L.marker(selected, { draggable: true }).addTo(picker);
+    }
+    const setPoint = (lat, lng) => {
+      selected = [lat, lng];
+      pin?.setLatLng(selected);
+      $('[name=latitude]').value = lat.toFixed(6);
+      $('[name=longitude]').value = lng.toFixed(6);
+    };
+    picker?.on('click', (e) => setPoint(e.latlng.lat, e.latlng.lng));
+    pin?.on('dragend', () => {
+      const p = pin.getLatLng();
+      setPoint(p.lat, p.lng);
+    });
+    $('#apply-coordinate').onclick = () => {
+      const lat = $('[name=latitude]'),
+        lng = $('[name=longitude]');
+      if (!lat.reportValidity() || !lng.reportValidity()) return;
+      setPoint(+lat.value, +lng.value);
+      picker?.setView(selected, 13);
+    };
+    delay(() => {
+      if (reportDialog.open) picker?.invalidateSize();
+    }, 200);
+    reportDialog.addEventListener('close', () => picker?.release(), { once: true });
     $('#incident-form').onsubmit = (e) => {
       e.preventDefault();
       if (!state.staff) return;
@@ -297,6 +358,7 @@ export function renderRecords() {
         personnel: Number(data.personnel),
         occurredAt: new Date(data.occurred + '+09:00').getTime(),
         manual: true,
+        coordinates: [Number(data.latitude), Number(data.longitude)],
       };
       if (!isIncident(item)) return toast('신고 내용을 확인해 주세요.');
       incidents.push(item);
@@ -304,7 +366,7 @@ export function renderRecords() {
       $('#document-dialog').close();
       page = 0;
       $('#incident-type').value = 'all';
-      $('#incident-status').value = 'all';
+      $('#incident-status').value = 'open';
       update();
       emergencyAlert(item);
     };
@@ -320,7 +382,20 @@ export function renderRecords() {
     if (!state.staff) return;
     if (!b) {
       const card = e.target.closest('[data-incident]');
-      if (card) openIncident(incidents.find((i) => i.id === card.dataset.incident));
+      if (card) {
+        const record = incidents.find((i) => i.id === card.dataset.incident);
+        const d = openIncident(record);
+        $('.record-dossier', d).insertAdjacentHTML(
+          'beforeend',
+          '<div id="case-location-map" class="seoul-map"></div>',
+        );
+        const m = createMap($('#case-location-map'), [{ ...record, resolvedAt: null }]);
+        m?.setView(record.coordinates || locations[record.location] || [37.55, 127], 14);
+        delay(() => {
+          if (d.open) m?.invalidateSize();
+        }, 200);
+        d.addEventListener('close', () => m?.release(), { once: true });
+      }
       return;
     }
     const record = incidents.find((i) => i.id === (b.dataset.resolve || b.dataset.reopen));
@@ -383,9 +458,28 @@ function renderOrpeContent(target) {
       '외부 위협 정보',
       '비인가 조직 · 관측 자료의 외부 반출을 금합니다.',
     ) +
-    `<section class="classified-board"><div class="classified-header"><span>TOP SECRET / ORPÉ PRIVATE FILE</span><span class="status-dot"></span></div><div class="threat-layout"><div><div id="az-profile" class="character-grid single"></div></div><div class="threat-intelligence"><span class="eyebrow">SUBJECT 001 / UNREGISTERED</span><h2>AZ<span>에이지</span></h2><p>극단주의 범죄 집단 ORPÉ 소속 미등록 각성자.<br>증언의 일치가 정보의 진실성을 보증하지 않습니다.</p><div class="threat-class"><span>THREAT ASSESSMENT</span><strong>UNMEASURABLE</strong><div class="threat-meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><dl class="facts"><div><dt>발화 동기화</dt><dd>추정 영향 반경 약 2km</dd></div><div><dt>주요 위험</dt><dd>거짓 증언 · 수치심 환산</dd></div><div><dt>대응 원칙</dt><dd>단독 접촉 금지 · 교차 검증</dd></div></dl><button class="danger-button" id="threat-log">감청·침입 로그 열람 ↗</button><div id="intrusion-log" class="terminal-log" aria-live="polite"></div></div></div><div class="tracking-section"><div class="section-title"><h2>동선 추적</h2><span class="badge danger">RESTRICTED INTELLIGENCE</span><button id="tracking-pause" aria-pressed="false">추적 일시정지</button><button id="track-az">신호 재탐색 ↻</button></div><div class="tracking-layout"><div id="tracking-map" class="seoul-map"></div><ol id="sighting-log"></ol></div></div></section>`;
+    `<section class="classified-board"><div class="classified-header"><span>TOP SECRET / ORPÉ PRIVATE FILE</span><span class="status-dot"></span></div><div class="threat-layout"><div><div id="az-profile" class="character-grid single"></div></div><div class="threat-intelligence"><span class="eyebrow">SUBJECT 001 / UNREGISTERED</span><h2>AZ<span>에이지</span></h2><p>극단주의 범죄 집단 ORPÉ 소속 미등록 각성자.<br>증언의 일치가 정보의 진실성을 보증하지 않습니다.</p><div class="threat-class"><span>THREAT ASSESSMENT</span><strong>UNMEASURABLE</strong><div class="threat-meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><dl class="facts"><div><dt>발화 동기화</dt><dd>추정 영향 반경 약 2km</dd></div><div><dt>주요 위험</dt><dd>거짓 증언 · 수치심 환산</dd></div><div><dt>대응 원칙</dt><dd>단독 접촉 금지 · 교차 검증</dd></div></dl><button class="danger-button" id="threat-log">감청·침입 로그 열람 ↗</button><div id="intrusion-log" class="terminal-log" aria-live="polite"></div></div></div>${evidenceIndex()}<div class="tracking-section"><div class="section-title"><h2>동선 추적</h2><span class="badge danger">RESTRICTED INTELLIGENCE</span><button id="tracking-pause" aria-pressed="false">추적 일시정지</button><button id="track-az">신호 재탐색 ↻</button></div><div class="tracking-layout"><div id="tracking-map" class="seoul-map"></div><ol id="sighting-log"></ol></div></div></section>`;
+  $('.classified-board', target).insertAdjacentHTML(
+    'afterbegin',
+    '<div class="case-breadcrumb"><span>COUNTERINTELLIGENCE BUREAU</span><b>CASE / OR—001</b><span>EVIDENCE REVIEW</span></div>',
+  );
   renderCards([az], $('#az-profile'));
+  $('#az-profile').insertAdjacentHTML(
+    'afterend',
+    `<div class="identity-terminal"><span>FACIAL RECONSTRUCTION / 01</span><pre aria-hidden="true">       .:+####+:.
+    .+#@@@@@@@@#+.
+   :##@@@####@@@##:
+   ##@@#:.  .:#@@##
+   #@@: .+  +. :@@#
+   :@#    /\    #@:
+    +#   ----   #+
+     :#:.    .:#:
+       :+####+:
+   [ IDENTITY UNVERIFIED ]</pre><b>TRACE_USER / AZ</b></div>`,
+  );
+  mountEvidenceIndex();
   const map = createMap($('#tracking-map'), []);
+  delay(() => map?.invalidateSize(), 400);
   let points = [],
     markers = [],
     step = 0,

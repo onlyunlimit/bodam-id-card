@@ -737,3 +737,12 @@ html[data-motion='off'] .connecting .connection-overlay {
     font-size: clamp(68px, 17vw, 126px);
   }
 }
+/* Intro artwork follows the same background-only image interaction. */
+img[data-image-url] {
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}

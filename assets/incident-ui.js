@@ -99,4 +99,5 @@ export function openIncident(record) {
     $('#report-pause').disabled = true;
   }
   d.addEventListener('close', () => clearTimeout(timer), { once: true });
+  return d;
 }

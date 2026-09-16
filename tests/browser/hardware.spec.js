@@ -17,7 +17,7 @@ test('Sealed archive rejects bad codes, accepts physical keypad input, and runs 
   await expect(page.locator('#az-profile')).toHaveCount(0);
   for (const n of ['0', '8', '2', '6']) await page.locator('[data-key="' + n + '"]').click();
   await page.locator('[data-key=ENTER]').click();
-  await expect(page.locator('.release-toasts')).toContainText('KEY ACCEPTED');
+  await expect(page.locator('.release-toasts')).toContainText('ACCESS VERIFIED');
   await expect(page.locator('#az-profile')).toBeVisible();
   await page.locator('#threat-log').click();
   await page.locator('#intercept-check').click();
@@ -50,9 +50,11 @@ test('Agencies show public artist profiles and a functional gallery; compendium 
     await expect(page.locator('.dossier-photo')).toBeVisible();
     await page.keyboard.press('Escape');
     await page.locator('[data-gallery-index]').first().click();
-    const img = await page.locator('.gallery-lightbox>img').getAttribute('src');
+    const img = await page.locator('.gallery-lightbox>img').getAttribute('data-image-url');
     await page.locator('#gallery-next').click();
-    expect(await page.locator('.gallery-lightbox>img').getAttribute('src')).not.toBe(img);
+    expect(await page.locator('.gallery-lightbox>img').getAttribute('data-image-url')).not.toBe(
+      img,
+    );
     await page.keyboard.press('Escape');
   }
   await page.goto('/manual.html');

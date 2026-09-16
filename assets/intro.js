@@ -1,3 +1,5 @@
+import { initImageSurfaces } from './image-surfaces.js';
+initImageSurfaces();
 import { initI18n, setLanguage, translateDOM } from './i18n.js';
 import { installInterfaceTranslations } from './interface-i18n.js';
 installInterfaceTranslations();
