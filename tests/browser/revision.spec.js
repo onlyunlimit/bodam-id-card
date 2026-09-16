@@ -154,3 +154,13 @@ test('All four languages fit mobile navigation, records and character dossiers',
   }
   expect(errors).toEqual([]);
 });
+
+test('Localized control descriptions follow changing theme state', async ({ page }) => {
+  await page.goto('/beacon.html');
+  await page.locator('[data-lang="en"]').click();
+  await expect(page.locator('#theme-toggle')).toHaveAttribute('aria-label', 'Switch to dark mode');
+  await page.locator('#theme-toggle').click();
+  await expect(page.locator('#theme-toggle')).toHaveAttribute('aria-label', 'Switch to light mode');
+  await page.locator('[data-lang="ko"]').click();
+  await expect(page.locator('#theme-toggle')).toHaveAttribute('aria-label', '라이트모드로 전환');
+});

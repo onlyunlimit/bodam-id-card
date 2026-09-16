@@ -311,6 +311,7 @@ export function personName(c) {
   return current === 'en' ? c.code : c.name.split(' · ')[0];
 }
 const originals = new WeakMap();
+const attributes = new WeakMap();
 function textNode(n) {
   const now = n.nodeValue,
     prev = originals.get(n);
@@ -336,10 +337,14 @@ export function translateDOM(root = document.body) {
   root.querySelectorAll?.('[placeholder],[aria-label],[title]').forEach((el) => {
     for (const attr of ['placeholder', 'aria-label', 'title']) {
       if (!el.hasAttribute(attr)) continue;
-      const key = 'i18n' + attr.replace('-', '');
-      const original = el.dataset[key] || el.getAttribute(attr);
-      el.dataset[key] = original;
-      el.setAttribute(attr, tr(original));
+      const values = attributes.get(el) || new Map();
+      const prior = values.get(attr);
+      const now = el.getAttribute(attr);
+      const original = prior && now === prior.output ? prior.original : now;
+      const output = tr(original);
+      values.set(attr, { original, output });
+      attributes.set(el, values);
+      if (now !== output) el.setAttribute(attr, output);
     }
   });
   document
@@ -355,10 +360,22 @@ export function initI18n() {
     queueMicrotask(() => {
       observer.disconnect();
       translateDOM();
-      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['aria-label', 'placeholder', 'title'],
+      });
       queued = false;
     });
   });
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ['aria-label', 'placeholder', 'title'],
+  });
   translateDOM();
 }
