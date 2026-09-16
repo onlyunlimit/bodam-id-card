@@ -1,4 +1,5 @@
-import { emergencyAlert, openIncident, bindDial } from './incident-ui.js';
+import { openTransmission, requestTransmission } from './transmissions.js';
+import { emergencyAlert, openIncident } from './incident-ui.js';
 import { listen, every, delay, onDispose, routeSignal } from './lifecycle.js';
 import { $, $$, state, esc, heading, modal, login, toast, read, save } from './runtime.js';
 import { generateIncident, isIncident, tally, koreaTime, incidentTypes } from './model.js';
@@ -147,15 +148,17 @@ export function renderOverview() {
   let seq = 0;
   const receive = () => {
     const b = bulletins[seq++ % bulletins.length],
-      el = document.createElement('article');
+      el = document.createElement('button');
     el.className = 'bulletin incoming';
     el.innerHTML = `<span class="transmission-icon">↘</span><div><small>${b[0]} <time>${koreaTime().clock}</time></small><p>${b[1]}</p></div><span class="badge">수신</span>`;
+    el.type = 'button';
+    el.onclick = () => openTransmission(b[0], b[1], el);
     $('#brief-feed').prepend(el);
     while ($('#brief-feed').children.length > 3) $('#brief-feed').lastChild.remove();
   };
   receive();
   receive();
-  $('#brief-refresh').onclick = receive;
+  $('#brief-refresh').onclick = () => requestTransmission($('#brief-refresh'), receive);
   every(() => {
     if (state.motion && !document.hidden) receive();
   }, 22000);
@@ -364,7 +367,7 @@ export function renderRecords() {
   listen(document, 'visibilitychange', () => {
     if (document.hidden && context) sound();
   });
-  bindDial();
+
   update();
 }
 export function renderOrpe(target = $('#main')) {

@@ -48,7 +48,7 @@ document.getElementById('connect').addEventListener('click', (event) => {
   document.body.classList.add('connecting');
   document.getElementById('connection-log').textContent =
     'CHANNEL 01 / 신호 확인 · 외부인 열람 권한 승인';
-  setTimeout(() => window.location.assign('portal.html'), paused ? 150 : 1250);
+  setTimeout(() => window.location.assign('portal.html'), paused ? 150 : 1900);
 });
 const canvas = document.getElementById('gate-particles'),
   ctx = canvas.getContext('2d');

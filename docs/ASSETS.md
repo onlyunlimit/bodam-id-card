@@ -15,7 +15,7 @@
 
 ## 기타
 
-- 인물 및 기존 팀 로고: 사용자가 제공한 `image.md`의 공개 이미지 URL
+- 인물: 사용자가 제공한 `image.md`의 공개 이미지 URL. 팀 로고는 포털에서 제거했습니다.
 - SGIA 문장: 기존 벡터 자산을 수정한 `assets/emblem.svg`
 - 지도: OpenStreetMap 타일 + Leaflet, 지도에 출처 표시
 - 레이더·날씨·시각·구조도: 수치와 연동한 SVG/CSS UI
@@ -27,11 +27,13 @@
 
 - `assets/art/silver-emblem.webp`: 실버 SGIA 문장, 헤더·인트로·사원증
 - `assets/art/footprints.webp`: 추적 지도 발자국
-- `assets/art/dossier-tab.webp`: 사건 문서의 금속 파일 탭
-- `assets/art/tuning-dial.webp`: 드래그/키보드 주파수 다이얼
 - `assets/art/community-icon.webp`: 게시판·독립 메신저 패널 아이콘
 - `assets/art/resolved-seal.webp`: 영문 종결 도장
 
 생성 요청: 1536×1024, 3×2 UI sprite sheet; polished silver titanium SGIA shield monogram, forensic shoe soles, slim dossier tab with barcode, precision radio tuning dial, community speech bubble, crimson RESOLVED seal. Separate assets and gutters; front-on, refined intelligence-agency styling; no scenes, architecture or wallpaper. Generated backgrounds are contained within cropped UI components. Live labels, controls and diagram room text remain HTML for interaction, accessibility and localization.
 
 기존 `assets/emblem.svg`는 레거시 링크 호환용으로 유지합니다. 새 포털의 문장은 위 WebP를 사용합니다.
+
+## 기록실 개편
+
+금속 파일 탭과 다이얼 이미지는 제거했습니다. 주파수는 이전 아날로그 슬라이더 구성으로 복원했습니다. 사용자가 제공한 13개 레퍼런스는 구획선·타이포 위계·기록물 배치의 참고로만 사용했으며, 원본 이미지·인물·로고·문구는 배포물에 포함하지 않았습니다.

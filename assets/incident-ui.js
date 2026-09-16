@@ -66,71 +66,37 @@ export function openIncident(record) {
   ];
   const d = modal(
     'CASE / ' + record.id,
-    `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><h3>${esc(record.location)}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
+    `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><h3>${esc(record.location)}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><div class="report-controls"><button id="report-pause">일시 정지</button><button id="report-complete">전체 읽기</button></div><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
     'record',
   );
   const text = tr(record.detail),
     out = $('#typed-report');
+  const letters = Array.from(text);
   let n = 0,
-    timer;
+    timer,
+    paused = false;
   const type = () => {
-    if (!d.open || !out.isConnected) return;
-    out.textContent = text.slice(0, (n += 2));
-    if (n < text.length) timer = delay(type, 18);
+    if (!d.open || !out.isConnected || paused) return;
+    out.textContent = letters.slice(0, ++n).join('');
+    if (n < letters.length) timer = delay(type, /[.,。!?。！？]/.test(letters[n - 1]) ? 420 : 75);
+    else $('#report-pause').disabled = true;
+  };
+  $('#report-pause').onclick = (e) => {
+    paused = !paused;
+    e.currentTarget.textContent = tr(paused ? '계속 읽기' : '일시 정지');
+    clearTimeout(timer);
+    if (!paused) type();
+  };
+  $('#report-complete').onclick = () => {
+    clearTimeout(timer);
+    n = letters.length;
+    out.textContent = text;
+    $('#report-pause').disabled = true;
   };
   if (state.motion) type();
-  else out.textContent = text;
-  d.addEventListener('close', () => clearTimeout(timer), { once: true });
-}
-export function bindDial() {
-  const range = $('#frequency');
-  if (!range) return;
-  range.insertAdjacentHTML(
-    'beforebegin',
-    '<div class="tuning-knob" id="tuning-knob" role="slider" tabindex="0" aria-label="수신 주파수" aria-valuemin="80" aria-valuemax="120" aria-valuenow="98.6"><img src="assets/art/tuning-dial.webp" alt="" draggable="false"><i></i><span>FINE TUNE</span></div>',
-  );
-  const knob = $('#tuning-knob');
-  function update(value) {
-    range.value = Math.max(80, Math.min(120, value)).toFixed(1);
-    range.dispatchEvent(new Event('input'));
-    knob.style.setProperty('--dial', (Number(range.value) - 80) * 7 - 140 + 'deg');
-    knob.setAttribute('aria-valuenow', range.value);
+  else {
+    out.textContent = text;
+    $('#report-pause').disabled = true;
   }
-  let start = null;
-  knob.onpointerdown = (e) => {
-    if (e.button !== 0) return;
-    start = { y: e.clientY, x: e.clientX, value: Number(range.value) };
-    knob.setPointerCapture(e.pointerId);
-  };
-  knob.onpointermove = (e) => {
-    if (start) update(start.value + (e.clientX - start.x + start.y - e.clientY) / 8);
-  };
-  knob.onpointerup = knob.onpointercancel = () => (start = null);
-  knob.onkeydown = (e) => {
-    const d = {
-      ArrowUp: 0.1,
-      ArrowRight: 0.1,
-      ArrowDown: -0.1,
-      ArrowLeft: -0.1,
-      PageUp: 1,
-      PageDown: -1,
-    }[e.key];
-    if (d) {
-      e.preventDefault();
-      update(Number(range.value) + d);
-    }
-    if (e.key === 'Home') {
-      e.preventDefault();
-      update(80);
-    }
-    if (e.key === 'End') {
-      e.preventDefault();
-      update(120);
-    }
-  };
-  range.addEventListener('input', () => {
-    knob.style.setProperty('--dial', (Number(range.value) - 80) * 7 - 140 + 'deg');
-    knob.setAttribute('aria-valuenow', range.value);
-  });
-  update(98.6);
+  d.addEventListener('close', () => clearTimeout(timer), { once: true });
 }

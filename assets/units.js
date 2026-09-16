@@ -3,7 +3,7 @@ import { personName, language } from './i18n.js';
 import { listen, every, delay, onDispose, routeSignal } from './lifecycle.js';
 import { characters } from './characters.js';
 import { teams, activityFor, scheduleFor, koreaTime, formatMinutes } from './model.js';
-import { teamLogos } from './media.js';
+import { openTransmission, requestTransmission } from './transmissions.js';
 import { $, $$, esc, state, heading, modal, login, toast, read, save } from './runtime.js';
 export const units = teams.filter((t) => ['origin', 'beacon', 'shield'].includes(t.id));
 export const unitLocations = {
@@ -43,7 +43,7 @@ export function renderDirectory(entertainment = false) {
     `<div class="directory-grid ${entertainment ? 'ent-directory' : ''}">${list
       .map(
         (t, i) =>
-          `<a href="${t.id}.html" class="directory-card" data-team="${t.id}"><span class="eyebrow">${entertainment ? (t.id === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND') : 'DIRECTORATE 0' + (i + 1)}</span><div class="directory-logo">${teamLogos[t.id] ? `<img src="${teamLogos[t.id]}" alt="${t.name} 로고">` : `<strong>${t.en}</strong>`}</div><div class="directory-title"><h2>${t.name}<small>${t.department}</small></h2><span>↗</span></div><p>${t.staff}</p><div class="directory-meta"><span>${unitLocations[t.id]}</span>${statusMarkup(t.id)}</div><div class="avatar-stack">${characters
+          `<a href="${t.id}.html" class="directory-card" data-team="${t.id}"><span class="eyebrow">${entertainment ? (t.id === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND') : 'DIRECTORATE 0' + (i + 1)}</span><div class="directory-title"><h2>${t.name}<small>${t.department}</small></h2><span>↗</span></div><p>${t.staff}</p><div class="directory-meta"><span>${unitLocations[t.id]}</span>${statusMarkup(t.id)}</div><div class="avatar-stack">${characters
             .filter((c) => c.team === t.id)
             .map((c) => `<img src="${c.portrait}" alt="" loading="lazy">`)
             .join(
@@ -276,7 +276,7 @@ export function renderUnit(id) {
       t.name,
       ent ? unitLocations[id] : t.department,
     ) +
-    `<section class="unit-masthead" data-team="${id}"><div><span class="eyebrow">${ent ? 'OFFICIAL HUNTER CREW' : 'SENTINEL & GUIDE INTEGRATED ADMINISTRATION'}</span><h2>${t.en}</h2><p>${t.staff}</p><div class="unit-meta"><span>${unitLocations[id]}</span>${statusMarkup(id)}</div></div>${teamLogos[id] ? `<img src="${teamLogos[id]}" alt="${t.name} 로고">` : '<div class="beacon-mark">B<span>TRACK & REGISTER</span></div>'}</section><div class="unit-workspace"><section class="unit-schedule panel"><div class="section-title"><h2>오늘의 부서 일정</h2><span class="mono">KST / <span class="schedule-clock"></span></span></div><div class="day-track"></div><div class="schedule-slots"></div><p class="muted">비상 출동은 시간표와 별도로 표시합니다.${id === 'beacon' ? ' 보고 일정은 18:30까지이며 현장 상황에 따라 퇴근이 달라질 수 있습니다.' : ''}</p><button id="unit-emergency" class="subtle" data-staff-only>비상 출동</button></section><section class="unit-communications"><div class="briefing panel"><div class="section-title"><h2>부서 브리핑</h2><span class="status-dot"></span></div><div id="unit-briefing" aria-live="polite"></div><button id="brief-refresh" class="subtle">새 연락 수신 ↻</button></div></section></div><div class="section-title personnel-heading"><div><p class="eyebrow">${ent ? 'CREW PROFILES' : 'PERSONNEL DIRECTORY'}</p><h2>${ent ? '크루 구성원' : '소속 요원'}</h2></div><span class="muted">클릭하여 프로필 열람 · 좌우로 밀어 회전</span></div><div id="character-grid" class="character-grid"></div>${ent ? `<a class="wide-link" href="community.html?board=${id}"><span>OFFICIAL FAN BOARD</span><b>${t.name} 팬 커뮤니티 ↗</b></a>` : ''}`;
+    `<section class="unit-masthead" data-team="${id}"><div><span class="eyebrow">${ent ? 'OFFICIAL HUNTER CREW' : 'SENTINEL & GUIDE INTEGRATED ADMINISTRATION'}</span><h2>${t.en}</h2><p>${t.staff}</p><div class="unit-meta"><span>${unitLocations[id]}</span>${statusMarkup(id)}</div></div></section><div class="unit-workspace"><section class="unit-schedule panel"><div class="section-title"><h2>오늘의 부서 일정</h2><span class="mono">KST / <span class="schedule-clock"></span></span></div><div class="shift-focus" id="shift-focus"></div><div class="day-track"></div><div class="schedule-slots"></div><p class="muted">비상 출동은 시간표와 별도로 표시합니다.${id === 'beacon' ? ' 보고 일정은 18:30까지이며 현장 상황에 따라 퇴근이 달라질 수 있습니다.' : ''}</p><button id="unit-emergency" class="subtle" data-staff-only>비상 출동</button></section><section class="unit-communications"><div class="briefing panel"><div class="section-title"><h2>부서 브리핑</h2><span class="status-dot"></span></div><div id="unit-briefing" aria-live="polite"></div><button id="brief-refresh" class="subtle">새 연락 수신 ↻</button></div></section></div><div class="section-title personnel-heading"><div><p class="eyebrow">${ent ? 'CREW PROFILES' : 'PERSONNEL DIRECTORY'}</p><h2>${ent ? '크루 구성원' : '소속 요원'}</h2></div><span class="muted">클릭하여 프로필 열람 · 좌우로 밀어 회전</span></div><div id="character-grid" class="character-grid"></div>${ent ? `<a class="wide-link" href="community.html?board=${id}"><span>OFFICIAL FAN BOARD</span><b>${t.name} 팬 커뮤니티 ↗</b></a>` : ''}`;
   const list = characters.filter((c) => c.team === id);
   renderCards(list, $('#character-grid'));
   let emergency = false,
@@ -294,24 +294,40 @@ export function renderUnit(id) {
             `<span title="${formatMinutes(s)} ${label}" style="left:${s / 14.4}%;width:${(e - s) / 14.4}%" class="${a ? 'active' : 'rest'}"></span>`,
         )
         .join('') + `<i style="left:${now.minutes / 14.4}%" title="현재 시각"></i>`;
+    const current = slots.findIndex(([s, e]) => now.minutes >= s && now.minutes < e);
+    const showSlot = (index) => {
+      const [s, e, label, active] = slots[index];
+      $('#shift-focus').innerHTML =
+        `<span class="eyebrow">DISPATCH / ${String(index + 1).padStart(2, '0')} · ${index === current ? 'LIVE' : 'SCHEDULE'}</span><h3>${esc(label)}</h3><div><time>${formatMinutes(s)} — ${formatMinutes(e)}</time><span>${esc(unitLocations[id])}</span></div><progress aria-label="일정 진행" max="${e - s}" value="${Math.max(0, Math.min(e - s, now.minutes - s))}"></progress>`;
+      $$('.schedule-slot').forEach((el, i) => el.setAttribute('aria-pressed', String(i === index)));
+    };
     $('.schedule-slots').innerHTML = slots
       .map(
-        ([s, e, l]) =>
-          `<div class="schedule-slot ${now.minutes >= s && now.minutes < e ? 'current' : ''}"><time>${formatMinutes(s)}—${formatMinutes(e)}</time><span>${l}</span>${now.minutes >= s && now.minutes < e ? '<i>NOW</i>' : ''}</div>`,
+        ([s, e, l], i) =>
+          `<button class="schedule-slot ${i === current ? 'current' : ''}" data-slot="${i}" aria-pressed="false"><span class="slot-index">${String(i + 1).padStart(2, '0')}</span><time>${formatMinutes(s)}<small>${formatMinutes(e)}</small></time><span>${l}</span><i>${i === current ? 'LIVE' : '↗'}</i></button>`,
       )
       .join('');
+    $$('.schedule-slot').forEach((el, i) => (el.onclick = () => showSlot(i)));
+    showSlot(Math.max(0, current));
   }
   let briefCount = 0;
   function brief() {
     const a = status(id, emergency),
       p = list[briefCount++ % list.length];
-    const el = document.createElement('div');
+    const el = document.createElement('button');
+    el.type = 'button';
     el.className = 'brief-message incoming';
     el.innerHTML = `<img src="${p.portrait}" alt=""><div><small>${state.staff ? esc(personName(p)) : t.name + ' 상황실'} <time>${koreaTime().clock.slice(0, 5)}</time></small><p>${esc(voice(p, emergency || a.active))}</p></div>`;
+    el.onclick = () =>
+      openTransmission(
+        state.staff ? personName(p) : t.name + ' 상황실',
+        voice(p, emergency || a.active),
+        el,
+      );
     $('#unit-briefing').prepend(el);
     while ($('#unit-briefing').children.length > 2) $('#unit-briefing').lastChild.remove();
   }
-  $('#brief-refresh').onclick = brief;
+  $('#brief-refresh').onclick = () => requestTransmission($('#brief-refresh'), brief);
   $('#unit-emergency').onclick = () => {
     emergency = !emergency;
     const a = status(id, emergency);

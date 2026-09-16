@@ -11,6 +11,8 @@
   </head>
   <body>
     <canvas id="gate-particles" aria-hidden="true"></canvas>
+    <div class="intro-grain" aria-hidden="true"></div>
+    <div class="intro-scanline" aria-hidden="true"></div>
     <header class="intro-header">
       <a class="intro-brand" href="index.html"
         ><img src="assets/art/silver-emblem.webp" width="44" height="44" alt="SGIA" /><span
@@ -27,45 +29,41 @@
       </div>
     </header>
     <main class="threshold">
-      <div class="threshold-status">
-        <span><i></i> SECURE NETWORK AVAILABLE</span><time id="intro-clock"></time>
+      <div class="threshold-top">
+        <span><i></i> RESTRICTED NETWORK · 001</span
+        ><span>SEOUL HQ <time id="intro-clock"></time></span>
       </div>
-      <section class="entry-layout">
-        <div class="entry-copy">
-          <span class="threshold-label">SENTINEL & GUIDE<br />INTEGRATED ADMINISTRATION</span>
-          <h1>국가 각성자<br /><span>통합관리청</span></h1>
-          <p class="intro-subtitle">INTEGRATED OPERATIONS PORTAL</p>
-          <div class="entry-console">
-            <span class="entry-number">ACCESS GATEWAY / 01</span>
-            <h2>접속하시겠습니까?</h2>
-            <p>국가 각성자 통합관리청 정보서비스에 접속합니다.</p>
-            <a id="connect" class="connect-button" href="portal.html"
-              ><span>통합 포털 접속<small>ESTABLISH CONNECTION</small></span
-              ><b>↗</b></a
-            >
-            <div id="connection-log" class="connection-log">보안 채널 대기 · PUBLIC ACCESS</div>
-          </div>
+      <div class="gate-art" aria-hidden="true">
+        <div class="gate-orbit orbit-a"></div>
+        <div class="gate-orbit orbit-b"></div>
+        <div class="gate-orbit orbit-c"></div>
+        <div class="gate-aperture gate-core"><div></div></div>
+        <span class="gate-coordinate coordinate-a">37.5665° N<br />126.9780° E</span
+        ><span class="gate-coordinate coordinate-b">GATE ORIGIN<br />SIGNAL DETECTED</span
+        ><span class="gate-cross">＋</span>
+      </div>
+      <div class="threshold-copy">
+        <p class="threshold-label">SENTINEL & GUIDE<br />INTEGRATED ADMINISTRATION</p>
+        <h1>THE OTHER<br /><span>SIDE</span><em>OF ORDINARY.</em></h1>
+        <p class="threshold-korean">당신이 모르는 세계도,<br />당신의 세계입니다.</p>
+      </div>
+      <div class="entry-console">
+        <div class="entry-prompt">
+          <span class="entry-number">[ 01 — ACCESS REQUEST ]</span>
+          <h2>접속하시겠습니까?</h2>
+          <p>경계 너머의 기록이 당신을 기다립니다.</p>
         </div>
-        <div class="gate-visual" aria-hidden="true">
-          <div class="gate-fixed">
-            <div class="gate-orbit orbit-outer"></div>
-            <div class="gate-orbit orbit-middle"></div>
-            <div class="gate-orbit orbit-inner"></div>
-            <div class="gate-core">
-              <img src="assets/art/silver-emblem.webp" alt="" /><span>SGIA</span
-              ><small>IDENTITY VERIFIED</small>
-            </div>
-            <div class="orbit-label north">N / 00</div>
-            <div class="orbit-label east">90</div>
-            <div class="orbit-label south">180 / S</div>
-            <div class="orbit-label west">270</div>
-          </div>
-          <span class="gate-caption">INTEGRITY 100% <i></i> CHANNEL 01</span>
+        <a id="connect" href="portal.html" class="connect-button"
+          ><span class="connect-mark">↗</span
+          ><span>접속하기<small>ESTABLISH CONNECTION</small></span
+          ><span class="connect-indicator">●</span></a
+        >
+        <div class="connection-log" id="connection-log" role="status" aria-live="polite">
+          <span>SYS /</span> 외부인 열람 채널 대기 중<span class="blink">_</span>
         </div>
-      </section>
+      </div>
       <div class="threshold-bottom">
-        <span>SEOUL HEADQUARTERS</span><span>SYSTEM STATUS / NOMINAL</span
-        ><span>PROTOCOL SG—001</span>
+        <span>WE WATCH THE UNKNOWN.</span><span>SO YOU CAN LIVE THE ORDINARY.</span>
       </div>
     </main>
     <footer class="intro-footer">

@@ -141,3 +141,25 @@ additional
   .trim()
   .split('\n')
   .forEach((r) => registerCopy(...r.split('|')));
+[
+  [
+    '당신이 모르는 세계도,',
+    'Even the world you cannot see',
+    'あなたの知らない世界も、',
+    '你所不了解的世界，',
+  ],
+  ['당신의 세계입니다.', 'is part of yours.', 'あなたの世界の一部です。', '也是你的世界。'],
+  [
+    '경계 너머의 기록이 당신을 기다립니다.',
+    'Records beyond the boundary await you.',
+    '境界の先の記録が、あなたを待っています。',
+    '边界彼端的记录，等待你的到来。',
+  ],
+  ['접속하기', 'Connect', '接続する', '接入'],
+  [
+    '외부인 열람 채널 대기 중',
+    'Public access channel standing by',
+    '一般閲覧チャンネル待機中',
+    '公众阅览频道待命中',
+  ],
+].forEach((row) => registerCopy(...row));
