@@ -14,7 +14,7 @@ test('Briefing connects, decodes, and acknowledges the selected message', async 
 });
 test('Schedule entries select a dispatch and team logos are absent', async ({ page }) => {
   await page.goto('/beacon.html');
-  await expect(page.locator('.unit-masthead img,.beacon-mark')).toHaveCount(0);
+  await expect(page.locator('.unit-masthead img[alt$="로고"],.beacon-mark')).toHaveCount(0);
   const row = page.locator('.schedule-slot').last();
   await row.click();
   await expect(row).toHaveAttribute('aria-pressed', 'true');

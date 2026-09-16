@@ -1,3 +1,4 @@
+import { visualSignature, scanMarkup, openSequence } from './personnel-design.js';
 import { voice } from './voices.js';
 import { personName, language } from './i18n.js';
 import { listen, every, delay, onDispose, routeSignal } from './lifecycle.js';
@@ -43,7 +44,13 @@ export function renderDirectory(entertainment = false) {
     `<div class="directory-grid ${entertainment ? 'ent-directory' : ''}">${list
       .map(
         (t, i) =>
-          `<a href="${t.id}.html" class="directory-card" data-team="${t.id}"><span class="eyebrow">${entertainment ? (t.id === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND') : 'DIRECTORATE 0' + (i + 1)}</span><div class="directory-title"><h2>${t.name}<small>${t.department}</small></h2><span>↗</span></div><p>${t.staff}</p><div class="directory-meta"><span>${unitLocations[t.id]}</span>${statusMarkup(t.id)}</div><div class="avatar-stack">${characters
+          `<a href="${t.id}.html" class="directory-card" data-team="${t.id}"><span class="eyebrow">${entertainment ? (t.id === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND') : 'DIRECTORATE 0' + (i + 1)}</span><div class="directory-visual" aria-hidden="true"><span class="directory-number">0${i + 1}</span>${characters
+            .filter((c) => c.team === t.id)
+            .slice(0, 3)
+            .map((c) => `<img src="${c.portrait}" alt="" loading="lazy">`)
+            .join(
+              '',
+            )}<span class="directory-window-label">${t.en} / INDEX</span></div><div class="directory-title"><h2>${t.name}<small>${t.department}</small></h2><span>↗</span></div><p>${t.staff}</p><div class="directory-meta"><span>${unitLocations[t.id]}</span>${statusMarkup(t.id)}</div><div class="avatar-stack">${characters
             .filter((c) => c.team === t.id)
             .map((c) => `<img src="${c.portrait}" alt="" loading="lazy">`)
             .join(
@@ -60,9 +67,9 @@ export function detailImage(c) {
 function dossier(c) {
   if (!state.staff) return login(() => dossier(c));
   const historic = (c.gallery || []).filter((g) => /과거/.test(g.label));
-  modal(
+  const dialog = modal(
     c.code,
-    `<div class="dossier-layout"><div><img class="dossier-photo" src="${detailImage(c)}" alt="${esc(c.name)} 상세 프로필">${historic.length ? `<details class="past-record"><summary>과거 기록 이미지</summary>${historic.map((g) => `<figure><img src="${g.url}" alt="${esc(g.label)}" loading="lazy"><figcaption>${esc(g.label)}</figcaption></figure>`).join('')}</details>` : ''}</div><div><p class="eyebrow">${teams.find((t) => t.id === c.team).en} / PERSONNEL FILE</p><h3>${esc(personName(c))}${language() !== 'en' ? `<small class="fixed-code"> ${esc(c.code)}</small>` : ''}</h3><p>${esc(c.bio)}</p><dl class="facts">${[
+    `<section class="profile-stage" data-team="${c.team}"><div class="profile-filebar"><span>SGIA / ${esc(c.code)} / ${visualSignature(c).number}</span><span>${c.team === 'orpe' ? 'RESTRICTED / EYES ONLY' : 'PERSONNEL / VERIFIED'}</span></div><div class="profile-editorial-title" aria-hidden="true">${c.team === 'orpe' ? 'SEALED.' : ['lucky', 'obsidus'].includes(c.team) ? 'ON RECORD.' : 'PERSONNEL.'}</div><div class="dossier-layout"><div class="profile-visual"><div class="profile-photo-window"><span class="profile-windowbar">${esc(c.code)}.ID <i>IDENTITY / SCAN</i></span><img class="dossier-photo" src="${detailImage(c)}" alt="${esc(c.name)} 상세 프로필">${scanMarkup({ ...c, portrait: detailImage(c) })}</div><div class="profile-photo-index"><span class="barcode"></span><span>${visualSignature(c).number} / ${esc(c.code)}</span></div>${historic.length ? `<details class="past-record"><summary>과거 기록 이미지</summary>${historic.map((g) => `<figure><img src="${g.url}" alt="${esc(g.label)}" loading="lazy"><figcaption>${esc(g.label)}</figcaption></figure>`).join('')}</details>` : ''}</div><div class="profile-document"><p class="eyebrow">${teams.find((t) => t.id === c.team).en} / PERSONNEL FILE</p><h3>${esc(personName(c))}${language() !== 'en' ? `<small class="fixed-code"> ${esc(c.code)}</small>` : ''}</h3><p>${esc(c.bio)}</p><dl class="facts">${[
       ['등급', c.rank],
       ['나이', c.age + '세'],
       ['역할', c.role],
@@ -74,15 +81,16 @@ function dossier(c) {
       .map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`)
       .join(
         '',
-      )}</dl>${c.link ? `<a class="primary" href="${c.link}" target="_blank" rel="noopener noreferrer">캐릭터 접속 ↗</a>` : '<span class="coming-soon">COMING SOON</span>'}</div></div>`,
+      )}</dl>${c.link ? `<a class="primary" href="${c.link}" target="_blank" rel="noopener noreferrer">캐릭터 접속 ↗</a>` : '<span class="coming-soon">COMING SOON</span>'}<div class="profile-signature" aria-hidden="true">${esc(c.code)}<small>SGIA / FILE ${visualSignature(c).number}</small></div></div></div></section>`,
     c.team,
   );
+  openSequence(dialog, c);
 }
 export function renderCards(list, target) {
   target.innerHTML = list
     .map(
       (c, i) =>
-        `<article class="person-card" data-team="${c.team}" data-character="${c.id}" style="--order:${i}"><div class="card-tilt"><button class="card-turner" aria-label="${esc(personName(c))} 프로필 열람. 좌우 스와이프 또는 방향키로 회전" aria-pressed="false"><span class="card-rotator"><span class="card-face front" aria-hidden="false"><span class="id-card-head"><img src="assets/art/silver-emblem.webp" alt=""><span>${c.team === 'orpe' ? 'CLASSIFIED / ORPÉ' : 'SGIA / ' + teams.find((t) => t.id === c.team).en}</span><span>${state.staff ? esc(c.rank) : 'PUBLIC'}</span></span><span class="id-photo"><img src="${c.portrait}" alt="${state.staff ? esc(c.name) : '신원 비공개'}" draggable="false" loading="lazy">${!state.staff ? '<span class="redaction-label">IDENTITY PROTECTED</span>' : ''}</span><span class="id-caption"><small>${state.staff ? esc(c.role) : 'PERSONNEL RECORD'}</small><span class="person-title"><strong class="card-code">${esc(personName(c))}</strong>${language() !== 'en' ? `<span class="fixed-code" data-no-translate>${esc(c.code)}</span>` : ''}</span></span><span class="id-card-foot"><span class="barcode"></span><small>SG / ${String(i + 1).padStart(3, '0')}</small><span>↔ FLIP</span></span><span class="hologram"></span></span><span class="card-face back" aria-hidden="true"><span class="eyebrow">${state.staff ? 'INTERNAL RECORD' : 'PUBLIC RECORD'}</span><img class="back-emblem" src="assets/art/silver-emblem.webp" alt=""><strong>${esc(c.code)}</strong><p>${state.staff ? esc(c.role) : '개인 식별 정보는 직원 채널에서 열람하십시오.'}</p><dl><dt>소속</dt><dd>${teams.find((t) => t.id === c.team).name}</dd>${state.staff ? `<dt>능력</dt><dd>${esc(c.ability)}</dd>` : ''}</dl><span class="back-bottom">SGIA · AUTHORIZED RECORD</span></span></span><span class="hold-meter"></span></button></div></article>`,
+        `<article class="person-card" data-team="${c.team}" data-character="${c.id}" data-visual="${visualSignature(c).mode}" style="--order:${i};--identity-angle:${visualSignature(c).angle}deg;--signal-delay:-${visualSignature(c).number % 9}s"><div class="card-tilt"><button class="card-turner" aria-label="${esc(personName(c))} 프로필 열람. 좌우 스와이프 또는 방향키로 회전" aria-pressed="false"><span class="card-rotator"><span class="card-face front" aria-hidden="false"><span class="id-card-head"><img src="assets/art/silver-emblem.webp" alt=""><span>${c.team === 'orpe' ? 'CLASSIFIED / ORPÉ' : 'SGIA / ' + teams.find((t) => t.id === c.team).en}</span><span>${state.staff ? esc(c.rank) : 'PUBLIC'}</span></span><span class="card-index" aria-hidden="true">${String(i + 1).padStart(2, '0')}<small>FILE / ${visualSignature(c).number}</small></span><span class="id-photo"><img src="${c.portrait}" alt="${state.staff ? esc(c.name) : '신원 비공개'}" draggable="false" loading="lazy">${scanMarkup(c)}${!state.staff ? '<span class="redaction-label">IDENTITY PROTECTED</span>' : ''}</span><span class="id-caption"><small>${state.staff ? esc(c.role) : 'PERSONNEL RECORD'}</small><span class="person-title"><strong class="card-code">${esc(personName(c))}</strong>${language() !== 'en' ? `<span class="fixed-code" data-no-translate>${esc(c.code)}</span>` : ''}</span></span><span class="id-card-foot"><span class="barcode"></span><small>SG / ${String(i + 1).padStart(3, '0')}</small><span>↔ FLIP</span></span><span class="hologram"></span></span><span class="card-face back" aria-hidden="true"><span class="eyebrow">${state.staff ? 'INTERNAL RECORD' : 'PUBLIC RECORD'}</span><img class="back-emblem" src="assets/art/silver-emblem.webp" alt=""><strong>${esc(c.code)}</strong><p>${state.staff ? esc(c.role) : '개인 식별 정보는 직원 채널에서 열람하십시오.'}</p><dl><dt>소속</dt><dd>${teams.find((t) => t.id === c.team).name}</dd>${state.staff ? `<dt>능력</dt><dd>${esc(c.ability)}</dd>` : ''}</dl><span class="back-bottom">SGIA · AUTHORIZED RECORD</span></span></span><span class="hold-meter"></span></button></div></article>`,
     )
     .join('');
   $$('.person-card', target).forEach((card) => {
@@ -276,7 +284,13 @@ export function renderUnit(id) {
       t.name,
       ent ? unitLocations[id] : t.department,
     ) +
-    `<section class="unit-masthead" data-team="${id}"><div><span class="eyebrow">${ent ? 'OFFICIAL HUNTER CREW' : 'SENTINEL & GUIDE INTEGRATED ADMINISTRATION'}</span><h2>${t.en}</h2><p>${t.staff}</p><div class="unit-meta"><span>${unitLocations[id]}</span>${statusMarkup(id)}</div></div></section><div class="unit-workspace"><section class="unit-schedule panel"><div class="section-title"><h2>오늘의 부서 일정</h2><span class="mono">KST / <span class="schedule-clock"></span></span></div><div class="shift-focus" id="shift-focus"></div><div class="day-track"></div><div class="schedule-slots"></div><p class="muted">비상 출동은 시간표와 별도로 표시합니다.${id === 'beacon' ? ' 보고 일정은 18:30까지이며 현장 상황에 따라 퇴근이 달라질 수 있습니다.' : ''}</p><button id="unit-emergency" class="subtle" data-staff-only>비상 출동</button></section><section class="unit-communications"><div class="briefing panel"><div class="section-title"><h2>부서 브리핑</h2><span class="status-dot"></span></div><div id="unit-briefing" aria-live="polite"></div><button id="brief-refresh" class="subtle">새 연락 수신 ↻</button></div></section></div><div class="section-title personnel-heading"><div><p class="eyebrow">${ent ? 'CREW PROFILES' : 'PERSONNEL DIRECTORY'}</p><h2>${ent ? '크루 구성원' : '소속 요원'}</h2></div><span class="muted">클릭하여 프로필 열람 · 좌우로 밀어 회전</span></div><div id="character-grid" class="character-grid"></div>${ent ? `<a class="wide-link" href="community.html?board=${id}"><span>OFFICIAL FAN BOARD</span><b>${t.name} 팬 커뮤니티 ↗</b></a>` : ''}`;
+    `<section class="unit-masthead" data-team="${id}"><div><span class="eyebrow">${ent ? 'OFFICIAL HUNTER CREW' : 'SENTINEL & GUIDE INTEGRATED ADMINISTRATION'}</span><h2>${t.en}<span class="masthead-index">${String(teams.indexOf(t) + 1).padStart(2, '0')}</span></h2><p>${t.staff}</p><div class="unit-meta"><span>${unitLocations[id]}</span>${statusMarkup(id)}</div></div><div class="unit-contact-sheet" aria-hidden="true">${characters
+      .filter((c) => c.team === id)
+      .slice(0, 3)
+      .map((c) => `<span><img src="${c.portrait}" alt=""><b>${esc(c.code)}</b></span>`)
+      .join(
+        '',
+      )}</div></section><div class="unit-workspace"><section class="unit-schedule panel"><div class="section-title"><h2>오늘의 부서 일정</h2><span class="mono">KST / <span class="schedule-clock"></span></span></div><div class="shift-focus" id="shift-focus"></div><div class="day-track"></div><div class="schedule-slots"></div><p class="muted">비상 출동은 시간표와 별도로 표시합니다.${id === 'beacon' ? ' 보고 일정은 18:30까지이며 현장 상황에 따라 퇴근이 달라질 수 있습니다.' : ''}</p><button id="unit-emergency" class="subtle" data-staff-only>비상 출동</button></section><section class="unit-communications"><div class="briefing panel"><div class="section-title"><h2>부서 브리핑</h2><span class="status-dot"></span></div><div id="unit-briefing" aria-live="polite"></div><button id="brief-refresh" class="subtle">새 연락 수신 ↻</button></div></section></div><div class="section-title personnel-heading"><div><p class="eyebrow">${ent ? 'CREW PROFILES' : 'PERSONNEL DIRECTORY'}</p><h2>${ent ? '크루 구성원' : '소속 요원'}</h2></div><span class="muted">클릭하여 프로필 열람 · 좌우로 밀어 회전</span></div><div id="character-grid" class="character-grid"></div>${ent ? `<a class="wide-link" href="community.html?board=${id}"><span>OFFICIAL FAN BOARD</span><b>${t.name} 팬 커뮤니티 ↗</b></a>` : ''}`;
   const list = characters.filter((c) => c.team === id);
   renderCards(list, $('#character-grid'));
   let emergency = false,
