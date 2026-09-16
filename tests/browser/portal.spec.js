@@ -51,19 +51,20 @@ test('Login cancellation stays public, staff persists across pages, photo roles 
   await page.waitForTimeout(150);
   await expect(page.locator('body')).toHaveAttribute('data-viewer', 'public');
   await login(page);
-  await card.locator('.card-turner').click();
+  await card.locator('.card-turner').focus();
+  await page.keyboard.press('ArrowRight');
   await expect(card.locator('.front')).toHaveAttribute('aria-hidden', 'true');
   await expect(card.locator('.back')).toHaveAttribute('aria-hidden', 'false');
   expect(await card.locator('.front').evaluate((e) => getComputedStyle(e).backfaceVisibility)).toBe(
     'hidden',
   );
-  await card.locator('[data-dossier]').click();
+  await card.locator('.card-turner').click();
   expect(await page.locator('.dossier-photo').getAttribute('src')).not.toBe(front);
   await expect(page.locator('[data-gallery]')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await page.goto('/origin.html');
   await expect(page.locator('body')).toHaveAttribute('data-viewer', 'staff');
-  await expect(page.locator('[data-character="bug"] .card-code')).toHaveText('BUG');
+  await expect(page.locator('[data-character="bug"] .fixed-code')).toHaveText('BUG');
   await page.locator('#viewer-toggle').click();
   await expect(page.locator('body')).toHaveAttribute('data-viewer', 'public');
 });

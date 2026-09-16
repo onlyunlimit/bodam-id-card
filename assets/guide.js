@@ -1,3 +1,6 @@
+import { tr } from './i18n.js';
+import { floorPlans } from './floor-plans.js';
+import { listen, every, delay, onDispose, routeSignal } from './lifecycle.js';
 import { $, $$, esc, state, heading, login, modal, toast } from './runtime.js';
 export const floors = [
   ['8F', '중앙 통제 본부', '최고 의사결정 · 전투 투입 승인', true],
@@ -19,20 +22,40 @@ export const floors = [
   ['B9', '극비 실험 구역', '접근 제한 연구', true],
   ['B10', '비공식 수용 구역', '비공식 수용 기록', true],
 ];
-export function renderHeadquarters() {
+export function renderHeadquarters(target = $('#main')) {
   let selected = '2F';
-  $('#main').innerHTML =
+  target.innerHTML =
     heading(
       'HEADQUARTERS / SPATIAL DIRECTORY',
       '각성관 층별 안내',
       '지상 8층 · 지하 10층의 통합 청사. 층을 선택해 시설과 배치 부서를 확인하십시오.',
     ) +
-    `<div class="building-layout"><section class="building-section panel"><div class="section-title"><h2>청사 단면도</h2><span class="mono">SECTION A—A</span></div><div class="building-floor-list">${floors.map(([f, n, d, access]) => `<button class="floor-row" data-floor="${f}" data-underground="${f.startsWith('B')}" aria-pressed="${f === selected}"><b>${f}</b><span class="floor-slab"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span>${access === true && !state.staff ? '제한 시설' : n}</span>${typeof access === 'string' ? '<em>' + access.toUpperCase() + '</em>' : ''}</button>`).join('')}</div><p class="muted">설정에 따른 개념 단면도 · 실제 평면·축척이 아닙니다.</p></section><aside><section class="floor-detail panel" id="floor-detail"></section><section class="panel assignment-note"><p class="eyebrow">UNIT ASSIGNMENTS</p><h2>부서 배치</h2><a href="beacon.html"><b>비콘</b><span>2F · 추적관리 사무실 ↗</span></a><a href="origin.html"><b>오리진</b><span>B4 생활 / B7 기록 ↗</span></a><a href="shield.html"><b>실드</b><span>각성관 · 전용 층 미지정 ↗</span></a><a href="entertainment.html"><b>헌터 크루</b><span>각성관 생활 · 전용 층 미지정 ↗</span></a><small>실드와 크루의 전용 층은 공개 설정에 지정되지 않았습니다. 훈련·행정 시설은 용도별로 표시합니다.</small></section></aside></div>`;
+    `<div class="building-layout"><section class="building-section panel"><div class="section-title"><h2>청사 단면도</h2><span class="mono">SECTION A—A</span></div><div class="building-floor-list">${floors.map(([f, n, d, access]) => `<button class="floor-row" data-floor="${f}" data-underground="${f.startsWith('B')}" aria-pressed="${f === selected}"><b>${f}</b><span class="floor-slab"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span>${access === true && !state.staff ? '제한 시설' : n}</span>${typeof access === 'string' ? '<em>' + access.toUpperCase() + '</em>' : ''}</button>`).join('')}</div><p class="muted">FACILITY PLAN / NOT TO SCALE</p></section><aside><section class="floor-detail panel" id="floor-detail"></section><section class="panel assignment-note"><p class="eyebrow">UNIT ASSIGNMENTS</p><h2>부서 배치</h2><a href="beacon.html"><b>비콘</b><span>2F · 추적관리 사무실 ↗</span></a><a href="origin.html"><b>오리진</b><span>B4 생활 / B7 기록 ↗</span></a><a href="shield.html"><b>실드</b><span>각성관 · 전용 층 미지정 ↗</span></a><a href="entertainment.html"><b>헌터 크루</b><span>각성관 생활 · 전용 층 미지정 ↗</span></a><small>실드와 크루의 전용 층은 공개 설정에 지정되지 않았습니다. 훈련·행정 시설은 용도별로 표시합니다.</small></section></aside></div>`;
   function show() {
     const [f, n, d, a] = floors.find((x) => x[0] === selected),
       locked = a === true && !state.staff;
     $('#floor-detail').innerHTML =
-      `<span class="eyebrow">FACILITY DIRECTORY</span><strong class="floor-number">${f}</strong><h2>${locked ? '접근 제한 시설' : n}</h2><div class="floor-plan" aria-label="선택 층의 개념 구획"><div>CORE</div><div>${locked ? 'RESTRICTED' : typeof a === 'string' ? a.toUpperCase() : 'OPERATIONS'}</div><div>ACCESS</div></div><p>${locked ? '직원 채널에서 시설 분류를 열람할 수 있습니다.' : d}</p>${locked ? '<button id="floor-login" class="primary">직원 열람</button>' : typeof a === 'string' ? `<a class="primary" href="${a}.html">부서 페이지 ↗</a>` : '<span class="badge">SGIA FACILITY</span>'}`;
+      `<span class="eyebrow">FACILITY DIRECTORY</span><strong class="floor-number">${f}</strong><h2>${locked ? '접근 제한 시설' : n}</h2><div class="floor-plan detailed-plan" data-plan="${f}" aria-label="${f} 실내 배치도"><span class="plan-compass">N ↑</span><span class="plan-corridor"></span>${locked ? '<div class="plan-locked">RESTRICTED / ACCESS REQUIRED</div>' : floorPlans[f].map(([room, x, y, w, h], i) => `<button class="plan-room" data-room="${i}" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%"><small>${f}-${String(i + 1).padStart(2, '0')}</small><span>${esc(room)}</span><i></i></button>`).join('')}<span class="plan-scale">0 ━━━ 10m / SCHEMATIC</span></div><p>${locked ? '직원 채널에서 시설 분류를 열람할 수 있습니다.' : d}</p>${locked ? '<button id="floor-login" class="primary">직원 열람</button>' : typeof a === 'string' ? `<a class="primary" href="${a}.html">부서 페이지 ↗</a>` : '<span class="badge">SGIA FACILITY</span>'}`;
+    $$('[data-room]').forEach(
+      (b) =>
+        (b.onclick = () => {
+          const room = floorPlans[f][Number(b.dataset.room)][0];
+          modal(
+            f + ' / ' + room,
+            '<div class="room-file"><p class="eyebrow">FACILITY ACCESS / ' +
+              f +
+              '</p><h3>' +
+              esc(room) +
+              '</h3><p>' +
+              esc(d) +
+              '</p><dl class="facts"><div><dt>출입 구분</dt><dd>' +
+              (a === true ? 'LEVEL 4 · STAFF' : 'LEVEL 2 · ESCORT') +
+              '</dd></div><div><dt>담당 구역</dt><dd>' +
+              esc(n) +
+              '</dd></div></dl><p>방문 시 해당 층 안내 데스크를 통해 담당자에게 연락하십시오.</p></div>',
+          );
+        }),
+    );
     $('#floor-login')?.addEventListener('click', () => login(show));
     $$('[data-floor]').forEach((b) =>
       b.setAttribute('aria-pressed', String(b.dataset.floor === selected)),
@@ -46,7 +69,7 @@ export function renderHeadquarters() {
       }),
   );
   show();
-  document.addEventListener('sgia:viewer', () => {
+  listen(document, 'sgia:viewer', () => {
     show();
     $$('[data-floor]').forEach((b) => {
       const f = floors.find((x) => x[0] === b.dataset.floor);
@@ -80,7 +103,7 @@ export const guideEntries = [
     'awakened',
     '각성자',
     'AWAKENED PERSONNEL',
-    '이능력을 지닌 극소수의 인간. 모든 각성자는 의무 등록 대상이며 미등록 상태는 세계관 법률상 불법이다.',
+    '이능력을 지닌 극소수의 인간. 모든 각성자는 의무 등록 대상이며 미등록 상태는 법률상 불법이다.',
     '일정 등급 이상은 이동과 직업에 제한을 받으며 임무 거부 시 처벌될 수 있다. 법적 국민의 지위와 국가 자산으로서의 취급 사이에 긴장이 존재한다.',
   ],
   [
@@ -194,7 +217,9 @@ export function renderManual() {
       )}</tbody></table></div><p class="muted">개별 인물의 SS·ERROR 표기는 원본 프로필의 별도 표기를 유지합니다.</p></div></section><section class="guide-entry" id="commands" data-search="명령어 OOC 메세지 단톡방 출력 게이트"><span class="guide-number">16</span><div><p class="eyebrow">CHARACTER CHAT COMMANDS</p><h2>명령어</h2><p>캐릭터 대화창에서 사용하는 명령어입니다. 홈페이지에서는 복사만 수행합니다.</p><div class="command-list">${commands.map(([cmd, d]) => `<button data-copy="${esc(cmd)}"><code>${esc(cmd)}</code><span>${d}</span><small>복사 ↗</small></button>`).join('')}</div><p>여러 명령어를 혼합할 수 있습니다. /html을 함께 입력하면 HTML 출력 반영을 요청할 수 있습니다.</p></div></section><p id="manual-empty" hidden>검색 결과가 없습니다.</p></div></div>`;
   const filter = () => {
     const q = $('#manual-search').value.trim().toLowerCase();
-    $$('[data-search]').forEach((e) => (e.hidden = !e.dataset.search.toLowerCase().includes(q)));
+    $$('[data-search]').forEach(
+      (e) => (e.hidden = !(e.dataset.search + ' ' + e.textContent).toLowerCase().includes(q)),
+    );
     $('#manual-empty').hidden = $$('[data-search]').some((e) => !e.hidden);
   };
   $('#manual-search').oninput = filter;

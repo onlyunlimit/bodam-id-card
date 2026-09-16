@@ -20,3 +20,18 @@
 - 지도: OpenStreetMap 타일 + Leaflet, 지도에 출처 표시
 - 레이더·날씨·시각·구조도: 수치와 연동한 SVG/CSS UI
 - Leaflet BSD 2-Clause 고지는 `assets/vendor/leaflet.js` 첫머리에 포함
+
+## 2026-09 UI 이미지 키트
+
+생성된 배경/건축 그림은 사용하지 않습니다. 사용자가 요청한 한 장의 UI 시트를 내장 image_gen으로 생성하고, Pillow로 셀별 자르기·WebP 저장만 수행했습니다. 생성 원본은 Codex generated_images 폴더에 보존합니다.
+
+- `assets/art/silver-emblem.webp`: 실버 SGIA 문장, 헤더·인트로·사원증
+- `assets/art/footprints.webp`: 추적 지도 발자국
+- `assets/art/dossier-tab.webp`: 사건 문서의 금속 파일 탭
+- `assets/art/tuning-dial.webp`: 드래그/키보드 주파수 다이얼
+- `assets/art/community-icon.webp`: 게시판·독립 메신저 패널 아이콘
+- `assets/art/resolved-seal.webp`: 영문 종결 도장
+
+생성 요청: 1536×1024, 3×2 UI sprite sheet; polished silver titanium SGIA shield monogram, forensic shoe soles, slim dossier tab with barcode, precision radio tuning dial, community speech bubble, crimson RESOLVED seal. Separate assets and gutters; front-on, refined intelligence-agency styling; no scenes, architecture or wallpaper. Generated backgrounds are contained within cropped UI components. Live labels, controls and diagram room text remain HTML for interaction, accessibility and localization.
+
+기존 `assets/emblem.svg`는 레거시 링크 호환용으로 유지합니다. 새 포털의 문장은 위 WebP를 사용합니다.

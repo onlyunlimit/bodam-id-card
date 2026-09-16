@@ -14,6 +14,7 @@ globalThis.fetch = async (url, ...args) =>
 async function fixture() {
   const sql = new DatabaseSync(':memory:');
   sql.exec(readFileSync(new URL('../migrations/0001.sql', import.meta.url), 'utf8'));
+  sql.exec(readFileSync(new URL('../migrations/0002_likes.sql', import.meta.url), 'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -230,4 +231,25 @@ test('Visitor count deduplicates IP per KST day and cleanup expires private logs
   assert.equal(sql.prepare('SELECT count(*) n FROM access_logs').get().n, 0);
   assert.equal((await req('/visitors')).data.total, 2);
   assert.equal((await req('/posts/' + created.data.id)).status, 200);
+});
+
+test('Likes are idempotent per network, reversible, origin protected and unavailable for deleted posts', async () => {
+  const { req, post } = await fixture();
+  const created = await req('/posts', 'POST', post);
+  const id = created.data.id;
+  assert.equal(
+    (await req('/posts/' + id + '/like', 'POST', { liked: true }, { origin: 'https://evil.test' }))
+      .status,
+    403,
+  );
+  assert.equal((await req('/posts/' + id + '/like', 'POST', { liked: true })).data.likes, 1);
+  assert.equal((await req('/posts/' + id + '/like', 'POST', { liked: true })).data.likes, 1);
+  assert.equal(
+    (await req('/posts/' + id + '/like', 'POST', { liked: true }, { ip: '192.0.2.88' })).data.likes,
+    2,
+  );
+  assert.equal((await req('/posts/' + id)).data.post.liked, true);
+  assert.equal((await req('/posts/' + id + '/like', 'POST', { liked: false })).data.likes, 1);
+  await req('/posts/' + id, 'DELETE', { password: '0123', captcha: 'verified' });
+  assert.equal((await req('/posts/' + id + '/like', 'POST', { liked: true })).status, 404);
 });

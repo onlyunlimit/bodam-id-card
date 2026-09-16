@@ -535,3 +535,39 @@ html[data-motion='off'] .connecting .connection-overlay {
     font-size: 7px;
   }
 }
+
+.language-controls {
+  display: flex;
+  gap: 3px;
+}
+.language-controls button {
+  font-size: 10px;
+  padding: 5px 8px;
+  min-height: 26px;
+}
+.language-controls [aria-pressed='true'] {
+  background: #9fbdc233;
+  color: #fff;
+}
+.intro-brand img,
+.gate-core img,
+.connection-overlay img {
+  border-radius: 14px;
+  object-fit: cover;
+}
+.gate-core img {
+  width: 90px;
+  height: 100px;
+}
+@media (max-width: 600px) {
+  .intro-controls {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 5px;
+    max-width: 180px;
+  }
+  .language-controls button {
+    font-size: 9px;
+    padding: 4px 6px;
+  }
+}

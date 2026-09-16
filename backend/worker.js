@@ -43,7 +43,9 @@ async function body(request) {
       bytes.set(c, offset);
       offset += c.length;
     }
-    return JSON.parse(new TextDecoder().decode(bytes));
+    const parsed = JSON.parse(new TextDecoder().decode(bytes));
+    if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') throw Error();
+    return parsed;
   } catch {
     throw new HTTPError(400, '잘못된 요청입니다.');
   }
@@ -316,12 +318,39 @@ async function handle(request, env) {
     const { hash } = await identity(request, env);
     await rate(env, 'read:' + hash, 120, 60);
   }
+  const likeMatch = path.match(/^\/posts\/([a-f0-9-]{36})\/like$/);
+  if (likeMatch && method === 'POST') {
+    const { ip, hash } = await identity(request, env);
+    await blocked(env, hash);
+    await rate(env, 'like:' + hash, 30, 60);
+    const data = await body(request);
+    if (typeof data.liked !== 'boolean') throw new HTTPError(400, '좋아요 상태를 확인해 주세요.');
+    const post = await env.DB.prepare(
+      'SELECT id FROM posts WHERE id=? AND hidden=0 AND deleted_at IS NULL',
+    )
+      .bind(likeMatch[1])
+      .first();
+    if (!post) throw new HTTPError(404, '게시물이 없거나 숨김 처리되었습니다.');
+    const voter = await hmac(env.IP_KEY, 'like:' + post.id + ':' + ip);
+    if (data.liked)
+      await env.DB.prepare('INSERT OR IGNORE INTO post_likes(post_id,voter) VALUES (?,?)')
+        .bind(post.id, voter)
+        .run();
+    else
+      await env.DB.prepare('DELETE FROM post_likes WHERE post_id=? AND voter=?')
+        .bind(post.id, voter)
+        .run();
+    const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM post_likes WHERE post_id=?')
+      .bind(post.id)
+      .first();
+    return json({ liked: data.liked, likes: count.n });
+  }
   if (path === '/posts' && method === 'GET') {
     const b = board(url.searchParams.get('board')),
       offset = Math.max(0, Math.min(100000, Number(url.searchParams.get('offset')) || 0)),
       search = (url.searchParams.get('q') || '').slice(0, 60);
     const { results } = await env.DB.prepare(
-      `SELECT ${postFields},(SELECT COUNT(*) FROM comments c WHERE c.post_id=p.id AND c.hidden=0 AND c.deleted_at IS NULL) AS comments FROM posts p WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL AND (p.title LIKE ? ESCAPE '\\' OR p.body LIKE ? ESCAPE '\\') ORDER BY p.created_at DESC LIMIT 21 OFFSET ?`,
+      `SELECT ${postFields},(SELECT COUNT(*) FROM comments c WHERE c.post_id=p.id AND c.hidden=0 AND c.deleted_at IS NULL) AS comments,(SELECT COUNT(*) FROM post_likes l WHERE l.post_id=p.id) AS likes FROM posts p WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL AND (p.title LIKE ? ESCAPE '\\' OR p.body LIKE ? ESCAPE '\\') ORDER BY p.created_at DESC LIMIT 21 OFFSET ?`,
     )
       .bind(
         b,
@@ -348,7 +377,15 @@ async function handle(request, env) {
     )
       .bind(row.id)
       .all();
-    return json({ post: row, comments: results });
+    const { ip } = await identity(request, env);
+    const voter = await hmac(env.IP_KEY, 'like:' + row.id + ':' + ip);
+    const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM post_likes WHERE post_id=?')
+      .bind(row.id)
+      .first();
+    const liked = await env.DB.prepare('SELECT post_id FROM post_likes WHERE post_id=? AND voter=?')
+      .bind(row.id, voter)
+      .first();
+    return json({ post: { ...row, likes: count.n, liked: !!liked }, comments: results });
   }
   if ((path === '/posts' || match) && ['POST', 'PATCH', 'DELETE'].includes(method)) {
     const { ip, hash } = await identity(request, env);
@@ -477,6 +514,7 @@ export default {
     h.set('X-Content-Type-Options', 'nosniff');
     h.set('Referrer-Policy', 'no-referrer');
     h.set('X-Frame-Options', 'DENY');
+    h.set('X-Robots-Tag', 'noindex, nofollow');
     if (!url.pathname.startsWith('/admin') && request.headers.get('Origin') === env.PUBLIC_ORIGIN) {
       h.set('Access-Control-Allow-Origin', env.PUBLIC_ORIGIN);
       h.set('Vary', 'Origin');
@@ -495,6 +533,9 @@ export default {
       env.DB.prepare('DELETE FROM blocks WHERE expires<?').bind(time),
       env.DB.prepare('DELETE FROM visitor_keys WHERE day<?').bind(cutoff),
       env.DB.prepare('DELETE FROM audit WHERE created_at<?').bind(time - 90 * 86400000),
+      env.DB.prepare(
+        'DELETE FROM post_likes WHERE post_id IN (SELECT id FROM posts WHERE deleted_at IS NOT NULL)',
+      ),
     ]);
   },
 };

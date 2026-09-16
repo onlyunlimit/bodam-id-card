@@ -1,4 +1,6 @@
 import { chirp } from './audio.js';
+import { translateDOM, language, setLanguage, tr } from './i18n.js';
+import { serviceConfig } from './service-config.js';
 import { koreaTime } from './model.js';
 export const $ = (s, root = document) => root.querySelector(s);
 export const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -38,8 +40,11 @@ export function toast(message) {
 export function modal(title, html, kind = '') {
   const d = $('#document-dialog');
   d.dataset.kind = kind;
+  logActivity(title, 'OPEN');
+  $('#document-title').toggleAttribute('data-user-content', kind === 'community-post');
   $('#document-title').textContent = title;
   $('#document-body').innerHTML = html;
+  translateDOM(d);
   if (!d.open) d.showModal();
   return d;
 }
@@ -52,7 +57,7 @@ export function login(callback = null) {
   }
   afterLogin = callback;
   $('#login-submit').disabled = false;
-  $('#login-progress').textContent = 'STAFF-001 / 발급된 체험 사원증';
+  $('#login-progress').textContent = 'STAFF-001 / 발급된 사원증';
   $('#staff-login').showModal();
 }
 export function applyViewer() {
@@ -81,16 +86,47 @@ export function initShell(title, page) {
   const links = [
     ['portal', '통합 관제', 'overview'],
     ['departments', '조직·부서', 'departments'],
-    ['headquarters', '각성관 안내', 'headquarters'],
     ['entertainment', '엔터테인먼트', 'entertainment'],
     ['records', '사건 기록실', 'records'],
-    ['orpe', '위협 정보', 'orpe'],
     ['manual', '세계관 안내서', 'manual'],
     ['community', '커뮤니티', 'community'],
   ];
   $('#app').innerHTML =
-    `<div class="agency-strip"><span>SGIA · 국가 각성자 통합관리청</span><span id="access-label"></span><span class="mono" id="shell-clock"></span></div><header class="site-header"><a class="brand" href="portal.html"><img src="assets/emblem.svg" width="46" height="46" alt="SGIA 문장"><span><b>SGIA</b><small>국가 각성자 통합관리청</small></span></a><div class="header-controls"><button id="sound-toggle" aria-pressed="false" aria-label="BGM 켜기">♫ <span>BGM OFF</span></button><button id="viewer-toggle" aria-pressed="false"><span id="viewer-label"></span></button><button id="theme-toggle" aria-label="라이트모드로 전환">◐</button><button id="motion-toggle" aria-pressed="false">모션 ON</button></div></header><nav class="site-nav" aria-label="주요 메뉴">${links.map(([href, label, id]) => `<a href="${href}.html" ${page === id ? 'aria-current="page"' : ''}>${label}</a>`).join('')}</nav><div class="staff-ribbon" data-staff-only><span><i class="status-dot"></i> 사내 통합망 연결</span><span>STAFF-001 · SEOUL HQ</span><button id="network-log">접속 로그 ↗</button></div><main id="main"></main><footer class="site-footer"><div class="footer-top"><a class="brand" href="portal.html"><img src="assets/emblem.svg" width="36" height="36" alt=""><b>SGIA</b></a><div class="footer-links"><a href="manual.html">세계관 안내</a><a href="community.html#privacy">개인정보·운영 안내</a><a href="index.html">접속 대기실</a></div><div id="visitor-count" class="visitor-count" aria-live="polite"><span>VISITORS</span><b>—</b><small>집계 연결 대기</small></div></div><p>onlyunlimit 창작 세계관 · 실제 국가기관이 아닙니다. 직원 채널은 체험용이며 관리자 인증과 별개입니다.<br>사건·게이트·메신저·브리핑은 가상 연출입니다. 지도·서울 날씨·시각은 현실 자료를 사용합니다.</p></footer><div id="cursor-radar" aria-hidden="true"><i></i><span></span></div><div id="toast" role="status" aria-live="polite"></div><dialog id="staff-login" aria-labelledby="login-title"><button data-close class="close-button" aria-label="로그인 취소">×</button><p class="eyebrow">INTERNAL ACCESS / SGIA</p><h2 id="login-title">직원 채널 접속</h2><p>사원증을 태그하여 내부 업무 화면으로 전환합니다.</p><div class="login-badge"><img src="assets/emblem.svg" width="60" alt=""><strong>SGIA STAFF<small>본부 체험 사원증 / 001</small></strong><span class="barcode"></span></div><p id="login-progress" role="status"></p><button id="login-submit" class="primary">사원증 태그 · 접속</button><small class="muted">실제 인증이 없는 세계관 체험입니다.</small></dialog><dialog id="document-dialog" aria-labelledby="document-title"><button data-close class="close-button" aria-label="문서 닫기">×</button><h2 id="document-title"></h2><div id="document-body"></div></dialog>`;
+    `<div class="agency-strip"><span>SGIA · 국가 각성자 통합관리청</span><span id="access-label"></span><span class="mono" id="shell-clock"></span></div><header class="site-header"><a class="brand" href="portal.html"><img src="assets/art/silver-emblem.webp" width="46" height="46" alt="SGIA 문장"><span><b>SGIA</b><small>국가 각성자 통합관리청</small></span></a><div class="header-controls"><div class="language-controls" role="group" aria-label="Language"><button data-lang="ko" aria-pressed="false">한국어</button><button data-lang="en" aria-pressed="false">EN</button><button data-lang="ja" aria-pressed="false">日本語</button><button data-lang="zh" aria-pressed="false">中文</button></div><button id="sound-toggle" aria-pressed="false" aria-label="BGM 켜기">♫ <span>BGM OFF</span></button><button id="viewer-toggle" aria-pressed="false"><span id="viewer-label"></span></button><button id="theme-toggle" aria-label="라이트모드로 전환">◐</button><button id="motion-toggle" aria-pressed="false">모션 ON</button></div></header><nav class="site-nav" aria-label="주요 메뉴">${links.map(([href, label, id]) => `<a href="${href}.html" ${page === id ? 'aria-current="page"' : ''}>${label}</a>`).join('')}</nav><div class="staff-ribbon" data-staff-only><span><i class="status-dot"></i> 사내 통합망 연결</span><span>STAFF-001 · SEOUL HQ</span><button id="network-log">접속 로그 ↗</button></div><main id="main"></main><footer class="site-footer"><div class="footer-top"><a class="brand" href="portal.html"><img src="assets/art/silver-emblem.webp" width="36" height="36" alt=""><b>SGIA</b></a><div class="footer-links"><a href="manual.html">세계관 안내</a><button id="activity-open">접속 로그 ↗</button><button id="privacy-note">개인정보</button><a href="index.html">접속 대기실</a></div><div id="visitor-count" class="visitor-count" aria-live="polite"><span>VISITORS</span><b>—</b><small>집계 연결 대기</small></div></div><p>© onlyunlimit · SGIA는 창작 세계관을 기반으로 한 가상의 서비스입니다.</p></footer><div id="cursor-radar" aria-hidden="true"><i></i><span></span></div><div id="toast" role="status" aria-live="polite"></div><dialog id="staff-login" aria-labelledby="login-title"><button data-close class="close-button" aria-label="로그인 취소">×</button><p class="eyebrow">INTERNAL ACCESS / SGIA</p><h2 id="login-title">직원 채널 접속</h2><p>사원증을 태그하여 내부 업무 화면으로 전환합니다.</p><div class="login-badge"><img src="assets/art/silver-emblem.webp" width="60" alt=""><strong>SGIA STAFF<small>본부 사원증 / 001</small></strong><span class="barcode"></span></div><p id="login-progress" role="status"></p><button id="login-submit" class="primary">사원증 태그 · 접속</button></dialog><dialog id="document-dialog" aria-labelledby="document-title"><button data-close class="close-button" aria-label="문서 닫기">×</button><h2 id="document-title"></h2><div id="document-body"></div></dialog>`;
   document.title = title + ' | SGIA';
+  $$('[data-lang]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.lang === language()));
+    b.onclick = () => {
+      setLanguage(b.dataset.lang);
+      document.dispatchEvent(new Event('sgia:language'));
+    };
+  });
+  $('#privacy-note').onclick = () =>
+    modal(
+      '개인정보',
+      '<p>작성 IP는 악성 게시물 대응을 위해 암호화하여 30일간 보관합니다. 인증된 관리자만 확인할 수 있습니다. 비밀번호는 검증값만 저장합니다. 방문 통계는 날짜별 비식별 값으로 집계합니다.</p><a href="https://github.com/onlyunlimit/bodam-id-card/issues" target="_blank" rel="noopener">운영 문의 ↗</a>',
+    );
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button,a,summary');
+    if (b && b.id !== 'network-log' && !b.closest('#document-dialog input'))
+      logActivity((b.getAttribute('aria-label') || b.textContent).trim().slice(0, 100));
+  });
+  let taps = [];
+  $('.site-footer .brand').addEventListener('click', (e) => {
+    e.preventDefault();
+    taps = taps.filter((t) => Date.now() - t < 3000);
+    taps.push(Date.now());
+    if (taps.length === 5) {
+      taps = [];
+      modal(
+        'SECURE OPERATIONS',
+        '<p>OWNER ACCESS / 키 인증 후 관리 콘솔이 열립니다.</p><a class="primary" href="' +
+          serviceConfig.api +
+          '/admin" target="_blank" rel="noopener noreferrer">인증 콘솔 열기 ↗</a>',
+      );
+    }
+  });
+  logActivity(title, 'CONNECT');
   applyViewer();
   $('#viewer-toggle').onclick = () => {
     if (state.staff) {
@@ -157,12 +193,11 @@ export function initShell(title, page) {
   };
   setInterval(tick, 1000);
   tick();
-  $('#network-log').onclick = () =>
-    modal(
-      '네트워크 접속 로그',
-      `<pre class="terminal-log">${koreaTime().clock} KST\nCHANNEL / STAFF-001\nREAD PERMISSION / GRANTED\nINTEGRITY / VERIFIED\n\n가상 단말 세션 · 관리자 권한 없음</pre>`,
-    );
+  $('#network-log').onclick = showActivityLog;
+  $('#activity-open').onclick = showActivityLog;
   const audio = new Audio('bgm/main.mp3');
+  audio.id = 'ambient-audio';
+  document.body.append(audio);
   audio.loop = true;
   audio.volume = 0.18;
   $('#sound-toggle').onclick = async () => {
@@ -176,13 +211,6 @@ export function initShell(title, page) {
       toast('브라우저에서 소리 재생을 허용해 주세요.');
     }
   };
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      audio.pause();
-      $('#sound-toggle').setAttribute('aria-pressed', 'false');
-      $('#sound-toggle span').textContent = 'BGM OFF';
-    }
-  });
   let frame;
   document.addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse' || !state.motion) return;
@@ -203,4 +231,44 @@ export function initShell(title, page) {
     'pointerleave',
     () => ($('#cursor-radar').style.opacity = 0),
   );
+}
+
+export function logActivity(label, kind = 'ACTION') {
+  const old = read('activity', [], true);
+  const rows = Array.isArray(old) ? old.slice(-149) : [];
+  rows.push({ time: koreaTime().clock, label: String(label).slice(0, 160), kind });
+  save('activity', rows, true);
+}
+export function showActivityLog() {
+  const rows = read('activity', [], true);
+  modal(
+    '접속·활동 로그',
+    '<div class="log-terminal"><div class="terminal-toolbar"><span>SESSION RECORDER / LIVE</span><button id="log-export">기록 내보내기 ↓</button></div><ol class="activity-lines">' +
+      rows
+        .toReversed()
+        .map(
+          (x) =>
+            '<li><time>' +
+            esc(x.time) +
+            '</time><b>' +
+            esc(x.kind) +
+            '</b><span>' +
+            esc(x.label) +
+            '</span></li>',
+        )
+        .join('') +
+      '</ol></div>',
+  );
+  $('#log-export').onclick = () => {
+    const a = document.createElement('a');
+    const u = URL.createObjectURL(
+      new Blob([rows.map((x) => x.time + ' ' + x.kind + ' ' + x.label).join('\n')], {
+        type: 'text/plain',
+      }),
+    );
+    a.href = u;
+    a.download = 'sgia-session.txt';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(u), 1000);
+  };
 }
