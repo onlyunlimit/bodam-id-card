@@ -91,3 +91,22 @@ test('Portrait artwork uses a background and expanded past records do not inters
   );
   expect(boxes[0].bottom).toBeLessThanOrEqual(boxes[1].top + 1);
 });
+
+test('Closing a report and immediately reusing the dialog never refreshes a disposed map', async ({
+  page,
+}) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.stack));
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/records.html');
+  await staff(page);
+  await page.locator('#new-incident').click();
+  await page.evaluate(() => {
+    document.querySelector('#document-dialog').close();
+    document.querySelector('#open-sealed').click();
+  });
+  await page.waitForTimeout(300);
+  await expect(page.locator('#archive-pin')).toBeVisible();
+  expect(errors).toEqual([]);
+});

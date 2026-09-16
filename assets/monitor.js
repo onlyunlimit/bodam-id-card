@@ -100,6 +100,9 @@ export function createMap(element, signals = incidents) {
       map.remove();
     }
   };
+  map.refreshSize = () => {
+    if (!released && element.isConnected) map.invalidateSize();
+  };
   const unregister = onDispose(release);
   map.release = () => {
     unregister();
@@ -255,7 +258,7 @@ export function renderRecords() {
   const recordMap = createMap($('#records-map'));
   const update = () => {
     recordMap?.syncSignals(incidents);
-    if (state.staff) delay(() => recordMap?.invalidateSize(), 60);
+    if (state.staff) delay(() => recordMap?.refreshSize(), 60);
     $('#records-lock').hidden = state.staff;
     $('#records-workspace').hidden = !state.staff;
     if (!state.staff) {
@@ -345,7 +348,7 @@ export function renderRecords() {
       picker?.setView(selected, 13);
     };
     delay(() => {
-      if (reportDialog.open) picker?.invalidateSize();
+      if (reportDialog.open) picker?.refreshSize();
     }, 200);
     reportDialog.addEventListener('close', () => picker?.release(), { once: true });
     $('#incident-form').onsubmit = (e) => {
@@ -392,7 +395,7 @@ export function renderRecords() {
         const m = createMap($('#case-location-map'), [{ ...record, resolvedAt: null }]);
         m?.setView(record.coordinates || locations[record.location] || [37.55, 127], 14);
         delay(() => {
-          if (d.open) m?.invalidateSize();
+          if (d.open) m?.refreshSize();
         }, 200);
         d.addEventListener('close', () => m?.release(), { once: true });
       }
@@ -479,7 +482,7 @@ function renderOrpeContent(target) {
   );
   mountEvidenceIndex();
   const map = createMap($('#tracking-map'), []);
-  delay(() => map?.invalidateSize(), 400);
+  delay(() => map?.refreshSize(), 400);
   let points = [],
     markers = [],
     step = 0,
