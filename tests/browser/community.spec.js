@@ -219,6 +219,13 @@ test('Both community themes fit small screens and expose four feeds', async ({
       320,
     );
     await page.screenshot({ path: testInfo.outputPath(board + '-mobile.png'), fullPage: true });
+    await page.locator('#write-post').click();
+    await expect(page.locator('#post-form button[type=submit]')).toBeEnabled();
+    const slot = await page.locator('.captcha-slot').boundingBox();
+    const widget = await page.locator('.captcha-widget').boundingBox();
+    expect(slot.height).toBeLessThanOrEqual(65);
+    expect(widget.width).toBeLessThanOrEqual(slot.width + 1);
+    await page.locator('#document-dialog').evaluate(d => d.close());
   }
 });
 

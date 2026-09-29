@@ -135,7 +135,7 @@ function consent() {
   return '<label class="consent"><input type="checkbox" name="consent" required><span>게시물 운영과 악성 작성 대응을 위한 IP 암호화 보관(30일), 관리자 열람에 동의합니다.</span></label>';
 }
 function captchaMarkup() {
-  return '<div class="captcha-widget"></div><p class="form-error" role="alert"></p>';
+  return '<div class="captcha-slot"><div class="captcha-widget"></div></div><p class="form-error" role="alert"></p>';
 }
 async function secureForm(form, submit) {
   const button = $('button[type=submit]', form),
@@ -145,10 +145,18 @@ async function secureForm(form, submit) {
     disposed = false;
   button.disabled = true;
   const dialog = form.closest('dialog');
+  const slot = $('.captcha-slot', form);
+  const resizeCaptcha = new ResizeObserver(([entry]) => {
+    const scale = Math.min(1, entry.contentRect.width / 300);
+    slot.style.height = `${65 * scale}px`;
+    $('.captcha-widget', slot).style.transform = `scale(${scale})`;
+  });
+  resizeCaptcha.observe(slot);
   const cleanup = () => {
     if (disposed) return;
     disposed = true;
     observer.disconnect();
+    resizeCaptcha.disconnect();
     dialog?.removeEventListener('close', onClose);
     unregister();
     if (widget !== undefined) window.turnstile?.remove(widget);
@@ -186,7 +194,7 @@ async function secureForm(form, submit) {
     widget = ts.render($('.captcha-widget', form), {
       sitekey: serviceConfig.turnstileSiteKey,
       action: 'community',
-      size: 'compact',
+      size: 'normal',
       theme: document.documentElement.dataset.theme,
       callback: (value) => {
         if (!disposed) {

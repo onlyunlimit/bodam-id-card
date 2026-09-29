@@ -1023,3 +1023,16 @@ html[data-community-theme] .fan-community {
   border-color: transparent;
   box-shadow: none;
 }
+
+/* Keep the full challenge visible without the tall compact layout. */
+.board-form .captcha-slot {
+  width: 100%;
+  max-width: 300px;
+  height: 65px;
+  min-width: 0;
+}
+.board-form .captcha-widget {
+  width: 300px;
+  height: 65px;
+  transform-origin: top left;
+}
