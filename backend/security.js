@@ -76,9 +76,12 @@ export function text(value, min, max, label) {
     throw new HTTPError(400, label + ' 입력을 확인해 주세요.');
   return value.trim();
 }
-export function pin(value) {
-  if (typeof value !== 'string' || !/^\d{4}$/.test(value))
-    throw new HTTPError(400, '비밀번호는 숫자 4자리입니다.');
+export function pin(value, legacy = false) {
+  if (typeof value !== 'string' || !(legacy ? /^\d{4}$/ : /^\d{6}$/).test(value))
+    throw new HTTPError(
+      400,
+      legacy ? '기존 비밀번호는 숫자 4자리입니다.' : '비밀번호는 숫자 6자리입니다.',
+    );
   return value;
 }
 export function board(value) {

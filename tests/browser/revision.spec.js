@@ -113,9 +113,11 @@ test('Each of 18 floors has a distinct interior and rooms open their facility re
   await page.locator('.plan-room').first().click();
   await expect(page.locator('.room-file')).toBeVisible();
 });
-test('Only the private footer gesture exposes the owner console entry', async ({ page }) => {
+test('Community admin entry and legacy footer shortcut both lead to server authentication', async ({
+  page,
+}) => {
   await page.goto('/community.html');
-  await expect(page.locator('a[href$="/admin"]')).toHaveCount(0);
+  await expect(page.locator('.community-admin')).toHaveAttribute('href', /\/admin\?board=lucky/);
   await expect(page.locator('#privacy')).toHaveCount(0);
   for (let i = 0; i < 5; i++) await page.locator('.site-footer .brand').click();
   await expect(page.locator('#document-dialog a[href$="/admin"]')).toBeVisible();

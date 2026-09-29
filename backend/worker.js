@@ -1,4 +1,12 @@
 import {
+  publicFan,
+  adminFan,
+  postFields,
+  enrichPosts,
+  imageChanges,
+  parentComment,
+} from './fan.js';
+import {
   random,
   digest,
   hmac,
@@ -30,7 +38,7 @@ async function body(request) {
     const { done, value } = await reader.read();
     if (done) break;
     total += value.length;
-    if (total > 24000) {
+    if (total > 1200000) {
       await reader.cancel();
       throw new HTTPError(413, '본문이 너무 큽니다.');
     }
@@ -107,7 +115,6 @@ async function sourceLog(env, id, kind, ip, hash) {
     'INSERT INTO access_logs(id,kind,ip_cipher,ip_hash,created_at) VALUES (?,?,?,?,?)',
   ).bind(id, kind, await cipherIP(ip, env.IP_KEY), hash, now());
 }
-const postFields = 'p.id,p.board,p.title,p.author,p.department,p.body,p.created_at,p.updated_at';
 async function handle(request, env) {
   if (!env.DB || !env.PASSWORD_PEPPER || !env.IP_KEY || !env.ADMIN_KEY_HASH)
     throw new HTTPError(503, '서버 준비 중입니다.');
@@ -131,7 +138,7 @@ async function handle(request, env) {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Content-Security-Policy':
-          "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+          "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data: https:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
       },
     });
   if (path === '/admin/app.js' && method === 'GET')
@@ -159,6 +166,8 @@ async function handle(request, env) {
   }
   if (isAdmin) {
     const hash = await session(request, env);
+    const fanResponse = await adminFan(request, env, { body, identity, sourceLog });
+    if (fanResponse) return fanResponse;
     if (path === '/admin/logout' && method === 'POST') {
       await env.DB.prepare('DELETE FROM sessions WHERE hash=?').bind(hash).run();
       return new Response('{"ok":true}', {
@@ -171,15 +180,15 @@ async function handle(request, env) {
     if (path === '/admin/posts' && method === 'GET') {
       const offset = Math.max(0, Math.min(100000, Number(url.searchParams.get('offset')) || 0));
       const { results } = await env.DB.prepare(
-        'SELECT id,board,title,author,department,body,created_at,updated_at,hidden,deleted_at FROM posts ORDER BY created_at DESC LIMIT 30 OFFSET ?',
+        'SELECT id,board,title,author,department,body,created_at,updated_at,hidden,deleted_at,member_id FROM posts ORDER BY created_at DESC LIMIT 30 OFFSET ?',
       )
         .bind(offset)
         .all();
-      return json({ posts: results, offset });
+      return json({ posts: await enrichPosts(env, results), offset });
     }
     if (path === '/admin/comments' && method === 'GET') {
       const { results } = await env.DB.prepare(
-        'SELECT id,post_id,author,body,created_at,updated_at,hidden,deleted_at FROM comments WHERE post_id=? ORDER BY created_at DESC LIMIT 100',
+        'SELECT id,post_id,author,body,created_at,updated_at,hidden,deleted_at,member_id,parent_id FROM comments WHERE post_id=? ORDER BY created_at DESC LIMIT 100',
       )
         .bind(url.searchParams.get('post'))
         .all();
@@ -252,6 +261,8 @@ async function handle(request, env) {
           now(),
         ),
       );
+      if (data.action === 'delete' && data.kind === 'post')
+        changes.push(env.DB.prepare('DELETE FROM images WHERE post_id=?').bind(id));
       await env.DB.batch(changes);
       return json({ ok: true });
     }
@@ -284,6 +295,8 @@ async function handle(request, env) {
     }
     throw new HTTPError(404, '관리 경로가 없습니다.');
   }
+  const fanResponse = await publicFan(request, env, { identity, rate, blocked, body });
+  if (fanResponse) return fanResponse;
   if (path === '/visitors' && method === 'POST') {
     const { ip, hash } = await identity(request, env);
     await rate(env, 'visit:' + hash, 30, 3600);
@@ -348,9 +361,22 @@ async function handle(request, env) {
   if (path === '/posts' && method === 'GET') {
     const b = board(url.searchParams.get('board')),
       offset = Math.max(0, Math.min(100000, Number(url.searchParams.get('offset')) || 0)),
-      search = (url.searchParams.get('q') || '').slice(0, 60);
+      search = (url.searchParams.get('q') || '').slice(0, 60),
+      feed = url.searchParams.get('feed') || 'fan';
+    if (!['fan', 'artist', 'highlight'].includes(feed))
+      throw new HTTPError(400, '잘못된 피드입니다.');
+    const feedFilter =
+      feed === 'fan'
+        ? ' AND p.member_id IS NULL'
+        : feed === 'artist'
+          ? ' AND p.member_id IS NOT NULL'
+          : '';
+    const order =
+      feed === 'highlight'
+        ? 'likes DESC,p.created_at DESC,p.id DESC'
+        : 'p.created_at DESC,p.id DESC';
     const { results } = await env.DB.prepare(
-      `SELECT ${postFields},(SELECT COUNT(*) FROM comments c WHERE c.post_id=p.id AND c.hidden=0 AND c.deleted_at IS NULL) AS comments,(SELECT COUNT(*) FROM post_likes l WHERE l.post_id=p.id) AS likes FROM posts p WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL AND (p.title LIKE ? ESCAPE '\\' OR p.body LIKE ? ESCAPE '\\') ORDER BY p.created_at DESC LIMIT 21 OFFSET ?`,
+      `SELECT ${postFields},(SELECT COUNT(*) FROM comments c WHERE c.post_id=p.id AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL))) AS comments,(SELECT COUNT(*) FROM post_likes l WHERE l.post_id=p.id) AS likes FROM posts p WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL ${feedFilter} AND (p.title LIKE ? ESCAPE '\\' OR p.body LIKE ? ESCAPE '\\') ORDER BY ${order} LIMIT 21 OFFSET ?`,
     )
       .bind(
         b,
@@ -360,7 +386,7 @@ async function handle(request, env) {
       )
       .all();
     return json({
-      posts: results.slice(0, 20).map(({ body, ...row }) => row),
+      posts: await enrichPosts(env, results.slice(0, 20)),
       more: results.length > 20,
     });
   }
@@ -373,7 +399,7 @@ async function handle(request, env) {
       .first();
     if (!row) throw new HTTPError(404, '게시물이 없거나 숨김 처리되었습니다.');
     const { results } = await env.DB.prepare(
-      'SELECT id,author,body,created_at,updated_at FROM comments WHERE post_id=? AND hidden=0 AND deleted_at IS NULL ORDER BY created_at LIMIT 100',
+      `SELECT c.id,c.author,c.body,c.created_at,c.updated_at,c.member_id,c.parent_id,c.pin_length,m.name AS member_name,m.avatar_url,(SELECT COUNT(*) FROM comment_likes l WHERE l.comment_id=c.id) AS likes FROM comments c LEFT JOIN members m ON m.id=c.member_id WHERE c.post_id=? AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL)) ORDER BY c.created_at,c.id LIMIT 100`,
     )
       .bind(row.id)
       .all();
@@ -385,14 +411,30 @@ async function handle(request, env) {
     const liked = await env.DB.prepare('SELECT post_id FROM post_likes WHERE post_id=? AND voter=?')
       .bind(row.id, voter)
       .first();
-    return json({ post: { ...row, likes: count.n, liked: !!liked }, comments: results });
+    const comments = await Promise.all(
+      results.map(async (c) => ({
+        ...c,
+        liked: !!(await env.DB.prepare(
+          'SELECT comment_id FROM comment_likes WHERE comment_id=? AND voter=?',
+        )
+          .bind(c.id, await hmac(env.IP_KEY, 'comment-like:' + c.id + ':' + ip))
+          .first()),
+      })),
+    );
+    return json({
+      post: { ...(await enrichPosts(env, [row]))[0], likes: count.n, liked: !!liked },
+      comments,
+    });
   }
   if ((path === '/posts' || match) && ['POST', 'PATCH', 'DELETE'].includes(method)) {
     const { ip, hash } = await identity(request, env);
     await blocked(env, hash);
     await rate(env, 'write:' + hash, 30, 3600);
     const data = await body(request);
-    pin(data.password);
+    if (method === 'POST') {
+      pin(data.password);
+      if (data.member_id) throw new HTTPError(403, '아티스트 작성은 관리자 인증이 필요합니다.');
+    }
     await captcha(data, env, ip);
     if (method === 'POST' && (path === '/posts' || match?.[3] === 'comments')) {
       if (data.consent !== true) throw new HTTPError(400, '운영·IP 보관 안내에 동의해 주세요.');
@@ -406,7 +448,7 @@ async function handle(request, env) {
       let stmt;
       if (path === '/posts') {
         stmt = env.DB.prepare(
-          'INSERT INTO posts(id,board,title,author,department,body,salt,password_hash,created_at) VALUES (?,?,?,?,?,?,?,?,?)',
+          'INSERT INTO posts(id,board,title,author,department,body,salt,password_hash,created_at,pin_length) VALUES (?,?,?,?,?,?,?,?,?,6)',
         ).bind(
           id,
           board(data.board),
@@ -432,11 +474,21 @@ async function handle(request, env) {
           .first();
         if (count.n >= 100) throw new HTTPError(409, '게시물당 댓글은 100개까지 등록됩니다.');
         stmt = env.DB.prepare(
-          'INSERT INTO comments(id,post_id,author,body,salt,password_hash,created_at) VALUES (?,?,?,?,?,?,?)',
-        ).bind(id, parent.id, author, content, salt, pwd, created);
+          'INSERT INTO comments(id,post_id,author,body,salt,password_hash,created_at,parent_id,pin_length) VALUES (?,?,?,?,?,?,?,?,6)',
+        ).bind(
+          id,
+          parent.id,
+          author,
+          content,
+          salt,
+          pwd,
+          created,
+          await parentComment(env, parent.id, data.parent_id),
+        );
       }
       await env.DB.batch([
         stmt,
+        ...(path === '/posts' ? await imageChanges(env, id, data.images) : []),
         await sourceLog(env, id, path === '/posts' ? 'post' : 'comment', ip, hash),
       ]);
       return json({ id }, 201);
@@ -447,12 +499,14 @@ async function handle(request, env) {
       await rate(env, 'password-ip:' + hash, 10, 900);
       await rate(env, 'password-record:' + id, 5, 900);
       const row = await env.DB.prepare(
-        `SELECT salt,password_hash FROM ${table} WHERE id=? AND hidden=0 AND deleted_at IS NULL`,
+        `SELECT salt,password_hash,pin_length,member_id FROM ${table} WHERE id=? AND hidden=0 AND deleted_at IS NULL`,
       )
         .bind(id)
         .first();
+      if (row) pin(data.password, row.pin_length === 4);
       if (
         !row ||
+        row.member_id ||
         !equal(await passwordHash(data.password, row.salt, env.PASSWORD_PEPPER), row.password_hash)
       )
         throw new HTTPError(403, '비밀번호가 일치하지 않거나 관리할 수 없는 기록입니다.');
@@ -465,14 +519,35 @@ async function handle(request, env) {
         if (!parent) throw new HTTPError(404, '게시물이 없습니다.');
       }
       if (method === 'PATCH') {
-        if (table === 'posts')
-          await env.DB.prepare('UPDATE posts SET title=?,body=?,updated_at=? WHERE id=?')
-            .bind(text(data.title, 1, 100, '제목'), text(data.body, 1, 5000, '내용'), now(), id)
-            .run();
-        else
-          await env.DB.prepare('UPDATE comments SET body=?,updated_at=? WHERE id=?')
-            .bind(text(data.body, 1, 1000, '내용'), now(), id)
-            .run();
+        const changes = [];
+        if (row.pin_length === 4 || data.newPassword) {
+          pin(data.newPassword);
+          const salt = random();
+          changes.push(
+            env.DB.prepare(
+              `UPDATE ${table} SET salt=?,password_hash=?,pin_length=6 WHERE id=?`,
+            ).bind(salt, await passwordHash(data.newPassword, salt, env.PASSWORD_PEPPER), id),
+          );
+        }
+        if (table === 'posts') {
+          changes.push(
+            env.DB.prepare('UPDATE posts SET title=?,body=?,updated_at=? WHERE id=?').bind(
+              text(data.title, 1, 100, '제목'),
+              text(data.body, 1, 5000, '내용'),
+              now(),
+              id,
+            ),
+          );
+          changes.push(...(await imageChanges(env, id, data.images)));
+        } else
+          changes.push(
+            env.DB.prepare('UPDATE comments SET body=?,updated_at=? WHERE id=?').bind(
+              text(data.body, 1, 1000, '내용'),
+              now(),
+              id,
+            ),
+          );
+        await env.DB.batch(changes);
       } else {
         const statements = [
           env.DB.prepare(
@@ -485,6 +560,8 @@ async function handle(request, env) {
               "UPDATE comments SET body='',author='삭제됨',password_hash='',salt='',deleted_at=? WHERE post_id=?",
             ).bind(now(), id),
           );
+        if (table === 'posts')
+          statements.push(env.DB.prepare('DELETE FROM images WHERE post_id=?').bind(id));
         await env.DB.batch(statements);
       }
       return json({ ok: true });
@@ -532,6 +609,9 @@ export default {
       env.DB.prepare('DELETE FROM sessions WHERE expires<?').bind(time),
       env.DB.prepare('DELETE FROM blocks WHERE expires<?').bind(time),
       env.DB.prepare('DELETE FROM visitor_keys WHERE day<?').bind(cutoff),
+      env.DB.prepare(
+        'DELETE FROM comment_likes WHERE comment_id IN (SELECT id FROM comments WHERE deleted_at IS NOT NULL)',
+      ),
       env.DB.prepare('DELETE FROM audit WHERE created_at<?').bind(time - 90 * 86400000),
       env.DB.prepare(
         'DELETE FROM post_likes WHERE post_id IN (SELECT id FROM posts WHERE deleted_at IS NOT NULL)',
