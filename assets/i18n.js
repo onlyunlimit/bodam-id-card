@@ -52,11 +52,11 @@ SGIA · 국가 각성자 통합관리청|SGIA · Integrated Administration|SGIA 
 PUBLIC / 공개 열람|PUBLIC / Visitor access|PUBLIC / 一般閲覧|PUBLIC / 公开查阅
 INTERNAL / 직원 열람|INTERNAL / Staff access|INTERNAL / 職員閲覧|INTERNAL / 职员查阅
 통합 관제 현황|Operations overview|統合管制状況|综合管制概况
-국가 각성자 통합관리청 · 서울권 운영 정보|SGIA · Seoul regional operations|SGIA・ソウル圏運用情報|SGIA · 首尔地区运行信息
+국가 각성자 통합관리청 · 전 세계 사건 관제|SGIA · Worldwide incident operations|SGIA・世界の事件管制|SGIA · 全球事件管制
 게이트 관측망|Gate surveillance|ゲート観測網|门扉观测网络
 관측 신호|Observed signals|観測信号|观测信号
 A급 경계|Class A alert|A級警戒|A级警戒
-서울권 재정렬 ↻|Reset Seoul view ↻|ソウル圏に戻る ↻|重置首尔视图 ↻
+세계 지도 ↻|World view ↻|世界地図 ↻|世界地图 ↻
 관측 중인 게이트|Gates under observation|観測中のゲート|正在观测的门扉
 기록 ↗|Archive ↗|記録 ↗|档案 ↗
 등급별 미해결 게이트 분포|Open gates by class|等級別・未処理ゲート|未处理门扉等级分布

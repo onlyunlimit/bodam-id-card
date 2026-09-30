@@ -42,6 +42,8 @@ async function mock(page) {
             .filter(
               (p) =>
                 p.board === url.searchParams.get('board') &&
+                (p.board!=='staff'||(p.channel||'free')===(url.searchParams.get('channel')||'free')) &&
+                (!url.searchParams.get('tag')||p.tags?.includes(url.searchParams.get('tag'))) &&
                 (url.searchParams.get('feed') === 'artist'
                   ? p.member_id
                   : url.searchParams.get('feed') === 'fan'
@@ -258,4 +260,22 @@ test('Community palette covers the shell and restores the saved theme on navigat
   await page.goForward();
   await expect(page.locator('html')).not.toHaveAttribute('data-community-theme');
   await expect(page.locator('body')).toHaveCSS('background-color', base.color);
+});
+
+test('Staff lounge separates daily work from fandom posts, filters tags and keeps admin at the bottom',async({page},testInfo)=>{
+ const f=await mock(page);await page.emulateMedia({reducedMotion:'reduce'});
+ await page.goto('/community.html?board=staff&channel=soliloquy');
+ await page.locator('#board-login').click();await page.locator('#login-submit').click();
+ await expect(page.locator('#feed-title')).toHaveText('혼잣말');
+ await page.locator('#write-post').click();
+ await page.locator('[name=title]').fill('오늘의 최애');await page.locator('[name=author]').fill('독자');await page.locator('[name=password]').fill('123456');await page.locator('[name=body]').fill('재인과 오리진 이야기가 좋아요');
+ await page.locator('[name=tags][value="member:jaein"]').check();await page.locator('[name=tags][value="team:origin"]').check();await page.locator('[name=consent]').check();await page.locator('#post-form button[type=submit]').click();
+ await expect(page.locator('.post-row')).toContainText('인물 · 재인');expect(f.posts[0].channel).toBe('soliloquy');expect(f.posts[0].tags).toEqual(expect.arrayContaining(['member:jaein','team:origin']));
+ await page.locator('#staff-tag-filter').selectOption('team:beacon');await expect(page.locator('.post-row')).toHaveCount(0);
+ await page.locator('#staff-tag-filter').selectOption('member:jaein');await expect(page.locator('.post-row')).toHaveCount(1);
+ await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('[name=tags][value="member:jaein"]')).toBeChecked();await page.locator('[name=tags][value="team:origin"]').uncheck();await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();await expect(page.locator('.post-body')).toBeVisible();expect(f.posts[0].tags).toEqual(['member:jaein']);await page.keyboard.press('Escape');
+ await page.locator('.staff-channel-nav a[href$="channel=free"]').click();await expect(page.locator('#feed-title')).toHaveText('자유게시판');await expect(page.locator('.post-row')).toHaveCount(0);
+ await expect(page.locator('.community-footer .community-admin')).toHaveCount(1);await expect(page.locator('.fan-sidebar .community-admin')).toHaveCount(0);
+ await page.locator('.staff-channel-nav a[href$="channel=soliloquy"]').click();await expect(page.locator('.post-row')).toHaveCount(1);
+ await page.screenshot({path:testInfo.outputPath('staff-desktop.png'),fullPage:true});await page.setViewportSize({width:320,height:800});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);await page.screenshot({path:testInfo.outputPath('staff-mobile.png'),fullPage:true});
 });

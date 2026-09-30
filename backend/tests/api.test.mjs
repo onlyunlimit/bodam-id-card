@@ -5,17 +5,22 @@ import { readFileSync } from 'node:fs';
 import worker from '../worker.js';
 import { digest, decipherIP } from '../security.js';
 const originalFetch = globalThis.fetch;
-globalThis.fetch = async (url, ...args) =>
-  String(url).startsWith('https://challenges.cloudflare.com/')
-    ? new Response(
-        JSON.stringify({ success: true, hostname: 'onlyunlimit.github.io', action: 'community' }),
-      )
-    : originalFetch(url, ...args);
+let geocodeCalls=0;
+const geoResult={display_name:'Paris, France',lat:'48.8566',lon:'2.3522',address:{city:'Paris'},geojson:{type:'Polygon',coordinates:[[[2.3,48.8],[2.4,48.8],[2.4,48.9],[2.3,48.8]]]}};
+globalThis.fetch=async(url,...args)=>{
+ if(String(url).startsWith('https://challenges.cloudflare.com/'))return Response.json({success:true,hostname:'onlyunlimit.github.io',action:'community'});
+ if(String(url).startsWith('https://nominatim.openstreetmap.org/')){geocodeCalls++;assert.match(args[0].headers['User-Agent'],/onlyunlimit.github.io/);return Response.json(String(url).includes('/search')?[geoResult]:geoResult);}
+ return originalFetch(url,...args);
+};
 async function fixture() {
   const sql = new DatabaseSync(':memory:');
   sql.exec(readFileSync(new URL('../migrations/0001.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0002_likes.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0004_fan_platform.sql', import.meta.url), 'utf8'));
+  sql.exec(readFileSync(new URL('../migrations/0005_image_urls.sql', import.meta.url), 'utf8'));
+  sql.exec(
+    readFileSync(new URL('../migrations/0006_staff_geocoding.sql', import.meta.url), 'utf8'),
+  );
   const DB = {
     prepare(query) {
       const statement = {
@@ -469,4 +474,40 @@ test('Attachments enforce format, ownership and deletion visibility; admin can e
   await req('/admin/moderate', 'POST', { kind: 'post', id: a.data.id, action: 'delete' }, options);
   assert.equal((await req('/media/' + image.id)).status, 404);
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM images WHERE post_id=?').get(a.data.id).n, 0);
+});
+
+test('Staff channels and member/team tags remain separate, filterable and editable',async()=>{
+ const {req,post}=await fixture();
+ const a=await req('/posts','POST',post);
+ const b=await req('/posts','POST',{...post,title:'덕질 이야기',channel:'soliloquy',tags:['member:jaein','team:origin']});
+ assert.equal(b.status,201,JSON.stringify(b.data));
+ assert.equal((await req('/posts?board=staff&channel=free')).data.posts.length,1);
+ const filtered=await req('/posts?board=staff&channel=soliloquy&tag=member:jaein');
+ assert.equal(filtered.data.posts[0].id,b.data.id);assert.deepEqual(filtered.data.posts[0].tags,['member:jaein','team:origin']);
+ assert.equal((await req('/posts?board=staff&channel=soliloquy&tag=team:beacon')).data.posts.length,0);
+ assert.equal((await req('/posts','POST',{...post,channel:'soliloquy',tags:['invented']})).status,400);
+ assert.equal((await req('/posts','POST',{...post,board:'lucky',channel:'soliloquy',tags:[]})).status,400);
+ assert.equal((await req('/posts/'+b.data.id,'PATCH',{...post,channel:'free',tags:[]})).status,200);
+ assert.equal((await req('/posts?board=staff&channel=free')).data.posts.length,2);
+});
+test('HTTPS image links persist and are gated with the parent post without upstream server fetches',async()=>{
+ const {req,post}=await fixture();
+ const a=await req('/posts','POST',{...post,images:[{url:'https://images.example/photo.jpg'}]});assert.equal(a.status,201);
+ const image=(await req('/posts/'+a.data.id)).data.post.images[0];
+ const r=await req('/media/'+image.id);assert.equal(r.status,302);assert.equal(r.response.headers.get('Location'),'https://images.example/photo.jpg');
+ assert.equal((await req('/posts','POST',{...post,images:[{url:'javascript:alert(1)'}]})).status,400);
+ assert.equal((await req('/posts','POST',{...post,images:[{url:'https://name:secret@example.com/p.jpg'}]})).status,400);
+ assert.equal((await req('/posts/'+a.data.id,'PATCH',{...post,images:[]})).status,200);
+ assert.equal((await req('/media/'+image.id)).status,404);
+});
+test('Worldwide geocoding caches queries, validates coordinates and throttles upstream calls globally',async()=>{
+ const {req,sql}=await fixture();geocodeCalls=0;
+ const a=await req('/geocode?q=Paris');assert.equal(a.status,200);assert.equal(a.data.results[0].lat,48.8566);assert.equal(a.data.results[0].area.type,'Polygon');
+ assert.equal((await req('/geocode?q=Paris')).status,200);assert.equal(geocodeCalls,1);
+ assert.equal((await req('/geocode?q=London')).status,429);assert.equal(geocodeCalls,1);
+ sql.prepare('UPDATE geocode_lock SET next_at=0').run();
+ assert.equal((await req('/geocode?lat=-33.8&lon=151.2&area=1')).status,200);
+ assert.equal((await req('/geocode?lat=91&lon=0')).status,400);
+ assert.equal((await req('/geocode?lat=0&lon=181')).status,400);
+ assert.equal((await req('/geocode')).status,400);
 });

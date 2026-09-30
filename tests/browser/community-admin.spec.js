@@ -59,9 +59,15 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await page.locator('#artist-compose').click();
   await page.locator('#admin-editor [name=title]').fill('공식 첫 인사');
   await page.locator('#admin-editor [name=body]').fill('팬 여러분 안녕하세요');
+  await page.locator('[data-image-url]').fill('https://images.example/photo.jpg');await page.locator('[data-add-image-url]').click();await expect(page.locator('.upload-image')).toHaveCount(1);
+  await page.locator('.attachment-remove').click();await expect(page.locator('.upload-image')).toHaveCount(0);
+  await page.locator('[data-image-url]').fill('https://images.example/photo.jpg');await page.locator('[data-add-image-url]').click();
+  await page.locator('[data-images]').setInputFiles('assets/art/id-frame.png');await expect(page.locator('.upload-image')).toHaveCount(2);
+
   await page.locator('#admin-editor button[type=submit]').click();
   await expect(page.locator('#posts')).toContainText('공식 첫 인사');
   expect(calls.find((c) => c.path === '/admin/publish').data.member_id).toBe('jaein');
+  expect(calls.find(c=>c.path==='/admin/publish').data.images).toHaveLength(2);
   await page.locator('#profile-edit').click();
   await page.locator('[name=bio]').fill('웹에서 수정한 프로필');
   await page.locator('#admin-editor button[type=submit]').click();

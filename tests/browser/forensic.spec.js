@@ -1,3 +1,4 @@
+import {mockGeocode} from './geocode-fixture.js';
 import { test, expect } from '@playwright/test';
 async function staff(page) {
   await page.locator('#viewer-toggle').click();
@@ -10,6 +11,7 @@ test('A clicked report pin persists into operations, disappears on closure, and 
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.stack));
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await mockGeocode(page);
   await page.goto('/records.html');
   await staff(page);
   await page.locator('#new-incident').click();
@@ -22,6 +24,7 @@ test('A clicked report pin persists into operations, disappears on closure, and 
     .locator('[name=latitude],[name=longitude]')
     .evaluateAll((es) => es.map((e) => Number(e.value)));
   expect(coords).not.toEqual([37.5445, 127.0557]);
+  await expect(page.locator('#address-status')).toContainText('확인했습니다');
   await page.locator('#incident-form .primary').click();
   await page.locator('#emergency-stack>button').click();
   const record = await page.evaluate(() =>
@@ -54,6 +57,7 @@ test('A clicked report pin persists into operations, disappears on closure, and 
 test('Classified evidence opens as a document and crosshair stays decorative without horizontal overflow', async ({
   page,
 }) => {
+  await mockGeocode(page);
   await page.goto('/records.html');
   await staff(page);
   await page.locator('#open-sealed').hover();
@@ -99,6 +103,7 @@ test('Closing a report and immediately reusing the dialog never refreshes a disp
   page.on('pageerror', (e) => errors.push(e.stack));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 390, height: 844 });
+  await mockGeocode(page);
   await page.goto('/records.html');
   await staff(page);
   await page.locator('#new-incident').click();
@@ -109,4 +114,17 @@ test('Closing a report and immediately reusing the dialog never refreshes a disp
   await page.waitForTimeout(300);
   await expect(page.locator('#archive-pin')).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test('Report addresses and worldwide pins stay in sync, save real boundaries and allow custom areas',async({page},testInfo)=>{
+ await mockGeocode(page);await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/records.html');await staff(page);
+ await expect(page.locator('.receiver svg.wave')).toHaveCount(0);
+ await page.locator('#new-incident').click();await expect(page.locator('.report-location-pin span')).toBeVisible();await expect(page.locator('#report-map img.leaflet-marker-icon')).toHaveCount(0);
+ await page.locator('[name=location]').fill('Paris');await page.locator('#search-address').click();await expect(page.locator('[name=latitude]')).toHaveValue('48.856600');await expect(page.locator('[name=longitude]')).toHaveValue('2.352200');
+ await page.locator('[name=areaMode]').selectOption('boundary');await page.locator('[name=radiusMeters]').fill('500');await page.locator('[name=reporter]').fill('구역 관측');await page.locator('[name=detail]').fill('프랑스 구역에서 생명체 발견');await page.locator('#document-dialog').screenshot({path:testInfo.outputPath('report-area.png')});await page.locator('#incident-form .primary').click();
+ const record=await page.evaluate(()=>JSON.parse(localStorage.getItem('sgia.incidents')).at(-1));expect(record.coordinates).toEqual([48.8566,2.3522]);expect(record.area.type).toBe('Polygon');expect(record.radiusMeters).toBe(500);expect(record.areaSource).toBe('osm');
+ await page.locator('#emergency-stack>button').click();await page.locator(`[data-incident="${record.id}"] .case-content`).click();await expect(page.locator('#case-location-map .leaflet-overlay-pane path')).toHaveCount(1);await page.keyboard.press('Escape');
+ await page.locator('#new-incident').click();await page.locator('#world-view').click();await page.locator('[name=latitude]').fill('-33.8688');await page.locator('[name=longitude]').fill('151.2093');await page.locator('#apply-coordinate').click();await expect(page.locator('[name=location]')).toHaveValue('현장 <b>표지</b>');
+ await page.locator('[name=areaMode]').selectOption('draw');for(const position of [{x:130,y:70},{x:180,y:110},{x:120,y:140}])await page.locator('#report-map').click({position});await expect(page.locator('#address-status')).toContainText('3개');
+ await page.locator('[name=reporter]').fill('구역 작성');await page.locator('[name=detail]').fill('호주에서 직접 지정한 현장');await page.locator('#incident-form .primary').click();const drawn=await page.evaluate(()=>JSON.parse(localStorage.getItem('sgia.incidents')).at(-1));expect(drawn.areaSource).toBe('manual');expect(drawn.area.coordinates[0]).toHaveLength(4);expect(drawn.coordinates).toEqual([-33.8688,151.2093]);
 });

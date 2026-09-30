@@ -50,6 +50,10 @@ export function openIncident(record) {
   const fields = [
     ['신고자', record.reporter || 'SGIA 자동 관측망'],
     ['발생 위치', record.location],
+    ...(record.radiusMeters ? [['추정 반경', record.radiusMeters + ' m']] : []),
+    ...(record.area
+      ? [['구역 경계', record.areaSource === 'osm' ? 'OpenStreetMap 경계' : '직접 지정']]
+      : []),
     [
       '발생 시각',
       record.occurredAt

@@ -1619,3 +1619,79 @@ html[data-motion='off'] .release-pages > span {
     top: 90px;
   }
 }
+/* Reports use an asset-free marker, independent of Leaflet's default PNG path. */
+.report-location-pin {
+  background: none !important;
+  border: 0 !important;
+}
+.report-location-pin > span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: #b32942;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 8px #0008;
+  color: #fff;
+  font: 700 22px monospace;
+}
+.address-tools,
+.area-draw-tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.address-tools button,
+.area-draw-tools button {
+  font-size: 11px;
+  padding: 8px 12px;
+}
+.area-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.area-controls label {
+  min-width: 0;
+}
+.area-controls input,
+.area-controls select {
+  width: 100%;
+  min-width: 0;
+}
+.area-help,
+#address-status {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+#address-results {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+#address-results button {
+  text-align: left;
+  font-size: 12px;
+  padding: 10px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.geocode-credit {
+  font-size: 10px;
+  color: var(--muted);
+}
+.geocode-credit a {
+  color: inherit;
+}
+.report-map-field {
+  min-width: 0;
+}
+@media (max-width: 550px) {
+  .area-controls {
+    grid-template-columns: 1fr;
+  }
+}

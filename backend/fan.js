@@ -5,7 +5,7 @@ const json = (data, status = 200) =>
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   });
 export const postFields =
-  'p.id,p.board,p.title,p.author,p.department,p.body,p.created_at,p.updated_at,p.member_id,p.pin_length';
+  'p.id,p.board,p.title,p.author,p.department,p.body,p.created_at,p.updated_at,p.member_id,p.pin_length,p.channel,p.tags';
 export async function attachments(env, postId) {
   return (
     await env.DB.prepare('SELECT id,mime FROM images WHERE post_id=? ORDER BY created_at,id')
@@ -17,6 +17,7 @@ export async function enrichPosts(env, rows) {
   return Promise.all(
     rows.map(async (p) => ({
       ...p,
+      tags: JSON.parse(p.tags || '[]'),
       images: await attachments(env, p.id),
       member: p.member_id
         ? await env.DB.prepare('SELECT id,board,name,bio,avatar_url FROM members WHERE id=?')
@@ -62,6 +63,26 @@ export async function imageChanges(env, postId, images) {
       if (!old.some((i) => i.id === value.id) || keep.includes(value.id))
         throw new HTTPError(400, '첨부 이미지 소유권을 확인해 주세요.');
       keep.push(value.id);
+    } else if (value && typeof value === 'object' && typeof value.url === 'string') {
+      let url;
+      try {
+        url = new URL(text(value.url, 1, 2000, '이미지 URL'));
+      } catch {
+        throw new HTTPError(400, '올바른 HTTPS 이미지 주소를 입력해 주세요.');
+      }
+      if (url.protocol !== 'https:' || url.username || url.password)
+        throw new HTTPError(400, 'HTTPS 이미지 주소만 사용할 수 있습니다.');
+      statements.push(
+        env.DB.prepare(
+          'INSERT INTO images(id,post_id,mime,data,created_at,url) VALUES (?,?,?,zeroblob(0),?,?)',
+        ).bind(
+          crypto.randomUUID(),
+          postId,
+          'text/uri-list',
+          Date.now(),
+          url.href,
+        ),
+      );
     } else {
       const { mime, bytes } = decodeImage(value),
         id = crypto.randomUUID();
@@ -118,11 +139,12 @@ export async function publicFan(request, env, { identity, rate, blocked, body })
   const media = path.match(/^\/media\/([a-f0-9-]{36})$/);
   if (media && method === 'GET') {
     const row = await env.DB.prepare(
-      'SELECT i.mime,i.data FROM images i LEFT JOIN posts p ON p.id=i.post_id WHERE i.id=? AND (i.member_id IS NOT NULL OR (p.hidden=0 AND p.deleted_at IS NULL))',
+      'SELECT i.mime,i.data,i.url FROM images i LEFT JOIN posts p ON p.id=i.post_id WHERE i.id=? AND (i.member_id IS NOT NULL OR (p.hidden=0 AND p.deleted_at IS NULL))',
     )
       .bind(media[1])
       .first();
     if (!row) throw new HTTPError(404, '이미지를 찾을 수 없습니다.');
+    if (row.url) return new Response(null, { status: 302, headers: { Location: row.url } });
     return new Response(row.data, {
       headers: {
         'Content-Type': row.mime,
@@ -182,10 +204,11 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
     method = request.method;
   const media = path.match(/^\/admin\/media\/([a-f0-9-]{36})$/);
   if (media && method === 'GET') {
-    const row = await env.DB.prepare('SELECT mime,data FROM images WHERE id=?')
+    const row = await env.DB.prepare('SELECT mime,data,url FROM images WHERE id=?')
       .bind(media[1])
       .first();
     if (!row) throw new HTTPError(404, '이미지를 찾을 수 없습니다.');
+    if (row.url) return new Response(null, { status: 302, headers: { Location: row.url } });
     return new Response(row.data, {
       headers: { 'Content-Type': row.mime, 'Content-Security-Policy': "default-src 'none'" },
     });

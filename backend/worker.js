@@ -1,3 +1,5 @@
+import { geocode } from './geocode.js';
+import { staffMeta } from './staff.js';
 import {
   publicFan,
   adminFan,
@@ -295,6 +297,8 @@ async function handle(request, env) {
     }
     throw new HTTPError(404, '관리 경로가 없습니다.');
   }
+  const geocoded = await geocode(request, env, { identity, rate });
+  if (geocoded) return geocoded;
   const fanResponse = await publicFan(request, env, { identity, rate, blocked, body });
   if (fanResponse) return fanResponse;
   if (path === '/visitors' && method === 'POST') {
@@ -371,15 +375,23 @@ async function handle(request, env) {
         : feed === 'artist'
           ? ' AND p.member_id IS NOT NULL'
           : '';
+    const meta = staffMeta(b, url.searchParams.get('channel') || 'free', []);
+    const tag = url.searchParams.get('tag') || '';
+    if (tag) staffMeta(b, 'soliloquy', [tag]);
+    const staffFilter =
+      b === 'staff'
+        ? " AND p.channel=? AND (?='' OR EXISTS(SELECT 1 FROM json_each(p.tags) WHERE value=?))"
+        : '';
     const order =
       feed === 'highlight'
         ? 'likes DESC,p.created_at DESC,p.id DESC'
         : 'p.created_at DESC,p.id DESC';
     const { results } = await env.DB.prepare(
-      `SELECT ${postFields},(SELECT COUNT(*) FROM comments c WHERE c.post_id=p.id AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL))) AS comments,(SELECT COUNT(*) FROM post_likes l WHERE l.post_id=p.id) AS likes FROM posts p WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL ${feedFilter} AND (p.title LIKE ? ESCAPE '\\' OR p.body LIKE ? ESCAPE '\\') ORDER BY ${order} LIMIT 21 OFFSET ?`,
+      `SELECT ${postFields},(SELECT COUNT(*) FROM comments c WHERE c.post_id=p.id AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL))) AS comments,(SELECT COUNT(*) FROM post_likes l WHERE l.post_id=p.id) AS likes FROM posts p WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL ${feedFilter} ${staffFilter} AND (p.title LIKE ? ESCAPE '\\' OR p.body LIKE ? ESCAPE '\\') ORDER BY ${order} LIMIT 21 OFFSET ?`,
     )
       .bind(
         b,
+        ...(b === 'staff' ? [meta.channel, tag, tag] : []),
         '%' + search.replace(/[\\%_]/g, '\\$&') + '%',
         '%' + search.replace(/[\\%_]/g, '\\$&') + '%',
         offset,
@@ -447,8 +459,9 @@ async function handle(request, env) {
         content = text(data.body, 1, path === '/posts' ? 5000 : 1000, '내용');
       let stmt;
       if (path === '/posts') {
+        const meta = staffMeta(board(data.board), data.channel || 'free', data.tags || []);
         stmt = env.DB.prepare(
-          'INSERT INTO posts(id,board,title,author,department,body,salt,password_hash,created_at,pin_length) VALUES (?,?,?,?,?,?,?,?,?,6)',
+          'INSERT INTO posts(id,board,title,author,department,body,salt,password_hash,created_at,pin_length,channel,tags) VALUES (?,?,?,?,?,?,?,?,?,6,?,?)',
         ).bind(
           id,
           board(data.board),
@@ -459,6 +472,8 @@ async function handle(request, env) {
           salt,
           pwd,
           created,
+          meta.channel,
+          meta.tags,
         );
       } else {
         const parent = await env.DB.prepare(
@@ -499,7 +514,7 @@ async function handle(request, env) {
       await rate(env, 'password-ip:' + hash, 10, 900);
       await rate(env, 'password-record:' + id, 5, 900);
       const row = await env.DB.prepare(
-        `SELECT salt,password_hash,pin_length,member_id FROM ${table} WHERE id=? AND hidden=0 AND deleted_at IS NULL`,
+        `SELECT salt,password_hash,pin_length,member_id,${table === 'posts' ? 'board,channel,tags' : 'post_id'} FROM ${table} WHERE id=? AND hidden=0 AND deleted_at IS NULL`,
       )
         .bind(id)
         .first();
@@ -530,6 +545,18 @@ async function handle(request, env) {
           );
         }
         if (table === 'posts') {
+          const meta = staffMeta(
+            row.board,
+            data.channel ?? row.channel,
+            data.tags ?? JSON.parse(row.tags),
+          );
+          changes.push(
+            env.DB.prepare('UPDATE posts SET channel=?,tags=? WHERE id=?').bind(
+              meta.channel,
+              meta.tags,
+              id,
+            ),
+          );
           changes.push(
             env.DB.prepare('UPDATE posts SET title=?,body=?,updated_at=? WHERE id=?').bind(
               text(data.title, 1, 100, '제목'),
@@ -607,6 +634,7 @@ export default {
       env.DB.prepare('DELETE FROM access_logs WHERE created_at<?').bind(time - 30 * 86400000),
       env.DB.prepare('DELETE FROM rate_limits WHERE expires<?').bind(time),
       env.DB.prepare('DELETE FROM sessions WHERE expires<?').bind(time),
+      env.DB.prepare('DELETE FROM geocode_cache WHERE expires<?').bind(time),
       env.DB.prepare('DELETE FROM blocks WHERE expires<?').bind(time),
       env.DB.prepare('DELETE FROM visitor_keys WHERE day<?').bind(cutoff),
       env.DB.prepare(

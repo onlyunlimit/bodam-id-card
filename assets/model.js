@@ -1,3 +1,4 @@
+import { isArea } from './geo-model.js';
 export const teams = [
   {
     id: 'origin',
@@ -204,6 +205,11 @@ export function isIncident(item) {
         item.coordinates.every(Number.isFinite) &&
         Math.abs(item.coordinates[0]) <= 90 &&
         Math.abs(item.coordinates[1]) <= 180)) &&
+    (item.area === undefined || isArea(item.area)) &&
+    (item.radiusMeters === undefined ||
+      (Number.isFinite(item.radiusMeters) &&
+        item.radiusMeters >= 0 &&
+        item.radiusMeters <= 2000000)) &&
     ['D', 'C', 'B', 'A'].includes(item.grade) &&
     (descriptions[item.type].includes(item.detail) ||
       (item.manual === true &&

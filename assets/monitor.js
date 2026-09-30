@@ -1,3 +1,4 @@
+import { reportMapControls, mountReportMap } from './report-map.js';
 import { evidenceIndex, mountEvidenceIndex } from './evidence.js';
 import { registerCopy } from './i18n.js';
 [
@@ -52,14 +53,15 @@ export function createMap(element, signals = incidents) {
   }
   const map = L.map(element, {
     scrollWheelZoom: false,
+    worldCopyJump: true,
     zoomAnimation: false,
     fadeAnimation: state.motion,
     zoomControl: true,
     attributionControl: true,
-  }).setView([37.553, 127.005], 11);
+  }).setView([20, 0], 2);
   const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 17,
-    minZoom: 10,
+    maxZoom: 19,
+    minZoom: 2,
     attribution:
       '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
   }).addTo(map);
@@ -78,7 +80,8 @@ export function createMap(element, signals = incidents) {
         C: ['#c8b97a', 600],
         D: ['#56d3dc', 280],
       }[s.grade];
-      L.circle(pos, { radius: risk[1], color: risk[0], weight: 1, fillOpacity: 0.12 }).addTo(layer);
+      if (s.area)
+        L.geoJSON(s.area, { style: { color: risk[0], weight: 2, fillOpacity: 0.14 } }).addTo(layer);
       const marker = L.marker(pos, {
         icon: L.divIcon({
           className: 'incident-pin',
@@ -118,11 +121,11 @@ export function renderOverview() {
     active = units.filter((x) => status(x.id).active).length;
   $('#main').innerHTML =
     heading(
-      'CENTRAL OPERATIONS / SEOUL',
+      'CENTRAL OPERATIONS / WORLD',
       '통합 관제 현황',
-      '국가 각성자 통합관리청 · 서울권 운영 정보',
+      '국가 각성자 통합관리청 · 전 세계 사건 관제',
     ) +
-    `<section class="control-grid"><div class="map-panel panel"><div class="section-title"><div><span class="eyebrow">SEOUL SURVEILLANCE</span><h2>게이트 관측망</h2></div><span class="badge">LIVE SIGNAL</span></div><div class="map-wrap"><div id="seoul-map" class="seoul-map" aria-label="서울권 위험 분포"></div><div class="map-target" id="map-target"><i></i><span>CURSOR TRACK</span></div><div class="map-coordinate">SEOUL / <span id="cursor-coordinate">37.5530, 127.0050</span></div></div><div class="map-legend"><span><i class="legend-dot" style="background:#ec4f64"></i>A / CRITICAL</span><span><i class="legend-dot" style="background:#eea455"></i>B / HIGH</span><span><i class="legend-dot" style="background:#d3bc62"></i>C / WATCH</span><span><i class="legend-dot green"></i>D / LOW</span><button id="map-reset" class="subtle">서울권 재정렬 ↻</button></div></div><aside class="control-sidebar"><section class="readout panel"><div class="readout-label"><h2>관측 중인 게이트</h2><a href="records.html">기록 ↗</a></div><div class="readout-body">${gauge(t.gates, Math.max(t.open, 1), 'GATES')}<div class="grade-chart">${[
+    `<section class="control-grid"><div class="map-panel panel"><div class="section-title"><div><span class="eyebrow">WORLD SURVEILLANCE</span><h2>게이트 관측망</h2></div><span class="badge">LIVE SIGNAL</span></div><div class="map-wrap"><div id="seoul-map" class="seoul-map" aria-label="세계 위험 분포"></div><div class="map-target" id="map-target"><i></i><span>CURSOR TRACK</span></div><div class="map-coordinate">WORLD / <span id="cursor-coordinate">20.0000, 0.0000</span></div></div><div class="map-legend"><span><i class="legend-dot" style="background:#ec4f64"></i>A / CRITICAL</span><span><i class="legend-dot" style="background:#eea455"></i>B / HIGH</span><span><i class="legend-dot" style="background:#d3bc62"></i>C / WATCH</span><span><i class="legend-dot green"></i>D / LOW</span><button id="map-reset" class="subtle">세계 지도 ↻</button></div></div><aside class="control-sidebar"><section class="readout panel"><div class="readout-label"><h2>관측 중인 게이트</h2><a href="records.html">기록 ↗</a></div><div class="readout-body">${gauge(t.gates, Math.max(t.open, 1), 'GATES')}<div class="grade-chart">${[
       'A',
       'B',
       'C',
@@ -138,7 +141,7 @@ export function renderOverview() {
         '',
       )}</div></div><small>등급별 미해결 게이트 분포</small></section><section class="readout panel"><div class="readout-label"><h2>부서 운용 현황</h2><span class="count-readout" id="active-count">${active}<small> / 3</small></span></div><div class="unit-lights">${units.map((u) => `<a href="${u.id}.html"><b>${u.en}</b>${statusMarkup(u.id)}</a>`).join('')}</div></section></aside></section><div class="environment-grid"><section class="weather-panel panel"><div class="section-title"><div><span class="eyebrow">SEOUL METEOROLOGICAL SERVICE</span><h2>서울 기상 관측</h2></div><span id="weather-status" class="muted">기상 수신 중</span></div><div class="weather-reading"><svg viewBox="0 0 100 80" class="weather-illustration" aria-hidden="true"><circle cx="35" cy="30" r="18" fill="#efc37d"/><path d="M20 65C0 60 12 40 27 44C32 17 69 21 74 44C96 37 106 69 80 68H25" fill="#a7c0df"/><path d="M22 75h52" stroke="#799bcc" stroke-width="2"/></svg><strong id="weather-temp">—<small>°C</small></strong><div><b id="weather-condition">기상 연결 대기</b><p id="weather-extra">서울 / 현재 관측</p></div></div><div id="weather-chart" class="weather-chart"><span>시간별 기온 자료 수신 대기</span></div><a class="credit" href="https://open-meteo.com/" target="_blank" rel="noopener">Weather by Open-Meteo ↗</a></section><section class="clock-panel panel"><div><span class="eyebrow">HEADQUARTERS STANDARD TIME</span><h2>본부 표준 시각</h2><time id="hq-clock"></time><p id="hq-date"></p><small>SEOUL, KR / UTC +09:00</small></div><div class="analog-clock"><span class="hour-hand"></span><span class="minute-hand"></span><span class="second-hand"></span><i></i><b>SGIA</b></div></section></div><section class="panel bulletin-panel"><div class="section-title"><div><p class="eyebrow">INCOMING / AGENCY BULLETIN</p><h2>관제 브리핑</h2></div><button class="subtle" id="brief-refresh">새 연락 수신 ↻</button></div><div id="brief-feed" class="brief-feed" aria-live="polite"></div></section><div class="service-links" id="resources"><a href="sgia.html"><span>PERSONNEL REGISTRATION</span><b>각성자 등록증 ↗</b></a><a href="monster.html"><span>ENTITY RECORD</span><b>괴물 관리 기록 ↗</b></a><a href="team.html"><span>UNIT REGISTRATION</span><b>팀 프로필 ↗</b></a></div>`;
   const map = createMap($('#seoul-map'));
-  $('#map-reset').onclick = () => map?.setView([37.553, 127.005], 11, { animate: state.motion });
+  $('#map-reset').onclick = () => map?.setView([20, 0], 2, { animate: state.motion });
   listen(document, 'sgia:cursor', (e) => {
     const { x, y } = e.detail,
       t = $('#map-target');
@@ -245,7 +248,7 @@ export function renderRecords() {
   let page = 0;
   $('#main').innerHTML =
     heading('INCIDENT ARCHIVE / RESPONSE', '사건 기록실', '신고 접수 · 현장 대응 · 종결 기록') +
-    `<div class="access-lock" id="records-lock"><img src="assets/art/silver-emblem.webp" alt=""><h2>직원 열람 채널</h2><p>신고 기록과 처리 업무는 직원 채널에서 열람할 수 있습니다.</p><button class="primary" id="records-login">직원 로그인</button></div><section id="records-workspace" hidden><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><svg class="wave" viewBox="0 0 180 40" aria-hidden="true"><path d="M0 20H25L30 8L35 35L40 17H60L65 2L70 38L75 20H110L115 10L120 32L125 20H180" fill="none" stroke="currentColor"/></svg><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p class="muted">단말 기록은 현재 브라우저에 보관됩니다.</p></section>`;
+    `<div class="access-lock" id="records-lock"><img src="assets/art/silver-emblem.webp" alt=""><h2>직원 열람 채널</h2><p>신고 기록과 처리 업무는 직원 채널에서 열람할 수 있습니다.</p><button class="primary" id="records-login">직원 로그인</button></div><section id="records-workspace" hidden><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p class="muted">단말 기록은 현재 브라우저에 보관됩니다.</p></section>`;
   const rack = document.createElement('aside');
   rack.className = 'records-rack';
   const receiver = $('.receiver');
@@ -320,48 +323,30 @@ export function renderRecords() {
     if (incidents.length >= 100) return toast('기록함에 최대 100건을 보관합니다.');
     const reportDialog = modal(
       '신고서 작성',
-      `<form id="incident-form" class="board-form"><div class="form-row"><label>신고자<input name="reporter" maxlength="40" required></label><label>발생 시각<input name="occurred" type="datetime-local" value="${koreaTime().date.replaceAll('.', '-')}T${koreaTime().clock.slice(0, 5)}" required></label></div><div class="form-row"><label>발생 위치<input name="location" maxlength="140" value="성수동 폐공장" required></label><label>구역<input name="zone" maxlength="80" required></label></div><div class="report-map-field"><p>지도를 눌러 발생 위치를 지정하세요.</p><div id="report-map" class="seoul-map" aria-label="신고 위치 선택 지도"></div><div class="coordinate-inputs"><label>위도<input name="latitude" type="number" step="any" min="-90" max="90" value="37.5445" required></label><label>경도<input name="longitude" type="number" step="any" min="-180" max="180" value="127.0557" required></label><button type="button" id="apply-coordinate">좌표 적용</button></div></div><div class="form-row"><label>유형<select name="type">${incidentTypes.map((t) => `<option value="${t}">${t}</option>`).join('')}</select></label><label>위험 등급<select name="grade"><option>D</option><option>C</option><option>B</option><option>A</option></select></label></div><div class="form-row"><label>지원 요청 팀<select name="support"><option value="비콘">비콘</option><option value="실드">실드</option><option value="오리진">오리진</option></select></label><label>필요 인원<input name="personnel" type="number" min="1" max="30" value="2" required></label></div><label>상황 설명<textarea name="detail" minlength="5" maxlength="1500" required></textarea></label><label>추가 요청사항<textarea name="requests" maxlength="500"></textarea></label><button class="primary">신고 접수</button></form>`,
+      `<form id="incident-form" class="board-form"><div class="form-row"><label>신고자<input name="reporter" maxlength="40" required></label><label>발생 시각<input name="occurred" type="datetime-local" value="${koreaTime().date.replaceAll('.', '-')}T${koreaTime().clock.slice(0, 5)}" required></label></div><div class="form-row"><label>발생 위치<input name="location" maxlength="140" placeholder="주소·도시·지역명" required></label><label>구역<input name="zone" maxlength="80" required></label></div><div class="report-map-field">${reportMapControls}<p>지도를 눌러 발생 위치를 지정하세요.</p><div id="report-map" class="seoul-map" aria-label="신고 위치 선택 지도"></div><div class="coordinate-inputs"><label>위도<input name="latitude" type="number" step="any" min="-90" max="90" value="37.5445" required></label><label>경도<input name="longitude" type="number" step="any" min="-180" max="180" value="127.0557" required></label><button type="button" id="apply-coordinate">좌표 적용</button></div></div><div class="form-row"><label>유형<select name="type">${incidentTypes.map((t) => `<option value="${t}">${t}</option>`).join('')}</select></label><label>위험 등급<select name="grade"><option>D</option><option>C</option><option>B</option><option>A</option></select></label></div><div class="form-row"><label>지원 요청 팀<select name="support"><option value="비콘">비콘</option><option value="실드">실드</option><option value="오리진">오리진</option></select></label><label>필요 인원<input name="personnel" type="number" min="1" max="30" value="2" required></label></div><label>상황 설명<textarea name="detail" minlength="5" maxlength="1500" required></textarea></label><label>추가 요청사항<textarea name="requests" maxlength="500"></textarea></label><button class="primary">신고 접수</button></form>`,
     );
     const picker = createMap($('#report-map'), []);
-    let selected = [37.5445, 127.0557],
-      pin;
-    if (picker) {
-      picker.setView(selected, 13);
-      pin = L.marker(selected, { draggable: true }).addTo(picker);
-    }
-    const setPoint = (lat, lng) => {
-      selected = [lat, lng];
-      pin?.setLatLng(selected);
-      $('[name=latitude]').value = lat.toFixed(6);
-      $('[name=longitude]').value = lng.toFixed(6);
-    };
-    picker?.on('click', (e) => setPoint(e.latlng.lat, e.latlng.lng));
-    pin?.on('dragend', () => {
-      const p = pin.getLatLng();
-      setPoint(p.lat, p.lng);
-    });
-    $('#apply-coordinate').onclick = () => {
-      const lat = $('[name=latitude]'),
-        lng = $('[name=longitude]');
-      if (!lat.reportValidity() || !lng.reportValidity()) return;
-      setPoint(+lat.value, +lng.value);
-      picker?.setView(selected, 13);
-    };
+    const mapInput = mountReportMap($('#incident-form'), picker, reportDialog);
     delay(() => {
       if (reportDialog.open) picker?.refreshSize();
     }, 200);
-    reportDialog.addEventListener('close', () => picker?.release(), { once: true });
     $('#incident-form').onsubmit = (e) => {
       e.preventDefault();
       if (!state.staff) return;
       const data = Object.fromEntries(new FormData(e.target));
+      let geo;
+      try {
+        geo = mapInput.read();
+      } catch (error) {
+        return toast(error.message);
+      }
       const item = {
         ...generateIncident(incidents.length),
         ...data,
         personnel: Number(data.personnel),
         occurredAt: new Date(data.occurred + '+09:00').getTime(),
         manual: true,
-        coordinates: [Number(data.latitude), Number(data.longitude)],
+        ...geo,
       };
       if (!isIncident(item)) return toast('신고 내용을 확인해 주세요.');
       incidents.push(item);
@@ -393,7 +378,9 @@ export function renderRecords() {
           '<div id="case-location-map" class="seoul-map"></div>',
         );
         const m = createMap($('#case-location-map'), [{ ...record, resolvedAt: null }]);
-        m?.setView(record.coordinates || locations[record.location] || [37.55, 127], 14);
+        if (record.area && m)
+          m.fitBounds(L.geoJSON(record.area).getBounds(), { padding: [20, 20] });
+        else m?.setView(record.coordinates || locations[record.location] || [37.55, 127], 14);
         delay(() => {
           if (d.open) m?.refreshSize();
         }, 200);

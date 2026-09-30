@@ -98,3 +98,8 @@ test('Pinned reports accept real coordinates, preserve old records, and reject c
     assert.equal(isIncident({ ...record, coordinates }), false);
   assert.equal(isIncident({ ...record, location: ' ' }), false);
 });
+
+test('Incident boundaries validate GeoJSON and retain worldwide coordinates and radius metadata',()=>{
+ const record={...generateIncident(1),coordinates:[-33.8688,151.2093],radiusMeters:500,area:{type:'Polygon',coordinates:[[[151,-34],[152,-34],[152,-33],[151,-34]]]}};
+ assert.equal(isIncident(record),true);assert.equal(isIncident({...record,radiusMeters:-1}),false);assert.equal(isIncident({...record,area:{type:'Polygon',coordinates:[[[0,0],[1,0],[1,1]]]}}),false);assert.equal(isIncident({...record,area:{type:'Polygon',coordinates:[[[181,0],[1,0],[1,1],[181,0]]]}}),false);
+});

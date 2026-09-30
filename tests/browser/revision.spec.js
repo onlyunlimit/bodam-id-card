@@ -1,3 +1,4 @@
+import {mockGeocode} from './geocode-fixture.js';
 import { test, expect } from '@playwright/test';
 async function login(p) {
   await p.locator('#viewer-toggle').click();
@@ -78,7 +79,11 @@ test('Manual reports persist, open as dossiers, dispatch alerts and retain Korea
   await login(page);
   await page.locator('[data-lang="en"]').click();
   await page.locator('#new-incident').click();
+  await mockGeocode(page);
   await page.locator('[name=reporter]').fill('Night watch');
+  await page.locator('[name=location]').fill('Paris');
+  await page.locator('#search-address').click();
+  await expect(page.locator('#address-status')).toContainText('Address and mapped boundary found.');
   await page.locator('[name=zone]').fill('Gate 03');
   await page.locator('[name=detail]').fill('Unidentified signal at the east entrance.');
   await page.locator('[name=personnel]').fill('7');
