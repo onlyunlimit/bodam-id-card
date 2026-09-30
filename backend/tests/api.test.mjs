@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import worker from '../worker.js';
+import {mediaClientSource} from '../admin-media.generated.js';
+test('Admin media source is current before Worker bundling',()=>{
+ assert.equal(mediaClientSource,readFileSync(new URL('../../assets/community-media.js',import.meta.url),'utf8').replace(/^export /gm,''));
+});
 import { digest, decipherIP } from '../security.js';
 const originalFetch = globalThis.fetch;
 let geocodeCalls=0;

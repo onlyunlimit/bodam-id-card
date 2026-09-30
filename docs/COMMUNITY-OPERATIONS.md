@@ -132,3 +132,11 @@ API 주소와 공개 Turnstile 사이트 키만 `assets/service-config.js`에 �
 - [Nominatim 정책](https://operations.osmfoundation.org/policies/nominatim/)에 맞춰 자동 완성 요청을 보내지 않습니다. 서버 전체 미캐시 조회 간격 1.2초, IP별 분당 20회, 결과 캐시 7일, 식별 User-Agent를 사용합니다. 서비스가 응답하지 않으면 지도 핀·좌표·직접 구역 작성으로 진행합니다. 캐시에 사건 본문이나 신고자를 저장하지 않으며 검색어·좌표는 외부 주소 서비스로 전달됩니다.
 - 주소 검색·경계에는 OpenStreetMap 출처를 표시합니다. 캐시는 일일 예약 작업에서 만료분을 제거합니다. 지나치게 복잡하거나 올바르지 않은 경계는 반환하지 않습니다(최대 2,500좌표).
 - 구역·추정 반경은 기존 사건과 함께 브라우저 로컬 저장입니다. 반경은 참고 수치이며 행정 경계를 반경에 맞춰 계산하지 않습니다. 운영 DB에는 사건 신고를 저장하지 않습니다.
+
+
+## 관리자 첨부 코드 빌드
+
+- 관리자 브라우저에서 실행할 첨부 코드를 Worker 함수의 `toString()`으로 추출하지 않습니다. Wrangler가 함수에 삽입하는 보조 함수가 브라우저에 없으면 첨부 초기화가 중단됩니다.
+- `backend/scripts/build-admin-media.mjs`가 `assets/community-media.js` 원본을 읽어 `backend/admin-media.generated.js` 문자열 모듈을 생성합니다. 생성 파일을 직접 수정하지 않습니다. Wrangler의 build 단계에서 자동 갱신하며, 수동 갱신은 루트에서 `node backend/scripts/build-admin-media.mjs`입니다.
+- 서버 검사는 생성 파일과 원본 일치를 확인합니다. 관리자 브라우저 검사는 Worker와 같은 `keepNames` 번들 변환 후 파일·링크 첨부, × 취소, 이미지 없는 등록을 확인합니다.
+- 배포 후 `SGIA_ADMIN_SCRIPT_URL=https://sgia-community.sgia-community-api.workers.dev/admin/app.js npx playwright test tests/browser/community-admin.spec.js`로 실제 공개 관리자 JS를 검사할 수 있습니다. 이 검사는 관리자 API를 테스트 대역으로 대체하므로 운영 게시물을 생성하지 않습니다.

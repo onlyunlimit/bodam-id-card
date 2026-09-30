@@ -1,6 +1,5 @@
-import { compressImage, attachmentPicker, uploadMarkup } from '../assets/community-media.js';
-export const composerJS =
-  `${compressImage.toString()}\n${attachmentPicker.toString()}\nconst uploadMarkup=${JSON.stringify(uploadMarkup)};\n` +
+import { mediaClientSource } from './admin-media.generated.js';
+export const composerJS = mediaClientSource + '\n' +
   String.raw`
 let memberCache=[],adminPosts=[],composerReady=false;
 const memberOptions=(group,selected)=>memberCache.filter(m=>!group||m.board===group).map(m=>'<option value="'+esc(m.id)+'" '+(m.id===selected?'selected':'')+'>'+esc(m.board+' / '+m.name)+'</option>').join('');

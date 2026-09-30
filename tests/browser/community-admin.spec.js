@@ -1,9 +1,17 @@
 import { test, expect } from '@playwright/test';
-import { adminHTML, adminJS } from '../../backend/admin.js';
+import { build } from '../../backend/node_modules/esbuild/lib/main.js';
+// Exercise the same keepNames transform used by Wrangler, not raw source functions.
+const bundled = await build({entryPoints:['backend/admin.js'],bundle:true,write:false,format:'esm',platform:'neutral',keepNames:true});
+const {adminHTML,adminJS:bundledAdminJS} = await import('data:text/javascript;base64,' + Buffer.from(bundled.outputFiles[0].text).toString('base64'));
+const adminJS = process.env.SGIA_ADMIN_SCRIPT_URL
+  ? await (await fetch(process.env.SGIA_ADMIN_SCRIPT_URL)).text()
+  : bundledAdminJS;
 
 test('Owner console publishes with a member identity, edits profiles and manages posts and replies', async ({
   page,
 }) => {
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
   const calls = [],
     members = [{ id: 'jaein', board: 'lucky', name: '재인', bio: '소개', avatar_url: '' }],
     posts = [
@@ -63,6 +71,8 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await page.locator('.attachment-remove').click();await expect(page.locator('.upload-image')).toHaveCount(0);
   await page.locator('[data-image-url]').fill('https://images.example/photo.jpg');await page.locator('[data-add-image-url]').click();
   await page.locator('[data-images]').setInputFiles('assets/art/id-frame.png');await expect(page.locator('.upload-image')).toHaveCount(2);
+  await page.locator('.attachment-remove').nth(1).click();await expect(page.locator('.upload-image')).toHaveCount(1);
+  await page.locator('[data-images]').setInputFiles('assets/art/id-frame.png');await expect(page.locator('.upload-image')).toHaveCount(2);
 
   await page.locator('#admin-editor button[type=submit]').click();
   await expect(page.locator('#posts')).toContainText('공식 첫 인사');
@@ -83,6 +93,13 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await page.locator('#admin-editor button[type=submit]').click();
   await expect(page.locator('#admin-editor')).not.toBeVisible();
   expect(calls.find((c) => c.path.startsWith('/admin/posts/')).data.body).toBe('관리자로 수정');
+  await page.locator('#artist-compose').click();
+  await page.locator('[name=title]').fill('사진 없이 작성');await page.locator('[name=body]').fill('취소한 사진은 등록하지 않음');
+  await page.locator('[data-images]').setInputFiles('assets/art/id-frame.png');await expect(page.locator('.upload-image')).toHaveCount(1);
+  await page.locator('.attachment-remove').click();await expect(page.locator('.upload-image')).toHaveCount(0);
+  await page.locator('#admin-editor button[type=submit]').click();await expect(page.locator('#admin-editor')).not.toBeVisible();
+  expect(calls.filter(c=>c.path==='/admin/publish').at(-1).data.images).toEqual([]);
+  expect(errors).toEqual([]);
   await page.locator('#logout').click();
   await expect(page.locator('#workspace')).not.toBeVisible();
 });
