@@ -1,7 +1,8 @@
 import { reportMapControls, mountReportMap } from './report-map.js';
 import { evidenceIndex, mountEvidenceIndex } from './evidence.js';
-import { registerCopy } from './i18n.js';
+import { registerCopy, tr } from './i18n.js';
 [
+  ['신고 접수가 완료되었습니다.', 'Report submitted successfully.', '通報を受け付けました。', '报案已成功提交。'],
   ['지원 팀 이름을 입력해 주세요.', 'Enter a support team name.', '支援チーム名を入力してください。', '请输入支援团队名称。'],
   ['지원 팀 이름', 'Support team name', '支援チーム名', '支援团队名称'],
   ['현장 위치', 'Incident locations', '現場位置', '现场位置'],
@@ -55,6 +56,8 @@ export function createMap(element, signals = incidents) {
   }
   const map = L.map(element, {
     scrollWheelZoom: false,
+    doubleClickZoom: true,
+    touchZoom: true,
     worldCopyJump: true,
     zoomAnimation: false,
     fadeAnimation: state.motion,
@@ -250,7 +253,7 @@ export function renderRecords() {
   let page = 0;
   $('#main').innerHTML =
     heading('INCIDENT ARCHIVE / RESPONSE', '사건 기록실', '신고 접수 · 현장 대응 · 종결 기록') +
-    `<div class="access-lock" id="records-lock"><img src="assets/art/silver-emblem.webp" alt=""><h2>직원 열람 채널</h2><p>신고 기록과 처리 업무는 직원 채널에서 열람할 수 있습니다.</p><button class="primary" id="records-login">직원 로그인</button></div><section id="records-workspace" hidden><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p class="muted">단말 기록은 현재 브라우저에 보관됩니다.</p></section>`;
+    `<div class="access-lock" id="records-lock"><img src="assets/art/silver-emblem.webp" alt=""><h2>직원 열람 채널</h2><p>신고 기록과 처리 업무는 직원 채널에서 열람할 수 있습니다.</p><button class="primary" id="records-login">직원 로그인</button></div><section id="records-workspace" hidden><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><p id="report-success" class="panel" role="status" tabindex="-1" hidden></p><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p class="muted">단말 기록은 현재 브라우저에 보관됩니다.</p></section>`;
   const rack = document.createElement('aside');
   rack.className = 'records-rack';
   const receiver = $('.receiver');
@@ -325,7 +328,7 @@ export function renderRecords() {
     if (incidents.length >= 100) return toast('기록함에 최대 100건을 보관합니다.');
     const reportDialog = modal(
       '신고서 작성',
-      `<form id="incident-form" class="board-form"><div class="form-row"><label>신고자<input name="reporter" maxlength="40" required></label><label>발생 시각<input name="occurred" type="datetime-local" value="${koreaTime().date.replaceAll('.', '-')}T${koreaTime().clock.slice(0, 5)}" required></label></div><div class="form-row"><label>발생 위치<input name="location" maxlength="140" placeholder="주소·도시·지역명" required></label><label>구역<input name="zone" maxlength="80" required></label></div><div class="report-map-field">${reportMapControls}<p>지도를 눌러 발생 위치를 지정하세요.</p><div id="report-map" class="seoul-map" aria-label="신고 위치 선택 지도"></div><div class="coordinate-inputs"><label>위도<input name="latitude" type="number" step="any" min="-90" max="90" value="37.5445" required></label><label>경도<input name="longitude" type="number" step="any" min="-180" max="180" value="127.0557" required></label><button type="button" id="apply-coordinate">좌표 적용</button></div></div><div class="form-row"><label>유형<select name="type">${incidentTypes.map((t) => `<option value="${t}">${t}</option>`).join('')}</select></label><label>위험 등급<select name="grade"><option>D</option><option>C</option><option>B</option><option>A</option></select></label></div><div class="form-row"><label>지원 요청 팀<select name="support"><option value="비콘">비콘</option><option value="실드">실드</option><option value="오리진">오리진</option><option value="custom">직접 입력</option></select></label><label>필요 인원<input name="personnel" type="number" min="1" max="30" value="2" required></label></div><label id="custom-support-field" hidden>지원 팀 이름<input name="customSupport" maxlength="80" disabled></label><label>상황 설명<textarea name="detail" minlength="5" maxlength="1500" required></textarea></label><label>추가 요청사항<textarea name="requests" maxlength="500"></textarea></label><button class="primary">신고 접수</button></form>`,
+      `<form id="incident-form" class="board-form"><div class="form-row"><label>신고자<input name="reporter" maxlength="40" required></label><label>발생 시각<input name="occurred" type="datetime-local" value="${koreaTime().date.replaceAll('.', '-')}T${koreaTime().clock.slice(0, 5)}" required></label></div><div class="form-row"><label>발생 위치<input name="location" maxlength="140" placeholder="주소·도시·지역명" required></label><label>구역<input name="zone" maxlength="80" required></label></div><div class="report-map-field">${reportMapControls}<p>지도를 눌러 발생 위치를 지정하세요.</p><div id="report-map" class="seoul-map" aria-label="신고 위치 선택 지도"></div><div class="coordinate-inputs"><label>위도<input name="latitude" type="number" step="any" min="-90" max="90" value="37.5445" required></label><label>경도<input name="longitude" type="number" step="any" min="-180" max="180" value="127.0557" required></label><button type="button" id="apply-coordinate">좌표 적용</button></div></div><div class="form-row"><label>유형<select name="type">${incidentTypes.map((t) => `<option value="${t}">${t}</option>`).join('')}</select></label><label>위험 등급<select name="grade"><option>D</option><option>C</option><option>B</option><option>A</option></select></label></div><div class="form-row"><label>지원 요청 팀<select name="support"><option value="비콘">비콘</option><option value="실드">실드</option><option value="오리진">오리진</option><option value="custom">직접 입력</option></select></label><label>필요 인원<input name="personnel" type="number" min="1" max="30" value="2" required></label></div><label id="custom-support-field" hidden>지원 팀 이름<input name="customSupport" maxlength="80" disabled></label><label>상황 설명<textarea name="detail" minlength="5" maxlength="1500" required></textarea></label><label>추가 요청사항<textarea name="requests" maxlength="500"></textarea></label><p id="report-error" class="form-error" role="alert" tabindex="-1" hidden></p><button class="primary">신고 접수</button></form>`,
     );
     const supportChoice = $('#incident-form [name=support]');
     const customSupport = $('#incident-form [name=customSupport]');
@@ -344,13 +347,21 @@ export function renderRecords() {
     $('#incident-form').onsubmit = (e) => {
       e.preventDefault();
       if (!state.staff) return;
+      const error = $('#report-error');
+      const fail = (message) => {
+        error.hidden = false;
+        error.textContent = message;
+        error.focus();
+        error.scrollIntoView({ block: 'nearest' });
+      };
+      error.hidden = true;
       const data = Object.fromEntries(new FormData(e.target));
       data.supportCustom = data.support === 'custom';
       if (data.supportCustom) {
         data.support = (data.customSupport || '').trim();
         if (!data.support) {
           customSupport.focus();
-          return toast('지원 팀 이름을 입력해 주세요.');
+          return fail('지원 팀 이름을 입력해 주세요.');
         }
       }
       delete data.customSupport;
@@ -358,7 +369,7 @@ export function renderRecords() {
       try {
         geo = mapInput.read();
       } catch (error) {
-        return toast(error.message);
+        return fail(error.message);
       }
       const item = {
         ...generateIncident(incidents.length),
@@ -368,14 +379,20 @@ export function renderRecords() {
         manual: true,
         ...geo,
       };
-      if (!isIncident(item)) return toast('신고 내용을 확인해 주세요.');
+      if (!isIncident(item)) return fail('신고 내용을 확인해 주세요.');
+      if (!save('incidents', [...incidents, item]))
+        return fail('저장 공간에 접근할 수 없습니다. 신고서를 닫지 말고 다시 시도해 주세요.');
       incidents.push(item);
-      save('incidents', incidents);
       $('#document-dialog').close();
       page = 0;
       $('#incident-type').value = 'all';
       $('#incident-status').value = 'open';
       update();
+      const success = $('#report-success');
+      success.hidden = false;
+      success.textContent = tr('신고 접수가 완료되었습니다.') + ' · ' + item.id;
+      success.focus();
+      success.scrollIntoView({ block: 'center' });
       emergencyAlert(item);
     };
   };

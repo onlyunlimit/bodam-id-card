@@ -1695,3 +1695,23 @@ html[data-motion='off'] .release-pages > span {
     grid-template-columns: 1fr;
   }
 }
+
+#report-success {
+  padding: 18px 22px;
+  border-left: 4px solid var(--accent);
+  scroll-margin-top: 100px;
+}
+#report-error {
+  padding: 12px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+}
+#approximate-tools {
+  padding: 12px;
+  margin-block: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+#approximate-tools p {
+  font-size: 12px;
+}

@@ -1,4 +1,5 @@
 import { registerCopy } from './i18n.js';
+[["가상 장소 / 대략적인 위치로 접수", "Fictional place / approximate location", "架空の場所・おおよその位置で通報", "虚构地点 / 大致位置"], ["지도에서 찾을 도시·지역", "City / region to find on the map", "地図で探す都市・地域", "在地图上查找城市或地区"], ["발생 위치에는 가상의 장소명을 적어도 됩니다. 도시를 검색하거나 대략적인 핀 위치를 지정하세요.", "You can use a fictional place name. Search a city or choose an approximate pin location.", "架空の場所名も使えます。都市を検索するか、おおよその位置にピンを置いてください。", "可填写虚构地点名称。请搜索城市或指定大致位置。"], ["현재 핀을 대략 위치로 사용", "Use current pin as approximate location", "現在のピンをおおよその位置にする", "使用当前标记作为大致位置"], ["현재 핀을 대략적인 위치로 지정했습니다. 가상의 장소명으로 접수할 수 있습니다.", "Approximate location set. You can submit with a fictional place name.", "おおよその位置を指定しました。架空の場所名で通報できます。", "已设置大致位置，可使用虚构地点名称提交。"]].forEach((row) => registerCopy(...row));
 [
   [
     "주소 검색 ↗",
@@ -124,12 +125,13 @@ import { registerCopy } from './i18n.js';
 import { serviceConfig } from './service-config.js';
 import { onDispose } from './lifecycle.js';
 import { isArea, wrapLongitude } from './geo-model.js';
-export const reportMapControls = `<div class="address-tools"><button type="button" id="search-address">주소 검색 ↗</button><button type="button" id="world-view">세계 지도</button></div><p id="address-status" role="status">주소를 입력하고 검색하거나 지도에 핀을 찍으세요.</p><div id="address-results"></div><div class="area-controls"><label>범위 표시<select name="areaMode"><option value="point">지점</option><option value="boundary">검색된 지형·행정 경계</option><option value="draw">직접 구역 그리기</option></select></label><label>추정 반경(m) · 선택<input name="radiusMeters" type="number" min="0" max="2000000" placeholder="예: 500"></label></div><p class="area-help">경계 모드는 검색된 구역 전체를 표시합니다. 직접 그리기는 지도에 꼭짓점을 3개 이상 지정하세요. 추정 반경은 현장 정보로 기록됩니다.</p><div class="area-draw-tools"><button id="area-undo" type="button">꼭짓점 되돌리기</button><button id="area-clear" type="button">구역 지우기</button></div><small class="geocode-credit">주소·경계: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors / Nominatim</small>`;
+export const reportMapControls = `<label class="consent"><input type="checkbox" name="approximate"><span>가상 장소 / 대략적인 위치로 접수</span></label><div id="approximate-tools" hidden><label>지도에서 찾을 도시·지역<input name="citySearch" placeholder="예: 서울, 부산, Paris"></label><p>발생 위치에는 가상의 장소명을 적어도 됩니다. 도시를 검색하거나 대략적인 핀 위치를 지정하세요.</p><button type="button" id="confirm-approximate">현재 핀을 대략 위치로 사용</button></div><div class="address-tools"><button type="button" id="search-address">주소 검색 ↗</button><button type="button" id="world-view">세계 지도</button></div><p id="address-status" role="status">주소를 입력하고 검색하거나 지도에 핀을 찍으세요.</p><div id="address-results"></div><div class="area-controls"><label>범위 표시<select name="areaMode"><option value="point">지점</option><option value="boundary">검색된 지형·행정 경계</option><option value="draw">직접 구역 그리기</option></select></label><label>추정 반경(m) · 선택<input name="radiusMeters" type="number" min="0" max="2000000" placeholder="예: 500"></label></div><p class="area-help">경계 모드는 검색된 구역 전체를 표시합니다. 직접 그리기는 지도에 꼭짓점을 3개 이상 지정하세요. 추정 반경은 현장 정보로 기록됩니다.</p><div class="area-draw-tools"><button id="area-undo" type="button">꼭짓점 되돌리기</button><button id="area-clear" type="button">구역 지우기</button></div><small class="geocode-credit">주소·경계: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors / Nominatim</small>`;
 export function mountReportMap(form, map, dialog) {
   const $ = (s) => form.querySelector(s),
     location = form.elements.location,
     zone = form.elements.zone,
-    mode = form.elements.areaMode;
+    mode = form.elements.areaMode,
+    approximate = form.elements.approximate;
   const controller = new AbortController();
   let generation = 0,
     disposed = false,
@@ -221,7 +223,7 @@ export function mountReportMap(form, map, dialog) {
     }
   }
   function result(r, { move = true } = {}) {
-    location.value = r.name;
+    if (!approximate.checked || !location.value.trim()) location.value = r.name;
     zone.value = r.zone || zone.value;
     boundary = isArea(r.area) ? r.area : null;
     if (move) {
@@ -239,7 +241,7 @@ export function mountReportMap(form, map, dialog) {
     $('#address-results').replaceChildren();
   }
   async function search() {
-    const q = location.value.trim();
+    const q = (approximate.checked ? form.elements.citySearch.value : location.value).trim();
     if (q.length < 2) return status('검색할 주소나 지역명을 입력해 주세요.');
     const ticket = ++generation;
     pending = true;
@@ -277,7 +279,8 @@ export function mountReportMap(form, map, dialog) {
     pending = true;
     const fallback = `${selected[0].toFixed(5)}, ${selected[1].toFixed(5)}`;
     locationConfirmed = true;
-    location.value = fallback;
+    if (!approximate.checked || !location.value.trim()) location.value = fallback;
+    if (approximate.checked && !zone.value.trim()) zone.value = '대략 위치';
     boundary = null;
     paint();
     status('선택한 위치의 주소를 확인하고 있습니다…');
@@ -297,13 +300,30 @@ export function mountReportMap(form, map, dialog) {
     }
   }
   location.addEventListener('input', () => {
+    if (approximate.checked) return;
     invalidate();
     locationConfirmed = false;
     boundary = null;
     $('#address-results').replaceChildren();
     paint();
   });
-  location.addEventListener('change', search);
+  location.addEventListener('change', () => { if (!approximate.checked) search(); });
+  approximate.onchange = () => {
+    invalidate();
+    $('#address-results').replaceChildren();
+    $('#approximate-tools').hidden = !approximate.checked;
+  };
+  $('#confirm-approximate').onclick = () => {
+    if (!form.elements.latitude.reportValidity() || !form.elements.longitude.reportValidity()) return;
+    invalidate();
+    $('#address-results').replaceChildren();
+    point(+form.elements.latitude.value, +form.elements.longitude.value);
+    if (!zone.value.trim()) zone.value = form.elements.citySearch.value.trim() || '대략 위치';
+    status('현재 핀을 대략적인 위치로 지정했습니다. 가상의 장소명으로 접수할 수 있습니다.');
+  };
+  form.elements.citySearch.onkeydown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); search(); }
+  };
   location.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -355,16 +375,17 @@ export function mountReportMap(form, map, dialog) {
   return {
     read() {
       if (!locationConfirmed) throw Error('주소 검색 결과를 선택하거나 지도에 발생 위치를 지정해 주세요.');
-      if (pending) throw Error('주소 조회가 끝난 뒤 접수해 주세요.');
+      if (pending && !approximate.checked) throw Error('주소 조회가 끝난 뒤 접수해 주세요.');
       if (+form.elements.latitude.value !== selected[0] || +form.elements.longitude.value !== selected[1])
         throw Error('수정한 좌표를 지도에 적용한 뒤 접수해 주세요.');
-      if ($('#address-results').children.length)
+      if ($('#address-results').children.length && !approximate.checked)
         throw Error('주소 검색 결과에서 위치를 선택해 주세요.');
       const area = selectedArea();
       if (mode.value !== 'point' && !isArea(area))
         throw Error('경계를 선택하거나 꼭짓점을 3개 이상 지정해 주세요.');
       return {
         coordinates: [...selected],
+        approximate: approximate.checked,
         ...(area ? { area, areaSource: mode.value === 'draw' ? 'manual' : 'osm' } : {}),
         radiusMeters: Number(form.elements.radiusMeters.value) || 0,
       };

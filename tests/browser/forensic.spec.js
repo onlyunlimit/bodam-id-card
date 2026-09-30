@@ -128,3 +128,47 @@ test('Report addresses and worldwide pins stay in sync, save real boundaries and
  await page.locator('[name=areaMode]').selectOption('draw');for(const position of [{x:130,y:70},{x:180,y:110},{x:120,y:140}])await page.locator('#report-map').click({position});await expect(page.locator('#address-status')).toContainText('3개');
  await page.locator('[name=reporter]').fill('구역 작성');await page.locator('[name=detail]').fill('호주에서 직접 지정한 현장');await page.locator('#incident-form .primary').click();const drawn=await page.evaluate(()=>JSON.parse(localStorage.getItem('sgia.incidents')).at(-1));expect(drawn.areaSource).toBe('manual');expect(drawn.area.coordinates[0]).toHaveLength(4);expect(drawn.coordinates).toEqual([-33.8688,151.2093]);
 });
+
+
+test('Fictional place names use approximate city pins and show errors above the modal and completion after closing', async ({page}) => {
+ await mockGeocode(page); await page.emulateMedia({reducedMotion:'reduce'}); await page.goto('/records.html'); await staff(page);
+ await page.locator('#new-incident').click();
+ await page.locator('[name=approximate]').check();
+ await page.locator('[name=location]').fill('달빛 연구소 지하 7구역');
+ await page.locator('[name=citySearch]').fill('Seoul'); await page.locator('#search-address').click();
+ await expect(page.locator('#address-status')).toContainText('확인했습니다');
+ await expect(page.locator('[name=location]')).toHaveValue('달빛 연구소 지하 7구역');
+ await page.locator('[name=location]').fill('별빛 연구소');
+ await page.locator('[name=reporter]').fill('야간조'); await page.locator('[name=detail]').fill('가상 연구소에서 관측한 신호');
+ await page.locator('[name=support]').selectOption('custom'); await page.locator('[name=customSupport]').fill('   ');
+ await page.locator('#incident-form .primary').click(); await expect(page.locator('#report-error')).toBeVisible(); await expect(page.locator('#document-dialog')).toBeVisible();
+ await page.locator('[name=customSupport]').fill('합동팀'); await page.locator('#incident-form .primary').click();
+ await expect(page.locator('#document-dialog')).not.toBeVisible(); await expect(page.locator('#report-success')).toContainText('신고 접수가 완료');
+ const record = await page.evaluate(()=>JSON.parse(localStorage.getItem('sgia.incidents')).at(-1)); expect(record.location).toBe('별빛 연구소'); expect(record.approximate).toBe(true); expect(record.coordinates).toEqual([48.8566,2.3522]);
+ await page.reload(); await expect(page.locator('.case-content').first()).toContainText('별빛 연구소');
+ await page.route('**/geocode?**', route=>route.fulfill({status:503,json:{error:'검색 연결 실패'}}));
+ await page.locator('#new-incident').click(); await page.locator('[name=approximate]').check();
+ await page.locator('[name=location]').fill('미등록 가상 기지'); await page.locator('[name=citySearch]').fill('서울');
+ await page.locator('#search-address').click(); await expect(page.locator('#address-status')).toContainText('검색 연결 실패');
+ await page.locator('#confirm-approximate').click();
+ await page.locator('[name=reporter]').fill('관측자'); await page.locator('[name=detail]').fill('대략적인 위치로 접수합니다');
+ await page.evaluate(()=>{window.restoreStorage=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==='sgia.incidents')throw Error('quota');return window.restoreStorage.call(this,k,v);};});
+ await page.locator('#incident-form .primary').click(); await expect(page.locator('#report-error')).toContainText('저장 공간'); await expect(page.locator('#document-dialog')).toBeVisible();
+ await page.evaluate(()=>{Storage.prototype.setItem=window.restoreStorage;delete window.restoreStorage;});
+ await page.locator('#incident-form .primary').click(); await expect(page.locator('#document-dialog')).not.toBeVisible();
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('sgia.incidents')).at(-1).location)).toBe('미등록 가상 기지');
+});
+
+test('Worldwide map zooms on two quick mobile taps', async ({browser}) => {
+ const context = await browser.newContext({hasTouch:true,isMobile:true,viewport:{width:390,height:844},reducedMotion:'reduce'});
+ const page = await context.newPage();
+ try {
+  await page.goto('http://127.0.0.1:4173/portal.html');
+  const map=page.locator('#seoul-map'); await map.scrollIntoViewIfNeeded();
+  const zoom=()=>map.locator('img.leaflet-tile').evaluateAll(es=>Math.max(...es.map(e=>Number(e.src.match(/\/(\d+)\/\d+\/\d+\.png/)?.[1]||0))));
+  await expect.poll(zoom).toBe(2); const box=await map.boundingBox();
+  await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);
+  await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);
+  await expect.poll(zoom).toBe(3);
+ } finally { await context.close(); }
+});
