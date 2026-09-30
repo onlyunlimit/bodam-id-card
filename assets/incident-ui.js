@@ -3,6 +3,7 @@ import { koreaTime } from './model.js';
 import { delay, onDispose } from './lifecycle.js';
 import { chirp } from './audio.js';
 import { tr } from './i18n.js';
+export const incidentZone = (record) => (typeof record.zone === 'string' && record.zone.trim()) || '구역 미지정';
 export function emergencyAlert(record) {
   $('#emergency-stack')?.remove();
   const stack = document.createElement('aside');
@@ -64,14 +65,13 @@ export function openIncident(record) {
         : when.date + ' ' + when.clock,
     ],
     ['접수 시각', when.date + ' ' + when.clock + ' KST'],
-    ['구역', record.zone || '서울권 / 현장 통제선'],
     ['지원 요청 팀', record.support || (record.type === '미등록 각성자' ? '비콘' : '실드')],
     ['필요 인원', record.personnel || { A: 8, B: 4, C: 2, D: 1 }[record.grade]],
     ['추가 요청사항', record.requests || '현장 접근 전 파장 측정. 주민 통제선 확보.'],
   ];
   const d = modal(
     'CASE / ' + record.id,
-    `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><h3>${esc(record.location)}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd${k === '지원 요청 팀' && record.supportCustom ? ' data-user-content' : ''}>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><div class="report-controls"><button id="report-pause">일시 정지</button><button id="report-complete">전체 읽기</button></div><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
+    `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><small class="dossier-zone-label">구역</small><h3 data-user-content>${esc(incidentZone(record))}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd${(k === '지원 요청 팀' && record.supportCustom) || k === '발생 위치' ? ' data-user-content' : ''}>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><div class="report-controls"><button id="report-pause">일시 정지</button><button id="report-complete">전체 읽기</button></div><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
     'record',
   );
   const text = tr(record.detail),

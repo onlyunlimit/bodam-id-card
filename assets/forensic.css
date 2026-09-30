@@ -1715,3 +1715,36 @@ html[data-motion='off'] .release-pages > span {
 #approximate-tools p {
   font-size: 12px;
 }
+
+/* Compact case files: region heading, location line, then the report abstract. */
+#incident-list { gap: 12px; align-items: start; }
+#incident-list .case-file { padding: 12px 14px; border-radius: 6px; gap: 0; }
+#incident-list .case-tab { padding-bottom: 7px; }
+#incident-list .case-tab > b { font-size: 25px; }
+#incident-list .case-content { padding: 10px 0; }
+#incident-list .case-content h3 { font-size: 17px; margin: 5px 0; overflow-wrap: anywhere; }
+.case-location { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.case-location > span:first-child { color: var(--muted); flex-shrink: 0; }
+#incident-list .case-content p { margin: 8px 0; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+#incident-list .case-action { padding-top: 8px; gap: 10px; }
+#incident-list .case-action button { padding: 8px 10px; min-height: 36px; }
+#incident-list .stamp { font-size: 18px; padding: 5px 9px; }
+#document-dialog[data-kind='record'] { width: min(680px, calc(100vw - 24px)); padding: 20px; }
+#document-dialog[data-kind='record'] > h2 { font-size: 17px; margin: 0 30px 14px 0; overflow-wrap: anywhere; }
+.record-dossier { padding: 18px; box-shadow: 2px 2px 0 var(--bg); }
+.record-dossier .dossier-strip { padding-bottom: 10px; font-size: 8px; gap: 8px; flex-wrap: wrap; }
+.dossier-zone-label { display: block; color: var(--muted); font-size: 10px; margin-top: 14px; }
+.record-dossier h3 { font-size: 22px; line-height: 1.35; margin: 3px 0 14px; overflow-wrap: anywhere; }
+.record-dossier .facts { margin: 0; font-size: 12px; }
+.record-dossier .facts > div { padding: 7px 0; }
+.record-dossier h4 { margin: 16px 0 8px; font-size: 13px; }
+.record-dossier .report-controls { margin: 8px 0; }
+.record-dossier .typed-report { min-height: 50px; line-height: 1.75; font-size: 12px; }
+.record-dossier .record-seal { width: 80px; }
+.record-dossier #case-location-map { height: 220px; min-height: 220px; margin-top: 14px; }
+@media (min-width: 1200px) { #incident-list { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+@media (max-width: 600px) {
+  #document-dialog[data-kind='record'] { padding: 14px; }
+  .record-dossier { padding: 12px; }
+  .record-dossier h3 { font-size: 19px; }
+}

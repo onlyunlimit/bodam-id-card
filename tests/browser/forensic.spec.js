@@ -33,8 +33,9 @@ test('A clicked report pin persists into operations, disappears on closure, and 
   expect(record.coordinates).toEqual(coords);
   const pin = `[data-map-incident="${record.id}"]`;
   await expect(page.locator(pin)).toHaveCount(1);
-  await expect(page.locator('.case-content').first().locator('h3')).toHaveText('현장 <b>표지</b>');
-  await expect(page.locator('.case-content').first().locator('h3 b')).toHaveCount(0);
+  await expect(page.locator('.case-content').first().locator('h3')).toHaveText('EAST');
+  await expect(page.locator('.case-content').first().locator('.case-location')).toContainText('현장 <b>표지</b>');
+  await expect(page.locator('.case-location b')).toHaveCount(0);
   await page.locator('.site-nav a[href="portal.html"]').click();
   await page.locator(pin).click({ force: true });
   await expect(page.locator('.map-detection code')).toHaveText(
@@ -49,6 +50,7 @@ test('A clicked report pin persists into operations, disappears on closure, and 
   await page.locator('#incident-status').selectOption('resolved');
   await page.locator(`[data-incident="${record.id}"] .case-content`).click();
   await expect(page.locator('#case-location-map ' + pin)).toHaveCount(1);
+  await expect(page.locator('.record-dossier h3')).toHaveText('EAST');
   await page.keyboard.press('Escape');
   await page.locator('.site-nav a[href="portal.html"]').click();
   await expect(page.locator(pin)).toHaveCount(0);
@@ -171,4 +173,18 @@ test('Worldwide map zooms on two quick mobile taps', async ({browser}) => {
   await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);
   await expect.poll(zoom).toBe(3);
  } finally { await context.close(); }
+});
+
+
+test('Compact records show the zone heading with a separate location and old records have a safe fallback', async ({page},testInfo) => {
+ await page.emulateMedia({reducedMotion:'reduce'}); await page.goto('/records.html'); await staff(page);
+ await expect(page.locator('.case-content h3').first()).toHaveText('구역 미지정');
+ await page.locator('#incident-list').screenshot({path:testInfo.outputPath('compact-records.png')});
+ await page.locator('.case-content').first().click();
+ await expect(page.locator('.record-dossier h3')).toHaveText('구역 미지정');
+ await expect(page.locator('.record-dossier .facts')).toContainText('발생 위치');
+ await page.locator('#document-dialog').screenshot({path:testInfo.outputPath('compact-dossier.png')});
+ await page.setViewportSize({width:320,height:800});
+ expect(await page.locator('#document-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1)).toBe(true);
+ await page.locator('#document-dialog').screenshot({path:testInfo.outputPath('compact-dossier-mobile.png')});
 });

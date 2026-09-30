@@ -139,6 +139,7 @@ export function mountReportMap(form, map, dialog) {
     locationConfirmed = false,
     selected = [37.5445, 127.0557],
     boundary = null,
+    lastAutoZone = '',
     drawn = [],
     areaLayer;
   const status = (msg) => {
@@ -224,7 +225,10 @@ export function mountReportMap(form, map, dialog) {
   }
   function result(r, { move = true } = {}) {
     if (!approximate.checked || !location.value.trim()) location.value = r.name;
-    zone.value = r.zone || zone.value;
+    if (!zone.value.trim() || zone.value === lastAutoZone || zone.value === '대략 위치') {
+      zone.value = r.zone || zone.value;
+      lastAutoZone = zone.value;
+    }
     boundary = isArea(r.area) ? r.area : null;
     if (move) {
       point(r.lat, r.lon);

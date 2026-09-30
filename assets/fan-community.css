@@ -161,6 +161,8 @@
   display: block;
   width: 100%;
   height: 130px;
+  transform: scale(1.42);
+  transform-origin: center;
   background-size: contain !important;
   background-position: center !important;
   filter: drop-shadow(0 9px 8px #633b5f55);
@@ -812,6 +814,7 @@
   }
   .fan-hero-art > img {
     height: 60px;
+    transform: scale(1.55);
   }
   .fan-hero-art:before {
     font-size: 35px;

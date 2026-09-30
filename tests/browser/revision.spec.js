@@ -99,13 +99,13 @@ test('Manual reports persist, open as dossiers, dispatch alerts and retain Korea
   await page.locator('.case-content').first().click();
   await expect(page.locator('.record-dossier')).toContainText('Night watch');
   await expect(page.locator('#typed-report')).toContainText('Unidentified signal');
-  await expect(page.locator('.facts dd[data-user-content]')).toHaveText('합동 <b>구조팀</b>');
+  await expect(page.locator('.facts > div').filter({has:page.locator('dt', {hasText:'Requested unit'})}).locator('dd')).toHaveText('합동 <b>구조팀</b>');
   await expect(page.locator('.facts dd b')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await page.reload();
   await expect(page.locator('.case-content').first()).toContainText('Unidentified signal');
   await page.locator('.case-content').first().click();
-  await expect(page.locator('.facts dd[data-user-content]')).toHaveText('합동 <b>구조팀</b>');
+  await expect(page.locator('.facts > div').filter({has:page.locator('dt', {hasText:'Requested unit'})}).locator('dd')).toHaveText('합동 <b>구조팀</b>');
 });
 test('Each of 18 floors has a distinct interior and rooms open their facility records', async ({
   page,
