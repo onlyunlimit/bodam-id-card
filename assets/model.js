@@ -220,7 +220,9 @@ export function isIncident(item) {
         item.reporter.length <= 40 &&
         typeof item.zone === 'string' &&
         item.zone.length <= 80 &&
-        ['오리진', '비콘', '실드'].includes(item.support) &&
+        typeof item.support === 'string' &&
+        item.support.trim().length > 0 &&
+        item.support.length <= 80 &&
         Number.isInteger(item.personnel) &&
         item.personnel >= 1 &&
         item.personnel <= 30 &&

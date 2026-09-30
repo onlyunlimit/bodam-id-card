@@ -103,3 +103,10 @@ test('Incident boundaries validate GeoJSON and retain worldwide coordinates and 
  const record={...generateIncident(1),coordinates:[-33.8688,151.2093],radiusMeters:500,area:{type:'Polygon',coordinates:[[[151,-34],[152,-34],[152,-33],[151,-34]]]}};
  assert.equal(isIncident(record),true);assert.equal(isIncident({...record,radiusMeters:-1}),false);assert.equal(isIncident({...record,area:{type:'Polygon',coordinates:[[[0,0],[1,0],[1,1]]]}}),false);assert.equal(isIncident({...record,area:{type:'Polygon',coordinates:[[[181,0],[1,0],[1,1],[181,0]]]}}),false);
 });
+
+ test('Manual reports retain custom support teams and reject empty or oversized names', () => {
+ const record = {...generateIncident(1),manual:true,detail:'직접 작성한 현장 상황',reporter:'신고자',zone:'현장',support:'합동 구조팀',personnel:2,requests:'',occurredAt:Date.now()};
+ assert.equal(isIncident(record),true);
+ for(const support of ['', '   ', '가'.repeat(81), null]) assert.equal(isIncident({...record,support}),false);
+ for(const support of ['실드','오리진','비콘']) assert.equal(isIncident({...record,support}),true);
+ });

@@ -26,8 +26,8 @@ export function emergencyAlert(record) {
         panel.innerHTML =
           '<span class="eyebrow">' +
           esc(label) +
-          '</span><strong>' +
-          esc(tr(body)) +
+          '</span><strong' + (label === 'DISPATCH REQUEST' && record.supportCustom ? ' data-user-content' : '') + '>' +
+          esc(label === 'DISPATCH REQUEST' && record.supportCustom ? body : tr(body)) +
           '</strong><small>CH.04 / ' +
           koreaTime().clock +
           '</small>';
@@ -70,7 +70,7 @@ export function openIncident(record) {
   ];
   const d = modal(
     'CASE / ' + record.id,
-    `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><h3>${esc(record.location)}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><div class="report-controls"><button id="report-pause">일시 정지</button><button id="report-complete">전체 읽기</button></div><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
+    `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><h3>${esc(record.location)}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd${k === '지원 요청 팀' && record.supportCustom ? ' data-user-content' : ''}>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><div class="report-controls"><button id="report-pause">일시 정지</button><button id="report-complete">전체 읽기</button></div><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
     'record',
   );
   const text = tr(record.detail),

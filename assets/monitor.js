@@ -2,6 +2,8 @@ import { reportMapControls, mountReportMap } from './report-map.js';
 import { evidenceIndex, mountEvidenceIndex } from './evidence.js';
 import { registerCopy } from './i18n.js';
 [
+  ['지원 팀 이름을 입력해 주세요.', 'Enter a support team name.', '支援チーム名を入力してください。', '请输入支援团队名称。'],
+  ['지원 팀 이름', 'Support team name', '支援チーム名', '支援团队名称'],
   ['현장 위치', 'Incident locations', '現場位置', '现场位置'],
   ['위도', 'Latitude', '緯度', '纬度'],
   ['경도', 'Longitude', '経度', '经度'],
@@ -323,8 +325,17 @@ export function renderRecords() {
     if (incidents.length >= 100) return toast('기록함에 최대 100건을 보관합니다.');
     const reportDialog = modal(
       '신고서 작성',
-      `<form id="incident-form" class="board-form"><div class="form-row"><label>신고자<input name="reporter" maxlength="40" required></label><label>발생 시각<input name="occurred" type="datetime-local" value="${koreaTime().date.replaceAll('.', '-')}T${koreaTime().clock.slice(0, 5)}" required></label></div><div class="form-row"><label>발생 위치<input name="location" maxlength="140" placeholder="주소·도시·지역명" required></label><label>구역<input name="zone" maxlength="80" required></label></div><div class="report-map-field">${reportMapControls}<p>지도를 눌러 발생 위치를 지정하세요.</p><div id="report-map" class="seoul-map" aria-label="신고 위치 선택 지도"></div><div class="coordinate-inputs"><label>위도<input name="latitude" type="number" step="any" min="-90" max="90" value="37.5445" required></label><label>경도<input name="longitude" type="number" step="any" min="-180" max="180" value="127.0557" required></label><button type="button" id="apply-coordinate">좌표 적용</button></div></div><div class="form-row"><label>유형<select name="type">${incidentTypes.map((t) => `<option value="${t}">${t}</option>`).join('')}</select></label><label>위험 등급<select name="grade"><option>D</option><option>C</option><option>B</option><option>A</option></select></label></div><div class="form-row"><label>지원 요청 팀<select name="support"><option value="비콘">비콘</option><option value="실드">실드</option><option value="오리진">오리진</option></select></label><label>필요 인원<input name="personnel" type="number" min="1" max="30" value="2" required></label></div><label>상황 설명<textarea name="detail" minlength="5" maxlength="1500" required></textarea></label><label>추가 요청사항<textarea name="requests" maxlength="500"></textarea></label><button class="primary">신고 접수</button></form>`,
+      `<form id="incident-form" class="board-form"><div class="form-row"><label>신고자<input name="reporter" maxlength="40" required></label><label>발생 시각<input name="occurred" type="datetime-local" value="${koreaTime().date.replaceAll('.', '-')}T${koreaTime().clock.slice(0, 5)}" required></label></div><div class="form-row"><label>발생 위치<input name="location" maxlength="140" placeholder="주소·도시·지역명" required></label><label>구역<input name="zone" maxlength="80" required></label></div><div class="report-map-field">${reportMapControls}<p>지도를 눌러 발생 위치를 지정하세요.</p><div id="report-map" class="seoul-map" aria-label="신고 위치 선택 지도"></div><div class="coordinate-inputs"><label>위도<input name="latitude" type="number" step="any" min="-90" max="90" value="37.5445" required></label><label>경도<input name="longitude" type="number" step="any" min="-180" max="180" value="127.0557" required></label><button type="button" id="apply-coordinate">좌표 적용</button></div></div><div class="form-row"><label>유형<select name="type">${incidentTypes.map((t) => `<option value="${t}">${t}</option>`).join('')}</select></label><label>위험 등급<select name="grade"><option>D</option><option>C</option><option>B</option><option>A</option></select></label></div><div class="form-row"><label>지원 요청 팀<select name="support"><option value="비콘">비콘</option><option value="실드">실드</option><option value="오리진">오리진</option><option value="custom">직접 입력</option></select></label><label>필요 인원<input name="personnel" type="number" min="1" max="30" value="2" required></label></div><label id="custom-support-field" hidden>지원 팀 이름<input name="customSupport" maxlength="80" disabled></label><label>상황 설명<textarea name="detail" minlength="5" maxlength="1500" required></textarea></label><label>추가 요청사항<textarea name="requests" maxlength="500"></textarea></label><button class="primary">신고 접수</button></form>`,
     );
+    const supportChoice = $('#incident-form [name=support]');
+    const customSupport = $('#incident-form [name=customSupport]');
+    supportChoice.onchange = () => {
+      const custom = supportChoice.value === 'custom';
+      $('#custom-support-field').hidden = !custom;
+      customSupport.disabled = !custom;
+      customSupport.required = custom;
+      if (custom) customSupport.focus();
+    };
     const picker = createMap($('#report-map'), []);
     const mapInput = mountReportMap($('#incident-form'), picker, reportDialog);
     delay(() => {
@@ -334,6 +345,15 @@ export function renderRecords() {
       e.preventDefault();
       if (!state.staff) return;
       const data = Object.fromEntries(new FormData(e.target));
+      data.supportCustom = data.support === 'custom';
+      if (data.supportCustom) {
+        data.support = (data.customSupport || '').trim();
+        if (!data.support) {
+          customSupport.focus();
+          return toast('지원 팀 이름을 입력해 주세요.');
+        }
+      }
+      delete data.customSupport;
       let geo;
       try {
         geo = mapInput.read();
