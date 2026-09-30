@@ -117,3 +117,15 @@ export const staffTags = [
     label: '인물 · 에이지',
   },
 ];
+
+export function staffTagInfo(id) {
+  const known = staffTags.find(t => t.id === id);
+  const kind = id.startsWith('team:') || id.startsWith('custom-team:') ? 'team' : id.startsWith('member:') ? 'member' : 'custom';
+  return { kind, label: known ? known.label.replace(/^(팀|인물) · /, '') : id.replace(/^custom(?:-team)?:/, '') };
+}
+export function validStaffTag(id) {
+  if (typeof id !== 'string') return false;
+  if (staffTags.some(t => t.id === id)) return true;
+  const match = id.match(/^custom(?:-team)?:([^\x00-\x1f\x7f]{1,40})$/u);
+  return !!match && !!match[1].trim() && match[1] === match[1].trim();
+}

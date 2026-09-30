@@ -1317,3 +1317,24 @@ html[data-community-theme] .fan-community {
     font-size: 29px;
   }
 }
+
+/* Attachments retain their original proportions in every feed and document. */
+.post-photos, .fan-post-detail .post-photos { grid-template-columns: 1fr; align-items: start; }
+.post-photos img[data-preserve-ratio], .staff .post-photos img[data-preserve-ratio] { height: auto; background-size: contain; background-repeat: no-repeat; object-fit: contain; }
+.staff .post-photos { max-width: 100%; }
+.upload-image { background-size: contain; background-repeat: no-repeat; }
+.staff-tags .tag-team, .staff-tag-picker .tag-team { color: #755018; background: #fff1cd; border: 1px solid #bc9451; }
+.staff-tags .tag-member, .staff-tag-picker .tag-member { color: #304d8d; background: #e8eeff; border: 1px solid #819acb; }
+.staff-tags .tag-custom, .staff-tag-picker .tag-custom { color: #594064; background: #f2e7f5; border: 1px solid #b993c3; }
+.staff-tag { display: inline-block; padding: 3px 7px; border-radius: 5px; overflow-wrap: anywhere; }
+.tag-legend { display: flex; gap: 12px; font-size: 12px; }
+.staff-tag-picker .custom-tag-entry { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-top: 12px; }
+.staff-tag-picker .custom-tag-entry label { display: grid; flex: 1 1 110px; min-width: 0; }
+.custom-tag-entry input, .custom-tag-entry select { width: 100%; min-width: 0; }
+.custom-tags .custom-tag { display: inline-flex; align-items: center; gap: 3px; }
+.custom-tag .remove-tag { min-width: 32px; min-height: 32px; padding: 3px; }
+.tag-error { display: block; color: #a62e41; margin-top: 8px; }
+
+.staff-tag-picker .custom-tag-entry label { display: grid !important; align-items: stretch; }
+.staff-tag-picker .custom-tag-entry input { width: 100% !important; }
+.staff-tag-picker .custom-tag-entry, .staff-tag-picker .custom-tags { max-height: none; overflow: visible; }

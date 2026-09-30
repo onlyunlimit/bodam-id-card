@@ -15,11 +15,11 @@ export function initImageSurfaces() {
     img.style.backgroundImage = `url(${JSON.stringify(source)})`;
     img.draggable = false;
     img.removeAttribute('srcset');
-    if (!img.width && !img.height) {
+    if (img.hasAttribute('data-preserve-ratio') || (!img.width && !img.height)) {
       img.style.aspectRatio = '2 / 3';
       const probe = new Image();
       probe.onload = () => {
-        if (img.isConnected)
+        if (img.isConnected && img.dataset.imageUrl === source)
           img.style.aspectRatio = probe.naturalWidth + ' / ' + probe.naturalHeight;
       };
       probe.src = source;

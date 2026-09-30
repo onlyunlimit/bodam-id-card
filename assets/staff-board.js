@@ -91,32 +91,32 @@ import { registerCopy } from './i18n.js';
     "喜爱SGIA角色的读者空间。用角色或团队标签标明主角。"
   ]
 ].forEach((row) => registerCopy(...row));
-import { staffTags } from './staff-tags.js';
+import { staffTags, staffTagInfo, validStaffTag } from './staff-tags.js';
 import { esc } from './runtime.js';
 export const channelName = (channel) => (channel === 'soliloquy' ? '혼잣말' : '자유게시판');
-export const tagOptions = (selected) =>
-  '<option value="">모든 캐릭터·팀</option>' +
-  staffTags
-    .map(
-      (t) =>
-        `<option value="${t.id}" ${selected === t.id ? 'selected' : ''}>${esc(t.label)}</option>`,
-    )
-    .join('');
-export const tagsMarkup = (tags) =>
-  tags?.length
-    ? `<div class="staff-tags" data-user-content>${tags.map((id) => `<span>#${esc(staffTags.find((t) => t.id === id)?.label || id)}</span>`).join('')}</div>`
-    : '';
+
+const tagChip = id => { const t = staffTagInfo(id); return `<span class="staff-tag tag-${t.kind}" title="${t.kind === 'team' ? '팀 주제' : t.kind === 'member' ? '인물' : '직접 입력'}">#${esc(t.label)}</span>`; };
+export const tagOptions = (selected, extra = []) => '<option value="">모든 캐릭터·팀</option>' + [...staffTags, ...[...new Set(extra)].filter(id => id !== selected && !staffTags.some(t => t.id === id)).map(id => ({id})), ...(selected && !staffTags.some(t => t.id === selected) ? [{id:selected}] : [])].map(t => `<option value="${esc(t.id)}" ${selected === t.id ? 'selected' : ''}>${esc(staffTagInfo(t.id).label)}</option>`).join('');
+export const tagsMarkup = tags => tags?.length ? `<div class="staff-tags" data-user-content>${tags.map(tagChip).join('')}</div>` : '';
+const customChip = id => `<label class="custom-tag" data-user-content><input type="hidden" name="tags" value="${esc(id)}">${tagChip(id)}<button type="button" class="remove-tag" aria-label="${esc(staffTagInfo(id).label)} 태그 삭제">×</button></label>`;
 export function staffFields(channel = 'free', tags = []) {
-  return `<div class="staff-fields"><label>게시판<select name="channel"><option value="free" ${channel === 'free' ? 'selected' : ''}>자유게시판 · SGIA 직장 생활</option><option value="soliloquy" ${channel === 'soliloquy' ? 'selected' : ''}>혼잣말 · 캐릭터 덕질</option></select></label><fieldset class="staff-tag-picker" ${channel === 'soliloquy' ? '' : 'hidden'}><legend>캐릭터·팀 태그 · 최대 5개</legend><div>${staffTags.map((t) => `<label><input type="checkbox" name="tags" value="${t.id}" ${tags.includes(t.id) ? 'checked' : ''}><span>${esc(t.label)}</span></label>`).join('')}</div></fieldset></div>`;
+ return `<div class="staff-fields"><label>게시판<select name="channel"><option value="free" ${channel === 'free' ? 'selected' : ''}>자유게시판 · SGIA 직장 생활</option><option value="soliloquy" ${channel === 'soliloquy' ? 'selected' : ''}>혼잣말 · 캐릭터 덕질</option></select></label><fieldset class="staff-tag-picker"><legend>관심 태그 · 최대 5개</legend><p class="tag-legend"><span class="tag-team">◆ 팀</span> <span class="tag-member">● 인물</span></p><div>${staffTags.map(t => `<label><input type="checkbox" name="tags" value="${t.id}" ${tags.includes(t.id) ? 'checked' : ''}>${tagChip(t.id)}</label>`).join('')}</div><div class="custom-tags">${tags.filter(t => !staffTags.some(x => x.id === t)).map(customChip).join('')}</div><div class="custom-tag-entry"><label>종류<select class="tag-kind"><option value="custom">일반 태그</option><option value="custom-team">팀 주제</option></select></label><label>직접 입력<input class="tag-text" maxlength="40" placeholder="태그 또는 팀 주제"></label><button type="button" class="add-tag">추가</button></div><small class="tag-error" role="status"></small></fieldset></div>`;
 }
 export function connectStaffFields(form) {
-  const select = form.elements.channel;
-  if (!select) return;
-  select.onchange = () => {
-    form.querySelector('.staff-tag-picker').hidden = select.value !== 'soliloquy';
-  };
+ const picker = form.querySelector('.staff-tag-picker'); if (!picker) return;
+ const error = picker.querySelector('.tag-error');
+ const add = () => {
+  const input = picker.querySelector('.tag-text');
+  const id = picker.querySelector('.tag-kind').value + ':' + input.value.trim();
+  const tags = new FormData(form).getAll('tags');
+  if (!validStaffTag(id)) {error.textContent = '태그를 1~40자로 입력해 주세요.'; return;}
+  if (tags.includes(id)) {error.textContent = '이미 선택한 태그입니다.'; return;}
+  if (tags.length >= 5) {error.textContent = '태그는 5개까지 선택할 수 있습니다.'; return;}
+  picker.querySelector('.custom-tags').insertAdjacentHTML('beforeend', customChip(id)); input.value = ''; error.textContent = ''; input.focus();
+ };
+ picker.querySelector('.add-tag').addEventListener('click', add);
+ picker.querySelector('.tag-text').addEventListener('keydown', e => {if(e.key === 'Enter'){e.preventDefault();add();}});
+ picker.addEventListener('click', e => {const button = e.target.closest('.remove-tag'); if(button){button.closest('.custom-tag').remove();error.textContent = '';}});
+ picker.addEventListener('change', e => {if(e.target.type === 'checkbox' && new FormData(form).getAll('tags').length > 5){e.target.checked = false;error.textContent = '태그는 5개까지 선택할 수 있습니다.';}});
 }
-export const readStaffFields = (form) => ({
-  channel: form.elements.channel.value,
-  tags: form.elements.channel.value === 'soliloquy' ? new FormData(form).getAll('tags') : [],
-});
+export const readStaffFields = form => ({channel: form.elements.channel.value, tags: new FormData(form).getAll('tags')});

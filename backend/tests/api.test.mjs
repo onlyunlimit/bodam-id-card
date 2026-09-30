@@ -34,7 +34,10 @@ async function fixture() {
           return this;
         },
         async first() {
-          return sql.prepare(query).get(...this.args) || null;
+          const row = sql.prepare(query).get(...this.args);
+          // D1 returns BLOBs as ordinary number arrays, unlike node:sqlite.
+          if (row) for (const key of Object.keys(row)) if (row[key] instanceof Uint8Array) row[key] = [...row[key]];
+          return row || null;
         },
         async all() {
           return { results: sql.prepare(query).all(...this.args) };
@@ -352,8 +355,8 @@ test('Fan platform supports official feeds, remote profiles, replies and comment
     404,
   );
   const thread = (await req('/posts/' + fan.data.id)).data.comments;
-  assert.equal(thread[1].parent_id, root.data.id);
-  assert.equal(thread[1].member_id, member.id);
+  assert.equal(thread.find(c => c.id === reply.data.id).parent_id, root.data.id);
+  assert.equal(thread.find(c => c.id === reply.data.id).member_id, member.id);
   for (let i = 0; i < 2; i++)
     assert.equal(
       (await req('/comments/' + reply.data.id + '/like', 'POST', { liked: true })).data.likes,
@@ -441,6 +444,7 @@ test('Attachments enforce format, ownership and deletion visibility; admin can e
   let detail = (await req('/posts/' + a.data.id)).data;
   const image = detail.post.images[0];
   assert.equal((await req('/media/' + image.id)).response.headers.get('Content-Type'), 'image/png');
+  assert.deepEqual(Buffer.from(await (await req('/media/' + image.id)).response.arrayBuffer()), Buffer.from(png.split(',')[1], 'base64'));
   const b = await req('/posts', 'POST', post);
   assert.equal(
     (await req('/posts/' + b.data.id, 'PATCH', { ...post, images: [{ id: image.id }] })).status,
@@ -472,7 +476,9 @@ test('Attachments enforce format, ownership and deletion visibility; admin can e
   await req('/admin/moderate', 'POST', { kind: 'post', id: a.data.id, action: 'hide' }, options);
   assert.equal((await req('/media/' + image.id)).status, 404);
   assert.equal((await req('/admin/media/' + image.id)).status, 401);
-  assert.equal((await req('/admin/media/' + image.id, 'GET', undefined, options)).status, 200);
+  const adminMedia = await req('/admin/media/' + image.id, 'GET', undefined, options);
+  assert.equal(adminMedia.status, 200);
+  assert.deepEqual(Buffer.from(await adminMedia.response.arrayBuffer()), Buffer.from(png.split(',')[1], 'base64'));
   await req('/admin/moderate', 'POST', { kind: 'post', id: a.data.id, action: 'restore' }, options);
   assert.equal((await req('/media/' + image.id)).status, 200);
   await req('/admin/moderate', 'POST', { kind: 'post', id: a.data.id, action: 'delete' }, options);
@@ -514,4 +520,15 @@ test('Worldwide geocoding caches queries, validates coordinates and throttles up
  assert.equal((await req('/geocode?lat=91&lon=0')).status,400);
  assert.equal((await req('/geocode?lat=0&lon=181')).status,400);
  assert.equal((await req('/geocode')).status,400);
+});
+
+test('Free lounge supports custom tags and team topics with validation and editing', async () => {
+ const {req, post} = await fixture();
+ const tags = ['member:jaein', 'team:origin', 'custom:오늘의 최애', 'custom-team:새로운 팀'];
+ const a = await req('/posts', 'POST', {...post, tags}); assert.equal(a.status, 201);
+ const list = await req('/posts?board=staff&tag='+encodeURIComponent(tags[3]));
+ assert.deepEqual(list.data.posts[0].tags, tags);
+ assert.equal((await req('/posts/'+a.data.id, 'PATCH', {...post, tags:['custom:수정']})).status, 200);
+ assert.deepEqual((await req('/posts/'+a.data.id)).data.post.tags,['custom:수정']);
+ for(const tags of [['custom:'], ['custom: '], ['custom:'+ 'x'.repeat(41)], ['member:unknown'], Array(6).fill('team:origin')]) assert.equal((await req('/posts','POST',{...post,tags})).status,400);
 });

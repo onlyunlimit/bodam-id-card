@@ -270,7 +270,7 @@ test('Staff lounge separates daily work from fandom posts, filters tags and keep
  await page.locator('#write-post').click();
  await page.locator('[name=title]').fill('오늘의 최애');await page.locator('[name=author]').fill('독자');await page.locator('[name=password]').fill('123456');await page.locator('[name=body]').fill('재인과 오리진 이야기가 좋아요');
  await page.locator('[name=tags][value="member:jaein"]').check();await page.locator('[name=tags][value="team:origin"]').check();await page.locator('[name=consent]').check();await page.locator('#post-form button[type=submit]').click();
- await expect(page.locator('.post-row')).toContainText('인물 · 재인');expect(f.posts[0].channel).toBe('soliloquy');expect(f.posts[0].tags).toEqual(expect.arrayContaining(['member:jaein','team:origin']));
+ await expect(page.locator('.post-row')).toContainText('#재인');expect(f.posts[0].channel).toBe('soliloquy');expect(f.posts[0].tags).toEqual(expect.arrayContaining(['member:jaein','team:origin']));
  await page.locator('#staff-tag-filter').selectOption('team:beacon');await expect(page.locator('.post-row')).toHaveCount(0);
  await page.locator('#staff-tag-filter').selectOption('member:jaein');await expect(page.locator('.post-row')).toHaveCount(1);
  await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('[name=tags][value="member:jaein"]')).toBeChecked();await page.locator('[name=tags][value="team:origin"]').uncheck();await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();await expect(page.locator('.post-body')).toBeVisible();expect(f.posts[0].tags).toEqual(['member:jaein']);await page.keyboard.press('Escape');
@@ -278,4 +278,35 @@ test('Staff lounge separates daily work from fandom posts, filters tags and keep
  await expect(page.locator('.community-footer .community-admin')).toHaveCount(1);await expect(page.locator('.fan-sidebar .community-admin')).toHaveCount(0);
  await page.locator('.staff-channel-nav a[href$="channel=soliloquy"]').click();await expect(page.locator('.post-row')).toHaveCount(1);
  await page.screenshot({path:testInfo.outputPath('staff-desktop.png'),fullPage:true});await page.setViewportSize({width:320,height:800});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);await page.screenshot({path:testInfo.outputPath('staff-mobile.png'),fullPage:true});
+});
+
+test('Attachments show the whole portrait and landscape for fan and artist posts', async ({page}) => {
+ const f = await mock(page);
+ await page.route(api+'/media/**', route => route.fulfill({contentType:'image/svg+xml', body:`<svg xmlns="http://www.w3.org/2000/svg" width="${route.request().url().endsWith('portrait')?300:600}" height="${route.request().url().endsWith('portrait')?600:300}"><rect width="100%" height="100%" fill="pink"/></svg>`}));
+ for(const artist of [false,true]) {
+  f.posts.splice(0, f.posts.length, {id:'photo-post',board:'lucky',title:'사진',body:'사진 비율',created_at:Date.now(),member_id:artist?'jaein':null,images:[{id:'portrait'},{id:'landscape'}]});
+  await page.goto('/community.html?board=lucky');
+  await page.locator('[data-feed='+ (artist?'artist':'fan') +']').click();
+  for(const width of [1280,320]) {
+   await page.setViewportSize({width,height:900});
+   const photos=page.locator('.post-photos img');
+   await expect(photos).toHaveCount(2);
+   await expect(photos.nth(0)).toHaveCSS('aspect-ratio','300 / 600');
+   await expect(photos.nth(1)).toHaveCSS('aspect-ratio','600 / 300');
+   for(let i=0;i<2;i++){await expect(photos.nth(i)).toHaveCSS('background-size','contain'); const b=await photos.nth(i).boundingBox();expect(b.width/b.height).toBeCloseTo(i?2:0.5,1);}
+  }
+ }
+});
+test('Free lounge adds, removes and edits custom colored tags', async ({page}, testInfo) => {
+ const f = await mock(page); await page.goto('/community.html?board=staff');
+ await page.locator('#board-login').click(); await page.locator('#login-submit').click();await page.locator('#write-post').click();
+ await page.locator('[name=title]').fill('태그 테스트');await page.locator('[name=author]').fill('동료');await page.locator('[name=password]').fill('123456');await page.locator('[name=body]').fill('팀 이야기');await page.locator('[name=consent]').check();
+ await page.locator('[name=tags][value="member:jaein"]').check();
+ await page.locator('.tag-text').fill('지울 태그');await page.locator('.add-tag').click();await page.locator('.remove-tag').click();
+ await page.locator('.tag-kind').selectOption('custom-team');await page.locator('.tag-text').fill('새 팀');await page.locator('.add-tag').click();
+ await page.locator('#post-form button[type=submit]').click();
+ expect(f.posts[0].tags).toEqual(['member:jaein','custom-team:새 팀']);
+ await expect(page.locator('.post-row .tag-team')).toHaveText('#새 팀');await expect(page.locator('.post-row .tag-member')).toHaveText('#재인');
+ await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('.custom-tags')).toContainText('#새 팀');
+ await page.setViewportSize({width:320,height:800});await expect(page.locator('.tag-text')).toBeVisible();expect(await page.locator('#edit-form').evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);await page.locator('.tag-text').scrollIntoViewIfNeeded();await page.screenshot({path:testInfo.outputPath('custom-tags-mobile.png')});
 });

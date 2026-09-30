@@ -240,7 +240,7 @@ const avatar = (url, name) =>
     : `<span class="fan-avatar initials" aria-hidden="true">${esc((name || 'F').slice(0, 1))}</span>`;
 const photos = (images) =>
   (images || []).length
-    ? `<div class="post-photos">${images.map((i) => `<img src="${esc(mediaURL(i.id))}" alt="첨부 사진" loading="lazy">`).join('')}</div>`
+    ? `<div class="post-photos">${images.map((i) => `<img data-preserve-ratio src="${esc(mediaURL(i.id))}" alt="첨부 사진" loading="lazy">`).join('')}</div>`
     : '';
 const pinInput = (n = 6, label = '작성 비밀번호', name = 'password') =>
   `<label>${label} · 숫자 ${n}자리<input name="${name}" type="password" inputmode="numeric" pattern="[0-9]{${n}}" minlength="${n}" maxlength="${n}" autocomplete="${name === 'newPassword' ? 'new-password' : 'off'}" required></label>`;
@@ -293,8 +293,7 @@ export function renderCommunity() {
       '<header class="staff-masthead"><span class="staff-wordmark">SGIA<span> lounge.</span></span><p>동료들의 일상, 그리고 캐릭터를 좋아하는 마음.</p></header>';
     $('.fan-sidebar').innerHTML =
       `<section class="staff-channel-nav"><small>OUR CHANNELS</small><a href="community.html?board=staff&channel=free" ${channel === 'free' ? 'aria-current="page"' : ''}><b>자유게시판</b><span>업무 · 일상 · 회사 이야기</span></a><a href="community.html?board=staff&channel=soliloquy" ${channel === 'soliloquy' ? 'aria-current="page"' : ''}><b>혼잣말</b><span>캐릭터 · 팀 · 덕질 이야기</span></a></section><section class="staff-channel-note"><b>${channel === 'free' ? '오늘도 무사 퇴근.' : '여기서는 세계관 밖의 이야기.'}</b><p>${channel === 'free' ? '부서 동료와 나누는 직장 생활. 질문과 고민을 편하게 남겨 보세요.' : 'SGIA 캐릭터를 좋아하는 독자들의 공간. 인물이나 팀 태그로 주인공을 알려주세요.'}</p></section>`;
-    if (channel === 'soliloquy')
-      $('.board-search').insertAdjacentHTML(
+    $('.board-search').insertAdjacentHTML(
         'beforebegin',
         `<label class="staff-tag-filter">관심 태그<select id="staff-tag-filter">${tagOptions(tag)}</select></label>`,
       );
@@ -392,6 +391,7 @@ export function renderCommunity() {
       if (signal.aborted || ticket !== requestId) return;
       $('#board-connection').textContent = '● ' + name + ' · 채널 연결됨';
       const rows = feed === 'comments' ? r.comments || [] : r.posts || [];
+      if (!fan) $('#staff-tag-filter').innerHTML = tagOptions(tag, rows.flatMap(p => p.tags || []));
       $('#board-list').innerHTML =
         rows
           .map((p) =>

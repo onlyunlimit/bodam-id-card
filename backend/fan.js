@@ -145,7 +145,7 @@ export async function publicFan(request, env, { identity, rate, blocked, body })
       .first();
     if (!row) throw new HTTPError(404, '이미지를 찾을 수 없습니다.');
     if (row.url) return new Response(null, { status: 302, headers: { Location: row.url } });
-    return new Response(row.data, {
+    return new Response(Array.isArray(row.data) ? new Uint8Array(row.data) : row.data, {
       headers: {
         'Content-Type': row.mime,
         'Content-Disposition': 'inline',
@@ -209,7 +209,7 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
       .first();
     if (!row) throw new HTTPError(404, '이미지를 찾을 수 없습니다.');
     if (row.url) return new Response(null, { status: 302, headers: { Location: row.url } });
-    return new Response(row.data, {
+    return new Response(Array.isArray(row.data) ? new Uint8Array(row.data) : row.data, {
       headers: { 'Content-Type': row.mime, 'Content-Security-Policy': "default-src 'none'" },
     });
   }
