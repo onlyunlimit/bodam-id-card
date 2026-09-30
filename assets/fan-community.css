@@ -1338,3 +1338,6 @@ html[data-community-theme] .fan-community {
 .staff-tag-picker .custom-tag-entry label { display: grid !important; align-items: stretch; }
 .staff-tag-picker .custom-tag-entry input { width: 100% !important; }
 .staff-tag-picker .custom-tag-entry, .staff-tag-picker .custom-tags { max-height: none; overflow: visible; }
+.staff-tag-picker label { flex-direction: row; }
+.staff-tag-picker .add-tag, .staff-tag-picker .remove-tag { color: #26303e; background: #f2f4f8; border: 1px solid #aab4c2; font-size: 13px; }
+.staff-tag-picker .add-tag { min-height: 42px; padding: 8px 14px; }
