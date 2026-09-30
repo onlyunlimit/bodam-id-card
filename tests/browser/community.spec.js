@@ -166,7 +166,7 @@ test('Fan photos survive editing; replies and comment hearts work; artist feeds 
   await expect(page.locator('.upload-image')).toHaveCount(1);
   await page.locator('#edit-form [name=password]').fill('123456');
   await page.locator('#edit-form button[type=submit]').click();
-  await expect(page.locator('.post-photos img')).toHaveCount(2);
+  await expect(page.locator('.post-photos img')).toHaveCount(1);
   expect(f.posts[0].images).toEqual([{ id: 'photo-0' }]);
   for (const [index, body] of ['첫 댓글', '대댓글'].entries()) {
     if (index) await page.locator('[data-reply]').first().click();
@@ -287,6 +287,9 @@ test('Attachments show the whole portrait and landscape for fan and artist posts
   f.posts.splice(0, f.posts.length, {id:'photo-post',board:'lucky',title:'사진',body:'사진 비율',created_at:Date.now(),member_id:artist?'jaein':null,images:[{id:'portrait'},{id:'landscape'}]});
   await page.goto('/community.html?board=lucky');
   await page.locator('[data-feed='+ (artist?'artist':'fan') +']').click();
+  await expect(page.locator('.post-row .post-photos')).toHaveCount(0);
+  await expect(page.locator('.post-attachment-indicator')).toHaveText('▧ 이미지 첨부 · 2장');
+  await page.locator('.post-row').click();
   for(const width of [1280,320]) {
    await page.setViewportSize({width,height:900});
    const photos=page.locator('.post-photos img');
