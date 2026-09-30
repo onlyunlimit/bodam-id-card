@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { staffTags, staffTagInfo } from '../../assets/staff-tags.js';
 const api = 'https://sgia-api.example';
 async function mock(page) {
   const posts = [],
@@ -21,6 +22,10 @@ async function mock(page) {
       url = new URL(req.url()),
       method = req.method(),
       data = req.postDataJSON?.();
+    if (url.pathname === '/staff-tags') {
+      const ids = [...new Set([...posts.flatMap(p => p.tags || []), ...staffTags.map(t => t.id)])];
+      return route.fulfill({json:{tags:ids.map(id => ({id,label:staffTagInfo(id).label})).filter(t => t.label.includes(url.searchParams.get('q') || '')).slice(0,20)}});
+    }
     if (url.pathname === '/members')
       return route.fulfill({
         json: { members: members.filter((m) => m.board === url.searchParams.get('board')) },
@@ -269,11 +274,11 @@ test('Staff lounge separates daily work from fandom posts, filters tags and keep
  await expect(page.locator('#feed-title')).toHaveText('혼잣말');
  await page.locator('#write-post').click();
  await page.locator('[name=title]').fill('오늘의 최애');await page.locator('[name=author]').fill('독자');await page.locator('[name=password]').fill('123456');await page.locator('[name=body]').fill('재인과 오리진 이야기가 좋아요');
- await page.locator('[name=tags][value="member:jaein"]').check();await page.locator('[name=tags][value="team:origin"]').check();await page.locator('[name=consent]').check();await page.locator('#post-form button[type=submit]').click();
+ await page.locator('#staff-hashtags').fill('#재인 #오리진');await page.locator('[name=consent]').check();await page.locator('#post-form button[type=submit]').click();
  await expect(page.locator('.post-row')).toContainText('#재인');expect(f.posts[0].channel).toBe('soliloquy');expect(f.posts[0].tags).toEqual(expect.arrayContaining(['member:jaein','team:origin']));
  await page.locator('#staff-tag-filter').selectOption('team:beacon');await expect(page.locator('.post-row')).toHaveCount(0);
  await page.locator('#staff-tag-filter').selectOption('member:jaein');await expect(page.locator('.post-row')).toHaveCount(1);
- await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('[name=tags][value="member:jaein"]')).toBeChecked();await page.locator('[name=tags][value="team:origin"]').uncheck();await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();await expect(page.locator('.post-body')).toBeVisible();expect(f.posts[0].tags).toEqual(['member:jaein']);await page.keyboard.press('Escape');
+ await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('#staff-hashtags')).toHaveValue('#재인 #오리진');await page.locator('#staff-hashtags').fill('#재인');await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();await expect(page.locator('.post-body')).toBeVisible();expect(f.posts[0].tags).toEqual(['member:jaein']);await page.keyboard.press('Escape');
  await page.locator('.staff-channel-nav a[href$="channel=free"]').click();await expect(page.locator('#feed-title')).toHaveText('자유게시판');await expect(page.locator('.post-row')).toHaveCount(0);
  await expect(page.locator('.community-footer .community-admin')).toHaveCount(1);await expect(page.locator('.fan-sidebar .community-admin')).toHaveCount(0);
  await page.locator('.staff-channel-nav a[href$="channel=soliloquy"]').click();await expect(page.locator('.post-row')).toHaveCount(1);
@@ -300,16 +305,26 @@ test('Attachments show the whole portrait and landscape for fan and artist posts
   }
  }
 });
-test('Free lounge adds, removes and edits custom colored tags', async ({page}, testInfo) => {
- const f = await mock(page); await page.goto('/community.html?board=staff');
- await page.locator('#board-login').click(); await page.locator('#login-submit').click();await page.locator('#write-post').click();
+
+test('Hashtags suggest shared saved tags, support keyboard selection and survive editing', async ({page}, testInfo) => {
+ const f = await mock(page);
+ f.posts.push({id:'saved',board:'staff',channel:'soliloquy',title:'이전 이야기',body:'태그',tags:['custom:야간근무'],created_at:Date.now()});
+ await page.goto('/community.html?board=staff');
+ await page.locator('#board-login').click();await page.locator('#login-submit').click();await page.locator('#write-post').click();
+ const input=page.locator('#staff-hashtags');await input.fill('#');
+ await expect(page.locator('#hashtag-suggestions')).toContainText('#야간근무');
+ await input.fill('#실');await expect(page.locator('#hashtag-suggestions')).toContainText('#실드');
+ await input.press('ArrowDown');await input.press('Enter');await expect(input).toHaveValue('#실드 ');
+ await input.fill('#실드 #야간');await page.getByRole('option',{name:'#야간근무',exact:true}).click();await expect(input).toHaveValue('#실드 #야간근무 ');
+ await input.fill('#실드 #야간근무 #새로운주제');
  await page.locator('[name=title]').fill('태그 테스트');await page.locator('[name=author]').fill('동료');await page.locator('[name=password]').fill('123456');await page.locator('[name=body]').fill('팀 이야기');await page.locator('[name=consent]').check();
- await page.locator('[name=tags][value="member:jaein"]').check();
- await page.locator('.tag-text').fill('지울 태그');await page.locator('.add-tag').click();await page.locator('.remove-tag').click();
- await page.locator('.tag-kind').selectOption('custom-team');await page.locator('.tag-text').fill('새 팀');await page.locator('.add-tag').click();
  await page.locator('#post-form button[type=submit]').click();
- expect(f.posts[0].tags).toEqual(['member:jaein','custom-team:새 팀']);
- await expect(page.locator('.post-row .tag-team')).toHaveText('#새 팀');await expect(page.locator('.post-row .tag-member')).toHaveText('#재인');
- await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('.custom-tags')).toContainText('#새 팀');
- await page.setViewportSize({width:320,height:800});await expect(page.locator('.tag-text')).toBeVisible();expect(await page.locator('#edit-form').evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);await page.locator('.tag-text').scrollIntoViewIfNeeded();await page.screenshot({path:testInfo.outputPath('custom-tags-mobile.png')});
+ expect(f.posts[1].tags).toEqual(['team:shield','custom:야간근무','custom:새로운주제']);
+ await expect(page.locator('.post-row .staff-tags')).toHaveText('#실드#야간근무#새로운주제');
+ // Another editor obtains the new tag from the shared API, not a browser cache.
+ await page.reload();await page.locator('#write-post').click();await page.locator('#staff-hashtags').fill('#새로운');await expect(page.locator('#hashtag-suggestions')).toContainText('#새로운주제');
+ await page.setViewportSize({width:320,height:800});await page.locator('#staff-hashtags').scrollIntoViewIfNeeded();expect(await page.locator('#post-form').evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);await page.screenshot({path:testInfo.outputPath('hashtags-mobile.png')});
+ await page.keyboard.press('Escape');await expect(page.locator('#document-dialog')).toBeVisible();await page.keyboard.press('Tab');await page.keyboard.press('Escape');
+ // Read and remove a tag from an existing post, preserving identifiers.
+ f.posts.shift();await page.reload();await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('#staff-hashtags')).toHaveValue('#실드 #야간근무 #새로운주제');await page.locator('#staff-hashtags').fill('#실드');await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();expect(f.posts[0].tags).toEqual(['team:shield']);
 });

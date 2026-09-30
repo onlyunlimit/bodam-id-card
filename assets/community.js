@@ -438,7 +438,7 @@ export function renderCommunity() {
     );
     const f = $('#post-form'),
       images = attachmentPicker(f, [], mediaURL);
-    if (!fan) connectStaffFields(f);
+    if (!fan) connectStaffFields(f, api);
     $('#department-choice')?.addEventListener('change', (e) => {
       $('#department-custom-label').hidden = e.target.value !== 'custom';
       $('input', $('#department-custom-label')).required = e.target.value === 'custom';
@@ -559,7 +559,7 @@ export function renderCommunity() {
     const f = $('#edit-form'),
       images =
         !deleting && kind === 'posts' ? attachmentPicker(f, item.images || [], mediaURL) : null;
-    if (!deleting && item.board === 'staff') connectStaffFields(f);
+    if (!deleting && item.board === 'staff') connectStaffFields(f, api);
     secureForm(f, async (data, captcha) => {
       if (!fan && !state.staff) throw Error('직원 채널에 다시 접속해 주세요.');
       await api('/' + kind + '/' + item.id, deleting ? 'DELETE' : 'PATCH', {

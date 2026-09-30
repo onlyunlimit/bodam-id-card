@@ -3,7 +3,10 @@ import { koreaTime } from './model.js';
 import { delay, onDispose } from './lifecycle.js';
 import { chirp } from './audio.js';
 import { tr } from './i18n.js';
-export const incidentZone = (record) => (typeof record.zone === 'string' && record.zone.trim()) || '구역 미지정';
+export const incidentZone = (record) =>
+  (typeof record.zone === 'string' && record.zone.trim()) ||
+  (record.manual !== true && typeof record.location === 'string' && record.location.trim()) ||
+  '구역 미지정';
 export function emergencyAlert(record) {
   $('#emergency-stack')?.remove();
   const stack = document.createElement('aside');

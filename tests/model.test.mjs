@@ -110,3 +110,7 @@ test('Incident boundaries validate GeoJSON and retain worldwide coordinates and 
  for(const support of ['', '   ', '가'.repeat(81), null]) assert.equal(isIncident({...record,support}),false);
  for(const support of ['실드','오리진','비콘']) assert.equal(isIncident({...record,support}),true);
  });
+
+test('Generated incidents use their generated location as the zone title', () => {
+ for(let i=0;i<10;i++){const record=generateIncident(i);assert.equal(record.zone,record.location);assert.equal(isIncident(record),true);}
+});

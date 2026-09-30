@@ -1253,31 +1253,6 @@ html[data-community-theme] .fan-community {
   display: grid;
   gap: 14px;
 }
-.staff-tag-picker {
-  border: 1px solid var(--fan-line);
-  border-radius: 8px;
-  padding: 12px;
-  min-width: 0;
-}
-.staff-tag-picker legend {
-  font-size: 12px;
-}
-.staff-tag-picker > div {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  max-height: 230px;
-  overflow: auto;
-}
-.staff-tag-picker label {
-  display: flex !important;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-}
-.staff-tag-picker input {
-  width: auto !important;
-}
 @media (max-width: 700px) {
   .staff .fan-layout {
     grid-template-columns: 1fr;
@@ -1318,26 +1293,17 @@ html[data-community-theme] .fan-community {
   }
 }
 
-/* Attachments retain their original proportions in every feed and document. */
+/* Attachments retain their original proportions inside post details. */
 .post-photos, .fan-post-detail .post-photos { grid-template-columns: 1fr; align-items: start; }
 .post-photos img[data-preserve-ratio], .staff .post-photos img[data-preserve-ratio] { height: auto; background-size: contain; background-repeat: no-repeat; object-fit: contain; }
 .staff .post-photos { max-width: 100%; }
 .upload-image { background-size: contain; background-repeat: no-repeat; }
-.staff-tags .tag-team, .staff-tag-picker .tag-team { color: #755018; background: #fff1cd; border: 1px solid #bc9451; }
-.staff-tags .tag-member, .staff-tag-picker .tag-member { color: #304d8d; background: #e8eeff; border: 1px solid #819acb; }
-.staff-tags .tag-custom, .staff-tag-picker .tag-custom { color: #594064; background: #f2e7f5; border: 1px solid #b993c3; }
-.staff-tag { display: inline-block; padding: 3px 7px; border-radius: 5px; overflow-wrap: anywhere; }
-.tag-legend { display: flex; gap: 12px; font-size: 12px; }
-.staff-tag-picker .custom-tag-entry { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-top: 12px; }
-.staff-tag-picker .custom-tag-entry label { display: grid; flex: 1 1 110px; min-width: 0; }
-.custom-tag-entry input, .custom-tag-entry select { width: 100%; min-width: 0; }
-.custom-tags .custom-tag { display: inline-flex; align-items: center; gap: 3px; }
-.custom-tag .remove-tag { min-width: 32px; min-height: 32px; padding: 3px; }
-.tag-error { display: block; color: #a62e41; margin-top: 8px; }
-
-.staff-tag-picker .custom-tag-entry label { display: grid !important; align-items: stretch; }
-.staff-tag-picker .custom-tag-entry input { width: 100% !important; }
-.staff-tag-picker .custom-tag-entry, .staff-tag-picker .custom-tags { max-height: none; overflow: visible; }
-.staff-tag-picker label { flex-direction: row; }
-.staff-tag-picker .add-tag, .staff-tag-picker .remove-tag { color: #26303e; background: #f2f4f8; border: 1px solid #aab4c2; font-size: 13px; }
-.staff-tag-picker .add-tag { min-height: 42px; padding: 8px 14px; }
+/* Plain hashtag entry and shared suggestions. */
+.staff-tags .staff-hashtag { padding: 0; border: 0; background: none; color: var(--fan-accent, #556b89); font-size: 12px; }
+.hashtag-editor { min-width: 0; }
+.hashtag-editor input { width: 100%; }
+.hashtag-editor small { display: block; margin-top: 6px; color: #687483; font-size: 12px; }
+.hashtag-suggestions { max-height: 180px; overflow-y: auto; margin-top: 8px; border: 1px solid #d2d8e0; border-radius: 8px; background: #fff; }
+.hashtag-suggestions[hidden] { display: none; }
+.hashtag-suggestions button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 0; box-shadow: none; background: #fff; color: #32485f; text-align: left; font-size: 13px; overflow-wrap: anywhere; }
+.hashtag-suggestions button:hover, .hashtag-suggestions button[aria-selected="true"] { background: #edf1f6; color: #172b45; }

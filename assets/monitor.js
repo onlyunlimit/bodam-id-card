@@ -63,7 +63,7 @@ export function createMap(element, signals = incidents) {
     fadeAnimation: state.motion,
     zoomControl: true,
     attributionControl: true,
-  }).setView([20, 0], 2);
+  }).setView([37.5665, 126.9780], 11);
   const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     minZoom: 2,
@@ -130,7 +130,7 @@ export function renderOverview() {
       '통합 관제 현황',
       '국가 각성자 통합관리청 · 전 세계 사건 관제',
     ) +
-    `<section class="control-grid"><div class="map-panel panel"><div class="section-title"><div><span class="eyebrow">WORLD SURVEILLANCE</span><h2>게이트 관측망</h2></div><span class="badge">LIVE SIGNAL</span></div><div class="map-wrap"><div id="seoul-map" class="seoul-map" aria-label="세계 위험 분포"></div><div class="map-target" id="map-target"><i></i><span>CURSOR TRACK</span></div><div class="map-coordinate">WORLD / <span id="cursor-coordinate">20.0000, 0.0000</span></div></div><div class="map-legend"><span><i class="legend-dot" style="background:#ec4f64"></i>A / CRITICAL</span><span><i class="legend-dot" style="background:#eea455"></i>B / HIGH</span><span><i class="legend-dot" style="background:#d3bc62"></i>C / WATCH</span><span><i class="legend-dot green"></i>D / LOW</span><button id="map-reset" class="subtle">세계 지도 ↻</button></div></div><aside class="control-sidebar"><section class="readout panel"><div class="readout-label"><h2>관측 중인 게이트</h2><a href="records.html">기록 ↗</a></div><div class="readout-body">${gauge(t.gates, Math.max(t.open, 1), 'GATES')}<div class="grade-chart">${[
+    `<section class="control-grid"><div class="map-panel panel"><div class="section-title"><div><span class="eyebrow">WORLD SURVEILLANCE</span><h2>게이트 관측망</h2></div><span class="badge">LIVE SIGNAL</span></div><div class="map-wrap"><div id="seoul-map" class="seoul-map" aria-label="세계 위험 분포"></div><div class="map-target" id="map-target"><i></i><span>CURSOR TRACK</span></div><div class="map-coordinate">WORLD / <span id="cursor-coordinate">37.5665, 126.9780</span></div></div><div class="map-legend"><span><i class="legend-dot" style="background:#ec4f64"></i>A / CRITICAL</span><span><i class="legend-dot" style="background:#eea455"></i>B / HIGH</span><span><i class="legend-dot" style="background:#d3bc62"></i>C / WATCH</span><span><i class="legend-dot green"></i>D / LOW</span><button id="map-reset" class="subtle">세계 지도 ↻</button></div></div><aside class="control-sidebar"><section class="readout panel"><div class="readout-label"><h2>관측 중인 게이트</h2><a href="records.html">기록 ↗</a></div><div class="readout-body">${gauge(t.gates, Math.max(t.open, 1), 'GATES')}<div class="grade-chart">${[
       'A',
       'B',
       'C',

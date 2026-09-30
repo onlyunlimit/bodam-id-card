@@ -176,10 +176,12 @@ const descriptions = {
 export function generateIncident(index, random = Math.random, now = Date.now()) {
   const pick = (list) => list[Math.floor(random() * list.length)];
   const type = incidentTypes[index % incidentTypes.length];
+  const location = pick(locations);
   return {
     id: `SG-${now.toString(36).toUpperCase()}-${index}`,
     type,
-    location: pick(locations),
+    location,
+    zone: location,
     grade: pick(['D', 'C', 'C', 'B', 'B', 'A']),
     detail: pick(descriptions[type]),
     created: now,

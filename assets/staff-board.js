@@ -95,28 +95,82 @@ import { staffTags, staffTagInfo, validStaffTag } from './staff-tags.js';
 import { esc } from './runtime.js';
 export const channelName = (channel) => (channel === 'soliloquy' ? '혼잣말' : '자유게시판');
 
-const tagChip = id => { const t = staffTagInfo(id); return `<span class="staff-tag tag-${t.kind}" title="${t.kind === 'team' ? '팀 주제' : t.kind === 'member' ? '인물' : '직접 입력'}">#${esc(t.label)}</span>`; };
+const tagChip = id => `<span class="staff-hashtag">#${esc(staffTagInfo(id).label)}</span>`;
 export const tagOptions = (selected, extra = []) => '<option value="">모든 캐릭터·팀</option>' + [...staffTags, ...[...new Set(extra)].filter(id => id !== selected && !staffTags.some(t => t.id === id)).map(id => ({id})), ...(selected && !staffTags.some(t => t.id === selected) ? [{id:selected}] : [])].map(t => `<option value="${esc(t.id)}" ${selected === t.id ? 'selected' : ''}>${esc(staffTagInfo(t.id).label)}</option>`).join('');
 export const tagsMarkup = tags => tags?.length ? `<div class="staff-tags" data-user-content>${tags.map(tagChip).join('')}</div>` : '';
-const customChip = id => `<label class="custom-tag" data-user-content><input type="hidden" name="tags" value="${esc(id)}">${tagChip(id)}<button type="button" class="remove-tag" aria-label="${esc(staffTagInfo(id).label)} 태그 삭제">×</button></label>`;
+
+const catalogs = new WeakMap();
 export function staffFields(channel = 'free', tags = []) {
- return `<div class="staff-fields"><label>게시판<select name="channel"><option value="free" ${channel === 'free' ? 'selected' : ''}>자유게시판 · SGIA 직장 생활</option><option value="soliloquy" ${channel === 'soliloquy' ? 'selected' : ''}>혼잣말 · 캐릭터 덕질</option></select></label><fieldset class="staff-tag-picker"><legend>관심 태그 · 최대 5개</legend><p class="tag-legend"><span class="tag-team">◆ 팀</span> <span class="tag-member">● 인물</span></p><div>${staffTags.map(t => `<label><input type="checkbox" name="tags" value="${t.id}" ${tags.includes(t.id) ? 'checked' : ''}>${tagChip(t.id)}</label>`).join('')}</div><div class="custom-tags">${tags.filter(t => !staffTags.some(x => x.id === t)).map(customChip).join('')}</div><div class="custom-tag-entry"><label>종류<select class="tag-kind"><option value="custom">일반 태그</option><option value="custom-team">팀 주제</option></select></label><label>직접 입력<input class="tag-text" maxlength="40" placeholder="태그 또는 팀 주제"></label><button type="button" class="add-tag">추가</button></div><small class="tag-error" role="status"></small></fieldset></div>`;
+  return `<div class="staff-fields"><label>게시판<select name="channel"><option value="free" ${channel === 'free' ? 'selected' : ''}>자유게시판 · SGIA 직장 생활</option><option value="soliloquy" ${channel === 'soliloquy' ? 'selected' : ''}>혼잣말 · 캐릭터 덕질</option></select></label><div class="hashtag-editor"><label for="staff-hashtags">태그<input id="staff-hashtags" name="hashtagText" value="${esc(tags.map(id => '#' + staffTagInfo(id).label).join(' '))}" placeholder="#실드 #재인" maxlength="220" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="hashtag-suggestions" aria-describedby="hashtag-help"></label><small id="hashtag-help">#을 입력하면 저장된 태그를 추천해요. 최대 5개.</small><div id="hashtag-suggestions" class="hashtag-suggestions" role="listbox" aria-label="태그 추천" hidden data-user-content></div><small class="hashtag-status" role="status"></small><input type="hidden" name="originalTags" value="${esc(JSON.stringify(tags))}"></div></div>`;
 }
-export function connectStaffFields(form) {
- const picker = form.querySelector('.staff-tag-picker'); if (!picker) return;
- const error = picker.querySelector('.tag-error');
- const add = () => {
-  const input = picker.querySelector('.tag-text');
-  const id = picker.querySelector('.tag-kind').value + ':' + input.value.trim();
-  const tags = new FormData(form).getAll('tags');
-  if (!validStaffTag(id)) {error.textContent = '태그를 1~40자로 입력해 주세요.'; return;}
-  if (tags.includes(id)) {error.textContent = '이미 선택한 태그입니다.'; return;}
-  if (tags.length >= 5) {error.textContent = '태그는 5개까지 선택할 수 있습니다.'; return;}
-  picker.querySelector('.custom-tags').insertAdjacentHTML('beforeend', customChip(id)); input.value = ''; error.textContent = ''; input.focus();
- };
- picker.querySelector('.add-tag').addEventListener('click', add);
- picker.querySelector('.tag-text').addEventListener('keydown', e => {if(e.key === 'Enter'){e.preventDefault();add();}});
- picker.addEventListener('click', e => {const button = e.target.closest('.remove-tag'); if(button){button.closest('.custom-tag').remove();error.textContent = '';}});
- picker.addEventListener('change', e => {if(e.target.type === 'checkbox' && new FormData(form).getAll('tags').length > 5){e.target.checked = false;error.textContent = '태그는 5개까지 선택할 수 있습니다.';}});
+export function connectStaffFields(form, request) {
+  const input = form.elements.hashtagText;
+  if (!input) return;
+  const list = form.querySelector('.hashtag-suggestions');
+  const status = form.querySelector('.hashtag-status');
+  const catalog = new Map(staffTags.map(t => [staffTagInfo(t.id).label, t.id]));
+  for (const id of JSON.parse(form.elements.originalTags.value)) catalog.set(staffTagInfo(id).label, id);
+  catalogs.set(form, catalog);
+  let ticket = 0, timer, options = [], active = -1;
+  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); active = -1; };
+  const segment = () => {
+    const caret = input.selectionStart ?? input.value.length;
+    const start = input.value.lastIndexOf('#', caret - 1);
+    if (start < 0) return null;
+    const next = input.value.indexOf('#', caret);
+    return { start, end: next < 0 ? input.value.length : next, query: input.value.slice(start + 1, caret).trim() };
+  };
+  const draw = rows => {
+    options = rows; active = -1; input.removeAttribute('aria-activedescendant');
+    list.innerHTML = rows.map((t, i) => `<button type="button" role="option" aria-selected="false" id="hashtag-option-${i}" data-option="${i}">#${esc(t.label)}</button>`).join('');
+    list.hidden = !rows.length; input.setAttribute('aria-expanded', String(!!rows.length));
+  };
+  const update = () => {
+    const current = ++ticket; clearTimeout(timer);
+    const part = segment(); if (!part) { close(); status.textContent = ''; return; }
+    const query = part.query.toLocaleLowerCase();
+    draw([...catalog].filter(([label]) => label.toLocaleLowerCase().includes(query)).slice(0,20).map(([label,id]) => ({label,id})));
+    status.textContent = '';
+    timer = setTimeout(async () => {
+      if (!request || !form.isConnected || document.activeElement !== input) return;
+      try {
+        const r = await request('/staff-tags?q=' + encodeURIComponent(part.query));
+        if (current !== ticket || !form.isConnected || document.activeElement !== input) return;
+        const rows = (r.tags || []).filter(t => typeof t.label === 'string' && validStaffTag(t.id));
+        rows.forEach(t => catalog.set(t.label,t.id));
+        draw(rows);
+        status.textContent = rows.length ? '' : '새 태그로 저장할 수 있어요.';
+      } catch { if(current === ticket && form.isConnected) status.textContent = '추천을 불러오지 못했어요. 직접 입력해 저장할 수 있어요.'; }
+    }, 180);
+  };
+  const choose = index => {
+    const part = segment(), option = options[index]; if(!part || !option) return;
+    input.value = input.value.slice(0, part.start) + '#' + option.label + ' ' + input.value.slice(part.end);
+    const caret = part.start + option.label.length + 2;
+    ticket++; clearTimeout(timer); close(); input.focus(); input.setSelectionRange(caret,caret); status.textContent = '';
+  };
+  input.addEventListener('input', update);
+  input.addEventListener('focus', update);
+  input.addEventListener('click', update);
+  input.addEventListener('blur', () => {ticket++; clearTimeout(timer); close();});
+  list.addEventListener('pointerdown', e => { const button = e.target.closest('[data-option]'); if(button){e.preventDefault();choose(Number(button.dataset.option));} });
+  list.addEventListener('click', e => {const button = e.target.closest('[data-option]');if(button)choose(Number(button.dataset.option));});
+  input.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){e.preventDefault();e.stopPropagation();ticket++;clearTimeout(timer);close();}
+    if(e.key === 'Enter'){e.preventDefault();if(active >= 0)choose(active);else close();}
+    if(!list.hidden && ['ArrowDown','ArrowUp'].includes(e.key)){
+      e.preventDefault();active = (active + (e.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+      [...list.children].forEach((el,i) => el.setAttribute('aria-selected',String(i === active)));
+      input.setAttribute('aria-activedescendant',list.children[active].id);list.children[active].scrollIntoView({block:'nearest'});
+    }
+  });
 }
-export const readStaffFields = form => ({channel: form.elements.channel.value, tags: new FormData(form).getAll('tags')});
+export function readStaffFields(form) {
+  const text = form.elements.hashtagText.value.trim();
+  if(text && !text.startsWith('#')) throw Error('태그 앞에 #을 붙여 주세요.');
+  const labels = [...new Set(text.split('#').map(t => t.trim()).filter(Boolean))];
+  const catalog = catalogs.get(form) || new Map();
+  const tags = labels.map(label => catalog.get(label) || 'custom:' + label);
+  if(tags.length > 5 || tags.some(id => !validStaffTag(id))) throw Error('태그는 5개까지, 각 이름은 1~40자로 입력해 주세요.');
+  return {channel:form.elements.channel.value, tags};
+}

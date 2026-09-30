@@ -1,5 +1,5 @@
 import { geocode } from './geocode.js';
-import { staffMeta } from './staff.js';
+import { staffMeta, staffTagSuggestions } from './staff.js';
 import {
   publicFan,
   adminFan,
@@ -330,6 +330,11 @@ async function handle(request, env) {
         .first(),
       total = await env.DB.prepare("SELECT value FROM counters WHERE name='visitors'").first();
     return json({ today: today?.count || 0, total: total.value });
+  }
+  if (path === '/staff-tags' && method === 'GET') {
+    const { hash } = await identity(request, env);
+    await rate(env, 'read:' + hash, 120, 60);
+    return json({ tags: await staffTagSuggestions(env, url.searchParams.get('q') || '') });
   }
   if ((path === '/posts' || path.startsWith('/posts/')) && method === 'GET') {
     const { hash } = await identity(request, env);

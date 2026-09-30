@@ -362,7 +362,7 @@ test('Fan platform supports official feeds, remote profiles, replies and comment
       (await req('/comments/' + reply.data.id + '/like', 'POST', { liked: true })).data.likes,
       1,
     );
-  assert.equal((await req('/posts/' + fan.data.id)).data.comments[1].liked, true);
+  assert.equal((await req('/posts/' + fan.data.id)).data.comments.find(c => c.id === reply.data.id).liked, true);
   assert.equal((await req('/artist-comments?board=lucky')).data.comments[0].body, '답장왔어요');
   await req('/posts/' + fan.data.id + '/like', 'POST', { liked: true });
   assert.equal((await req('/posts?board=lucky&feed=highlight')).data.posts[0].id, fan.data.id);
@@ -531,4 +531,17 @@ test('Free lounge supports custom tags and team topics with validation and editi
  assert.equal((await req('/posts/'+a.data.id, 'PATCH', {...post, tags:['custom:수정']})).status, 200);
  assert.deepEqual((await req('/posts/'+a.data.id)).data.post.tags,['custom:수정']);
  for(const tags of [['custom:'], ['custom: '], ['custom:'+ 'x'.repeat(41)], ['member:unknown'], Array(6).fill('team:origin')]) assert.equal((await req('/posts','POST',{...post,tags})).status,400);
+});
+
+test('Hashtag suggestions read shared saved tags and exclude hidden or deleted posts', async () => {
+ const {req,post,sql} = await fixture();
+ const a=await req('/posts','POST',{...post,tags:['custom:야간근무','team:shield']});
+ const tags=(await req('/staff-tags?q=야간')).data.tags;
+ assert.deepEqual(tags,[{id:'custom:야간근무',label:'야간근무'}]);
+ assert.ok((await req('/staff-tags')).data.tags.some(t=>t.id==='custom:야간근무'));
+ assert.ok((await req('/staff-tags?q=실')).data.tags.some(t=>t.id==='team:shield'));
+ sql.prepare('UPDATE posts SET hidden=1 WHERE id=?').run(a.data.id);
+ assert.equal((await req('/staff-tags?q=야간')).data.tags.length,0);
+ sql.prepare('UPDATE posts SET hidden=0,deleted_at=? WHERE id=?').run(Date.now(),a.data.id);
+ assert.equal((await req('/staff-tags?q=야간')).data.tags.length,0);
 });

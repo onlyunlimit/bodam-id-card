@@ -16,7 +16,6 @@ test('A clicked report pin persists into operations, disappears on closure, and 
   await staff(page);
   await page.locator('#new-incident').click();
   await page.locator('[name=reporter]').fill('Map observer');
-  await page.locator('[name=location]').fill('현장 <b>표지</b>');
   await page.locator('[name=zone]').fill('EAST');
   await page.locator('[name=detail]').fill('새로운 생명체 발견. 현장 접근 대기.');
   await page.locator('#report-map').click({ position: { x: 350, y: 75 } });
@@ -69,6 +68,7 @@ test('Classified evidence opens as a document and crosshair stays decorative wit
   await page.locator('#archive-pin').fill('0826');
   await page.locator('[data-key=ENTER]').click();
   await expect(page.locator('[data-evidence]')).toHaveCount(3);
+  await expect.poll(() => page.locator('#tracking-map img.leaflet-tile').evaluateAll(es => Math.max(...es.map(e => Number(e.src.match(/\/(\d+)\/\d+\/\d+\.png/)?.[1] || 0))))).toBe(11);
   await page.locator('[data-evidence="01"]').click();
   await expect(page.locator('.evidence-reader')).toContainText('동일 발화');
   await page.setViewportSize({ width: 320, height: 850 });
@@ -168,20 +168,26 @@ test('Worldwide map zooms on two quick mobile taps', async ({browser}) => {
   await page.goto('http://127.0.0.1:4173/portal.html');
   const map=page.locator('#seoul-map'); await map.scrollIntoViewIfNeeded();
   const zoom=()=>map.locator('img.leaflet-tile').evaluateAll(es=>Math.max(...es.map(e=>Number(e.src.match(/\/(\d+)\/\d+\/\d+\.png/)?.[1]||0))));
-  await expect.poll(zoom).toBe(2); const box=await map.boundingBox();
-  await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);
-  await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);
-  await expect.poll(zoom).toBe(3);
+  await expect.poll(zoom).toBe(11); const box=await map.boundingBox();
+  await page.touchscreen.tap(box.x+box.width*0.8,box.y+box.height*0.2);
+  await page.touchscreen.tap(box.x+box.width*0.8,box.y+box.height*0.2);
+  await expect.poll(zoom).toBe(12);
  } finally { await context.close(); }
 });
 
 
-test('Compact records show the zone heading with a separate location and old records have a safe fallback', async ({page},testInfo) => {
+test('Generated records use their location as zone heading, including saved legacy records', async ({page},testInfo) => {
  await page.emulateMedia({reducedMotion:'reduce'}); await page.goto('/records.html'); await staff(page);
- await expect(page.locator('.case-content h3').first()).toHaveText('구역 미지정');
+ const title = await page.locator('.case-content h3').first().textContent();
+ await expect(page.locator('.case-location').first()).toContainText(title);
+ await expect(page.locator('.case-content h3').first()).not.toHaveText('구역 미지정');
+ await page.evaluate(async () => {const {generateIncident}=await import('/assets/model.js');const record=generateIncident(1);delete record.zone;localStorage.setItem('sgia.incidents',JSON.stringify([record]));});
+ await page.reload();
+ const legacyTitle=await page.locator('.case-content h3').first().textContent();
+ await expect(page.locator('.case-location').first()).toContainText(legacyTitle);
  await page.locator('#incident-list').screenshot({path:testInfo.outputPath('compact-records.png')});
  await page.locator('.case-content').first().click();
- await expect(page.locator('.record-dossier h3')).toHaveText('구역 미지정');
+ await expect(page.locator('.record-dossier h3')).toHaveText(legacyTitle);
  await expect(page.locator('.record-dossier .facts')).toContainText('발생 위치');
  await page.locator('#document-dialog').screenshot({path:testInfo.outputPath('compact-dossier.png')});
  await page.setViewportSize({width:320,height:800});

@@ -140,3 +140,9 @@ API 주소와 공개 Turnstile 사이트 키만 `assets/service-config.js`에 �
 - `backend/scripts/build-admin-media.mjs`가 `assets/community-media.js` 원본을 읽어 `backend/admin-media.generated.js` 문자열 모듈을 생성합니다. 생성 파일을 직접 수정하지 않습니다. Wrangler의 build 단계에서 자동 갱신하며, 수동 갱신은 루트에서 `node backend/scripts/build-admin-media.mjs`입니다.
 - 서버 검사는 생성 파일과 원본 일치를 확인합니다. 관리자 브라우저 검사는 Worker와 같은 `keepNames` 번들 변환 후 파일·링크 첨부, × 취소, 이미지 없는 등록을 확인합니다.
 - 배포 후 `SGIA_ADMIN_SCRIPT_URL=https://sgia-community.sgia-community-api.workers.dev/admin/app.js npx playwright test tests/browser/community-admin.spec.js`로 실제 공개 관리자 JS를 검사할 수 있습니다. 이 검사는 관리자 API를 테스트 대역으로 대체하므로 운영 게시물을 생성하지 않습니다.
+
+## 해시태그 추천
+
+- 자유게시판·혼잣말 작성/수정은 `#실드 #재인` 형태의 한 입력칸 사용. 기존 태그 ID 유지, 새로운 이름은 `custom:` 접두사로 글의 JSON tags에 저장.
+- `GET /staff-tags?q=검색어`: 공개 사내 글의 저장 태그와 기본 태그를 합쳐 중복 이름 제거 후 최대 20개 추천. 입력 전송은 180ms 지연, 조회 제한 적용. 숨김/삭제 글의 사용자 지정 태그는 추천에서 제외.
+- 별도 마이그레이션 없음. 브라우저 로컬 저장이 아닌 D1에 저장된 글을 읽으므로 다른 브라우저에서도 추천 가능. 글 작성 전의 입력만으로 DB에 추가하지 않음.
