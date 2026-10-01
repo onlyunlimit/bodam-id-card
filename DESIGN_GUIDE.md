@@ -32,7 +32,7 @@
 | 인물 카드 크기·사진·이름판 | [assets/forensic.css](assets/forensic.css) | `.person-card`, `.id-photo`, `.id-caption`, `.person-title` |
 | 사건 기록 카드 크기·간격 | [assets/forensic.css](assets/forensic.css) | `.case-file`, `.case-content`, `.case-location`, 파일 하단의 기록물 규칙 |
 | 게시글 목록·본문·댓글 | [assets/fan-community.css](assets/fan-community.css) | `.fan-post-card`, `.feed-body`, `.post-body`, `.comment-row` |
-| 선택한 태그·입력·자동완성 | [assets/fan-community.css](assets/fan-community.css) | `.selected-hashtags`, `.selected-hashtag`, `.hashtag-editor`, `.hashtag-suggestions` |
+| 선택한 태그·입력·자동완성 | [assets/fan-community.css](assets/fan-community.css) | `.selected-hashtags`, `.selected-hashtag`, `.hashtag-input`(자동 # 표시), `.hashtag-suggestions` |
 | 시작 화면 | [assets/intro.css](assets/intro.css) | `.threshold`, `.threshold-copy`, `.intro-brand` |
 
 ### CSS가 여러 파일에 있는 이유

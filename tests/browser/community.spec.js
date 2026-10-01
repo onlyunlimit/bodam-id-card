@@ -335,3 +335,15 @@ test('Hashtags suggest shared saved tags, support keyboard selection and survive
  // Read and remove a tag from an existing post, preserving identifiers.
  f.posts.shift();await page.reload();await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('#staff-hashtags')).toHaveValue('');await expect(page.locator('.selected-hashtag')).toHaveCount(5);await page.getByRole('button',{name:'야간근무 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'새로운주제 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'다섯번째 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'여섯번째 태그 삭제',exact:true}).click();await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();expect(f.posts[0].tags).toEqual(['team:shield']);
 });
+
+test('Tag names need no hash and typing or selecting never focuses required nickname', async ({page}) => {
+ await mock(page);await page.goto('/community.html?board=staff');await page.locator('#board-login').click();await page.locator('#login-submit').click();await page.locator('#write-post').click();
+ await page.locator('[name=title]').fill('포커스 검사');
+ const input=page.locator('#staff-hashtags');
+ await input.fill('실');await expect(input).toBeFocused();await page.getByRole('option',{name:'#실드',exact:true}).click();await expect(input).toBeFocused();await expect(input).toHaveValue('');await expect(page.locator('.selected-hashtag')).toContainText('#실드');
+ await input.fill('새 태그');await input.press('Enter');await expect(input).toBeFocused();await expect(page.locator('.selected-hashtag')).toHaveCount(2);
+ await input.fill('#');await expect(input).toBeFocused();await expect(page.locator('#hashtag-suggestions')).toBeVisible();await expect(input).toBeFocused();
+ await input.fill('한글조합');await input.dispatchEvent('keydown',{key:'Enter',code:'Enter',isComposing:true,keyCode:229});await expect(input).toBeFocused();await expect(page.locator('.selected-hashtag')).toHaveCount(2);await expect(input).toHaveValue('한글조합');
+ await input.press('Enter');await expect(input).toBeFocused();await expect(page.locator('.selected-hashtag')).toHaveCount(3);
+ await page.setViewportSize({width:320,height:800});await input.fill('모바일태그');await page.locator('.hashtag-add').click();await expect(input).toBeFocused();await expect(input).toHaveValue('');await expect(page.locator('[name=author]')).toHaveValue('');
+});

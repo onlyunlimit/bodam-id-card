@@ -101,7 +101,7 @@ export const tagsMarkup = tags => tags?.length ? `<div class="staff-tags" data-u
 
 const editors = new WeakMap();
 export function staffFields(channel = 'free', tags = []) {
-  return `<div class="staff-fields"><label>게시판<select name="channel"><option value="free" ${channel === 'free' ? 'selected' : ''}>자유게시판 · SGIA 직장 생활</option><option value="soliloquy" ${channel === 'soliloquy' ? 'selected' : ''}>혼잣말 · 캐릭터 덕질</option></select></label><div class="hashtag-editor"><label for="staff-hashtags">태그<input id="staff-hashtags" name="hashtagText" value="" placeholder="#태그 입력" maxlength="220" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="hashtag-suggestions" aria-describedby="hashtag-help"></label><div class="selected-hashtags" role="list" aria-label="선택한 태그" data-user-content></div><button type="button" class="hashtag-add">태그 추가</button><small id="hashtag-help">#으로 검색한 뒤 선택하거나 Enter로 추가하세요. 최대 5개.</small><div id="hashtag-suggestions" class="hashtag-suggestions" role="listbox" aria-label="태그 추천" hidden data-user-content></div><small class="hashtag-status" role="status"></small><input type="hidden" name="originalTags" value="${esc(JSON.stringify(tags))}"></div></div>`;
+  return `<div class="staff-fields"><label>게시판<select name="channel"><option value="free" ${channel === 'free' ? 'selected' : ''}>자유게시판 · SGIA 직장 생활</option><option value="soliloquy" ${channel === 'soliloquy' ? 'selected' : ''}>혼잣말 · 캐릭터 덕질</option></select></label><div class="hashtag-editor"><label for="staff-hashtags">태그<span class="hashtag-input"><span aria-hidden="true">#</span><input id="staff-hashtags" name="hashtagText" value="" placeholder="태그 이름" maxlength="220" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="hashtag-suggestions" aria-describedby="hashtag-help"></span></label><div class="selected-hashtags" role="list" aria-label="선택한 태그" data-user-content></div><button type="button" class="hashtag-add">태그 추가</button><small id="hashtag-help">이름만 입력하세요. #은 자동으로 붙습니다. 최대 5개.</small><div id="hashtag-suggestions" class="hashtag-suggestions" role="listbox" aria-label="태그 추천" hidden data-user-content></div><small class="hashtag-status" role="status"></small><input type="hidden" name="originalTags" value="${esc(JSON.stringify(tags))}"></div></div>`;
 }
 export function connectStaffFields(form, request) {
   const input = form.elements.hashtagText;
@@ -121,7 +121,7 @@ export function connectStaffFields(form, request) {
   const segment = () => {
     const caret = input.selectionStart ?? input.value.length;
     const start = input.value.lastIndexOf('#', caret - 1);
-    if (start < 0) return null;
+    if (start < 0) return {query: input.value.slice(0, caret).trim()};
     const next = input.value.indexOf('#', caret);
     return { start, end: next < 0 ? input.value.length : next, query: input.value.slice(start + 1, caret).trim() };
   };
@@ -152,7 +152,6 @@ export function connectStaffFields(form, request) {
   const add = (chosen) => {
     const raw = input.value.trim();
     if (!chosen && !raw) return true;
-    if (!chosen && !raw.startsWith('#')) {status.textContent = '태그 앞에 #을 붙여 주세요.'; return false;}
     const labels = chosen ? [chosen.label] : [...new Set(raw.split('#').map(t => t.trim()).filter(Boolean))];
     if (!labels.length) {status.textContent = '태그 이름을 입력해 주세요.'; return false;}
     const additions = labels.filter(label => !selected.some(id => staffTagInfo(id).label.toLocaleLowerCase() === label.toLocaleLowerCase())).map(label => chosen?.id || catalog.get(label) || 'custom:' + label);
@@ -180,8 +179,13 @@ export function connectStaffFields(form, request) {
   input.addEventListener('blur', () => {ticket++; clearTimeout(timer); close();});
   list.addEventListener('pointerdown', e => { const button = e.target.closest('[data-option]'); if(button)e.preventDefault(); });
   list.addEventListener('click', e => {const button = e.target.closest('[data-option]');if(button)choose(Number(button.dataset.option));});
+  input.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {e.preventDefault();e.stopPropagation();}
+  });
   input.addEventListener('keydown', e => {
-    if (e.isComposing) return;
+    // Block implicit form submission even when Enter finishes an IME composition.
+    if (e.key === 'Enter') {e.preventDefault();e.stopPropagation();}
+    if (e.isComposing || e.keyCode === 229) return;
     if(e.key === 'Escape'){e.preventDefault();e.stopPropagation();ticket++;clearTimeout(timer);close();}
     if(e.key === 'Enter'){e.preventDefault();if(active >= 0)choose(active);else add();}
     if(!list.hidden && ['ArrowDown','ArrowUp'].includes(e.key)){
