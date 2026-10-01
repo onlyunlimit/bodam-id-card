@@ -278,7 +278,7 @@ test('Staff lounge separates daily work from fandom posts, filters tags and keep
  await expect(page.locator('.post-row')).toContainText('#재인');expect(f.posts[0].channel).toBe('soliloquy');expect(f.posts[0].tags).toEqual(expect.arrayContaining(['member:jaein','team:origin']));
  await page.locator('#staff-tag-filter').selectOption('team:beacon');await expect(page.locator('.post-row')).toHaveCount(0);
  await page.locator('#staff-tag-filter').selectOption('member:jaein');await expect(page.locator('.post-row')).toHaveCount(1);
- await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('#staff-hashtags')).toHaveValue('#재인 #오리진');await page.locator('#staff-hashtags').fill('#재인');await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();await expect(page.locator('.post-body')).toBeVisible();expect(f.posts[0].tags).toEqual(['member:jaein']);await page.keyboard.press('Escape');
+ await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('.selected-hashtag')).toHaveCount(2);await page.getByRole('button',{name:'오리진 태그 삭제',exact:true}).click();await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();await expect(page.locator('.post-body')).toBeVisible();expect(f.posts[0].tags).toEqual(['member:jaein']);await page.keyboard.press('Escape');
  await page.locator('.staff-channel-nav a[href$="channel=free"]').click();await expect(page.locator('#feed-title')).toHaveText('자유게시판');await expect(page.locator('.post-row')).toHaveCount(0);
  await expect(page.locator('.community-footer .community-admin')).toHaveCount(1);await expect(page.locator('.fan-sidebar .community-admin')).toHaveCount(0);
  await page.locator('.staff-channel-nav a[href$="channel=soliloquy"]').click();await expect(page.locator('.post-row')).toHaveCount(1);
@@ -314,17 +314,24 @@ test('Hashtags suggest shared saved tags, support keyboard selection and survive
  const input=page.locator('#staff-hashtags');await input.fill('#');
  await expect(page.locator('#hashtag-suggestions')).toContainText('#야간근무');
  await input.fill('#실');await expect(page.locator('#hashtag-suggestions')).toContainText('#실드');
- await input.press('ArrowDown');await input.press('Enter');await expect(input).toHaveValue('#실드 ');
- await input.fill('#실드 #야간');await page.getByRole('option',{name:'#야간근무',exact:true}).click();await expect(input).toHaveValue('#실드 #야간근무 ');
- await input.fill('#실드 #야간근무 #새로운주제');
+ await input.press('ArrowDown');await input.press('Enter');await expect(input).toHaveValue('');await expect(page.locator('.selected-hashtag')).toHaveCount(1);
+ await input.fill('#야간');await page.getByRole('option',{name:'#야간근무',exact:true}).click();await expect(input).toHaveValue('');await expect(page.locator('.selected-hashtag')).toHaveCount(2);
+ await input.fill('#새로운주제');await input.press('Enter');
+ await input.fill('#네번째');await page.locator('.hashtag-add').click();
+ await input.fill('#다섯번째');await input.press('Enter');await expect(page.locator('.selected-hashtag')).toHaveCount(5);await expect(input).toHaveValue('');
+ await input.fill('#여섯번째');await input.press('Enter');await expect(page.locator('.hashtag-status')).toContainText('최대 5개');await expect(page.locator('.selected-hashtag')).toHaveCount(5);
+ await page.getByRole('button',{name:'네번째 태그 삭제',exact:true}).click();await input.press('Enter');await expect(page.locator('.selected-hashtag')).toHaveCount(5);
+ await input.fill('#실드');await input.press('Enter');await expect(page.locator('.hashtag-status')).toContainText('이미 추가');await expect(page.locator('.selected-hashtag')).toHaveCount(5);await input.fill('');
+ await page.setViewportSize({width:320,height:800});await input.scrollIntoViewIfNeeded();await page.screenshot({path:testInfo.outputPath('five-selected-tags-mobile.png')});await page.setViewportSize({width:1280,height:900});
  await page.locator('[name=title]').fill('태그 테스트');await page.locator('[name=author]').fill('동료');await page.locator('[name=password]').fill('123456');await page.locator('[name=body]').fill('팀 이야기');await page.locator('[name=consent]').check();
  await page.locator('#post-form button[type=submit]').click();
- expect(f.posts[1].tags).toEqual(['team:shield','custom:야간근무','custom:새로운주제']);
- await expect(page.locator('.post-row .staff-tags')).toHaveText('#실드#야간근무#새로운주제');
+ await expect.poll(() => f.posts.length).toBe(2);
+ expect(f.posts[1].tags).toEqual(['team:shield','custom:야간근무','custom:새로운주제','custom:다섯번째','custom:여섯번째']);
+ await expect(page.locator('.post-row .staff-tags')).toHaveText('#실드#야간근무#새로운주제#다섯번째#여섯번째');
  // Another editor obtains the new tag from the shared API, not a browser cache.
  await page.reload();await page.locator('#write-post').click();await page.locator('#staff-hashtags').fill('#새로운');await expect(page.locator('#hashtag-suggestions')).toContainText('#새로운주제');
  await page.setViewportSize({width:320,height:800});await page.locator('#staff-hashtags').scrollIntoViewIfNeeded();expect(await page.locator('#post-form').evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);await page.screenshot({path:testInfo.outputPath('hashtags-mobile.png')});
  await page.keyboard.press('Escape');await expect(page.locator('#document-dialog')).toBeVisible();await page.keyboard.press('Tab');await page.keyboard.press('Escape');
  // Read and remove a tag from an existing post, preserving identifiers.
- f.posts.shift();await page.reload();await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('#staff-hashtags')).toHaveValue('#실드 #야간근무 #새로운주제');await page.locator('#staff-hashtags').fill('#실드');await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();expect(f.posts[0].tags).toEqual(['team:shield']);
+ f.posts.shift();await page.reload();await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('#staff-hashtags')).toHaveValue('');await expect(page.locator('.selected-hashtag')).toHaveCount(5);await page.getByRole('button',{name:'야간근무 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'새로운주제 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'다섯번째 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'여섯번째 태그 삭제',exact:true}).click();await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();expect(f.posts[0].tags).toEqual(['team:shield']);
 });

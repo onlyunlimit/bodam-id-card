@@ -1,6 +1,6 @@
 # SGIA 저장소 작업 지침
 
-이 파일은 이 저장소에서 작업하는 코딩 에이전트의 안내서입니다. 최근 변경 사항은 [CHANGELOG.md](CHANGELOG.md), 현재 페이지 구조는 [SITE_MAP.md](SITE_MAP.md)를 확인합니다. 사용자 지시는 이 문서보다 우선합니다.
+이 파일은 이 저장소에서 작업하는 코딩 에이전트의 안내서입니다. 최근 변경 사항은 [CHANGELOG.md](CHANGELOG.md), 현재 페이지 구조는 [SITE_MAP.md](SITE_MAP.md), 디자인 수정 위치·GitHub 편집 경로는 [DESIGN_GUIDE.md](DESIGN_GUIDE.md)를 확인합니다. 사용자 지시는 이 문서보다 우선합니다.
 
 ## 1. 작업 시작
 

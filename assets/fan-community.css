@@ -1307,3 +1307,8 @@ html[data-community-theme] .fan-community {
 .hashtag-suggestions[hidden] { display: none; }
 .hashtag-suggestions button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 0; box-shadow: none; background: #fff; color: #32485f; text-align: left; font-size: 13px; overflow-wrap: anywhere; }
 .hashtag-suggestions button:hover, .hashtag-suggestions button[aria-selected="true"] { background: #edf1f6; color: #172b45; }
+
+.selected-hashtags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.selected-hashtag { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; border: 1px solid #d2d8e0; border-radius: 6px; padding: 3px 7px; color: #32485f; background: #f6f7f9; overflow-wrap: anywhere; font-size: 12px; }
+.selected-hashtag button { flex: 0 0 28px; min-height: 28px; padding: 2px; border: 0; box-shadow: none; background: transparent; color: #32485f; font-size: 18px; }
+.hashtag-editor .hashtag-add { margin-top: 8px; padding: 6px 10px; border: 1px solid #c4cdd7; background: #f4f6f8; color: #32485f; font-size: 12px; }
