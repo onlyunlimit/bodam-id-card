@@ -347,3 +347,20 @@ test('Tag names need no hash and typing or selecting never focuses required nick
  await input.press('Enter');await expect(input).toBeFocused();await expect(page.locator('.selected-hashtag')).toHaveCount(3);
  await page.setViewportSize({width:320,height:800});await input.fill('모바일태그');await page.locator('.hashtag-add').click();await expect(input).toBeFocused();await expect(input).toHaveValue('');await expect(page.locator('[name=author]')).toHaveValue('');
 });
+
+test('Mobile line-break and IME confirmation add tags without triggering nickname validation', async ({page}) => {
+ await mock(page);await page.goto('/community.html?board=staff');await page.locator('#board-login').click();await page.locator('#login-submit').click();await page.locator('#write-post').click();
+ await page.locator('[name=title]').fill('모바일 입력');
+ await page.locator('#post-form').evaluate(form => {window.tagInvalidCount=0;form.addEventListener('invalid',()=>window.tagInvalidCount++,true);});
+ const input=page.locator('#staff-hashtags');await input.fill('실드');
+ await input.evaluate(el => el.dispatchEvent(new InputEvent('beforeinput',{inputType:'insertLineBreak',bubbles:true,cancelable:true})));
+ await expect(input).toBeFocused();await expect(input).toHaveValue('');await expect(page.locator('.selected-hashtag')).toHaveCount(1);
+ await input.fill('야간근무');await input.dispatchEvent('compositionstart',{data:'근무'});
+ await input.dispatchEvent('keydown',{key:'Enter',isComposing:true,keyCode:229});
+ await input.dispatchEvent('compositionend',{data:'근무'});
+ await expect(page.locator('.selected-hashtag')).toHaveCount(2);await expect(input).toHaveValue('');await expect(input).toBeFocused();
+ await input.fill('세번째');await input.evaluate(el => el.dispatchEvent(new InputEvent('beforeinput',{inputType:'insertParagraph',bubbles:true,cancelable:true})));
+ await expect(page.locator('.selected-hashtag')).toHaveCount(3);await expect(input).toBeFocused();
+ expect(await page.evaluate(()=>window.tagInvalidCount)).toBe(0);
+ await page.locator('#post-form button[type=submit]').click();await expect(page.locator('[name=author]')).toBeFocused();
+});

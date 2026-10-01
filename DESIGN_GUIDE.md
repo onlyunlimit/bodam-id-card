@@ -114,11 +114,52 @@ gap: 12px;
 - 버튼 크기만 바꿀 때 JS 이벤트·`id`·`data-*` 속성은 유지하면 기존 클릭 기능을 보존할 수 있습니다.
 - 새 규칙을 파일 맨 아래 계속 추가하기보다, 현재 적용되는 규칙을 찾아 값을 수정하는 편이 관리하기 쉽습니다.
 
-## 6. 별도 제작 도구
+## 6. 모바일 디자인만 수정하려면
+
+**모바일용 별도 HTML은 없습니다.** 같은 CSS 안의 `@media (max-width: …px)`가 화면 너비에 따라 적용됩니다. 모바일만 바꾸려면 해당 범위 **중괄호 안**에서 수정하세요.
+
+| 화면 | 수정 파일 | 먼저 검색할 모바일 구간 |
+| --- | --- | --- |
+| 커뮤니티·라운지·태그 | `assets/fan-community.css` | `@media`, `.fan-layout`, `.staff`, `.hashtag-editor` |
+| 사건 카드·상세·신고·기밀 화면 | `assets/forensic.css` | `@media`, `.case-file`, `.record-dossier`, `.report-map-field` |
+| 인물 카드·목록 | `assets/editorial.css`, `assets/forensic.css` | `max-width: 760px`, `max-width: 360px`, `.person-card` |
+| 키패드·기획사·안내서 | `assets/game-ui.css` | `max-width: 900px`, `max-width: 760px` |
+| 공통 메뉴·문서 창 | `assets/portal.css` | `max-width: 850px`, `max-width: 580px`, `max-width: 360px` |
+| 시작 화면 | `assets/intro.css` | `@media`, `.threshold` |
+
+### 예: 커뮤니티의 모바일 여백과 글자만 줄이기
+
+`assets/fan-community.css`에서 기존 모바일 규칙을 찾아 아래처럼 값을 조정합니다. 아래 수치는 수정 예시이며 현재 설정값은 아닙니다.
+
+```css
+@media (max-width: 700px) {
+  .fan-community { padding: 14px; }
+  .fan-post-card { padding: 16px; }
+  .fan-post-card h3 { font-size: 18px; }
+}
+```
+
+- `max-width: 700px`는 700px 이하에서만 적용됩니다. 그 밖의 데스크톱 스타일은 유지됩니다.
+- 같은 모바일 선택자가 파일 뒤에 또 있으면 뒤의 규칙도 확인하세요. `forensic.css`의 규칙이 앞에서 읽은 CSS를 덮어쓸 수도 있습니다.
+- 한 줄에 카드 1개는 해당 부모의 `grid-template-columns: 1fr`, 두 개는 `repeat(2, minmax(0, 1fr))`로 조정합니다.
+- 모바일 입력칸 글자는 `font-size: 16px`부터 확인하세요. iPhone에서 작은 입력 글자를 선택할 때 자동 확대되는 현상을 줄일 수 있습니다. 태그 입력칸 선택자는 `.hashtag-input textarea`입니다.
+- 가로로 삐져나오는 항목은 `width:100%`, `min-width:0`, `box-sizing:border-box`, 긴 문장의 `overflow-wrap:anywhere`를 확인합니다. 전체 `body`를 잘라 문제를 숨기면 버튼·내용까지 잘릴 수 있습니다.
+- 사진 비율을 유지하려면 고정 높이 대신 `height:auto`를 사용합니다. CSS 배경으로 표시하는 사진은 `background-size:contain`도 함께 확인합니다.
+
+### PC에서 모바일 화면 미리보기
+
+1. 사이트를 열고 Chrome 개발자 도구를 엽니다(Mac: `⌘⌥I`, Windows: `F12`).
+2. 휴대폰/태블릿 아이콘을 선택합니다(Mac: `⌘⇧M`, Windows: `Ctrl⇧M`).
+3. 화면 폭을 **320px → 390px → 430px**로 바꿔 확인합니다. 마지막에 넓은 데스크톱 화면도 확인합니다.
+4. 게시글 작성·상세 창을 열어 내부 스크롤, 태그 5개, 긴 이름과 이미지가 잘리는지 확인합니다.
+5. 개발자 도구의 Styles에서 바꾼 값은 미리보기일 뿐입니다. 확인한 값을 GitHub의 해당 CSS에 저장해야 유지됩니다.
+6. 배포 완료 후 실제 휴대폰에서도 확인합니다. 특히 키보드·한글 입력·터치 동작은 PC 화면 축소만으로 모두 재현되지 않습니다.
+
+## 7. 별도 제작 도구
 
 [sgia.html](sgia.html), [monster.html](monster.html), [team.html](team.html), [quote.html](quote.html), [setlog.html](setlog.html), [bodam.html](bodam.html), [idcard/index.html](idcard/index.html), [school/index.html](school/index.html)은 별도 HTML 앱입니다. 각 파일의 `<style>`과 `<script>`를 확인합니다. 공통 포털 CSS가 모두 적용되는 구조는 아닙니다.
 
-## 7. 수정 후 확인
+## 8. 수정 후 확인
 
 1. 수정 화면의 데스크톱과 좁은 모바일 화면 확인.
 2. 밝은/어두운 테마, 직원/방문자 화면이 달라지는 부분이면 각각 확인.
