@@ -34,7 +34,26 @@ function endGesture(e){if(!gesture||e.pointerId!==gesture.pointer)return;gesture
 canvas.onpointerup=endGesture;canvas.onpointercancel=endGesture;canvas.onlostpointercapture=endGesture;
 canvas.onkeydown=e=>{if(!item())return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();checkpoint();const step=e.shiftKey?20:5;item().x=Math.max(0,Math.min(scene.width,item().x+(e.key==='ArrowLeft'?-step:e.key==='ArrowRight'?step:0)));item().y=Math.max(0,Math.min(scene.height,item().y+(e.key==='ArrowUp'?-step:e.key==='ArrowDown'?step:0)));inspect();}if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();$('remove').click();}};
 $('layer-select').onchange=e=>{selected=e.target.value;picking=false;setTool('select');inspect();};
-for(const [id,prop,convert] of [['item-scale','scale',v=>v/100],['item-rotation','r',v=>v],['item-x','x',v=>Math.max(0,Math.min(scene.width,v))],['item-y','y',v=>Math.max(0,Math.min(scene.height,v))]])$(id).onchange=e=>{if(!item()||!Number.isFinite(Number(e.target.value)))return;checkpoint();item()[prop]=convert(Number(e.target.value));inspect();};
+// Preview every slider input; keep one undo snapshot for the whole adjustment.
+for(const [id,prop,convert,output,unit] of [
+ ['item-scale','scale',v=>v/100,'scale-output','%'],
+ ['item-rotation','r',v=>v,'rotation-output','°']
+]){
+ const slider=$(id);let editing=null;
+ const finish=()=>{editing=null;};
+ const preview=()=>{
+  const target=item(),value=Number(slider.value);
+  if(!target||!Number.isFinite(value)||target[prop]===convert(value))return;
+  if(editing!==target){checkpoint();editing=target;}
+  target[prop]=convert(value);$(output).value=value+unit;draw();
+ };
+ slider.oninput=preview;
+ slider.onchange=()=>{preview();finish();};
+ slider.onblur=finish;
+ slider.onpointerdown=finish;
+ slider.onpointercancel=finish;
+}
+for(const [id,prop,convert] of [['item-x','x',v=>Math.max(0,Math.min(scene.width,v))],['item-y','y',v=>Math.max(0,Math.min(scene.height,v))]])$(id).onchange=e=>{if(!item()||!Number.isFinite(Number(e.target.value)))return;checkpoint();item()[prop]=convert(Number(e.target.value));inspect();};
 for(const [id,step]of [['layer-up',1],['layer-down',-1]])$(id).onclick=()=>{const n=scene.items.findIndex(i=>i.id===selected),to=n+step;if(n<0||to<0||to>=scene.items.length)return;checkpoint();[scene.items[n],scene.items[to]]=[scene.items[to],scene.items[n]];inspect();};
 $('remove').onclick=()=>{if(!item())return;checkpoint();scene.items=scene.items.filter(i=>i.id!==selected);selected=scene.items.at(-1)?.id||null;inspect();};
 $('duplicate').onclick=()=>{const i=item();if(!i)return;try{append({...i,id:'copy-'+(++serial),x:Math.min(scene.width,i.x+25),y:Math.min(scene.height,i.y+25),key:i.key?{...i.key}:null});}catch(e){status(e.message);}};

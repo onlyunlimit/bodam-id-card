@@ -9,6 +9,29 @@ async function fixture(page){
  await page.route('https://cdn.caveduck.io/**',r=>r.fulfill({contentType:'image/png',body:buffer,headers:{'Access-Control-Allow-Origin':'*'}}));
  return {name:'photo.png',mimeType:'image/png',buffer};
 }
+test('Size and rotation preview during dragging, with one undo step per adjustment',async({page})=>{
+ const file=await fixture(page);await page.locator('#photo-file').setInputFiles(file);
+ await expect(page.locator('#status')).toContainText('추가했어요');
+ const canvas=page.locator('#photo-canvas');
+ for(const [id,output,unit] of [['item-scale','scale-output','%'],['item-rotation','rotation-output','°']]){
+  const slider=page.locator('#'+id),initial=await slider.inputValue(),before=await canvas.evaluate(e=>e.toDataURL());
+  await slider.scrollIntoViewIfNeeded();const r=await slider.boundingBox();
+  const ratio=await slider.evaluate(e=>(Number(e.value)-Number(e.min))/(Number(e.max)-Number(e.min)));
+  await page.mouse.move(r.x+8+(r.width-16)*ratio,r.y+r.height/2);await page.mouse.down();
+  await page.mouse.move(r.x+r.width*.7,r.y+r.height/2,{steps:6});
+  expect(await slider.inputValue()).not.toBe(initial);
+  await expect(page.locator('#'+output)).toHaveText((await slider.inputValue())+unit);
+  expect((await canvas.evaluate(e=>e.toDataURL()))===before).toBe(false);
+  await page.mouse.move(r.x+r.width*.85,r.y+r.height/2,{steps:6});
+  const finalValue=await slider.inputValue();await page.mouse.up();
+  await page.locator('#undo').click();await expect(slider).toHaveValue(initial);
+  expect((await canvas.evaluate(e=>e.toDataURL()))===before).toBe(true);
+  await page.locator('#redo').click();await expect(slider).toHaveValue(finalValue);
+  await slider.focus();await page.keyboard.press('ArrowLeft');
+  await expect(page.locator('#'+output)).toHaveText((await slider.inputValue())+unit);
+  await page.locator('#undo').click();await expect(slider).toHaveValue(finalValue);
+ }
+});
 test('Studio uploads, positions, draws, removes chroma and exports an unselected PNG with optional watermark',async({page},info)=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());const file=await fixture(page);
  await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#layer-select option')).toHaveCount(1);await expect(page.locator('#status')).toContainText('추가');
