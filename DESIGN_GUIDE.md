@@ -155,6 +155,19 @@ gap: 12px;
 5. 개발자 도구의 Styles에서 바꾼 값은 미리보기일 뿐입니다. 확인한 값을 GitHub의 해당 CSS에 저장해야 유지됩니다.
 6. 배포 완료 후 실제 휴대폰에서도 확인합니다. 특히 키보드·한글 입력·터치 동작은 PC 화면 축소만으로 모두 재현되지 않습니다.
 
+## 프리쿠라 메이커 디자인
+
+| 바꿀 부분 | 파일 / 검색어 |
+| --- | --- |
+| 화면 항목·도구 이름 | [purikura.html](purikura.html) |
+| 핑크/실버 배경·버튼·도구 패널 | [assets/purikura.css](assets/purikura.css): `:root`, `.booth-layout`, `.stage`, `.tools`, `.inspector` |
+| 모바일 배치 | 같은 CSS의 `@media(max-width:700px)`, `.preview-jump`; 중간 크기는 1100px 기준 |
+| PNG에 찍히는 사진지·프레임·워터마크 | [assets/purikura-engine.js](assets/purikura-engine.js): `renderScene` — 화면 CSS가 아니라 캔버스 그리기 코드 |
+| 랜덤/선택용 사진 추가 | [assets/purikura-gallery.js](assets/purikura-gallery.js): `extraPhotos`에 `{name:'이름',url:'https://…'}` 추가 |
+| 도구 동작·업로드·저장 | [assets/purikura.js](assets/purikura.js) |
+
+기존 인물·화보와 공개 커뮤니티 프로필은 자동으로 합쳐집니다. 파일·URL로 작업에 넣은 사진은 공개 목록에 자동 저장되지 않습니다. 사진 링크는 외부 캔버스 사용(CORS)이 허용되어야 PNG 저장에 사용할 수 있습니다.
+
 ## 7. 별도 제작 도구
 
 [sgia.html](sgia.html), [monster.html](monster.html), [team.html](team.html), [quote.html](quote.html), [setlog.html](setlog.html), [bodam.html](bodam.html), [idcard/index.html](idcard/index.html), [school/index.html](school/index.html)은 별도 HTML 앱입니다. 각 파일의 `<style>`과 `<script>`를 확인합니다. 공통 포털 CSS가 모두 적용되는 구조는 아닙니다.
