@@ -1,15 +1,15 @@
 import {studioPhotos} from './purikura-gallery.js';
 import {serviceConfig} from './service-config.js';
-import {sizes,fonts,cloneScene,localPoint,contains,keyPixels,renderScene} from './purikura-engine.js';
+import {sizes,fonts,cloneScene,localPoint,contains,transformFromPointers,keyPixels,renderScene} from './purikura-engine.js';
 const $=id=>document.getElementById(id), canvas=$('photo-canvas'),inkCanvas=document.createElement('canvas');
 let scene={width:900,height:1200,paper:'#fff6f8',frame:'scallop',items:[],strokes:[],watermarkOn:false,watermark:'',watermarkColor:'#864761'}, selected=null,tool='select',picking=false,gesture=null,dirty=false;
-const history=[],future=[],images=new Map(),processed=new Map();let serial=0,loading=0;
+const history=[],future=[],images=new Map(),processed=new Map(),pointers=new Map();let serial=0,loading=0;
 const status=message=>$('status').textContent=message;
 const item=()=>scene.items.find(x=>x.id===selected);
 function checkpoint(){history.push(cloneScene(scene));if(history.length>30)history.shift();future.length=0;dirty=true;}
 function imageFor(i){const original=images.get(i.asset);if(!i.key?.enabled)return original;const cache=`${i.asset}:${i.key.color}:${i.key.tolerance}`;if(processed.has(cache))return processed.get(cache);const out=document.createElement('canvas');out.width=original.width;out.height=original.height;const c=out.getContext('2d',{willReadFrequently:true});c.drawImage(original,0,0);const pixels=c.getImageData(0,0,out.width,out.height);keyPixels(pixels.data,i.key.color,i.key.tolerance);c.putImageData(pixels,0,0);processed.set(cache,out);if(processed.size>8)processed.delete(processed.keys().next().value);return out;}
 function draw(){renderScene(canvas,scene,{imageFor,selected,inkCanvas});canvas.style.setProperty('--photo-ratio',scene.width/scene.height);$('size-label').textContent=`${scene.width} × ${scene.height} PX`;$('empty-note').hidden=!!(scene.items.length||scene.strokes.length);$('undo').disabled=!history.length;$('redo').disabled=!future.length;}
-function inspect(){const i=item();$('layer-select').replaceChildren(...(scene.items.length?[...scene.items].reverse().map(x=>new Option(x.label,x.id)): [new Option('항목 없음','')]));$('layer-select').value=selected||'';$('item-controls').hidden=!i;$('chroma-controls').hidden=i?.type!=='image';$('edit-text-box').hidden=i?.type!=='text';if(i){$('item-scale').value=i.scale*100;$('scale-output').value=Math.round(i.scale*100)+'%';$('item-rotation').value=i.r;$('rotation-output').value=i.r+'°';$('item-x').value=Math.round(i.x);$('item-y').value=Math.round(i.y);if(i.type==='text')$('edit-text').value=i.text;else{$('chroma-enabled').checked=!!i.key?.enabled;$('chroma-color').value=i.key?.color||'#00ff00';$('chroma-tolerance').value=i.key?.tolerance??45;$('chroma-output').value=i.key?.tolerance??45;}}draw();}
+function inspect(){const i=item();$('layer-select').replaceChildren(...(scene.items.length?[...scene.items].reverse().map(x=>new Option(x.label,x.id)): [new Option('항목 없음','')]));$('layer-select').value=selected||'';$('item-controls').hidden=!i;$('chroma-controls').hidden=i?.type!=='image';$('edit-text-box').hidden=i?.type!=='text';if(i){$('item-scale').value=i.scale*100;$('scale-output').value=Math.round(i.scale*100)+'%';$('item-rotation').value=i.r;$('rotation-output').value=Math.round(i.r)+'°';$('item-x').value=Math.round(i.x);$('item-y').value=Math.round(i.y);if(i.type==='text')$('edit-text').value=i.text;else{$('chroma-enabled').checked=!!i.key?.enabled;$('chroma-color').value=i.key?.color||'#00ff00';$('chroma-tolerance').value=i.key?.tolerance??45;$('chroma-output').value=i.key?.tolerance??45;}}draw();}
 function sync(){if(!scene.items.some(x=>x.id===selected))selected=null;$('paper-color').value=scene.paper;$('frame').value=scene.frame;$('paper-size').value=Object.keys(sizes).find(k=>sizes[k][0]===scene.width&&sizes[k][1]===scene.height);$('watermark-on').checked=scene.watermarkOn;$('watermark-text').value=scene.watermark;$('watermark-color').value=scene.watermarkColor;inspect();}
 function setTool(t){tool=t;picking=false;$('eyedropper').setAttribute('aria-pressed','false');document.querySelectorAll('[data-tool]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tool===t)));canvas.style.cursor=t==='select'?'grab':'crosshair';}
 function append(i){if(scene.items.length>=35)throw Error('사진·글자·스티커는 35개까지 넣을 수 있어요.');checkpoint();scene.items.push(i);selected=i.id;setTool('select');inspect();}
@@ -27,10 +27,60 @@ $('text-add').onclick=()=>{const text=$('text-input').value.trim();if(!text)retu
 document.querySelectorAll('[data-stamp]').forEach(b=>b.onclick=()=>{try{append(makeText(b.dataset.stamp,'serif',$('text-color').value));}catch(e){status(e.message);}});
 $('text-update').onclick=()=>{const i=item(),text=$('edit-text').value.trim();if(!i||i.type!=='text'||!text)return;checkpoint();const replacement=makeText(text,i.font,i.color);Object.assign(i,{text,w:replacement.w,h:replacement.h,label:replacement.label});inspect();};
 function pos(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*scene.width/r.width,y:(e.clientY-r.top)*scene.height/r.height};}
-canvas.onpointerdown=e=>{if(e.button!==0||gesture)return;e.preventDefault();canvas.focus({preventScroll:true});const p=pos(e);if(picking){const i=item();if(!i||i.type!=='image'||!contains(i,p))return status('선택한 이미지 안의 배경색을 찍어 주세요.');const q=localPoint(i,p),src=images.get(i.asset),c=src.getContext('2d',{willReadFrequently:true}),pixel=c.getImageData(Math.min(src.width-1,Math.floor(q.x/i.w*src.width)),Math.min(src.height-1,Math.floor(q.y/i.h*src.height)),1,1).data;if(!pixel[3])return status('이미 투명한 곳이에요. 배경색이 있는 곳을 찍어 주세요.');checkpoint();i.key={...i.key,enabled:true,color:'#'+[...pixel.slice(0,3)].map(v=>v.toString(16).padStart(2,'0')).join('')};picking=false;$('eyedropper').setAttribute('aria-pressed','false');inspect();status('선택한 색을 지웠어요. 허용 범위로 가장자리를 조절해 주세요.');return;}
- canvas.setPointerCapture(e.pointerId);if(tool==='select'){selected=[...scene.items].reverse().find(i=>contains(i,p))?.id||null;const i=item();gesture={pointer:e.pointerId,start:p,x:i?.x,y:i?.y,moved:false};inspect();}else{if(scene.strokes.length>=200)return status('펜 선은 200개까지 그릴 수 있어요.');checkpoint();const stroke={tool,color:$('ink-color').value,size:Number($('ink-size').value),points:[p]};scene.strokes.push(stroke);gesture={pointer:e.pointerId,stroke};draw();}};
-canvas.onpointermove=e=>{if(!gesture||gesture.pointer!==e.pointerId)return;const p=pos(e);if(gesture.stroke){if(gesture.stroke.points.length<5000)gesture.stroke.points.push(p);draw();}else if(item()){if(!gesture.moved&&Math.hypot(p.x-gesture.start.x,p.y-gesture.start.y)>2){checkpoint();gesture.moved=true;}if(gesture.moved){item().x=Math.max(0,Math.min(scene.width,gesture.x+p.x-gesture.start.x));item().y=Math.max(0,Math.min(scene.height,gesture.y+p.y-gesture.start.y));draw();}}};
-function endGesture(e){if(!gesture||e.pointerId!==gesture.pointer)return;gesture=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);inspect();}
+canvas.onpointerdown=e=>{if(e.button!==0||(gesture&&(gesture.stroke||e.pointerType!=='touch'||gesture.pointerType!=='touch'||pointers.size>=2)))return;e.preventDefault();canvas.focus({preventScroll:true});const p=pos(e);if(picking){const i=item();if(!i||i.type!=='image'||!contains(i,p))return status('선택한 이미지 안의 배경색을 찍어 주세요.');const q=localPoint(i,p),src=images.get(i.asset),c=src.getContext('2d',{willReadFrequently:true}),pixel=c.getImageData(Math.min(src.width-1,Math.floor(q.x/i.w*src.width)),Math.min(src.height-1,Math.floor(q.y/i.h*src.height)),1,1).data;if(!pixel[3])return status('이미 투명한 곳이에요. 배경색이 있는 곳을 찍어 주세요.');checkpoint();i.key={...i.key,enabled:true,color:'#'+[...pixel.slice(0,3)].map(v=>v.toString(16).padStart(2,'0')).join('')};picking=false;$('eyedropper').setAttribute('aria-pressed','false');inspect();status('선택한 색을 지웠어요. 허용 범위로 가장자리를 조절해 주세요.');return;}
+ if(tool==='select'){
+  canvas.setPointerCapture(e.pointerId);
+  if(!pointers.size){
+   const hit=[...scene.items].reverse().find(i=>contains(i,p));
+   selected=hit?.id||(e.pointerType==='touch'?selected:null);
+   gesture={checkpointed:false,pointerType:e.pointerType};
+  }
+  pointers.set(e.pointerId,p);beginSelectionGesture();inspect();
+ }else{
+  if(scene.strokes.length>=200)return status('펜 선은 200개까지 그릴 수 있어요.');
+  canvas.setPointerCapture(e.pointerId);checkpoint();
+  const stroke={tool,color:$('ink-color').value,size:Number($('ink-size').value),points:[p]};
+  scene.strokes.push(stroke);gesture={pointer:e.pointerId,stroke};draw();
+ }
+};
+function beginSelectionGesture(){
+ const i=item(),points=[...pointers.values()];
+ gesture={checkpointed:gesture?.checkpointed||false,pointerType:gesture?.pointerType,
+  start:points,initial:i?{x:i.x,y:i.y,r:i.r,scale:i.scale}:null};
+}
+function previewTransform(i){
+ $('item-scale').value=i.scale*100;$('scale-output').value=Math.round(i.scale*100)+'%';
+ $('item-rotation').value=i.r;$('rotation-output').value=Math.round(i.r)+'°';
+ $('item-x').value=Math.round(i.x);$('item-y').value=Math.round(i.y);draw();
+}
+canvas.onpointermove=e=>{
+ if(!gesture)return;
+ const p=pos(e);
+ if(gesture.stroke){
+  if(gesture.pointer!==e.pointerId)return;
+  if(gesture.stroke.points.length<5000)gesture.stroke.points.push(p);draw();return;
+ }
+ if(!pointers.has(e.pointerId))return;
+ pointers.set(e.pointerId,p);
+ const i=item();if(!i||!gesture.initial)return;
+ const points=[...pointers.values()],start=gesture.start;
+ if(!gesture.checkpointed&&!points.some((q,n)=>Math.hypot(q.x-start[n].x,q.y-start[n].y)>2))return;
+ if(!gesture.checkpointed){checkpoint();gesture.checkpointed=true;}
+ const next=points.length===2?transformFromPointers(gesture.initial,start,points):{
+  x:gesture.initial.x+p.x-start[0].x,y:gesture.initial.y+p.y-start[0].y};
+ Object.assign(i,next,{x:Math.max(0,Math.min(scene.width,next.x)),y:Math.max(0,Math.min(scene.height,next.y))});
+ previewTransform(i);
+};
+function endGesture(e){
+ if(!gesture)return;
+ if(gesture.stroke){if(e.pointerId!==gesture.pointer)return;gesture=null;}
+ else{
+  if(!pointers.delete(e.pointerId))return;
+  if(pointers.size)beginSelectionGesture();else gesture=null;
+ }
+ if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
+ inspect();
+}
 canvas.onpointerup=endGesture;canvas.onpointercancel=endGesture;canvas.onlostpointercapture=endGesture;
 canvas.onkeydown=e=>{if(!item())return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();checkpoint();const step=e.shiftKey?20:5;item().x=Math.max(0,Math.min(scene.width,item().x+(e.key==='ArrowLeft'?-step:e.key==='ArrowRight'?step:0)));item().y=Math.max(0,Math.min(scene.height,item().y+(e.key==='ArrowUp'?-step:e.key==='ArrowDown'?step:0)));inspect();}if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();$('remove').click();}};
 $('layer-select').onchange=e=>{selected=e.target.value;picking=false;setTool('select');inspect();};

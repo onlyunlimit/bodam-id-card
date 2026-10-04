@@ -70,3 +70,38 @@ test('Mobile eyedropper samples the photo and touch strokes can be undone',async
  await touch.detach();
  expect(await c.evaluate(e=>e.toDataURL())).not.toBe(before);await page.locator('#undo').click();expect(await c.evaluate(e=>e.toDataURL())).toBe(before);
 });
+test('Two fingers resize and rotate the selected photo with a single undo step',async({page})=>{
+ await page.setViewportSize({width:390,height:850});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const file=await fixture(page);await page.locator('#photo-file').setInputFiles(file);
+ await expect(page.locator('#status')).toContainText('추가했어요');const c=page.locator('#photo-canvas');await c.scrollIntoViewIfNeeded();
+ const before=await c.evaluate(e=>e.toDataURL()),box=await c.boundingBox(),cx=box.x+box.width/2,cy=box.y+box.height/2;
+ const touch=await page.context().newCDPSession(page);
+ const points=(dx,dy)=>[{id:1,x:cx-dx,y:cy-dy},{id:2,x:cx+dx,y:cy+dy}];
+ await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:points(30,0)});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:points(50,20)});
+ await expect.poll(async()=>Number(await page.locator('#item-scale').inputValue())).toBeGreaterThan(160);
+ await expect.poll(async()=>Number(await page.locator('#item-rotation').inputValue())).toBeGreaterThan(15);
+ expect((await c.evaluate(e=>e.toDataURL()))===before).toBe(false);
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:points(20,-10)});
+ await expect.poll(async()=>Number(await page.locator('#item-scale').inputValue())).toBeLessThan(100);
+ await expect.poll(async()=>Number(await page.locator('#item-rotation').inputValue())).toBeLessThan(-15);
+ const one=points(20,-10).slice(1),pinched=await c.evaluate(e=>e.toDataURL());
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:one});
+ expect((await c.evaluate(e=>e.toDataURL()))===pinched).toBe(true);
+ const pinchX=Number(await page.locator('#item-x').inputValue());
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...one[0],x:one[0].x+15}]});
+ await expect.poll(async()=>Number(await page.locator('#item-x').inputValue())).toBeGreaterThan(pinchX);
+ await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ const after=await c.evaluate(e=>e.toDataURL());
+ await page.locator('#undo').click();await expect(page.locator('#item-scale')).toHaveValue('100');await expect(page.locator('#item-rotation')).toHaveValue('0');
+ expect((await c.evaluate(e=>e.toDataURL()))===before).toBe(true);
+ await page.locator('#redo').click();expect((await c.evaluate(e=>e.toDataURL()))===after).toBe(true);
+ // A fresh one-finger gesture still drags normally after both contacts end.
+ await c.scrollIntoViewIfNeeded();const r=await c.boundingBox(),x=r.x+r.width/2,y=r.y+r.height/2;
+ const previousX=Number(await page.locator('#item-x').inputValue());
+ await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:3,x,y}]});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:3,x:x+15,y}]});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ expect(Number(await page.locator('#item-x').inputValue())).toBeGreaterThan(previousX);
+ await touch.detach();expect(errors).toEqual([]);
+});

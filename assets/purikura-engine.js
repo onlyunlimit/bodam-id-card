@@ -3,6 +3,17 @@ export const fonts = {sans:'Arial, "Apple SD Gothic Neo", sans-serif',serif:'Geo
 export function cloneScene(s) {return {...s,items:s.items.map(x=>({...x,key:x.key?{...x.key}:null})),strokes:s.strokes.map(x=>({...x,points:x.points.map(p=>({...p}))}))};}
 export function localPoint(item,p) {const a=-item.r*Math.PI/180,dx=p.x-item.x,dy=p.y-item.y;return {x:(dx*Math.cos(a)-dy*Math.sin(a))/item.scale+item.w/2,y:(dx*Math.sin(a)+dy*Math.cos(a))/item.scale+item.h/2};}
 export function contains(item,p) {const q=localPoint(item,p);return q.x>=0&&q.y>=0&&q.x<=item.w&&q.y<=item.h;}
+export function transformFromPointers(item,start,current) {
+ const midpoint=points=>({x:(points[0].x+points[1].x)/2,y:(points[0].y+points[1].y)/2});
+ const distance=points=>Math.hypot(points[1].x-points[0].x,points[1].y-points[0].y);
+ const angle=points=>Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);
+ const from=midpoint(start),to=midpoint(current),turn=angle(current)-angle(start);
+ const scale=Math.max(.1,Math.min(2.5,item.scale*distance(current)/Math.max(1,distance(start))));
+ const factor=scale/item.scale,dx=item.x-from.x,dy=item.y-from.y;
+ return {scale,r:((item.r+turn*180/Math.PI)%360+540)%360-180,
+  x:to.x+(dx*Math.cos(turn)-dy*Math.sin(turn))*factor,
+  y:to.y+(dx*Math.sin(turn)+dy*Math.cos(turn))*factor};
+}
 export function keyPixels(data,hex,tolerance) {
  const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
  for(let i=0;i<data.length;i+=4){const distance=Math.hypot(data[i]-rgb[0],data[i+1]-rgb[1],data[i+2]-rgb[2]);const factor=Math.max(0,Math.min(1,(distance-tolerance)/20));data[i+3]=Math.round(data[i+3]*factor);}
