@@ -1,6 +1,6 @@
 # SGIA 디자인 수정 안내
 
-> 기준: 2026-10-01 · 화면 구조는 [SITE_MAP.md](SITE_MAP.md), 변경 내역은 [CHANGELOG.md](CHANGELOG.md).
+> 기준: 2026-10-05 · 화면 구조는 [SITE_MAP.md](SITE_MAP.md), 변경 내역은 [CHANGELOG.md](CHANGELOG.md).
 > **색상·크기·여백은 CSS, 화면 구성·버튼 문구는 JS, 사진 URL은 데이터 파일을 수정합니다.**
 
 ## 1. GitHub에서 어떤 저장소를 열어야 하나요?
@@ -161,10 +161,17 @@ gap: 12px;
 | --- | --- |
 | 화면 항목·도구 이름 | [purikura.html](purikura.html) |
 | 핑크/실버 배경·버튼·도구 패널 | [assets/purikura.css](assets/purikura.css): `:root`, `.booth-layout`, `.stage`, `.tools`, `.inspector` |
-| 모바일 배치 | 같은 CSS의 `@media(max-width:700px)`, `.preview-jump`; 중간 크기는 1100px 기준 |
-| PNG에 찍히는 사진지·프레임·워터마크 | [assets/purikura-engine.js](assets/purikura-engine.js): `renderScene` — 화면 CSS가 아니라 캔버스 그리기 코드 |
+| 모바일 배치 | 같은 CSS의 `@media(max-width:1100px)`, `.mobile-dock`, `.tools.is-open`, `.inspector.is-open`; 좁은 화면 세부 여백은 700/380px 기준 |
+| PNG에 찍히는 사진지·프레임·워터마크 | [assets/purikura-engine.js](assets/purikura-engine.js): `drawFrame`/`renderScene` — 화면 CSS가 아니라 캔버스 그리기 코드 |
 | 랜덤/선택용 사진 추가 | [assets/purikura-gallery.js](assets/purikura-gallery.js): `extraPhotos`에 `{name:'이름',url:'https://…'}` 추가 |
-| 도구 동작·업로드·저장 | [assets/purikura.js](assets/purikura.js) |
+| 도구 동작·업로드·저장·정렬 | [assets/purikura.js](assets/purikura.js), 엔진의 `snapItem` |
+| 요소 옆 삭제·자르기 버튼 | HTML `selection-actions`, CSS `.selection-actions`, JS `placeActions` |
+| 자르기 창·원본 복원 | [assets/purikura-crop.js](assets/purikura-crop.js), HTML `crop-dialog`, CSS `.crop-preview` |
+| 글꼴 예문·± 버튼·모바일 패널 동작 | [assets/purikura-controls.js](assets/purikura-controls.js), CSS `.font-grid`, `.range-stepper` |
+| 실제 한글 글꼴 파일 | `assets/fonts/`와 CSS `@font-face`; 출처/라이선스는 [자산 문서](docs/ASSETS.md) |
+
+
+프레임 종류와 겹침 순서는 화면과 PNG에 함께 반영됩니다. 사진지 크기를 바꾸면 요소는 중앙을 기준으로 이동하며 실제 픽셀 크기와 회전은 유지됩니다. 화면에 맞추는 미리보기 배율 때문에 눈에 보이는 크기는 달라질 수 있습니다.
 
 기존 인물·화보와 공개 커뮤니티 프로필은 자동으로 합쳐집니다. 파일·URL로 작업에 넣은 사진은 공개 목록에 자동 저장되지 않습니다. 사진 링크는 외부 캔버스 사용(CORS)이 허용되어야 PNG 저장에 사용할 수 있습니다.
 

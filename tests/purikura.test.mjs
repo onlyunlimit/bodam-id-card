@@ -15,3 +15,21 @@ test('Pinch scale stays within slider limits, including coincident fingers',()=>
  assert.equal(transformFromPointers(i,start,[{x:0,y:0},{x:0,y:0}]).scale,.1);
  for(const value of Object.values(transformFromPointers(i,[{x:0,y:0},{x:0,y:0}],start)))assert.ok(Number.isFinite(value));
 });
+
+test('Alignment snaps rotated bounds to paper and other elements',async()=>{
+ const {snapItem}=await import('../assets/purikura-engine.js');
+ const i={id:'a',x:447,y:100,w:100,h:100,scale:1,r:0};
+ assert.equal(snapItem(i,[],900,1200,6).x,450);
+ assert.equal(snapItem({...i,x:53},[],900,1200,6).x,50);
+ const other={...i,id:'b',x:200};
+ assert.equal(snapItem({...i,x:302},[other],900,1200,6).x,300);
+ assert.equal(snapItem({...i,x:350},[],900,1200,6).x,350);
+});
+test('Color treatment keeps alpha and history isolates crop and effect settings',async()=>{
+ const {colorPixels}=await import('../assets/purikura-engine.js');
+ const pixels=new Uint8ClampedArray([240,20,50,90]);colorPixels(pixels,{preset:'mono'});
+ assert.equal(pixels[0],pixels[1]);assert.equal(pixels[1],pixels[2]);assert.equal(pixels[3],90);
+ const s={items:[{crop:{x:0,w:1},effects:{brightness:100}}],strokes:[]},copy=cloneScene(s);
+ copy.items[0].crop.w=.5;copy.items[0].effects.brightness=70;
+ assert.equal(s.items[0].crop.w,1);assert.equal(s.items[0].effects.brightness,100);
+});

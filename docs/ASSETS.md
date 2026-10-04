@@ -66,3 +66,19 @@
 - UI 프레임·체크 무늬·종이·펜 스탬프는 CSS/Canvas로 직접 구성. 신규 외부 이미지 파일 없음.
 - `assets/purikura-gallery.js`는 기존 공개 `characters.js`/`agency-gallery.js` 이미지 URL을 재사용하며, 공개 커뮤니티 아티스트 프로필 URL을 읽어 선택 목록에 추가. 기존 자산의 출처 유지. 비공개 참고 이미지/MD 복사 없음.
 - 사용자가 넣는 사진·스티커는 브라우저 메모리에서만 처리하며 배포 자산으로 복사하지 않음.
+
+
+## 2026-10-05 프리쿠라 편집 확장·한글 글꼴
+
+- 하트·레이스·별빛·우표·폴라로이드·골드 프레임은 `assets/purikura-engine.js`의 Canvas 도형으로 직접 구성. 외부 프레임 이미지 없음.
+- 예문 선택과 PNG 출력에 쓰는 한글 글꼴 4종을 Google Fonts 공식 저장소에서 내려받아 `assets/fonts/`에 자체 제공. 원본 TTF를 수정하지 않음. 각 폰트의 OFL.txt를 해당 폴더의 `*-OFL.txt`로 함께 배포.
+
+| 글꼴 | 원본 출처 | 파일 / 라이선스 |
+| --- | --- | --- |
+| Jua | [Google Fonts / Jua](https://github.com/google/fonts/tree/main/ofl/jua) | `Jua-Regular.ttf`, `jua-OFL.txt` |
+| Do Hyeon | [Google Fonts / Do Hyeon](https://github.com/google/fonts/tree/main/ofl/dohyeon) | `DoHyeon-Regular.ttf`, `dohyeon-OFL.txt` |
+| Nanum Pen Script | [Google Fonts / Nanum Pen Script](https://github.com/google/fonts/tree/main/ofl/nanumpenscript) | `NanumPenScript-Regular.ttf`, `nanumpenscript-OFL.txt` |
+| Nanum Brush Script | [Google Fonts / Nanum Brush Script](https://github.com/google/fonts/tree/main/ofl/nanumbrushscript) | `NanumBrushScript-Regular.ttf`, `nanumbrushscript-OFL.txt` |
+
+- 나머지 고딕·세리프·타자기 예문은 시스템 글꼴 스택 사용. 기기별 대체 글꼴 차이가 있을 수 있음.
+- 새 글꼴은 메이커에서만 로드. 공개 빌드에는 위 8개 폰트/라이선스 경로만 추가 허용하며 비공개 텍스트 파일 허용 범위를 넓히지 않음.

@@ -60,11 +60,11 @@ test('Studio imports URL and shared catalogue, reports bad links and fits mobile
 test('Mobile eyedropper samples the photo and touch strokes can be undone',async({page})=>{
  await page.setViewportSize({width:390,height:850});const file=await fixture(page);
  await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');
- await page.locator('#eyedropper').click();const c=page.locator('#photo-canvas');await c.scrollIntoViewIfNeeded();const rect=await c.boundingBox();
+ await page.locator('[data-open-panel=inspector-panel]').click();await page.locator('#eyedropper').click();const c=page.locator('#photo-canvas');await c.scrollIntoViewIfNeeded();const rect=await c.boundingBox();
  await page.mouse.click(rect.x+rect.width*.25,rect.y+rect.height*.3);
  await expect(page.locator('#chroma-color')).toHaveValue('#00ff00');await expect(page.locator('#chroma-enabled')).toBeChecked();
  expect(await c.evaluate(e=>[...e.getContext('2d').getImageData(225,360,1,1).data])).toEqual([255,246,248,255]);
- await page.locator('[data-tool=pen]').click();await c.scrollIntoViewIfNeeded();const before=await c.evaluate(e=>e.toDataURL());
+ await page.locator('[data-open-panel=tools-panel]').click();await page.locator('[data-tool=pen]').click();await c.scrollIntoViewIfNeeded();const before=await c.evaluate(e=>e.toDataURL());
  const touch=await page.context().newCDPSession(page),r=await c.boundingBox();
  for(const [type,x] of [['touchStart',.3],['touchMove',.6],['touchEnd',.6]])await touch.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x:r.x+r.width*x,y:r.y+r.height*.2}]});
  await touch.detach();
@@ -104,4 +104,66 @@ test('Two fingers resize and rotate the selected photo with a single undo step',
  await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
  expect(Number(await page.locator('#item-x').inputValue())).toBeGreaterThan(previousX);
  await touch.detach();expect(errors).toEqual([]);
+});
+
+test('Context actions crop nondestructively, flip, tint and fade images, and paper keeps pixel size',async({page})=>{
+ const file=await fixture(page);await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');
+ const canvas=page.locator('#photo-canvas'),pixels=()=>canvas.evaluate(e=>e.toDataURL());
+ const redBounds=()=>canvas.evaluate(e=>{const c=e.getContext('2d'),d=c.getImageData(0,0,e.width,e.height).data;let minX=e.width,maxX=0,minY=e.height,maxY=0;for(let y=0;y<e.height;y++)for(let x=0;x<e.width;x++){const i=(y*e.width+x)*4;if(d[i]>250&&d[i+1]<5&&d[i+2]<5){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}}return [maxX-minX,maxY-minY];});
+ await expect(page.locator('#quick-remove')).toBeVisible();const original=await pixels(),size=await redBounds();
+ await page.locator('#quick-crop').click();await expect(page.locator('#crop-dialog')).toBeVisible();
+ await page.locator('#crop-width').fill('50');await page.locator('#crop-width').blur();await page.locator('#crop-apply').click();
+ await expect(page.locator('#crop-dialog')).not.toBeVisible();expect((await pixels())===original).toBe(false);
+ const cropped=await pixels();await page.locator('#flip-x').click();await expect(page.locator('#flip-x')).toHaveAttribute('aria-pressed','true');expect((await pixels())===cropped).toBe(false);
+ await page.locator('#undo').click();expect((await pixels())===cropped).toBe(true);
+ await page.locator('#crop-restore').click();expect((await pixels())===original).toBe(true);
+ await page.locator('#item-opacity').fill('40');await expect(page.locator('#opacity-output')).toHaveText('40%');expect((await pixels())===original).toBe(false);await page.locator('#undo').click();
+ await page.locator('#image-filter').selectOption('mono');const gray=await canvas.evaluate(e=>[...e.getContext('2d').getImageData(450,500,1,1).data]);expect(gray[0]).toBe(gray[1]);expect(gray[1]).toBe(gray[2]);await page.locator('#undo').click();
+ await page.getByText('종이 & 프레임',{exact:false}).click();await page.locator('#paper-size').selectOption('square');expect(await redBounds()).toEqual(size);await expect(page.locator('#item-scale')).toHaveValue('100');
+ await page.locator('#frame').selectOption('lace');expect(await redBounds()).toEqual(size);
+ await page.locator('#frame-front').click();await expect(page.locator('#frame-layer-label')).toContainText('맨앞');await page.locator('#frame-down').click();await expect(page.locator('#frame-layer-label')).toContainText('1개');
+ await page.locator('#item-scale').locator('..').getByRole('button',{name:'크기 늘리기'}).click();await expect(page.locator('#item-scale')).toHaveValue('101');await page.locator('#undo').click();await expect(page.locator('#item-scale')).toHaveValue('100');
+ await page.locator('#quick-remove').click();await expect(page.locator('#selection-actions')).toBeHidden();await expect(page.locator('#empty-note')).toBeVisible();await page.locator('#undo').click();await expect(page.locator('#empty-note')).toBeHidden();await canvas.click();await expect(page.locator('#selection-actions')).toBeVisible();
+});
+
+test('Font previews apply to text layers and outlined watermarks; foreground frame covers photos',async({page},info)=>{
+ const file=await fixture(page);await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');
+ await page.evaluate(()=>document.fonts.ready);expect(await page.evaluate(()=>document.fonts.check('24px Jua','우리'))).toBe(true);
+ await page.getByText('글씨 & 스티커',{exact:false}).click();
+ await page.locator('[data-font-picker=text-font] [data-font=pen]').click();await page.locator('#text-input').fill('우리의 오늘 ♡');await page.locator('#text-add').click();
+ await expect(page.locator('#edit-text-box')).toBeVisible();await expect(page.locator('#edit-font')).toHaveValue('pen');await expect(page.locator('#layer-select option')).toHaveCount(2);
+ await page.locator('[data-font-picker=edit-font] [data-font=jua]').click();await expect(page.locator('#edit-font')).toHaveValue('jua');
+ await page.locator('#item-rotation').fill('15');await page.locator('#item-scale').fill('120');await page.locator('#layer-down').click();expect(await page.locator('#layer-select option').last().textContent()).toContain('글자');
+ await page.locator('#watermark-on').check();await page.locator('#watermark-text').fill('우리 둘의 기념일');await page.locator('#watermark-text').blur();await page.locator('[data-font-picker=watermark-font] [data-font=brush]').click();await page.locator('#watermark-outline').fill('5');await page.locator('#watermark-size').fill('40');
+ const downloadPromise=page.waitForEvent('download');await page.locator('#save-png').click();await (await downloadPromise).saveAs(info.outputPath('styled.png'));
+ await page.locator('#layer-select').selectOption({label:'사진 · photo.png'});await page.locator('#item-scale').fill('250');
+ await page.getByText('종이 & 프레임',{exact:false}).click();await page.locator('#frame').selectOption('film');
+ const edge=()=>page.locator('#photo-canvas').evaluate(e=>[...e.getContext('2d').getImageData(5,400,1,1).data]);const behind=await edge();await page.locator('#frame-front').click();expect(await edge()).not.toEqual(behind);expect(await edge()).toEqual([37,27,36,255]);
+ await page.screenshot({path:info.outputPath('editor-desktop.png'),fullPage:true});
+});
+
+test('Mobile side panels open, close, keep focus, and expose context crop and delete',async({page},info)=>{
+ await page.setViewportSize({width:320,height:850});const file=await fixture(page);
+ await expect(page.locator('#tools-panel')).toBeHidden();await expect(page.locator('#inspector-panel')).toBeHidden();
+ await page.locator('[data-open-panel=tools-panel]').click();await expect(page.locator('#tools-panel')).toBeVisible();
+ await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');await expect(page.locator('#tools-panel')).toBeHidden();
+ await page.locator('#quick-crop').click();await expect(page.locator('#crop-dialog')).toBeVisible();const crop=page.locator('#crop-canvas'),r=await crop.boundingBox();
+ await page.mouse.move(r.x+r.width*.1,r.y+r.height*.1);await page.mouse.down();await page.mouse.move(r.x+r.width*.8,r.y+r.height*.8);await page.mouse.up();await page.locator('#crop-apply').click();
+ await page.locator('#quick-edit').click();await expect(page.locator('#inspector-panel')).toBeVisible();
+ await page.locator('#item-scale').locator('..').getByRole('button',{name:'크기 늘리기'}).click();await expect(page.locator('#item-scale')).toHaveValue('101');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);await page.screenshot({path:info.outputPath('editor-mobile-panel.png'),fullPage:true});
+ await page.keyboard.press('Escape');await expect(page.locator('#inspector-panel')).toBeHidden();await expect(page.locator('[data-open-panel=inspector-panel]')).toBeFocused();
+ await page.screenshot({path:info.outputPath('editor-mobile-canvas.png'),fullPage:true});
+ await page.locator('#quick-remove').click();await expect(page.locator('#empty-note')).toBeVisible();
+});
+
+test('Dragging snaps to the center with a visible guide and can be switched off',async({page})=>{
+ const file=await fixture(page);await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');
+ await page.locator('#item-x').fill('410');await page.locator('#item-x').dispatchEvent('change');
+ const c=page.locator('#photo-canvas');await c.scrollIntoViewIfNeeded();const r=await c.boundingBox();
+ await page.mouse.move(r.x+r.width*410/900,r.y+r.height/2);await page.mouse.down();await page.mouse.move(r.x+r.width*448/900,r.y+r.height/2,{steps:5});
+ await expect(page.locator('#item-x')).toHaveValue('450');expect(await c.evaluate(e=>[...e.getContext('2d').getImageData(450,100,1,1).data])).toEqual([0,143,159,255]);await page.mouse.up();
+ expect(await c.evaluate(e=>[...e.getContext('2d').getImageData(450,100,1,1).data])).toEqual([255,246,248,255]);
+ await page.locator('#snap-on').uncheck();await c.scrollIntoViewIfNeeded();const b=await c.boundingBox();
+ await page.mouse.move(b.x+b.width/2,b.y+b.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width*454/900,b.y+b.height/2);await page.mouse.up();await expect(page.locator('#item-x')).toHaveValue('454');
 });

@@ -7,6 +7,10 @@ export const root = fileURLToPath(new URL('../', import.meta.url));
 export const publicEntries = ['index.html', 'portal.html', 'departments.html', 'origin.html', 'beacon.html', 'shield.html', 'entertainment.html', 'elysian.html', 'hunterwind.html', 'lucky.html', 'obsidus.html', 'orpe.html', 'records.html', 'headquarters.html', 'manual.html', 'community.html', 'monster.html', 'sgia.html', 'team.html',
   'purikura.html', 'bodam.html', 'quote.html', 'setlog.html', 'character', 'school', 'idcard', 'bgm', 'assets'];
 const extensions = new Set(['.html', '.css', '.js', '.json', '.svg', '.webp', '.png', '.jpg', '.mp3', '.woff2']);
+const fontAssets = new Set([
+  'Jua-Regular.ttf', 'DoHyeon-Regular.ttf', 'NanumPenScript-Regular.ttf', 'NanumBrushScript-Regular.ttf',
+  'jua-OFL.txt', 'dohyeon-OFL.txt', 'nanumpenscript-OFL.txt', 'nanumbrushscript-OFL.txt',
+].map(name => path.join(root, 'assets/fonts', name)));
 async function validate(dir) {
   const stat = await lstat(dir);
   if (stat.isSymbolicLink()) throw new Error(`Public symlinks are forbidden: ${dir}`);
@@ -15,7 +19,7 @@ async function validate(dir) {
       if (entry.startsWith('.')) throw new Error(`Hidden public entry: ${entry}`);
       await validate(path.join(dir, entry));
     }
-  } else if (!extensions.has(path.extname(dir))) throw new Error(`Unexpected public file: ${dir}`);
+  } else if (!extensions.has(path.extname(dir)) && !fontAssets.has(dir)) throw new Error(`Unexpected public file: ${dir}`);
 }
 export async function build() {
   for (const entry of publicEntries) await validate(path.join(root, entry));
