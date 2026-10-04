@@ -33,3 +33,11 @@ test('Color treatment keeps alpha and history isolates crop and effect settings'
  copy.items[0].crop.w=.5;copy.items[0].effects.brightness=70;
  assert.equal(s.items[0].crop.w,1);assert.equal(s.items[0].effects.brightness,100);
 });
+
+test('Horizontal snapping uses a small tolerance and keeps the pinch anchor coherent',async()=>{
+ const {snapHorizontal}=await import('../assets/purikura-engine.js');
+ assert.equal(snapHorizontal(3),0);assert.equal(snapHorizontal(-2),0);assert.equal(snapHorizontal(4),4);
+ const start=[{x:-10,y:0},{x:10,y:0}],angle=2*Math.PI/180,current=start.map(p=>({x:p.x*Math.cos(angle),y:p.x*Math.sin(angle)}));
+ const i={x:0,y:10,r:0,scale:1},snapped=transformFromPointers(i,start,current,true),free=transformFromPointers(i,start,current);
+ assert.equal(snapped.r,0);assert.ok(Math.abs(snapped.x)<1e-10);assert.ok(Math.abs(snapped.y-10)<1e-10);assert.ok(Math.abs(free.r-2)<1e-10);
+});

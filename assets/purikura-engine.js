@@ -5,14 +5,17 @@ export const fontStyle=(key,size)=>`${['jua','pen','brush','display'].includes(k
 export function cloneScene(s) {return {...s,items:s.items.map(x=>({...x,key:x.key?{...x.key}:null,crop:x.crop?{...x.crop}:null,effects:x.effects?{...x.effects}:null})),strokes:s.strokes.map(x=>({...x,points:x.points.map(p=>({...p}))}))};}
 export function localPoint(item,p) {const a=-item.r*Math.PI/180,dx=p.x-item.x,dy=p.y-item.y;return {x:(dx*Math.cos(a)-dy*Math.sin(a))/item.scale+item.w/2,y:(dx*Math.sin(a)+dy*Math.cos(a))/item.scale+item.h/2};}
 export function contains(item,p) {const q=localPoint(item,p);return q.x>=0&&q.y>=0&&q.x<=item.w&&q.y<=item.h;}
-export function transformFromPointers(item,start,current) {
+export const snapHorizontal=degrees=>Math.abs(degrees)<=3?0:degrees;
+export function transformFromPointers(item,start,current,snapToHorizontal=false) {
  const midpoint=points=>({x:(points[0].x+points[1].x)/2,y:(points[0].y+points[1].y)/2});
  const distance=points=>Math.hypot(points[1].x-points[0].x,points[1].y-points[0].y);
  const angle=points=>Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);
- const from=midpoint(start),to=midpoint(current),turn=angle(current)-angle(start);
+ const from=midpoint(start),to=midpoint(current);let turn=angle(current)-angle(start);
+ const raw=((item.r+turn*180/Math.PI)%360+540)%360-180,r=snapToHorizontal?snapHorizontal(raw):raw;
+ if(r!==raw)turn+=(r-raw)*Math.PI/180;
  const scale=Math.max(.1,Math.min(2.5,item.scale*distance(current)/Math.max(1,distance(start))));
  const factor=scale/item.scale,dx=item.x-from.x,dy=item.y-from.y;
- return {scale,r:((item.r+turn*180/Math.PI)%360+540)%360-180,
+ return {scale,r,
   x:to.x+(dx*Math.cos(turn)-dy*Math.sin(turn))*factor,
   y:to.y+(dx*Math.sin(turn)+dy*Math.cos(turn))*factor};
 }

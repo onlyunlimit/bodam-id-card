@@ -1,6 +1,6 @@
 import {studioPhotos} from './purikura-gallery.js';
 import {serviceConfig} from './service-config.js';
-import {sizes,fontStyle,cloneScene,localPoint,contains,transformFromPointers,itemBounds,snapItem,colorPixels,frameDepth,keyPixels,renderScene} from './purikura-engine.js';
+import {sizes,fontStyle,cloneScene,localPoint,contains,transformFromPointers,snapHorizontal,itemBounds,snapItem,colorPixels,frameDepth,keyPixels,renderScene} from './purikura-engine.js';
 import {initControls,syncFontPickers,closePanels,openPanel,fontsReady} from './purikura-controls.js';
 import {initCrop} from './purikura-crop.js';
 const $=id=>document.getElementById(id), canvas=$('photo-canvas'),inkCanvas=document.createElement('canvas');
@@ -86,9 +86,9 @@ canvas.onpointermove=e=>{
  const points=[...pointers.values()],start=gesture.start;
  if(!gesture.checkpointed&&!points.some((q,n)=>Math.hypot(q.x-start[n].x,q.y-start[n].y)>2))return;
  if(!gesture.checkpointed){checkpoint();gesture.checkpointed=true;}
- const next=points.length===2?transformFromPointers(gesture.initial,start,points):{
+ const next=points.length===2?transformFromPointers(gesture.initial,start,points,$('angle-snap').checked):{
   x:gesture.initial.x+p.x-start[0].x,y:gesture.initial.y+p.y-start[0].y};
- guides=null;if(points.length===1&&$('snap-on').checked&&!e.shiftKey){const snap=snapItem({...i,...next},scene.items,scene.width,scene.height,6*scene.width/canvas.getBoundingClientRect().width);next.x=snap.x;next.y=snap.y;guides=snap.guides;}
+ guides=points.length===2&&$('angle-snap').checked&&next.r===0?{y:next.y}:null;if(points.length===1&&$('snap-on').checked&&!e.shiftKey){const snap=snapItem({...i,...next},scene.items,scene.width,scene.height,6*scene.width/canvas.getBoundingClientRect().width);next.x=snap.x;next.y=snap.y;guides=snap.guides;}
  Object.assign(i,next,{x:Math.max(0,Math.min(scene.width,next.x)),y:Math.max(0,Math.min(scene.height,next.y))});
  previewTransform(i);
 };
@@ -110,10 +110,11 @@ for(const [id,prop,convert,output,unit] of [
  ['item-scale','scale',v=>v/100,'scale-output','%'],
  ['item-rotation','r',v=>v,'rotation-output','°']
 ]){
- const slider=$(id);let editing=null;
- const finish=()=>{editing=null;};
+ const slider=$(id);let editing=null,dragging=false;
+ const finish=()=>{editing=null;dragging=false;};
  const preview=()=>{
-  const target=item(),value=Number(slider.value);
+  const target=item(),raw=Number(slider.value),value=prop==='r'&&dragging&&$('angle-snap').checked?snapHorizontal(raw):raw;
+  slider.value=value;
   if(!target||!Number.isFinite(value)||target[prop]===convert(value))return;
   if(editing!==target){checkpoint();editing=target;}
   target[prop]=convert(value);$(output).value=value+unit;draw();
@@ -121,7 +122,8 @@ for(const [id,prop,convert,output,unit] of [
  slider.oninput=preview;
  slider.onchange=()=>{preview();finish();};
  slider.onblur=finish;
- slider.onpointerdown=finish;
+ slider.onpointerdown=()=>{finish();dragging=true;};
+ slider.onpointerup=()=>{dragging=false;};
  slider.onpointercancel=finish;
 }
 for(const [id,prop,convert] of [['item-x','x',v=>Math.max(0,Math.min(scene.width,v))],['item-y','y',v=>Math.max(0,Math.min(scene.height,v))]])$(id).onchange=e=>{if(!item()||!Number.isFinite(Number(e.target.value)))return;checkpoint();item()[prop]=convert(Number(e.target.value));inspect();};
@@ -153,6 +155,7 @@ $('edit-font').onchange=async e=>{const i=item(),font=e.target.value;if(i?.type!
 for(const [id,key] of [['edit-color','color'],['edit-outline-color','outlineColor']])$(id).onchange=e=>{const i=item();if(i?.type!=='text')return;checkpoint();i[key]=e.target.value;draw();};
 for(const [id,key] of [['watermark-font','watermarkFont'],['watermark-outline-color','watermarkOutlineColor']])$(id).onchange=async e=>{const value=e.target.value;await fontsReady;checkpoint();scene[key]=value;draw();syncFontPickers();};
 for(const [id,direction] of [['frame-down',-1],['frame-up',1],['frame-back','back'],['frame-front','front']])$(id).onclick=()=>{checkpoint();scene.frameLayer=typeof direction==='string'?direction:Math.max(0,Math.min(scene.items.length+1,frameDepth(scene)+direction));draw();};
+$('straighten').onclick=()=>{const i=item();if(!i||i.r===0)return;checkpoint();i.r=0;inspect();status('수평으로 맞췄어요.');};
 $('quick-remove').onclick=()=>$('remove').click();$('quick-edit').onclick=()=>openPanel('inspector-panel');
 new ResizeObserver(placeActions).observe(canvas.parentElement);
 initControls();

@@ -85,7 +85,9 @@ test('Two fingers resize and rotate the selected photo with a single undo step',
  await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:points(20,-10)});
  await expect.poll(async()=>Number(await page.locator('#item-scale').inputValue())).toBeLessThan(100);
  await expect.poll(async()=>Number(await page.locator('#item-rotation').inputValue())).toBeLessThan(-15);
- const one=points(20,-10).slice(1),pinched=await c.evaluate(e=>e.toDataURL());
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:points(30,1)});
+ await expect(page.locator('#item-rotation')).toHaveValue('0');
+ const one=points(30,1).slice(1),pinched=await c.evaluate(e=>e.toDataURL());
  await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:one});
  expect((await c.evaluate(e=>e.toDataURL()))===pinched).toBe(true);
  const pinchX=Number(await page.locator('#item-x').inputValue());
@@ -166,4 +168,21 @@ test('Dragging snaps to the center with a visible guide and can be switched off'
  expect(await c.evaluate(e=>[...e.getContext('2d').getImageData(450,100,1,1).data])).toEqual([255,246,248,255]);
  await page.locator('#snap-on').uncheck();await c.scrollIntoViewIfNeeded();const b=await c.boundingBox();
  await page.mouse.move(b.x+b.width/2,b.y+b.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width*454/900,b.y+b.height/2);await page.mouse.up();await expect(page.locator('#item-x')).toHaveValue('454');
+});
+
+test('Horizontal button resets rotation without changing size and dragging can snap or stay precise',async({page})=>{
+ const file=await fixture(page);await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');
+ const rotation=page.locator('#item-rotation');await rotation.fill('25');await page.locator('#item-scale').fill('130');
+ await page.locator('#straighten').click();await expect(rotation).toHaveValue('0');await expect(page.locator('#item-scale')).toHaveValue('130');await expect(page.locator('#item-x')).toHaveValue('450');
+ await page.locator('#undo').click();await expect(rotation).toHaveValue('25');await page.locator('#redo').click();await expect(rotation).toHaveValue('0');
+ // Exact + / - adjustments must remain possible while automatic snapping is enabled.
+ await rotation.locator('..').getByRole('button',{name:'회전 늘리기'}).click();await expect(rotation).toHaveValue('1');
+ await rotation.fill('25');
+ for(const enabled of [true,false]){
+  await page.locator('#angle-snap').setChecked(enabled);
+  await rotation.dispatchEvent('pointerdown');await rotation.evaluate(e=>{e.value='2';e.dispatchEvent(new Event('input',{bubbles:true}));});
+  await expect(rotation).toHaveValue(enabled?'0':'2');await expect(page.locator('#rotation-output')).toHaveText(enabled?'0°':'2°');
+  await rotation.dispatchEvent('change');await rotation.dispatchEvent('pointerup');
+ }
+ await page.setViewportSize({width:320,height:850});await page.locator('[data-open-panel=inspector-panel]').click();await page.locator('#straighten').click();await expect(rotation).toHaveValue('0');
 });
