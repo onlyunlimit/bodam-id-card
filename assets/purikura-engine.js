@@ -2,7 +2,7 @@ export const sizes = {portrait:[900,1200],square:[1000,1000],strip:[600,1800]};
 export const fonts = {sans:'Arial, "Apple SD Gothic Neo", sans-serif',serif:'Georgia, "AppleMyungjo", serif',mono:'monospace',jua:'"Jua", sans-serif',pen:'"Nanum Pen Script", cursive',brush:'"Nanum Brush Script", cursive',display:'"Do Hyeon", sans-serif'};
 export const fontNames={sans:'깔끔한 고딕',serif:'클래식 세리프',mono:'타자기',jua:'동글동글 주아',pen:'나눔 손글씨 펜',brush:'나눔 손글씨 붓',display:'힘 있는 도현'};
 export const fontStyle=(key,size)=>`${['jua','pen','brush','display'].includes(key)?400:700} ${size}px ${fonts[key]||fonts.sans}`;
-export function cloneScene(s) {return {...s,items:s.items.map(x=>({...x,key:x.key?{...x.key}:null,crop:x.crop?{...x.crop}:null,effects:x.effects?{...x.effects}:null})),strokes:s.strokes.map(x=>({...x,points:x.points.map(p=>({...p}))}))};}
+export function cloneScene(s) {return {...s,items:s.items.map(x=>({...x,key:x.key?{...x.key}:null,crop:x.crop?{...x.crop}:null,effects:x.effects?{...x.effects}:null,erases:x.erases?.map(s=>({...s,points:s.points.map(p=>({...p}))}))})),strokes:s.strokes.map(x=>({...x,points:x.points.map(p=>({...p}))}))};}
 export function localPoint(item,p) {const a=-item.r*Math.PI/180,dx=p.x-item.x,dy=p.y-item.y;return {x:(dx*Math.cos(a)-dy*Math.sin(a))/item.scale+item.w/2,y:(dx*Math.sin(a)+dy*Math.cos(a))/item.scale+item.h/2};}
 export function contains(item,p) {const q=localPoint(item,p);return q.x>=0&&q.y>=0&&q.x<=item.w&&q.y<=item.h;}
 export const snapHorizontal=degrees=>Math.abs(degrees)<=3?0:degrees;
@@ -13,7 +13,7 @@ export function transformFromPointers(item,start,current,snapToHorizontal=false)
  const from=midpoint(start),to=midpoint(current);let turn=angle(current)-angle(start);
  const raw=((item.r+turn*180/Math.PI)%360+540)%360-180,r=snapToHorizontal?snapHorizontal(raw):raw;
  if(r!==raw)turn+=(r-raw)*Math.PI/180;
- const scale=Math.max(.1,Math.min(2.5,item.scale*distance(current)/Math.max(1,distance(start))));
+ const scale=Math.max(.1,item.scale*distance(current)/Math.max(1,distance(start)));
  const factor=scale/item.scale,dx=item.x-from.x,dy=item.y-from.y;
  return {scale,r,
   x:to.x+(dx*Math.cos(turn)-dy*Math.sin(turn))*factor,

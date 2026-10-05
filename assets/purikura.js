@@ -1,5 +1,3 @@
-import {studioPhotos} from './purikura-gallery.js';
-import {serviceConfig} from './service-config.js';
 import {sizes,fontStyle,cloneScene,localPoint,contains,transformFromPointers,snapHorizontal,itemBounds,snapItem,colorPixels,frameDepth,keyPixels,renderScene} from './purikura-engine.js';
 import {initControls,syncFontPickers,closePanels,openPanel,fontsReady} from './purikura-controls.js';
 import {initCrop} from './purikura-crop.js';
@@ -12,13 +10,15 @@ function checkpoint(){history.push(cloneScene(scene));if(history.length>30)histo
 function imageFor(i){
  const original=images.get(i.asset),e=i.effects||{};
  const tinted=e.preset&&e.preset!=='original'||['brightness','contrast','saturation'].some(k=>e[k]!=null&&e[k]!==100);
- if(!i.key?.enabled&&!tinted)return original;
- const cache=JSON.stringify([i.asset,i.key,e]);if(processed.has(cache))return processed.get(cache);
+ if(!i.key?.enabled&&!tinted&&!i.erases?.length)return original;
+ const cache=JSON.stringify([i.asset,i.key,e,i.erases]);if(processed.has(cache))return processed.get(cache);
  const out=document.createElement('canvas');out.width=original.width;out.height=original.height;
  const c=out.getContext('2d',{willReadFrequently:true});c.drawImage(original,0,0);
- const pixels=c.getImageData(0,0,out.width,out.height);
+ if(i.key?.enabled||tinted){const pixels=c.getImageData(0,0,out.width,out.height);
  if(i.key?.enabled)keyPixels(pixels.data,i.key.color,i.key.tolerance);
- if(tinted)colorPixels(pixels.data,e);c.putImageData(pixels,0,0);
+ if(tinted)colorPixels(pixels.data,e);c.putImageData(pixels,0,0);}
+ c.globalCompositeOperation='destination-out';c.lineCap=c.lineJoin='round';
+ for(const stroke of i.erases||[]){c.lineWidth=stroke.size*out.width;c.beginPath();const first=stroke.points[0];c.moveTo(first.x*out.width,first.y*out.height);for(const q of stroke.points)c.lineTo(q.x*out.width,q.y*out.height);c.stroke();if(stroke.points.length===1){c.beginPath();c.arc(first.x*out.width,first.y*out.height,c.lineWidth/2,0,Math.PI*2);c.fill();}}
  processed.set(cache,out);if(processed.size>8)processed.delete(processed.keys().next().value);return out;
 }
 function placeActions(){
@@ -29,16 +29,13 @@ function placeActions(){
  bar.style.top=Math.max(6,Math.min(wrap.height-bar.offsetHeight-6,rect.top-wrap.top+b.top*rect.height/scene.height-bar.offsetHeight-7))+'px';
 }
 function draw(){renderScene(canvas,scene,{imageFor,selected,inkCanvas,guides});canvas.style.setProperty('--photo-ratio',scene.width/scene.height);$('size-label').textContent=`${scene.width} × ${scene.height} PX`;$('empty-note').hidden=!!(scene.items.length||scene.strokes.length);$('undo').disabled=!history.length;$('redo').disabled=!future.length;placeActions();$('frame-layer-label').textContent=frameDepth(scene)===0?'프레임 · 맨뒤':frameDepth(scene)===scene.items.length+1?'프레임 · 맨앞':'프레임 · '+frameDepth(scene)+'개 요소 앞';}
-function inspect(){const i=item();$('layer-select').replaceChildren(...(scene.items.length?[...scene.items].reverse().map(x=>new Option(x.label,x.id)): [new Option('항목 없음','')]));$('layer-select').value=selected||'';$('item-controls').hidden=!i;$('chroma-controls').hidden=i?.type!=='image';$('image-controls').hidden=i?.type!=='image';$('edit-text-box').hidden=i?.type!=='text';if(i){$('item-opacity').value=(i.opacity??1)*100;$('opacity-output').value=Math.round((i.opacity??1)*100)+'%';$('flip-x').setAttribute('aria-pressed',String(!!i.flipX));$('flip-y').setAttribute('aria-pressed',String(!!i.flipY));$('crop-restore').disabled=!i.crop;if(i.type==='image'){$('image-filter').value=i.effects?.preset||'original';for(const k of ['brightness','contrast','saturation']){$('image-'+k).value=i.effects?.[k]??100;$(k+'-output').value=(i.effects?.[k]??100)+'%';}}$('item-scale').value=i.scale*100;$('scale-output').value=Math.round(i.scale*100)+'%';$('item-rotation').value=i.r;$('rotation-output').value=Math.round(i.r)+'°';$('item-x').value=Math.round(i.x);$('item-y').value=Math.round(i.y);if(i.type==='text'){$('edit-text').value=i.text;$('edit-font').value=i.font;$('edit-color').value=i.color;$('edit-outline-color').value=i.outlineColor||'#fffaf6';$('text-outline').value=i.outlineWidth??4;$('text-outline-output').value=i.outlineWidth??4;}else{$('chroma-enabled').checked=!!i.key?.enabled;$('chroma-color').value=i.key?.color||'#00ff00';$('chroma-tolerance').value=i.key?.tolerance??45;$('chroma-output').value=i.key?.tolerance??45;}}syncFontPickers();draw();}
+function inspect(){const i=item();$('layer-select').replaceChildren(...(scene.items.length?[...scene.items].reverse().map(x=>new Option(x.label,x.id)): [new Option('항목 없음','')]));$('layer-select').value=selected||'';$('item-controls').hidden=!i;$('chroma-controls').hidden=i?.type!=='image';$('image-controls').hidden=i?.type!=='image';$('edit-text-box').hidden=i?.type!=='text';if(i){$('item-opacity').value=(i.opacity??1)*100;$('opacity-output').value=Math.round((i.opacity??1)*100)+'%';$('flip-x').setAttribute('aria-pressed',String(!!i.flipX));$('flip-y').setAttribute('aria-pressed',String(!!i.flipY));$('crop-restore').disabled=!i.crop;$('erase-restore').disabled=!i.erases?.length;if(i.type==='image'){$('image-filter').value=i.effects?.preset||'original';for(const k of ['brightness','contrast','saturation']){$('image-'+k).value=i.effects?.[k]??100;$(k+'-output').value=(i.effects?.[k]??100)+'%';}}syncTransformFields(i);$('item-x').value=Math.round(i.x);$('item-y').value=Math.round(i.y);if(i.type==='text'){$('edit-text').value=i.text;$('edit-font').value=i.font;$('edit-color').value=i.color;$('edit-outline-color').value=i.outlineColor||'#fffaf6';$('text-outline').value=i.outlineWidth??4;$('text-outline-output').value=i.outlineWidth??4;}else{$('chroma-enabled').checked=!!i.key?.enabled;$('chroma-color').value=i.key?.color||'#00ff00';$('chroma-tolerance').value=i.key?.tolerance??45;$('chroma-output').value=i.key?.tolerance??45;}}syncFontPickers();draw();}
 function sync(){if(!scene.items.some(x=>x.id===selected))selected=null;$('paper-color').value=scene.paper;$('frame').value=scene.frame;$('paper-size').value=Object.keys(sizes).find(k=>sizes[k][0]===scene.width&&sizes[k][1]===scene.height);$('watermark-on').checked=scene.watermarkOn;$('watermark-text').value=scene.watermark;$('watermark-color').value=scene.watermarkColor;$('watermark-font').value=scene.watermarkFont||'sans';$('watermark-outline-color').value=scene.watermarkOutlineColor||'#ffffff';for(const [id,key] of [['watermark-size','watermarkSize'],['watermark-outline','watermarkOutline']]){$(id).value=scene[key];$(id+'-output').value=scene[key];}inspect();}
 function setTool(t){tool=t;picking=false;$('eyedropper').setAttribute('aria-pressed','false');document.querySelectorAll('[data-tool]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tool===t)));canvas.style.cursor=t==='select'?'grab':'crosshair';}
 function append(i){if(scene.items.length>=35)throw Error('사진·글자·스티커는 35개까지 넣을 수 있어요.');checkpoint();scene.items.push(i);selected=i.id;setTool('select');closePanels();inspect();}
 async function importImage(source,kind,label){if(loading)return status('이미지를 불러오는 중이에요. 잠시 기다려 주세요.');loading++;status('사진을 준비하고 있어요…');try{if(scene.items.length>=35)throw Error('항목은 35개까지 추가할 수 있어요.');let blob;if(source instanceof Blob)blob=source;else{const url=new URL(source);if(!['https:'].includes(url.protocol)||url.username||url.password)throw Error('HTTPS 이미지 주소를 입력해 주세요.');const response=await fetch(url,{mode:'cors',credentials:'omit',signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error('이미지 주소에 접근할 수 없어요.');blob=await response.blob();}if(blob.size>20*1024*1024)throw Error('이미지는 장당 20MB까지 사용할 수 있어요.');if(!/^image\/(png|jpeg|webp)$/.test(blob.type))throw Error('JPG·PNG·WebP 이미지 파일을 선택해 주세요.');const url=URL.createObjectURL(blob);let picture;try{picture=new Image();picture.src=url;await picture.decode();}finally{URL.revokeObjectURL(url);}if(!picture.naturalWidth||picture.naturalWidth*picture.naturalHeight>50_000_000)throw Error('너무 큰 이미지예요. 크기를 줄여 다시 넣어 주세요.');const asset=document.createElement('canvas'),factor=Math.min(1,2000/Math.max(picture.naturalWidth,picture.naturalHeight));asset.width=Math.round(picture.naturalWidth*factor);asset.height=Math.round(picture.naturalHeight*factor);asset.getContext('2d').drawImage(picture,0,0,asset.width,asset.height);const id='image-'+(++serial);images.set(id,asset);const f=Math.min(scene.width*(kind==='sticker'?.28:.75)/asset.width,scene.height*.65/asset.height);append({id,asset:id,type:'image',label:(kind==='sticker'?'스티커 · ':'사진 · ')+label,w:asset.width*f,h:asset.height*f,x:scene.width/2,y:scene.height/2,r:kind==='sticker'?-8:0,scale:1,key:{enabled:false,color:'#00ff00',tolerance:45}});status('추가했어요! 선택 도구로 끌어서 배치해 주세요.');}catch(e){status(e.name==='TypeError'?'이미지를 불러오지 못했어요. 외부 사용 제한이 있는 주소라면 파일로 업로드해 주세요.':e.name==='TimeoutError'?'이미지 연결이 늦어지고 있어요. 잠시 후 다시 시도해 주세요.':e.message);}finally{loading--;}}
 for(const kind of ['photo','sticker']){$(kind+'-file').onchange=async e=>{const files=[...e.target.files];for(const file of files)await importImage(file,kind,file.name);e.target.value='';};$(kind+'-link').onclick=()=>{const value=$(kind+'-url').value.trim();if(!value)return status('이미지 주소를 입력해 주세요.');importImage(value,kind,'링크 이미지');};}
-let gallery=[...new Map(studioPhotos.map(p=>[p.url,p])).values()];
-function renderGallery(){const previous=$('gallery-select').value;$('gallery-select').replaceChildren(...gallery.map((p,i)=>new Option(p.name||'사이트 사진',i)));if(previous)$('gallery-select').value=previous;$('gallery-add').disabled=!gallery.length;$('gallery-random').disabled=!gallery.length;}
-renderGallery();$('gallery-add').onclick=()=>{const p=gallery[Number($('gallery-select').value)];if(p)importImage(p.url,'photo',p.name);};let lastRandom=-1;$('gallery-random').onclick=()=>{let n=Math.floor(Math.random()*gallery.length);if(n===lastRandom&&gallery.length>1)n=(n+1)%gallery.length;lastRandom=n;$('gallery-select').value=n;const p=gallery[n];if(p)importImage(p.url,'photo',p.name);};
-Promise.allSettled(['lucky','obsidus'].map(async board=>{const r=await fetch(serviceConfig.api+'/members?board='+board,{signal:AbortSignal.timeout(8000)});if(!r.ok)return [];return ((await r.json()).members||[]).filter(m=>m.avatar_url).map(m=>({name:m.name+' · 커뮤니티',url:m.avatar_url.startsWith('/')?serviceConfig.api+m.avatar_url:m.avatar_url}));})).then(results=>{gallery=[...new Map([...gallery,...results.flatMap(r=>r.status==='fulfilled'?r.value:[])].map(p=>[p.url,p])).values()];renderGallery();});
+if(document.body.hasAttribute('data-sgia-gallery'))import('./purikura-site-gallery.js').then(m=>m.initSiteGallery(importImage)).catch(()=>status('사이트 사진 목록을 불러오지 못했어요. 파일·링크로 추가할 수 있어요.'));
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{setTool(b.dataset.tool);closePanels();});
 for(const color of ['#ed5996','#a169d2','#64b8df','#f7c956','#83b783','#24232d','#ffffff']){const b=document.createElement('button');b.style.background=color;b.setAttribute('aria-label','펜 색상 '+color);b.onclick=()=>$('ink-color').value=color;$('swatches').append(b);}
 $('ink-size').oninput=()=>$('ink-output').value=$('ink-size').value;
@@ -47,7 +44,7 @@ $('text-add').onclick=async()=>{await fontsReady;const text=$('text-input').valu
 document.querySelectorAll('[data-stamp]').forEach(b=>b.onclick=async()=>{await fontsReady;try{append(makeText(b.dataset.stamp,'serif',$('text-color').value));}catch(e){status(e.message);}});
 $('text-update').onclick=()=>{const i=item(),text=$('edit-text').value.trim();if(!i||i.type!=='text'||!text)return;checkpoint();const replacement=makeText(text,i.font,i.color);Object.assign(i,{text,w:replacement.w,h:replacement.h,label:replacement.label});inspect();};
 function pos(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*scene.width/r.width,y:(e.clientY-r.top)*scene.height/r.height};}
-canvas.onpointerdown=e=>{if(e.button!==0||(gesture&&(gesture.stroke||e.pointerType!=='touch'||gesture.pointerType!=='touch'||pointers.size>=2)))return;e.preventDefault();canvas.focus({preventScroll:true});const p=pos(e);if(picking){const i=item();if(!i||i.type!=='image'||!contains(i,p))return status('선택한 이미지 안의 배경색을 찍어 주세요.');const q=localPoint(i,p),crop=i.crop||{x:0,y:0,w:1,h:1},src=images.get(i.asset),c=src.getContext('2d',{willReadFrequently:true}),pixel=c.getImageData(Math.min(src.width-1,Math.floor((crop.x+(i.flipX?1-q.x/i.w:q.x/i.w)*crop.w)*src.width)),Math.min(src.height-1,Math.floor((crop.y+(i.flipY?1-q.y/i.h:q.y/i.h)*crop.h)*src.height)),1,1).data;if(!pixel[3])return status('이미 투명한 곳이에요. 배경색이 있는 곳을 찍어 주세요.');checkpoint();i.key={...i.key,enabled:true,color:'#'+[...pixel.slice(0,3)].map(v=>v.toString(16).padStart(2,'0')).join('')};picking=false;$('eyedropper').setAttribute('aria-pressed','false');inspect();status('선택한 색을 지웠어요. 허용 범위로 가장자리를 조절해 주세요.');return;}
+canvas.onpointerdown=e=>{if(e.button!==0||(gesture&&(gesture.stroke||gesture.erasure||e.pointerType!=='touch'||gesture.pointerType!=='touch'||pointers.size>=2)))return;e.preventDefault();canvas.focus({preventScroll:true});const p=pos(e);if(picking){const i=item();if(!i||i.type!=='image'||!contains(i,p))return status('선택한 이미지 안의 배경색을 찍어 주세요.');const q=localPoint(i,p),crop=i.crop||{x:0,y:0,w:1,h:1},src=images.get(i.asset),c=src.getContext('2d',{willReadFrequently:true}),pixel=c.getImageData(Math.min(src.width-1,Math.floor((crop.x+(i.flipX?1-q.x/i.w:q.x/i.w)*crop.w)*src.width)),Math.min(src.height-1,Math.floor((crop.y+(i.flipY?1-q.y/i.h:q.y/i.h)*crop.h)*src.height)),1,1).data;if(!pixel[3])return status('이미 투명한 곳이에요. 배경색이 있는 곳을 찍어 주세요.');checkpoint();i.key={...i.key,enabled:true,color:'#'+[...pixel.slice(0,3)].map(v=>v.toString(16).padStart(2,'0')).join('')};picking=false;$('eyedropper').setAttribute('aria-pressed','false');inspect();status('선택한 색을 지웠어요. 허용 범위로 가장자리를 조절해 주세요.');return;}
  if(tool==='select'){
   canvas.setPointerCapture(e.pointerId);
   if(!pointers.size){
@@ -56,6 +53,12 @@ canvas.onpointerdown=e=>{if(e.button!==0||(gesture&&(gesture.stroke||e.pointerTy
    gesture={checkpointed:false,pointerType:e.pointerType};
   }
   pointers.set(e.pointerId,p);beginSelectionGesture();inspect();
+ }else if(tool==='image-eraser'){
+  const i=item();if(i?.type!=='image'||!contains(i,p))return status('선택한 사진·스티커 안을 문질러 주세요.');
+  if(i.erases?.length>=200)return status('지우개 획은 이미지마다 200개까지 사용할 수 있어요.');
+  checkpoint();canvas.setPointerCapture(e.pointerId);
+  const erasure={size:Number($('erase-size').value)/i.scale*(i.crop?.w??1)/i.w,points:[sourcePoint(i,p)]};
+  (i.erases??=[]).push(erasure);gesture={pointer:e.pointerId,erasure,target:i};draw();
  }else{
   if(scene.strokes.length>=200)return status('펜 선은 200개까지 그릴 수 있어요.');
   canvas.setPointerCapture(e.pointerId);checkpoint();
@@ -68,14 +71,20 @@ function beginSelectionGesture(){
  gesture={checkpointed:gesture?.checkpointed||false,pointerType:gesture?.pointerType,
   start:points,initial:i?{x:i.x,y:i.y,r:i.r,scale:i.scale}:null};
 }
-function previewTransform(i){
- $('item-scale').value=i.scale*100;$('scale-output').value=Math.round(i.scale*100)+'%';
- $('item-rotation').value=i.r;$('rotation-output').value=Math.round(i.r)+'°';
- $('item-x').value=Math.round(i.x);$('item-y').value=Math.round(i.y);draw();
+function syncTransformFields(i){
+ const percent=i.scale*100,slider=$('item-scale');
+ if(percent>=Number(slider.max))slider.max=Math.ceil(percent*2);
+ slider.value=percent;$('scale-output').value=Number(percent.toFixed(2))+'%';$('scale-number').value=Number(percent.toFixed(2));
+ $('item-rotation').value=i.r;$('rotation-output').value=Number(i.r.toFixed(2))+'°';$('rotation-number').value=Number(i.r.toFixed(2));
 }
+function previewTransform(i){syncTransformFields(i);$('item-x').value=Math.round(i.x);$('item-y').value=Math.round(i.y);draw();}
+function sourcePoint(i,p){const q=localPoint(i,p),c=i.crop||{x:0,y:0,w:1,h:1};return {x:c.x+(i.flipX?1-q.x/i.w:q.x/i.w)*c.w,y:c.y+(i.flipY?1-q.y/i.h:q.y/i.h)*c.h};}
+$('erase-size').oninput=()=>$('erase-output').value=$('erase-size').value;
+$('erase-restore').onclick=()=>{const i=item();if(!i?.erases?.length)return;checkpoint();i.erases=[];inspect();status('지운 부분을 복원했어요.');};
 canvas.onpointermove=e=>{
  if(!gesture)return;
  const p=pos(e);
+ if(gesture.erasure){if(gesture.pointer!==e.pointerId)return;if(gesture.erasure.points.length<5000)gesture.erasure.points.push(sourcePoint(gesture.target,p));draw();return;}
  if(gesture.stroke){
   if(gesture.pointer!==e.pointerId)return;
   if(gesture.stroke.points.length<5000)gesture.stroke.points.push(p);draw();return;
@@ -94,7 +103,7 @@ canvas.onpointermove=e=>{
 };
 function endGesture(e){
  if(!gesture)return;
- if(gesture.stroke){if(e.pointerId!==gesture.pointer)return;gesture=null;}
+ if(gesture.stroke||gesture.erasure){if(e.pointerId!==gesture.pointer)return;gesture=null;}
  else{
   if(!pointers.delete(e.pointerId))return;
   if(pointers.size)beginSelectionGesture();else gesture=null;
@@ -117,19 +126,25 @@ for(const [id,prop,convert,output,unit] of [
   slider.value=value;
   if(!target||!Number.isFinite(value)||target[prop]===convert(value))return;
   if(editing!==target){checkpoint();editing=target;}
-  target[prop]=convert(value);$(output).value=value+unit;draw();
+  target[prop]=convert(value);$(output).value=value+unit;$(prop==='r'?'rotation-number':'scale-number').value=value;draw();
  };
  slider.oninput=preview;
- slider.onchange=()=>{preview();finish();};
+ slider.onchange=()=>{preview();finish();if(item())syncTransformFields(item());};
  slider.onblur=finish;
  slider.onpointerdown=()=>{finish();dragging=true;};
  slider.onpointerup=()=>{dragging=false;};
  slider.onpointercancel=finish;
 }
+for(const [id,prop] of [['scale-number','scale'],['rotation-number','r']]){
+ const field=$(id);field.onchange=()=>{const i=item(),raw=Number(field.value);if(!i)return;if(!field.value.trim()||!Number.isFinite(raw)||(prop==='scale'&&(raw<10||!Number.isFinite(raw*Math.max(i.w,i.h))))){syncTransformFields(i);return;}
+ const value=prop==='scale'?raw/100:((raw%360)+540)%360-180;if(value!==i[prop]){checkpoint();i[prop]=value;}inspect();};
+ field.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();field.dispatchEvent(new Event('change'));}};
+}
+for(const [id,factor] of [['scale-double',2],['scale-half',.5]])$(id).onclick=()=>{const i=item();if(!i)return;const next=Math.max(.1,i.scale*factor);if(!Number.isFinite(next*Math.max(i.w,i.h)))return;checkpoint();i.scale=next;inspect();};
 for(const [id,prop,convert] of [['item-x','x',v=>Math.max(0,Math.min(scene.width,v))],['item-y','y',v=>Math.max(0,Math.min(scene.height,v))]])$(id).onchange=e=>{if(!item()||!Number.isFinite(Number(e.target.value)))return;checkpoint();item()[prop]=convert(Number(e.target.value));inspect();};
 for(const [id,step]of [['layer-up',1],['layer-down',-1]])$(id).onclick=()=>{const n=scene.items.findIndex(i=>i.id===selected),to=n+step;if(n<0||to<0||to>=scene.items.length)return;checkpoint();[scene.items[n],scene.items[to]]=[scene.items[to],scene.items[n]];inspect();};
 $('remove').onclick=()=>{if(!item())return;checkpoint();scene.items=scene.items.filter(i=>i.id!==selected);selected=scene.items.at(-1)?.id||null;inspect();};
-$('duplicate').onclick=()=>{const i=item();if(!i)return;try{append({...i,id:'copy-'+(++serial),x:Math.min(scene.width,i.x+25),y:Math.min(scene.height,i.y+25),key:i.key?{...i.key}:null,crop:i.crop?{...i.crop}:null,effects:i.effects?{...i.effects}:null});}catch(e){status(e.message);}};
+$('duplicate').onclick=()=>{const i=item();if(!i)return;try{append({...cloneScene({items:[i],strokes:[]}).items[0],id:'copy-'+(++serial),x:Math.min(scene.width,i.x+25),y:Math.min(scene.height,i.y+25),key:i.key?{...i.key}:null,crop:i.crop?{...i.crop}:null,effects:i.effects?{...i.effects}:null});}catch(e){status(e.message);}};
 for(const id of ['chroma-enabled','chroma-color','chroma-tolerance'])$(id).onchange=()=>{if(item()?.type!=='image')return;checkpoint();item().key={enabled:$('chroma-enabled').checked,color:$('chroma-color').value,tolerance:Number($('chroma-tolerance').value)};inspect();};
 $('eyedropper').onclick=()=>{if(item()?.type!=='image')return;picking=!picking;closePanels();$('eyedropper').setAttribute('aria-pressed',String(picking));status(picking?'캔버스에서 지울 배경색을 찍어 주세요.':'색 선택을 취소했어요.');};
 for(const [id,prop]of [['paper-color','paper'],['frame','frame'],['watermark-text','watermark'],['watermark-color','watermarkColor']])$(id).onchange=e=>{checkpoint();scene[prop]=e.target.value;draw();};

@@ -9,9 +9,9 @@ test('Two-finger transform scales and rotates around the fingers, preserving the
  const next=transformFromPointers(i,[{x:40,y:50},{x:60,y:50}],[{x:100,y:80},{x:100,y:120}]);
  assert.equal(next.scale,2);assert.equal(next.r,90);assert.equal(next.x,100);assert.equal(next.y,120);
 });
-test('Pinch scale stays within slider limits, including coincident fingers',()=>{
+test('Pinch has no enlargement cap and handles coincident fingers',()=>{
  const i={x:0,y:0,scale:1,r:170},start=[{x:-10,y:0},{x:10,y:0}];
- assert.equal(transformFromPointers(i,start,[{x:-100,y:0},{x:100,y:0}]).scale,2.5);
+ assert.equal(transformFromPointers(i,start,[{x:-100,y:0},{x:100,y:0}]).scale,10);
  assert.equal(transformFromPointers(i,start,[{x:0,y:0},{x:0,y:0}]).scale,.1);
  for(const value of Object.values(transformFromPointers(i,[{x:0,y:0},{x:0,y:0}],start)))assert.ok(Number.isFinite(value));
 });
@@ -41,3 +41,5 @@ test('Horizontal snapping uses a small tolerance and keeps the pinch anchor cohe
  const i={x:0,y:10,r:0,scale:1},snapped=transformFromPointers(i,start,current,true),free=transformFromPointers(i,start,current);
  assert.equal(snapped.r,0);assert.ok(Math.abs(snapped.x)<1e-10);assert.ok(Math.abs(snapped.y-10)<1e-10);assert.ok(Math.abs(free.r-2)<1e-10);
 });
+
+test('Eraser history isolates per-image masks and stroke points',()=>{const s={items:[{erases:[{size:.1,points:[{x:.2,y:.3}]}]}],strokes:[]},copy=cloneScene(s);copy.items[0].erases[0].points[0].x=.9;assert.equal(s.items[0].erases[0].points[0].x,.2);});

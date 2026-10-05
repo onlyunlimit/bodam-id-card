@@ -25,6 +25,8 @@ const copy = `통합 관제|Operations|統合管制|综合管制
 세계관 안내서|Field handbook|世界観ガイド|世界观指南
 세계관 안내|Field handbook|世界観ガイド|世界观指南
 커뮤니티|Community|コミュニティ|社区
+미니|Mini|ミニ|迷你
+미니 · 프리쿠라 ↗|Mini · Photo maker ↗|ミニ · プリクラ ↗|迷你 · 大头贴 ↗
 부서 정보|Department profile|部署情報|部门资料
 외부 위협 정보|Threat intelligence|脅威情報|威胁情报
 위협 정보 · ORPÉ|Threat intelligence · ORPÉ|脅威情報 · ORPÉ|威胁情报 · ORPÉ

@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-async function fixture(page){
+async function fixture(page,sgia=false){
  await page.route('**/members?board=*',r=>r.fulfill({json:{members:[{name:'공유 DB 인물',avatar_url:'https://studio.test/member.png'}]}}));
- await page.goto('/purikura.html');
+ await page.goto(sgia?'/purikura-sgia.html':'/purikura.html');
  const data=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=200;c.height=300;const x=c.getContext('2d');x.fillStyle='#00ff00';x.fillRect(0,0,200,300);x.fillStyle='#ff0000';x.fillRect(60,70,80,120);return c.toDataURL('image/png').split(',')[1];});
  const buffer=Buffer.from(data,'base64');
  await page.route('https://studio.test/**',r=>r.fulfill({contentType:'image/png',body:buffer,headers:{'Access-Control-Allow-Origin':'*'}}));
@@ -50,7 +50,7 @@ test('Studio uploads, positions, draws, removes chroma and exports an unselected
  await page.locator('#watermark-on').uncheck();await page.locator('#clear').click();await expect(page.locator('#empty-note')).toBeVisible();await page.locator('#undo').click();await expect(page.locator('#empty-note')).toBeHidden();expect(errors).toEqual([]);
 });
 test('Studio imports URL and shared catalogue, reports bad links and fits mobile layouts',async({page},info)=>{
- page.on('dialog',d=>d.accept());await fixture(page);
+ page.on('dialog',d=>d.accept());await fixture(page,true);
  await page.locator('#photo-url').fill('https://studio.test/photo.png');await page.locator('#photo-link').click();await expect(page.locator('#status')).toContainText('추가했어요');
  await expect(page.locator('#gallery-select')).toContainText('공유 DB 인물');await page.locator('#gallery-random').click();await expect(page.locator('#layer-select option')).toHaveCount(2);
  await page.locator('#photo-url').fill('javascript:alert(1)');await page.locator('#photo-link').click();await expect(page.locator('#status')).toContainText('HTTPS');await expect(page.locator('#layer-select option')).toHaveCount(2);
@@ -185,4 +185,34 @@ test('Horizontal button resets rotation without changing size and dragging can s
   await rotation.dispatchEvent('change');await rotation.dispatchEvent('pointerup');
  }
  await page.setViewportSize({width:320,height:850});await page.locator('[data-open-panel=inspector-panel]').click();await page.locator('#straighten').click();await expect(rotation).toHaveValue('0');
+});
+
+test('Standalone is independent of SGIA data and supports uncapped scale and typed rotation',async({page})=>{
+ const requests=[];page.on('request',r=>requests.push(r.url()));const file=await fixture(page);
+ await expect(page.locator('#gallery-select')).toHaveCount(0);expect(requests.filter(u=>/members\?|characters\.js|agency-gallery|service-config|purikura-gallery|purikura-site-gallery/.test(u))).toEqual([]);
+ await page.locator('#sticker-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');
+ await page.locator('#scale-number').fill('1500');await page.locator('#scale-number').press('Enter');await expect(page.locator('#scale-output')).toHaveText('1500%');
+ await page.locator('#scale-double').click();await expect(page.locator('#scale-number')).toHaveValue('3000');
+ await page.locator('#rotation-number').fill('-37.5');await page.locator('#rotation-number').press('Enter');await expect(page.locator('#rotation-output')).toHaveText('-37.5°');
+ await page.locator('#undo').click();await expect(page.locator('#rotation-number')).toHaveValue('-8');
+ await page.locator('#undo').click();await expect(page.locator('#scale-number')).toHaveValue('1500');
+});
+test('Image eraser removes only selected pixels, survives PNG export, and supports undo and restore',async({page})=>{
+ const file=await fixture(page);await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');
+ const c=page.locator('#photo-canvas'),pixel=()=>c.evaluate(e=>[...e.getContext('2d').getImageData(450,600,1,1).data]);expect(await pixel()).toEqual([255,0,0,255]);
+ await page.locator('[data-tool="image-eraser"]').click();await c.scrollIntoViewIfNeeded();const r=await c.boundingBox();await page.mouse.move(r.x+r.width*.45,r.y+r.height*.5);await page.mouse.down();await page.mouse.move(r.x+r.width*.55,r.y+r.height*.5,{steps:8});await page.mouse.up();expect(await pixel()).toEqual([255,246,248,255]);
+ expect(await c.evaluate(e=>[...e.getContext('2d').getImageData(450,500,1,1).data])).toEqual([255,0,0,255]);
+ const download=page.waitForEvent('download');await page.locator('#save-png').click();const png=await readFile(await (await download).path());
+ const exported=await page.evaluate(async b=>{const img=new Image();img.src='data:image/png;base64,'+b;await img.decode();const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const ctx=c.getContext('2d');ctx.drawImage(img,0,0);return [...ctx.getImageData(450,600,1,1).data];},png.toString('base64'));expect(exported).toEqual([255,246,248,255]);
+ await page.locator('#undo').click();expect(await pixel()).toEqual([255,0,0,255]);await page.locator('#redo').click();expect(await pixel()).toEqual([255,246,248,255]);
+ await page.locator('#erase-restore').click();expect(await pixel()).toEqual([255,0,0,255]);
+});
+test('Mobile image erasing follows rotation, flip and enlargement in image coordinates',async({page})=>{
+ await page.setViewportSize({width:390,height:850});const file=await fixture(page);await page.locator('#photo-file').setInputFiles(file);await expect(page.locator('#status')).toContainText('추가했어요');
+ await page.locator('[data-open-panel="inspector-panel"]').click();
+ await page.locator('#scale-number').fill('400');await page.locator('#scale-number').press('Enter');await page.locator('#rotation-number').fill('90');await page.locator('#rotation-number').press('Enter');await page.locator('#flip-x').click();
+ await page.locator('[data-tool="image-eraser"]').click();const c=page.locator('#photo-canvas');await c.scrollIntoViewIfNeeded();const r=await c.boundingBox(),touch=await page.context().newCDPSession(page);
+ const p={x:r.x+r.width*.5,y:r.y+r.height*500/1200};await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[p]});await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await expect.poll(()=>c.evaluate(e=>[...e.getContext('2d').getImageData(450,500,1,1).data])).toEqual([255,246,248,255]);
+ await page.locator('[data-open-panel="inspector-panel"]').click();await page.locator('#rotation-number').fill('0');await page.locator('#rotation-number').press('Enter');expect(await c.evaluate(e=>[...e.getContext('2d').getImageData(350,600,1,1).data])).toEqual([255,246,248,255]);
 });

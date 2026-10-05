@@ -159,11 +159,13 @@ gap: 12px;
 
 | 바꿀 부분 | 파일 / 검색어 |
 | --- | --- |
-| 화면 항목·도구 이름 | [purikura.html](purikura.html) |
+| 화면 항목·도구 이름 | 독립판 [purikura.html](purikura.html), SGIA 미니 [purikura-sgia.html](purikura-sgia.html). 공통 도구 마크업 변경은 두 파일에 함께 적용 |
 | 핑크/실버 배경·버튼·도구 패널 | [assets/purikura.css](assets/purikura.css): `:root`, `.booth-layout`, `.stage`, `.tools`, `.inspector` |
 | 모바일 배치 | 같은 CSS의 `@media(max-width:1100px)`, `.mobile-dock`, `.tools.is-open`, `.inspector.is-open`; 좁은 화면 세부 여백은 700/380px 기준 |
 | PNG에 찍히는 사진지·프레임·워터마크 | [assets/purikura-engine.js](assets/purikura-engine.js): `drawFrame`/`renderScene` — 화면 CSS가 아니라 캔버스 그리기 코드 |
-| 랜덤/선택용 사진 추가 | [assets/purikura-gallery.js](assets/purikura-gallery.js): `extraPhotos`에 `{name:'이름',url:'https://…'}` 추가 |
+| SGIA 미니 전용 랜덤/선택용 사진 추가 | [assets/purikura-gallery.js](assets/purikura-gallery.js): `extraPhotos`에 `{name:'이름',url:'https://…'}` 추가 |
+| 사이트·DB 목록 연결 | [assets/purikura-site-gallery.js](assets/purikura-site-gallery.js); `data-sgia-gallery`가 있는 SGIA 미니에서만 로드 |
+| 확대·각도 직접 입력·부분 지우개 | 두 HTML의 `scale-number`, `rotation-number`, `erase-size`; JS `syncTransformFields`, `sourcePoint`, `imageFor` |
 | 도구 동작·업로드·저장·정렬 | [assets/purikura.js](assets/purikura.js), 엔진의 `snapItem` |
 | 요소 옆 삭제·자르기 버튼 | HTML `selection-actions`, CSS `.selection-actions`, JS `placeActions` |
 | 자르기 창·원본 복원 | [assets/purikura-crop.js](assets/purikura-crop.js), HTML `crop-dialog`, CSS `.crop-preview` |
@@ -173,7 +175,7 @@ gap: 12px;
 
 프레임 종류와 겹침 순서는 화면과 PNG에 함께 반영됩니다. 사진지 크기를 바꾸면 요소는 중앙을 기준으로 이동하며 실제 픽셀 크기와 회전은 유지됩니다. 화면에 맞추는 미리보기 배율 때문에 눈에 보이는 크기는 달라질 수 있습니다.
 
-기존 인물·화보와 공개 커뮤니티 프로필은 자동으로 합쳐집니다. 파일·URL로 작업에 넣은 사진은 공개 목록에 자동 저장되지 않습니다. 사진 링크는 외부 캔버스 사용(CORS)이 허용되어야 PNG 저장에 사용할 수 있습니다.
+SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 자동으로 합칩니다. 독립판에는 이 목록과 DB 연결이 없습니다. 두 버전은 CSS·편집 JS를 공유하므로 모바일 패널 디자인도 함께 적용됩니다. 파일·URL로 작업에 넣은 사진은 공개 목록에 자동 저장되지 않습니다. 사진 링크는 외부 캔버스 사용(CORS)이 허용되어야 PNG 저장에 사용할 수 있습니다.
 
 ## 7. 별도 제작 도구
 

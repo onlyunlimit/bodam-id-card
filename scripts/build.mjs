@@ -5,7 +5,7 @@ import path from 'node:path';
 export const root = fileURLToPath(new URL('../', import.meta.url));
 // Explicit public entries. Never copy the repository root or raw Markdown.
 export const publicEntries = ['index.html', 'portal.html', 'departments.html', 'origin.html', 'beacon.html', 'shield.html', 'entertainment.html', 'elysian.html', 'hunterwind.html', 'lucky.html', 'obsidus.html', 'orpe.html', 'records.html', 'headquarters.html', 'manual.html', 'community.html', 'monster.html', 'sgia.html', 'team.html',
-  'purikura.html', 'bodam.html', 'quote.html', 'setlog.html', 'character', 'school', 'idcard', 'bgm', 'assets'];
+  'purikura.html', 'purikura-sgia.html', 'bodam.html', 'quote.html', 'setlog.html', 'character', 'school', 'idcard', 'bgm', 'assets'];
 const extensions = new Set(['.html', '.css', '.js', '.json', '.svg', '.webp', '.png', '.jpg', '.mp3', '.woff2']);
 const fontAssets = new Set([
   'Jua-Regular.ttf', 'DoHyeon-Regular.ttf', 'NanumPenScript-Regular.ttf', 'NanumBrushScript-Regular.ttf',
