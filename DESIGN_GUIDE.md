@@ -1,6 +1,6 @@
 # SGIA 디자인 수정 안내
 
-> 기준: 2026-10-05 · 화면 구조는 [SITE_MAP.md](SITE_MAP.md), 변경 내역은 [CHANGELOG.md](CHANGELOG.md).
+> 기준: 2026-11-06 · 화면 구조는 [SITE_MAP.md](SITE_MAP.md), 변경 내역은 [CHANGELOG.md](CHANGELOG.md).
 > **색상·크기·여백은 CSS, 화면 구성·버튼 문구는 JS, 사진 URL은 데이터 파일을 수정합니다.**
 
 ## 1. GitHub에서 어떤 저장소를 열어야 하나요?
@@ -21,6 +21,25 @@
 
 원본의 [pages.yml](.github/workflows/pages.yml)은 **수동 실행 전용**이며, 현재 서비스용 저장소로 파일을 복사하는 작업과 다릅니다. 원본 커밋만으로 `onlyunlimit.github.io`가 바뀌는 구조는 아닙니다. 관리자 화면은 GitHub Pages가 아니라 별도의 Worker 배포가 필요합니다.
 
+
+## 최신 수정 위치 — 2026-11-06
+
+새 디자인은 **아래 두 CSS가 마지막으로 적용**됩니다. 이전 파일의 같은 선택자를 고쳐도 이 규칙이 덮어쓸 수 있습니다.
+
+| 바꾸려는 화면 | 구성·문구 | 최종 디자인 위치 |
+| --- | --- | --- |
+| 블랙잭 — 시소 금속 TV·크림 기록 카드 | `assets/team-design.js`의 `blackjack` 분기, `assets/units.js` | `assets/team-themes.css`의 `BLACKJACK`, `.field-tv`, `.tv-screen`, `[data-team=blackjack]` |
+| 오리진 — 보라색 게이트·아치형 표본 | `team-design.js`의 `origin` 분기 | `team-themes.css`의 `ORIGIN`, `.origin-aperture`, `.origin-ring` |
+| 비콘 — 청회색 수사철·클립 증거 사진 | `team-design.js`의 `beacon` 분기 | `team-themes.css`의 `BEACON`, `.beacon-evidence` |
+| 실드 — 황동·카키 장갑판 | `team-design.js`의 기본 실드 분기 | `team-themes.css`의 `SHIELD`, `.shield-lineup` |
+| 팀별 배경·라이트/다크 | 경로별 `body[data-unit]` | `team-themes.css` 맨 위, `html[data-theme=light]` |
+| 공통 입력창·닫기 버튼·라이트모드 | 공통 셸 `assets/runtime.js` | `assets/service-design.css` 맨 위 및 마지막 라이트모드 규칙 |
+| 커뮤니티 색상·목록·여백·프로필 피드 | `assets/community.js` | `service-design.css`의 `Community colors`, `.fan-layout`, `.post-row`, `.profile-feed` |
+| 기획사 큰 인물 이미지·전환 속도 | `assets/agencies.js`의 `advance`, `every(...,6500)` | `service-design.css`의 `Artist labels`, `.spotlight-frame`, `.agency-hero` |
+| 블랙잭 인물·사진 | `assets/characters.js`의 `poker/dealer/rear/panden/siso` | 이미지 미등록 3명은 `assets/art/personnel-placeholder.svg` |
+| 관리자 멤버·좋아요 설정 | `backend/admin-composer.js`, `backend/admin.js` | 관리자 HTML 내부 CSS. 변경 후 Worker 별도 배포 필요 |
+
+
 ## 2. 가장 자주 고칠 파일
 
 | 바꾸려는 것 | 먼저 열 파일 | 파일 안에서 검색할 글자 |
@@ -39,7 +58,7 @@
 
 포털 페이지는 다음 순서로 스타일을 불러옵니다.
 
-`vendor/leaflet.css` → `portal.css` → `editorial.css` → `game-ui.css` → `forensic.css` → `fan-community.css`
+`vendor/leaflet.css` → `portal.css` → `editorial.css` → `game-ui.css` → `forensic.css` → `fan-community.css` → `service-design.css` → `team-themes.css`
 
 - `portal.css`: 공통 화면의 기본 뼈대와 초기 스타일.
 - `editorial.css`: 카드·편집형 화면 스타일.
@@ -189,3 +208,8 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 4. 변경 내역은 [CHANGELOG.md](CHANGELOG.md)에 기록. 배포 전/완료 여부를 구분.
 
 이 문서는 수정 위치 안내서입니다. 문서를 편집하는 것만으로 홈페이지 디자인이 바뀌지는 않습니다.
+
+### 작성 옵션 입력 위치 (2026-11-07)
+
+- 닉네임 선택 필드·미입력 안내: `assets/community.js`의 `#write-post` 클릭 처리의 게시글 폼과 `openPost` 댓글 폼.
+- 관리자 작성 시각: `backend/admin-composer.js`의 `timeField`, `selectedTime`, `managedEditor`. 한국 시간 변환과 서버 검증은 유지하면서 라벨·간격을 수정하세요. 서버 파일 변경은 Worker 별도 배포가 필요합니다.

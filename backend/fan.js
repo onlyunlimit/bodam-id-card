@@ -4,6 +4,12 @@ const json = (data, status = 200) =>
     status,
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   });
+function postTime(value, fallback) {
+  if (value === undefined) return fallback;
+  if (!Number.isSafeInteger(value) || value < 0 || value > 253402268399999)
+    throw new HTTPError(400, '작성 시각을 확인해 주세요.');
+  return value;
+}
 export const postFields =
   'p.id,p.board,p.title,p.author,p.department,p.body,p.created_at,p.updated_at,p.member_id,p.pin_length,p.channel,p.tags';
 export async function attachments(env, postId) {
@@ -19,8 +25,9 @@ export async function enrichPosts(env, rows) {
       ...p,
       tags: JSON.parse(p.tags || '[]'),
       images: await attachments(env, p.id),
+      likes: (await env.DB.prepare('SELECT max(0,like_adjustment+(SELECT count(*) FROM post_likes WHERE post_id=posts.id)) AS n FROM posts WHERE id=?').bind(p.id).first()).n,
       member: p.member_id
-        ? await env.DB.prepare('SELECT id,board,name,bio,avatar_url FROM members WHERE id=?')
+        ? await env.DB.prepare('SELECT id,board,name,bio,avatar_url,team FROM members WHERE id=?')
             .bind(p.member_id)
             .first()
         : null,
@@ -129,12 +136,22 @@ export async function publicFan(request, env, { identity, rate, blocked, body })
     return json({
       members: (
         await env.DB.prepare(
-          'SELECT id,board,name,bio,avatar_url,updated_at FROM members WHERE board=? ORDER BY rowid',
+          "SELECT id,board,name,bio,avatar_url,updated_at,team FROM members WHERE (?='staff' OR board=?) ORDER BY team,rowid",
         )
-          .bind(b)
+          .bind(b,b)
           .all()
       ).results,
     });
+  }
+  const profile = path.match(/^\/members\/([a-z0-9_-]+)(?:\/(feed))?$/);
+  if (profile && method === 'GET') {
+    const {hash} = await identity(request,env); await rate(env,'read:'+hash,120,60);
+    const member = await env.DB.prepare('SELECT id,board,name,bio,avatar_url,team FROM members WHERE id=?').bind(profile[1]).first();
+    if (!member) throw new HTTPError(404,'프로필을 찾을 수 없습니다.');
+    if (!profile[2]) return json({member});
+    const offset = Math.max(0,Math.min(100000,Number(u.searchParams.get('offset'))||0));
+    const {results} = await env.DB.prepare(`SELECT ${postFields} FROM posts p WHERE p.member_id=? AND p.hidden=0 AND p.deleted_at IS NULL ORDER BY p.created_at DESC,p.id DESC LIMIT 21 OFFSET ?`).bind(member.id,offset).all();
+    return json({member,posts:await enrichPosts(env,results.slice(0,20)),more:results.length>20});
   }
   const media = path.match(/^\/media\/([a-f0-9-]{36})$/);
   if (media && method === 'GET') {
@@ -159,7 +176,7 @@ export async function publicFan(request, env, { identity, rate, blocked, body })
     const b = board(u.searchParams.get('board')),
       offset = Math.max(0, Math.min(100000, Number(u.searchParams.get('offset')) || 0));
     const { results } = await env.DB.prepare(
-      `SELECT c.id,c.post_id,c.parent_id,c.body,c.created_at,c.member_id,m.name,m.avatar_url,p.title,(SELECT COUNT(*) FROM comment_likes l WHERE l.comment_id=c.id) AS likes FROM comments c JOIN posts p ON p.id=c.post_id JOIN members m ON m.id=c.member_id WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL)) ORDER BY c.created_at DESC,c.id DESC LIMIT 21 OFFSET ?`,
+      `SELECT c.id,c.post_id,c.parent_id,c.body,c.created_at,c.member_id,m.name,m.avatar_url,p.title,max(0,c.like_adjustment+(SELECT COUNT(*) FROM comment_likes l WHERE l.comment_id=c.id)) AS likes FROM comments c JOIN posts p ON p.id=c.post_id JOIN members m ON m.id=c.member_id WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL)) ORDER BY c.created_at DESC,c.id DESC LIMIT 21 OFFSET ?`,
     )
       .bind(b, offset)
       .all();
@@ -190,7 +207,7 @@ export async function publicFan(request, env, { identity, rate, blocked, body })
     return json({
       liked: data.liked,
       likes: (
-        await env.DB.prepare('SELECT COUNT(*) n FROM comment_likes WHERE comment_id=?')
+        await env.DB.prepare('SELECT max(0,like_adjustment+(SELECT count(*) FROM comment_likes WHERE comment_id=comments.id)) n FROM comments WHERE id=?')
           .bind(c.id)
           .first()
       ).n,
@@ -202,6 +219,19 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
   const url = new URL(request.url),
     path = url.pathname,
     method = request.method;
+  const likeEdit = path.match(/^\/admin\/(posts|comments)\/([a-f0-9-]{36})\/likes$/);
+  if (likeEdit && method === 'PATCH') {
+    const data = await body(request);
+    if (!Number.isSafeInteger(data.likes) || data.likes < 0 || data.likes > 10000000) throw new HTTPError(400,'좋아요는 0~10,000,000 사이의 정수로 입력해 주세요.');
+    const table = likeEdit[1], key = table === 'posts' ? 'post' : 'comment', id = likeEdit[2];
+    const row = await env.DB.prepare(`SELECT id FROM ${table} WHERE id=? AND deleted_at IS NULL`).bind(id).first();
+    if (!row) throw new HTTPError(404,'기록을 찾을 수 없습니다.');
+    await env.DB.batch([
+      env.DB.prepare(`UPDATE ${table} SET like_adjustment=?-(SELECT count(*) FROM ${key}_likes WHERE ${key}_id=?) WHERE id=?`).bind(data.likes,id,id),
+      env.DB.prepare('INSERT INTO audit(id,action,target,created_at) VALUES (?,?,?,?)').bind(random(),'LIKE_COUNT_SET',key+':'+id+':'+data.likes,Date.now())
+    ]);
+    return json({ok:true,likes:data.likes});
+  }
   const media = path.match(/^\/admin\/media\/([a-f0-9-]{36})$/);
   if (media && method === 'GET') {
     const row = await env.DB.prepare('SELECT mime,data,url FROM images WHERE id=?')
@@ -289,7 +319,7 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
           text(data.title, 1, 100, '제목'),
           m.name,
           text(data.body, 1, 5000, '내용'),
-          time,
+          postTime(data.created_at, time),
           m.id,
         ),
       );
@@ -335,16 +365,19 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
     const data = await body(request),
       table = edit[1],
       id = edit[2],
-      row = await env.DB.prepare(`SELECT id FROM ${table} WHERE id=? AND deleted_at IS NULL`)
+      row = await env.DB.prepare(`SELECT id,member_id,created_at FROM ${table} WHERE id=? AND deleted_at IS NULL`)
         .bind(id)
         .first();
     if (!row) throw new HTTPError(404, '기록이 없습니다.');
+    if (data.created_at !== undefined && (table !== 'posts' || !row.member_id))
+      throw new HTTPError(403, '관리자가 작성한 멤버 게시글만 작성 시각을 변경할 수 있습니다.');
     const changes = [
       table === 'posts'
-        ? env.DB.prepare('UPDATE posts SET title=?,body=?,updated_at=? WHERE id=?').bind(
+        ? env.DB.prepare('UPDATE posts SET title=?,body=?,updated_at=?,created_at=? WHERE id=?').bind(
             text(data.title, 1, 100, '제목'),
             text(data.body, 1, 5000, '내용'),
             Date.now(),
+            postTime(data.created_at, row.created_at),
             id,
           )
         : env.DB.prepare('UPDATE comments SET body=?,updated_at=? WHERE id=?').bind(

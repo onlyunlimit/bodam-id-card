@@ -1,5 +1,12 @@
 // Shared tag identifiers used by the browser and API.
 export const staffTags = [
+  {id:'team:blackjack',label:'팀 · 블랙잭'},
+  {id:'member:poker',label:'인물 · 포커'},
+  {id:'member:dealer',label:'인물 · 딜러'},
+  {id:'member:rear',label:'인물 · 리어'},
+  {id:'member:panden',label:'인물 · 판덴'},
+  {id:'member:siso',label:'인물 · 시소'},
+
   {
     id: 'team:origin',
     label: '팀 · 오리진',

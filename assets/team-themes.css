@@ -1,0 +1,106 @@
+/* Independent art direction: each team owns materials, typography and composition. */
+body[data-unit=blackjack]{--bg:#0b100b;--surface:#1c261b;--surface2:#2d3c29;--text:#e6e5ce;--muted:#b7c2a4;--accent:#b4cd8d;--line:#526044;--field:#182116;--control:#35452d;background:radial-gradient(ellipse at 70% 25%,#34492744,transparent 55%),var(--bg)}
+body[data-unit=origin]{--bg:#100d1d;--surface:#21192f;--surface2:#312542;--text:#eee6ff;--muted:#b8a9cb;--accent:#c3a0f6;--line:#514260;--field:#1b1428;--control:#3b2d4d;background:radial-gradient(ellipse at 85% 30%,#54357d44,transparent 60%),var(--bg)}
+body[data-unit=beacon]{--bg:#101d27;--surface:#1c2b36;--surface2:#2c3d49;--text:#e5eef2;--muted:#a1b6c4;--accent:#98cee3;--line:#465b69;--field:#172630;--control:#304552;background:var(--bg)}
+body[data-unit=shield]{--bg:#191a18;--surface:#292b25;--surface2:#3a3c32;--text:#ede9d9;--muted:#bcb59e;--accent:#dabb76;--line:#5a5748;--field:#22241e;--control:#414133;background:linear-gradient(120deg,#39322135,transparent 70%),var(--bg)}
+html[data-theme=light] body[data-unit=blackjack]{--bg:#d9dfcc;--surface:#eef0e2;--surface2:#cbd4b9;--text:#25311f;--muted:#58674b;--accent:#49672e;--line:#a4b28f;--field:#f8f9ef;--control:#d4ddc4}
+html[data-theme=light] body[data-unit=origin]{--bg:#e3deec;--surface:#f3eef8;--surface2:#d9cde7;--text:#2c213b;--muted:#746183;--accent:#774ba8;--line:#bdadce;--field:#fbf8ff;--control:#e5daef}
+html[data-theme=light] body[data-unit=beacon]{--bg:#dfe7eb;--surface:#f6f8f8;--surface2:#d4e0e7;--text:#233848;--muted:#5d7786;--accent:#2d718d;--line:#aec4d0;--field:#fff;--control:#dce8ee}
+html[data-theme=light] body[data-unit=shield]{--bg:#e1ddcf;--surface:#f0eee5;--surface2:#d9d2bf;--text:#353426;--muted:#79715a;--accent:#8b6c29;--line:#bcb396;--field:#fffdf4;--control:#e2dcc9}
+body:is([data-unit=blackjack],[data-unit=origin],[data-unit=beacon],[data-unit=shield]) :is(.site-header,.site-nav,.site-footer,.agency-strip){background:var(--surface);color:var(--text);border-color:var(--line)}
+body .team-hero{position:relative;isolation:isolate;min-height:420px;padding:40px!important;border:1px solid var(--line);color:var(--text);background:var(--surface)!important}
+.team-hero h2{font-size:clamp(44px,6.5vw,96px);line-height:.95;letter-spacing:-.045em;margin:22px 0}
+.team-division{font:11px var(--mono);letter-spacing:.15em;color:var(--muted)}
+.team-motto{font-size:20px;font-weight:700;line-height:1.5}
+.team-description{font-size:14px;line-height:1.9;max-width:45ch;color:var(--muted)}
+.team-hero .unit-meta{margin-top:24px;font-size:11px;line-height:1.8;flex-wrap:wrap;gap:12px}
+.team-hero-photo{background-size:cover;background-position:50% 22%;min-width:0;min-height:0;-webkit-touch-callout:none;user-select:none}
+.team-anchor{display:inline-block;margin-top:24px;font-size:12px;border-bottom:1px solid currentColor;padding-bottom:8px}
+body[data-viewer=public] .team-hero-photo{filter:blur(8px) grayscale(1)}
+/* BLACKJACK: Siso's olive metal television, cream dossier stock, checkered rails. */
+body .blackjack-hero{grid-template-columns:1fr 1fr!important;background:radial-gradient(at 80% 10%,#526e3833,transparent 60%),#11190e!important;color:#e6e5ce;border:1px solid #64744e;border-radius:30px!important;padding:46px 40px 62px!important;box-shadow:inset 0 1px 0 #d8e1b733,0 24px 45px #0004;overflow:visible}
+body .blackjack-hero h2{color:#e6e5ce!important;text-shadow:3px 3px 0 #455b35}
+body .blackjack-hero :is(p,small,.team-division,.unit-meta){color:#b7c2a4!important}
+.blackjack-copy{align-self:center}
+.field-tv{position:relative;padding:19px 19px 15px;border-radius:38px;background:linear-gradient(135deg,#a5b28d 0%,#566943 12%,#27351e 45%,#6e8053 80%,#29391f);border:2px solid #81956a;box-shadow:inset 3px 3px 5px #e9f1c7b0,inset -7px -8px 5px #0c1809,10px 14px 0 #11190c,16px 26px 30px #0008;transform:rotate(-2deg);max-width:530px;width:100%;margin:auto}
+.tv-screen{position:relative;height:330px;overflow:hidden;border-radius:25px;background:#101a0c;border:8px solid #1b2915;box-shadow:0 0 0 2px #6a7b50,inset 0 0 25px #000}
+.tv-screen .team-hero-photo{height:100%;opacity:.85;filter:saturate(.6);background-position:50% 30%}
+.tv-screen:after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#102009dd,transparent 60%);pointer-events:none}
+.tv-screen-label{position:absolute;top:13px;left:15px;right:15px;z-index:2;display:flex;gap:6px;align-items:center;color:#d2e3b5;font:8px var(--mono);letter-spacing:.1em}
+.tv-screen-label>span{margin-left:auto}.tv-screen-label i{width:6px;height:6px;border-radius:50%;background:#c2ee88;box-shadow:0 0 8px #bcf77b}
+.tv-caption{position:absolute;bottom:20px;left:24px;z-index:2;color:#e9e8d2;display:grid;gap:8px}.tv-caption strong{font:64px/.9 var(--display);letter-spacing:.04em}.tv-caption small{font:9px var(--mono);letter-spacing:.15em}
+.tv-scan{position:absolute;inset:0;background:repeating-linear-gradient(transparent 0 3px,#0002 3px 4px);pointer-events:none;z-index:3}
+.tv-controls{display:flex;align-items:center;gap:20px;padding:20px 7px 3px}.tv-dial{width:40px;height:40px;flex:0 0 40px;border-radius:50%;background:repeating-conic-gradient(#344625 0 7deg,#90a471 7deg 14deg);box-shadow:0 3px 4px #0008,inset 0 0 0 9px #637c49;border:1px solid #c0ce9c}.tv-speaker{height:27px;flex:1;border-radius:6px;background:repeating-linear-gradient(90deg,#101a0b 0 3px,#7b8a60 3px 6px);box-shadow:inset 0 2px 4px #0008}
+.blackjack-checker{position:absolute;bottom:0;left:25px;right:25px;height:13px;background:conic-gradient(#879b6b 25%,#182510 0 50%,#879b6b 0 75%,#182510 0) 0 0/18px 18px;border-radius:0 0 4px 4px}
+body[data-unit=blackjack] .unit-workspace{background:linear-gradient(130deg,#9fac86,#3a4a2d);padding:16px;border-radius:25px;box-shadow:inset 2px 2px 0 #e6ebcd,0 8px 0 #1c2814;margin-top:38px;gap:16px}
+body[data-unit=blackjack] .unit-workspace .panel{background:#e3e3ce;color:#293622;--text:#293622;--muted:#5e6d4d;--line:#b4bea1;--accent:#4b6e32;border-radius:16px;border:1px solid #536641;box-shadow:inset 0 1px 0 #fff}
+body .person-card[data-team=blackjack] .card-face{background:linear-gradient(135deg,#f0efdc,#d6d8bf)!important;color:#253622;border:5px solid #697c50!important;box-shadow:inset 0 1px 0 #fff,4px 7px 0 #29391d,0 15px 24px #0004!important;--text:#253622;--muted:#586a45;--line:#adba96;--card-text:#253622;--card-muted:#586a45}
+body .person-card[data-team=blackjack] .id-card-head{background:linear-gradient(#4b6239,#2c4222);color:#dfe6c6}
+body .person-card[data-team=blackjack] .id-photo{border:2px solid #435d30;border-radius:15px!important}
+body .person-card[data-team=blackjack] .id-caption{padding:18px;background:#e0e1c9!important}
+body .person-card[data-team=blackjack] .id-card-foot{background:#cfD4b8;color:#425635}
+/* ORIGIN: a violet gate aperture and translucent vertical specimen records. */
+body .origin-hero{grid-template-columns:1fr 1fr!important;border-radius:42px 42px 12px 42px!important;background:radial-gradient(ellipse at 80% 50%,#74539566,transparent 65%),#171022!important;color:#eee6ff;border-color:#85649e;min-height:500px;overflow:hidden}
+body .origin-hero h2{color:#eee6ff!important;font-weight:400;letter-spacing:.13em;font-size:clamp(40px,6vw,90px)}
+body .origin-hero :is(p,small,.team-division,.unit-meta){color:#c1afcf!important}
+.origin-orbit-label{font:10px var(--mono);letter-spacing:.25em;color:#bba1d0;display:block;margin-bottom:36px}
+.origin-aperture{position:relative;min-height:360px;display:flex;align-items:center;justify-content:center;gap:12px;perspective:800px}
+.origin-ring{position:absolute;width:340px;height:340px;border-radius:50%;border:1px solid #b793dc;box-shadow:0 0 35px #b580b642,inset 0 0 40px #8e55b340,0 0 0 18px #ab80d010,0 0 0 19px #ae83d438;transform:rotateX(18deg) rotateY(-20deg)}
+.origin-aperture .team-hero-photo{position:relative;width:26%;height:250px;border-radius:120px 120px 14px 14px;border:1px solid #d9bff06b;box-shadow:0 25px 30px #0007;filter:saturate(.35)}
+.origin-aperture .team-hero-photo:nth-of-type(2){height:320px;z-index:2}
+.origin-aperture>span{position:absolute;bottom:0;font:8px var(--mono);letter-spacing:.22em;color:#c3a5d8}
+body .person-card[data-team=origin] .card-face{border-radius:60px 60px 16px 16px!important;clip-path:inset(0 round 60px 60px 16px 16px);background:linear-gradient(150deg,#493255,#21152e)!important;--text:#eee6f3;--muted:#bdabc8;color:#eee6f3;border-color:#a489b1!important}
+body .person-card[data-team=origin] .id-card-head{padding-top:9px;justify-content:center;color:#d8c4e8}.person-card[data-team=origin] .id-card-head>img{display:none}
+body .person-card[data-team=origin] .id-photo{border-radius:42px 42px 10px 10px!important;border:1px solid #bc94d35c}
+body .person-card[data-team=origin] .id-caption{color:#eee6f3!important;--muted:#bdabc8}
+body .person-card[data-team=origin] .id-card-foot{color:#bdabc8}
+/* BEACON: a pale blue investigation file, clipped evidence and calibrated reticle. */
+body .beacon-hero{grid-template-columns:1.15fr .85fr!important;background:linear-gradient(90deg,#e8eef1 0 58%,#bfced7 58%)!important;color:#233849;border:1px solid #9bb0be;border-radius:12px 30px 30px 12px!important;border-left:10px solid #628a9f}
+body .beacon-hero h2{color:#233849!important;font-family:Georgia,serif;font-size:clamp(43px,6.5vw,92px);letter-spacing:-.065em}
+body .beacon-hero :is(p,small,.team-division,.unit-meta){color:#536d80!important}
+.beacon-file-label{display:inline-block;border:1px solid #92a5b3;padding:9px;font:9px var(--mono);color:#4f6a7c;letter-spacing:.08em;margin-bottom:18px}
+.beacon-file-sign{display:flex;gap:18px;align-items:center;font:8px var(--mono);margin-top:28px;color:#4d6f85}
+.beacon-evidence{height:360px;border:10px solid #f7f8f4;border-bottom-width:35px;box-shadow:5px 7px 0 #7c909d,0 20px 30px #182f4533;position:relative;transform:rotate(3deg);background:#8d9fac;margin:8px 15px}
+.beacon-evidence:before{content:'';position:absolute;right:20px;top:-25px;width:22px;height:54px;border:3px solid #748894;border-radius:12px;z-index:3;box-shadow:2px 1px 1px #fff9}
+.beacon-evidence .team-hero-photo{height:100%;filter:grayscale(.7)}
+.evidence-label{position:absolute;bottom:-27px;left:0;right:0;text-align:center;color:#435a69;font:9px var(--mono)}
+.evidence-crosshair{position:absolute;inset:16%;border:1px solid #d7edf988;pointer-events:none}.evidence-crosshair:after{content:'+';position:absolute;inset:0;display:grid;place-items:center;color:#d7edf9;font:36px monospace}
+body .person-card[data-team=beacon] .card-face{border-radius:12px!important;clip-path:inset(0 round 12px);background:linear-gradient(135deg,#f0f4f5,#d9e3e8)!important;border:1px solid #8fa5b5!important;--text:#253e51;--muted:#5c788b;color:#253e51;box-shadow:6px 7px 0 #657f9433,0 15px 24px #0002!important}
+body .person-card[data-team=beacon] .id-card-head{background:#36566c;color:#e2edf5}
+body .person-card[data-team=beacon] .id-photo{border:8px solid #fff;border-radius:2px!important;box-shadow:0 3px 6px #29445922;transform:rotate(-1deg);margin:12px 18px 4px}
+body .person-card[data-team=beacon] .id-caption{border-left:3px solid #547f9b!important;margin:12px 16px;padding:8px 12px;color:#253e51!important;--muted:#5c788b}
+body .person-card[data-team=beacon] .id-card-foot{color:#5c788b;background:#cddae2}
+/* SHIELD: broad armored panels, amber hazard edges and rank plates. */
+body .shield-hero{grid-template-columns:1fr 1fr!important;gap:24px;background:linear-gradient(120deg,#30352e,#171c18)!important;color:#e9e3cd;border:2px solid #77745d;border-radius:18px!important;box-shadow:inset 0 2px 0 #c4b89555,0 10px 0 #111710,0 22px 35px #0003}
+.shield-hero-top,.shield-hero-bottom{grid-column:1/-1;display:flex;justify-content:space-between;font:10px var(--mono);letter-spacing:.15em;color:#c3b47f;gap:12px}
+.shield-hero-top{border-bottom:1px solid #77745d;padding-bottom:18px}.shield-hero-bottom{padding:12px 18px;background:repeating-linear-gradient(135deg,#c1a65c 0 10px,#343b2a 10px 20px);border-radius:5px;color:#fff;text-shadow:0 1px 5px #000}
+.shield-copy{align-self:center}.shield-copy .team-division{display:none}
+body .shield-hero h2{color:#e9e3cd!important;font-size:clamp(50px,8vw,112px);letter-spacing:.02em;text-shadow:0 3px 0 #978c66}
+body .shield-hero :is(p,small,.unit-meta){color:#bdb799!important}
+.shield-lineup{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:9px;min-height:330px}
+.shield-lineup>div{position:relative;overflow:hidden;border-radius:9px;border:1px solid #877c54}.shield-lineup .team-hero-photo{height:100%;filter:saturate(.45)}
+.shield-lineup>div>span{position:absolute;bottom:0;left:0;right:0;padding:15px 8px;background:#1c251acc;color:#e4d39c;font:10px var(--mono)}
+body .person-card[data-team=shield] .card-face{border-radius:12px!important;clip-path:inset(0 round 12px);background:linear-gradient(140deg,#4a4e40,#272e23)!important;--text:#eee9d4;--muted:#c2bb9e;color:#eee9d4;border:3px solid #8f8966!important;box-shadow:inset 0 2px 0 #dbd1ac88,5px 7px 0 #192016,0 18px 22px #0004!important}
+body .person-card[data-team=shield] .id-card-head{background:#b7a267;color:#1e291d;font-weight:700}
+body .person-card[data-team=shield] .id-photo{border:2px solid #a19162;border-radius:8px!important;margin:10px 12px 0}
+body .person-card[data-team=shield] .id-caption{background:linear-gradient(#4e5543,#343e2c)!important;color:#eee9d4;--muted:#c2bb9e}
+body .person-card[data-team=shield] .id-card-foot{background:repeating-linear-gradient(135deg,#82774822 0 8px,#1b251644 8px 16px);color:#d0c59f}
+/* Directory previews preserve those distinct materials. */
+body .directory-grid>.directory-card[data-team=blackjack]{background:linear-gradient(145deg,#526740,#1a2814);color:#e5e7cd;--text:#e5e7cd;--muted:#b6c59c;--line:#758860;border:3px solid #879a6e;border-radius:30px!important;box-shadow:inset 2px 2px 0 #d7dfb6,6px 9px 0 #26361d!important}
+body .directory-grid>.directory-card[data-team=blackjack] .directory-visual{border:8px solid #26391b;box-shadow:0 0 0 2px #91a471;border-radius:22px}
+body .directory-grid>.directory-card[data-team=origin]{background:radial-gradient(at 80% 15%,#715082,#21162e 70%);--text:#f1e6fa;--muted:#c5afd3;--line:#9a79ad55;color:var(--text);border-radius:45px 45px 14px 14px!important;border-color:#9a79ad}
+body .directory-grid>.directory-card[data-team=origin] .directory-visual{border-radius:120px 120px 14px 14px;border:1px solid #cdaae655}
+body .directory-grid>.directory-card[data-team=beacon]{background:linear-gradient(140deg,#f0f4f5,#cfdee7);--text:#233e52;--muted:#58768b;--line:#a4bbcb;color:var(--text);border-radius:12px!important;border-left:8px solid #63899f;box-shadow:7px 8px 0 #7f9aaf44!important}
+body .directory-grid>.directory-card[data-team=beacon] .directory-visual{border:7px solid #fff;border-radius:2px;transform:rotate(-1deg);box-shadow:0 5px 12px #273e5522}
+body .directory-grid>.directory-card[data-team=shield]{background:linear-gradient(130deg,#4a503f,#222b1e);--text:#eee8d2;--muted:#c1b995;--line:#80784e;color:var(--text);border-radius:16px!important;border:3px solid #8f865e;box-shadow:inset 0 2px 0 #e4d6a455,5px 7px 0 #1b2417!important}
+body .directory-grid>.directory-card[data-team=shield] .directory-window-label{background:repeating-linear-gradient(135deg,#81733e 0 10px,#4f542b 10px 20px)}
+.profile-stage[data-design=blackjack]{--text:#293a22;--muted:#60724e;--surface:#e4e6d0;--control:#c7d0b1;--accent:#496e2f;--line:#9eaf84;background:linear-gradient(130deg,#7d9061,#34482a);padding:12px}
+@media(max-width:760px){body .team-hero{grid-template-columns:minmax(0,1fr)!important;padding:25px!important;gap:28px}.team-hero h2{font-size:54px}.team-motto{font-size:17px}.team-description{font-size:13px}.field-tv{max-width:430px;padding:13px;border-radius:30px}.tv-screen{height:270px;border-width:6px;border-radius:20px}.tv-caption strong{font-size:48px}.tv-controls{padding-top:14px}.tv-dial{width:30px;height:30px;flex-basis:30px}.blackjack-checker{height:9px}.origin-aperture{min-height:290px}.origin-ring{width:240px;height:240px}.origin-aperture .team-hero-photo{height:200px}.origin-aperture .team-hero-photo:nth-of-type(2){height:250px}.beacon-evidence{height:290px;margin:0 10px 15px}.shield-lineup{min-height:270px}.shield-hero-top,.shield-hero-bottom{font-size:8px}body[data-unit=blackjack] .unit-workspace{padding:10px}}
+@media(prefers-reduced-motion:reduce){.field-tv{transform:none}}
+:root{--display:'Barlow Condensed',sans-serif}
+.team-hero .team-division{display:block}
+body .team-hero>.blackjack-checker{max-width:none}
+body .team-hero>.shield-hero-top,body .team-hero>.shield-hero-bottom{max-width:none}
+body .team-hero.beacon-hero{border-left-color:#628a9f!important}
+body .team-hero>.field-tv{max-width:530px}
+body .team-hero>.origin-aperture{max-width:none}

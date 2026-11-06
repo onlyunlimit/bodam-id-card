@@ -25,6 +25,9 @@ async function fixture() {
   sql.exec(
     readFileSync(new URL('../migrations/0006_staff_geocoding.sql', import.meta.url), 'utf8'),
   );
+  sql.exec(readFileSync(new URL('../migrations/0007_staff_profiles_likes.sql', import.meta.url), 'utf8'));
+  sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
+  sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -544,4 +547,103 @@ test('Hashtag suggestions read shared saved tags and exclude hidden or deleted p
  assert.equal((await req('/staff-tags?q=야간')).data.tags.length,0);
  sql.prepare('UPDATE posts SET hidden=0,deleted_at=? WHERE id=?').run(Date.now(),a.data.id);
  assert.equal((await req('/staff-tags?q=야간')).data.tags.length,0);
+});
+
+test('Staff member profiles expose only their published feed; admin like totals retain real votes',async()=>{
+ const {req,key,sql,post}=await fixture();
+ const auth=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const options={origin:'https://sgia.test',headers:{Cookie:auth.response.headers.get('Set-Cookie').split(';')[0]}};
+ const all=(await req('/members?board=staff')).data.members;
+ assert.equal(all.length,27);assert.ok(all.some(m=>m.id==='siso' && m.team==='blackjack'));
+ const created=await req('/admin/publish','POST',{member_id:'siso',title:'복귀 보고',body:'모두 복귀했습니다.'},options);
+ assert.equal(created.status,201,JSON.stringify(created.data));const id=created.data.id;
+ assert.equal((await req('/posts?board=staff')).data.posts[0].id,id);
+ assert.equal((await req('/members/siso/feed')).data.posts[0].id,id);
+ assert.equal((await req('/members/poker/feed')).data.posts.length,0);
+ assert.equal((await req('/admin/posts/'+id+'/likes','PATCH',{likes:50})).status,403);
+ for(const likes of [-1,1.5,'10',10000001]) assert.equal((await req('/admin/posts/'+id+'/likes','PATCH',{likes},options)).status,400);
+ assert.equal((await req('/posts/'+id+'/like','POST',{liked:true})).data.likes,1);
+ assert.equal((await req('/admin/posts/'+id+'/likes','PATCH',{likes:50},options)).status,200);
+ assert.equal(sql.prepare('SELECT count(*) n FROM post_likes').get().n,1);
+ assert.equal((await req('/members/siso/feed')).data.posts[0].likes,50);
+ assert.equal((await req('/posts/'+id+'/like','POST',{liked:false})).data.likes,49);
+ assert.equal((await req('/posts/'+id+'/like','POST',{liked:true})).data.likes,50);
+ const c=await req('/posts/'+id+'/comments','POST',{author:'동료',body:'확인했습니다',password:'123456',captcha:'ok',consent:true});
+ assert.equal((await req('/admin/comments/'+c.data.id+'/likes','PATCH',{likes:12},options)).status,200);
+ assert.equal((await req('/comments/'+c.data.id+'/like','POST',{liked:true})).data.likes,13);
+ assert.equal((await req('/posts/'+id)).data.comments[0].likes,13);
+ assert.equal((await req('/admin/posts/'+id+'/likes','PATCH',{likes:0},options)).status,200);
+ assert.equal((await req('/posts/'+id+'/like','POST',{liked:false})).data.likes,0);
+ await req('/admin/members/siso','PATCH',{name:'시소',bio:'변경한 소개',avatar_url:''},options);
+ assert.equal((await req('/members/siso')).data.member.bio,'변경한 소개');
+ await req('/admin/moderate','POST',{kind:'post',id,action:'hide'},options);
+ assert.equal((await req('/members/siso/feed')).data.posts.length,0);
+ assert.equal((await req('/members/not-a-member/feed')).status,404);
+ assert.ok(sql.prepare("SELECT count(*) n FROM audit WHERE action='LIKE_COUNT_SET'").get().n>=3);
+});
+
+test('Staff migration preserves existing member edits and foreign-key linked posts, comments and photos',()=>{
+ const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');
+ for(const file of ['0001.sql','0002_likes.sql','0004_fan_platform.sql','0005_image_urls.sql','0006_staff_geocoding.sql']) db.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+ db.exec("UPDATE members SET name='편집된 재인',bio='보존할 소개' WHERE id='jaein'; INSERT INTO posts(id,board,title,author,body,salt,password_hash,created_at,member_id) VALUES('p','lucky','기존 글','재인','본문','','',1,'jaein'); INSERT INTO comments(id,post_id,author,body,salt,password_hash,created_at,member_id) VALUES('c','p','재인','댓글','','',1,'jaein'); INSERT INTO images(id,member_id,mime,data,created_at) VALUES('i','jaein','image/png',X'01',1);");
+ db.exec('BEGIN');db.exec(readFileSync(new URL('../migrations/0007_staff_profiles_likes.sql',import.meta.url),'utf8'));db.exec('COMMIT');
+ assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(),[]);
+ assert.equal(db.prepare("SELECT name FROM members WHERE id='jaein'").get().name,'편집된 재인');
+ assert.equal(db.prepare('SELECT count(*) n FROM images').get().n,1);
+ assert.equal(db.prepare('SELECT member_id FROM comments').get().member_id,'jaein');
+ assert.equal(db.prepare('SELECT like_adjustment FROM posts').get().like_adjustment,0);
+ db.close();
+});
+
+test('Joker withdrawal only removes an unused seed and preserves edited profiles or linked content',()=>{
+ const sql=new DatabaseSync(':memory:');for(const file of ['0001.sql','0002_likes.sql','0004_fan_platform.sql','0005_image_urls.sql','0006_staff_geocoding.sql','0007_staff_profiles_likes.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+ const migration=readFileSync(new URL('../migrations/0008_withdraw_joker.sql',import.meta.url),'utf8');
+ sql.exec("UPDATE members SET updated_at=123 WHERE id='joker'");sql.exec(migration);assert.ok(sql.prepare("SELECT id FROM members WHERE id='joker'").get());
+ sql.exec("UPDATE members SET updated_at=0 WHERE id='joker'; INSERT INTO posts(id,board,title,author,body,salt,password_hash,created_at,member_id) VALUES('keep','staff','작성한 글','조커','보존','','',1,'joker')");sql.exec(migration);assert.ok(sql.prepare("SELECT id FROM members WHERE id='joker'").get());
+ sql.exec("DELETE FROM posts WHERE id='keep'");sql.exec(migration);assert.equal(sql.prepare("SELECT id FROM members WHERE id='joker'").get(),undefined);sql.close();
+});
+
+test('Blank names use stable per-post IP aliases across replies, deletion and timestamp ordering', async () => {
+ const {req,post,sql}=await fixture();
+ const made=await req('/posts','POST',{...post,author:'   ',created_at:1});
+ assert.equal(made.status,201);const id=made.data.id;
+ assert.equal(sql.prepare('SELECT author FROM posts WHERE id=?').get(id).author,'ㅇㅇ');
+ assert.notEqual(sql.prepare('SELECT created_at FROM posts WHERE id=?').get(id).created_at,1);
+ const comment={body:'익명 댓글',password:'123456',captcha:'verified',consent:true};
+ const add=(ip,extra={})=>req('/posts/'+id+'/comments','POST',{...comment,...extra},{ip});
+ const a=await add('192.0.2.10');const b=await add('192.0.2.11');
+ const reply=await add('192.0.2.10',{parent_id:b.data.id});
+ for(const r of [a,b,reply])assert.equal(r.status,201);
+ const name=id=>sql.prepare('SELECT author FROM comments WHERE id=?').get(id).author;
+ assert.equal(name(a.data.id),'익명1');assert.equal(name(b.data.id),'익명2');assert.equal(name(reply.data.id),'익명1');
+ sql.prepare('UPDATE comments SET created_at=1,deleted_at=2 WHERE id=?').run(a.data.id);
+ const again=await add('192.0.2.10');assert.equal(name(again.data.id),'익명1');
+ const explicit=await add('192.0.2.12',{author:'내 닉네임'});assert.equal(name(explicit.data.id),'내 닉네임');
+ const invalid=await add('192.0.2.13',{parent_id:'ffffffff-ffff-4fff-8fff-ffffffffffff'});assert.equal(invalid.status,404);
+ const next=await add('192.0.2.14');assert.equal(name(next.data.id),'익명3');
+ const second=await req('/posts','POST',{...post,author:undefined},{ip:'192.0.2.20'});
+ const reset=await req('/posts/'+second.data.id+'/comments','POST',comment,{ip:'192.0.2.11'});
+ assert.equal(name(reset.data.id),'익명1');
+ const rows=sql.prepare('SELECT * FROM comment_aliases').all();assert.equal(JSON.stringify(rows).includes('192.0.2.'),false);
+ const detail=await req('/posts/'+id);assert.equal(JSON.stringify(detail.data).includes('voter'),false);
+});
+
+test('Only authenticated admin-written posts accept custom creation time, without changing audit time',async()=>{
+ const {req,key,sql,post}=await fixture();
+ const auth=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const options={origin:'https://sgia.test',headers:{Cookie:auth.response.headers.get('Set-Cookie').split(';')[0]}};
+ const stamp=Date.parse('2024-01-02T03:04:05+09:00');
+ const payload={member_id:'siso',title:'지난 기록',body:'기록 본문',created_at:stamp};
+ assert.equal((await req('/admin/publish','POST',payload,{origin:'https://sgia.test'})).status,401);
+ const created=await req('/admin/publish','POST',payload,options);assert.equal(created.status,201);const id=created.data.id;
+ const row=()=>sql.prepare('SELECT * FROM posts WHERE id=?').get(id);
+ assert.equal(row().created_at,stamp);
+ const patch={title:'시간 수정',body:'수정 본문',created_at:stamp+3600000};
+ assert.equal((await req('/admin/posts/'+id,'PATCH',patch,options)).status,200);assert.equal(row().created_at,patch.created_at);
+ assert.ok(row().updated_at>stamp);
+ assert.equal((await req('/admin/posts/'+id,'PATCH',{title:'내용만',body:'시간 보존'},options)).status,200);assert.equal(row().created_at,patch.created_at);
+ for(const value of [-1,'2024-01-01',null,1.5,1e16])assert.equal((await req('/admin/posts/'+id,'PATCH',{...patch,created_at:value},options)).status,400);
+ const visitor=await req('/posts','POST',post);
+ assert.equal((await req('/admin/posts/'+visitor.data.id,'PATCH',patch,options)).status,403);
+ assert.ok(sql.prepare("SELECT created_at FROM audit WHERE action='ARTIST_PUBLISH' AND target=?").get(id).created_at>stamp);
 });

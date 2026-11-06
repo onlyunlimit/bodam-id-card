@@ -1,5 +1,6 @@
 import { isArea } from './geo-model.js';
 export const teams = [
+  {id:'blackjack', name:'블랙잭', en:'BLACKJACK', department:'대테러부대', color:'#a6b891', description:'패가 나쁘면 판을 엎어라.', staff:'대테러 특수진압과 고위험 게이트 돌입, 인질 구출을 담당하는 특수 부대. 포커, 딜러, 리어, 판덴, 시소가 전술과 각성 능력을 결합합니다.'},
   {
     id: 'origin',
     name: '오리진',
@@ -72,6 +73,7 @@ const standard = [
   [1080, 1140, '저녁 식사', false],
 ];
 export function scheduleFor(id) {
+  if (id === 'blackjack') return [[0,1440,'작전 일정에 따라 운용',false]];
   if (id === 'beacon')
     return [
       [540, 600, '타겟 정보 브리핑', true],

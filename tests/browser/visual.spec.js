@@ -14,6 +14,7 @@ test('All new pages render without browser errors at desktop and narrow mobile s
       'beacon',
       'origin',
       'shield',
+      'blackjack',
       'headquarters',
       'entertainment',
       'elysian',

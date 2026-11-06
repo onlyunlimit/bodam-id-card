@@ -28,8 +28,9 @@ async function mock(page) {
     }
     if (url.pathname === '/members')
       return route.fulfill({
-        json: { members: members.filter((m) => m.board === url.searchParams.get('board')) },
+        json: { members: members.filter((m) => url.searchParams.get('board') === 'staff' || m.board === url.searchParams.get('board')) },
       });
+    if (/^\/members\/[^/]+\/feed$/.test(url.pathname)) return route.fulfill({json:{posts:posts.filter(p=>p.member_id===url.pathname.split('/')[2]),more:false}});
     if (url.pathname === '/artist-comments')
       return route.fulfill({
         json: {
@@ -240,7 +241,7 @@ test('Community palette covers the shell and restores the saved theme on navigat
   page,
 }) => {
   await mock(page);
-  await page.goto('/beacon.html');
+  await page.goto('/departments.html');
   await page
     .locator('body')
     .evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
@@ -250,12 +251,12 @@ test('Community palette covers the shell and restores the saved theme on navigat
   }));
   await page.locator('.site-nav a[href="community.html"]').click();
   await expect(page.locator('html')).toHaveAttribute('data-community-theme', 'lucky');
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(243, 233, 239)');
-  await expect(page.locator('.site-footer')).toHaveCSS('background-color', 'rgb(248, 237, 245)');
+  await expect(page.locator('body')).toHaveCSS('background-color', base.theme === 'light' ? 'rgb(250, 243, 247)' : 'rgb(28, 19, 27)');
+  await expect(page.locator('.site-footer')).toHaveCSS('background-color', base.theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(43, 32, 42)');
   await page.locator('.community-switch a[href$="board=obsidus"]').click();
   await expect(page.locator('html')).toHaveAttribute('data-community-theme', 'obsidus');
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(20, 20, 22)');
-  await expect(page.locator('.site-nav')).toHaveCSS('background-color', 'rgb(25, 25, 28)');
+  await expect(page.locator('body')).toHaveCSS('background-color', base.theme === 'light' ? 'rgb(238, 238, 240)' : 'rgb(17, 18, 21)');
+  await expect(page.locator('.site-nav')).toHaveCSS('background-color', base.theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(29, 31, 36)');
   expect(await page.locator('html').getAttribute('data-theme')).toBe(base.theme);
   await page.locator('.site-nav a[href="departments.html"]').click();
   await expect(page.locator('html')).not.toHaveAttribute('data-community-theme');
@@ -362,5 +363,31 @@ test('Mobile line-break and IME confirmation add tags without triggering nicknam
  await input.fill('세번째');await input.evaluate(el => el.dispatchEvent(new InputEvent('beforeinput',{inputType:'insertParagraph',bubbles:true,cancelable:true})));
  await expect(page.locator('.selected-hashtag')).toHaveCount(3);await expect(input).toBeFocused();
  expect(await page.evaluate(()=>window.tagInvalidCount)).toBe(0);
- await page.locator('#post-form button[type=submit]').click();await expect(page.locator('[name=author]')).toBeFocused();
+ await page.locator('#post-form button[type=submit]').click();await expect(page.locator('[name=password]')).toBeFocused();
+});
+
+
+test('Member directory opens the selected personal feed and its post without leaking another member feed',async({page})=>{
+ const f=await mock(page);
+ f.posts.push({id:'11111111-1111-4111-8111-111111111111',board:'lucky',member_id:'jaein',title:'재인의 소식',body:'오늘도 반가워요',author:'재인',created_at:Date.now(),likes:12});
+ await page.goto('/community.html?board=staff&member=jaein');
+ await expect(page.locator('.community-profile h3')).toHaveText('재인');
+ await expect(page.locator('.profile-feed-post')).toHaveCount(1);
+ await expect(page.locator('.profile-feed-post')).toContainText('재인의 소식');
+ await page.locator('.profile-feed-post').click();
+ await page.locator('#login-submit').click();
+ await expect(page.locator('.post-body')).toHaveText('오늘도 반가워요');
+});
+
+test('Nickname is optional when submitting posts, comments and replies',async({page})=>{
+ const f=await mock(page);await page.goto('/community.html');await page.locator('#write-post').click();
+ await page.locator('[name=title]').fill('닉네임 없이 작성');await page.locator('[name=password]').fill('123456');await page.locator('[name=body]').fill('익명 본문');await page.locator('[name=consent]').check();
+ await page.locator('#post-form button[type=submit]').click();await expect(page.locator('.post-row')).toContainText('닉네임 없이 작성');expect(f.posts[0].author).toBe('');
+ await page.locator('.post-row').click();
+ for(let i=0;i<2;i++){
+  if(i)await page.locator('[data-reply]').first().click();
+  await page.locator('#comment-form [name=password]').fill('123456');await page.locator('#comment-form [name=body]').fill('익명 대화 '+i);await page.locator('#comment-form [name=consent]').check();await page.locator('#comment-form button[type=submit]').click();
+  await expect(page.locator('.comment-row')).toHaveCount(i+1);expect(f.comments[i].author).toBe('');
+ }
+ expect(f.comments[1].parent_id).toBe(f.comments[0].id);
 });

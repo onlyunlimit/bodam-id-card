@@ -55,7 +55,7 @@ test('Owner console publishes with a member identity, edits profiles and manages
         id: '22222222-2222-4222-8222-222222222222',
         board: 'lucky',
         author: '재인',
-        created_at: Date.now(),
+        created_at: data.created_at ?? Date.now(),
       });
     if (path === '/admin/logout') authenticated = false;
     return route.fulfill({ json: { ok: true } });
@@ -65,6 +65,7 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await page.locator('#login button').click();
   await expect(page.locator('#workspace')).toBeVisible();
   await page.locator('#artist-compose').click();
+  await page.locator('#admin-editor [name=created_at]').fill('2024-01-02T03:04:05');
   await page.locator('#admin-editor [name=title]').fill('공식 첫 인사');
   await page.locator('#admin-editor [name=body]').fill('팬 여러분 안녕하세요');
   await page.locator('[data-image-url]').fill('https://images.example/photo.jpg');await page.locator('[data-add-image-url]').click();await expect(page.locator('.upload-image')).toHaveCount(1);
@@ -76,6 +77,7 @@ test('Owner console publishes with a member identity, edits profiles and manages
 
   await page.locator('#admin-editor button[type=submit]').click();
   await expect(page.locator('#posts')).toContainText('공식 첫 인사');
+  expect(calls.find(c=>c.path==='/admin/publish').data.created_at).toBe(Date.parse('2024-01-02T03:04:05+09:00'));
   expect(calls.find((c) => c.path === '/admin/publish').data.member_id).toBe('jaein');
   expect(calls.find(c=>c.path==='/admin/publish').data.images).toHaveLength(2);
   await page.locator('#profile-edit').click();
@@ -89,9 +91,12 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await expect(page.locator('#admin-editor')).not.toBeVisible();
   expect(calls.find((c) => c.path === '/admin/reply').data.body).toBe('고마워요!');
   await page.locator('[data-action=edit]').first().click();
+  await expect(page.locator('#admin-editor [name=created_at]')).toHaveValue('2024-01-02T03:04:05');
+  await page.locator('#admin-editor [name=created_at]').fill('2024-01-03T12:30');
   await page.locator('#admin-editor [name=body]').fill('관리자로 수정');
   await page.locator('#admin-editor button[type=submit]').click();
   await expect(page.locator('#admin-editor')).not.toBeVisible();
+  expect(calls.find(c=>c.path.startsWith('/admin/posts/')).data.created_at).toBe(Date.parse('2024-01-03T12:30:00+09:00'));
   expect(calls.find((c) => c.path.startsWith('/admin/posts/')).data.body).toBe('관리자로 수정');
   await page.locator('#artist-compose').click();
   await page.locator('[name=title]').fill('사진 없이 작성');await page.locator('[name=body]').fill('취소한 사진은 등록하지 않음');
@@ -99,6 +104,11 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await page.locator('.attachment-remove').click();await expect(page.locator('.upload-image')).toHaveCount(0);
   await page.locator('#admin-editor button[type=submit]').click();await expect(page.locator('#admin-editor')).not.toBeVisible();
   expect(calls.filter(c=>c.path==='/admin/publish').at(-1).data.images).toEqual([]);
+  await page.locator('[data-like-edit]').first().click();
+  await page.locator('#admin-editor [name=likes]').fill('321');
+  await page.locator('#admin-editor button[type=submit]').click();
+  await expect(page.locator('#admin-editor')).not.toBeVisible();
+  expect(calls.find(c=>c.path.endsWith('/likes')).data.likes).toBe(321);
   expect(errors).toEqual([]);
   await page.locator('#logout').click();
   await expect(page.locator('#workspace')).not.toBeVisible();

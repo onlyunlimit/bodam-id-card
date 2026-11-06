@@ -26,7 +26,7 @@ test('Departments are separate pages and entertainment is excluded from agency d
   page,
 }) => {
   await page.goto('/departments.html');
-  await expect(page.locator('.directory-card')).toHaveCount(3);
+  await expect(page.locator('.directory-card')).toHaveCount(4);
   await expect(page.locator('.directory-grid')).not.toContainText('럭키트릭');
   await page.locator('.directory-card[href="beacon.html"]').click();
   await expect(page.locator('h1')).toHaveText('비콘');

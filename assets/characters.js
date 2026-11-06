@@ -593,5 +593,115 @@ export const characters = [
         "url": "https://cdn.caveduck.io/cdn-cgi/image/anim=true,dpr=2,f=auto,w=500/charim-standard/4b184c6d-47fc-4a44-92f2-c3be1b0817b9?v=0932ea"
       }
     ]
-  }
+  },
+{
+  "id": "poker",
+  "team": "blackjack",
+  "code": "POKER",
+  "name": "포커 · 강준겸",
+  "rank": "SS+",
+  "age": 35,
+  "role": "팀장 / 데크 소환",
+  "ability": "53장의 카드 기물을 실체화하는 데크",
+  "bio": "고위험 작전의 판을 읽고 기물을 배치하는 블랙잭 팀장. 전술과 각성 능력을 결합해 팀의 돌입을 지휘한다.",
+  "appearance": "갈색 울프컷 · 흑안 · 은색 링 피어싱",
+  "location": "각성관 · 블랙잭",
+  "link": null,
+  "portrait": "https://cdn.caveduck.io/cdn-cgi/image/anim=true,dpr=2,f=auto,w=500/charim-standard/c8574255-991d-416b-bf99-2dfac0c30357?v=e82871",
+  "notes": "대테러 대응과 고위험 현장의 돌입·회수 임무를 수행한다.",
+  "gallery": [
+    {
+      "label": "포커 · 강준겸",
+      "url": "https://cdn.caveduck.io/cdn-cgi/image/anim=true,dpr=2,f=auto,w=500/charim-standard/c8574255-991d-416b-bf99-2dfac0c30357?v=e82871"
+    }
+  ]
+},
+{
+  "id": "dealer",
+  "team": "blackjack",
+  "code": "DEALER",
+  "name": "딜러",
+  "rank": "미공개",
+  "age": null,
+  "role": "작전 중개 / 링크",
+  "ability": "팀원 간 생각을 공유하는 링크 연결",
+  "bio": "작전 중 팀원들의 판단과 정보를 연결한다. 링크는 임무 수행 중에만 운용한다.",
+  "appearance": "외형 정보 미공개",
+  "location": "각성관 · 블랙잭",
+  "link": null,
+  "portrait": "assets/art/personnel-placeholder.svg",
+  "notes": "대테러 대응과 고위험 현장의 돌입·회수 임무를 수행한다.",
+  "gallery": [
+    {
+      "label": "딜러",
+      "url": "assets/art/personnel-placeholder.svg"
+    }
+  ]
+},
+{
+  "id": "rear",
+  "team": "blackjack",
+  "code": "REAR",
+  "name": "리어",
+  "rank": "미공개",
+  "age": null,
+  "role": "후면 방어 / 리어가드",
+  "ability": "Crown · 영역 선언과 침입 감지",
+  "bio": "지정한 영역의 움직임을 감지하고 후면을 지킨다. 팀이 안전하게 후퇴할 시간을 확보한다.",
+  "appearance": "외형 정보 미공개",
+  "location": "각성관 · 블랙잭",
+  "link": null,
+  "portrait": "assets/art/personnel-placeholder.svg",
+  "notes": "대테러 대응과 고위험 현장의 돌입·회수 임무를 수행한다.",
+  "gallery": [
+    {
+      "label": "리어",
+      "url": "assets/art/personnel-placeholder.svg"
+    }
+  ]
+},
+{
+  "id": "panden",
+  "team": "blackjack",
+  "code": "PANDEN",
+  "name": "판덴",
+  "rank": "미공개",
+  "age": null,
+  "role": "관측 / 원거리 탐지",
+  "ability": "공간 너머의 인원과 특징 탐지",
+  "bio": "시야 너머 현장의 인원과 특징을 파악하는 관측 담당. 능력 소모에 따라 탐지 정확도가 달라진다.",
+  "appearance": "외형 정보 미공개",
+  "location": "각성관 · 블랙잭",
+  "link": null,
+  "portrait": "assets/art/personnel-placeholder.svg",
+  "notes": "대테러 대응과 고위험 현장의 돌입·회수 임무를 수행한다.",
+  "gallery": [
+    {
+      "label": "판덴",
+      "url": "assets/art/personnel-placeholder.svg"
+    }
+  ]
+},
+{
+  "id": "siso",
+  "team": "blackjack",
+  "code": "SISO",
+  "name": "시소",
+  "rank": "비각성",
+  "age": null,
+  "role": "브리처 / 인질 회수",
+  "ability": "야간 시야 · 기동 · 돌입과 회수",
+  "bio": "검은 고양이 출신 수인. 빠루로 진입로를 열고 인질을 안전한 곳으로 회수하는 블랙잭의 막내다.",
+  "appearance": "흑발 · 흑안 · 검은 체크 스카프",
+  "location": "각성관 · 블랙잭",
+  "link": null,
+  "portrait": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim-standard/dc108656-4e56-4d1a-a1c4-b2c18fa8eac4?v=8172d8",
+  "notes": "대테러 대응과 고위험 현장의 돌입·회수 임무를 수행한다.",
+  "gallery": [
+    {
+      "label": "시소",
+      "url": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim-standard/dc108656-4e56-4d1a-a1c4-b2c18fa8eac4?v=8172d8"
+    }
+  ]
+}
 ];

@@ -1,0 +1,27 @@
+import {registerCopy} from './i18n.js';
+const rows=[
+ ['각성관 · 블랙잭','Awakening Hall · Blackjack','覚醒館・ブラックジャック','觉醒馆 · 黑杰克'],
+ ['각성관 · 대테러부대','Awakening Hall · Counter-terror unit','覚醒館・対テロ部隊','觉醒馆 · 反恐部队'],
+ ['팀장 / 데크 소환','Leader / Deck summons','隊長 / デッキ召喚','队长 / 卡组召唤'],
+ ['53장의 카드 기물을 실체화하는 데크','A deck that manifests 53 card entities','53枚のカードの駒を実体化するデッキ','将53张卡牌棋子实体化的卡组'],
+ ['고위험 작전의 판을 읽고 기물을 배치하는 블랙잭 팀장. 전술과 각성 능력을 결합해 팀의 돌입을 지휘한다.','Blackjack’s leader reads high-risk operations and positions his pieces, combining tactics and awakened abilities to command the breach.','高危険度作戦の局面を読み、駒を配置する隊長。戦術と覚醒能力を組み合わせ、突入を指揮する。','黑杰克队长负责判断高风险行动局势、部署棋子，结合战术与觉醒能力指挥突入。'],
+ ['갈색 울프컷 · 흑안 · 은색 링 피어싱','Brown wolf cut · Black eyes · Silver ring piercings','茶色のウルフカット・黒い目・銀のリングピアス','棕色狼尾发型 · 黑眼睛 · 银色环形耳饰'],
+ ['작전 중개 / 링크','Operations liaison / Link','作戦仲介 / リンク','行动联络 / 链接'],
+ ['팀원 간 생각을 공유하는 링크 연결','A link sharing thoughts among teammates','隊員同士の思考を共有するリンク','连接队员并共享思维'],
+ ['작전 중 팀원들의 판단과 정보를 연결한다. 링크는 임무 수행 중에만 운용한다.','Connects the team’s judgments and information. The link is used only during missions.','作戦中の隊員の判断と情報をつなぐ。リンクは任務中にのみ運用する。','在行动中连接队员的判断与信息。链接仅在执行任务时使用。'],
+ ['후면 방어 / 리어가드','Rear defense / Rearguard','後方防御 / リアガード','后方防御 / 后卫'],
+ ['Crown · 영역 선언과 침입 감지','Crown · Territory declaration and intrusion detection','Crown・領域宣言と侵入感知','Crown · 宣告领域与入侵感知'],
+ ['지정한 영역의 움직임을 감지하고 후면을 지킨다. 팀이 안전하게 후퇴할 시간을 확보한다.','Detects movement within a designated territory and guards the rear, securing time for a safe retreat.','指定領域の動きを感知し、後方を守る。隊員が安全に撤退するための時間を確保する。','感知指定领域内的动静并守住后方，为团队安全撤退争取时间。'],
+ ['관측 / 원거리 탐지','Observation / Remote detection','観測 / 遠隔探知','观测 / 远程探测'],
+ ['공간 너머의 인원과 특징 탐지','Detecting people and traits beyond intervening space','空間の向こうにいる人員と特徴を探知','探测空间另一侧的人员及特征'],
+ ['시야 너머 현장의 인원과 특징을 파악하는 관측 담당. 능력 소모에 따라 탐지 정확도가 달라진다.','Observes personnel and features beyond sight. Detection accuracy varies with ability exhaustion.','視界の外の人員や特徴を把握する観測担当。能力の消耗によって精度が変わる。','负责识别视野之外现场的人员与特征。探测精度随能力消耗而变化。'],
+ ['외형 정보 미공개','Appearance undisclosed','外見情報非公開','外貌信息未公开'],
+ ['브리처 / 인질 회수','Breacher / Hostage retrieval','ブリーチャー / 人質回収','破门手 / 人质救援'],
+ ['야간 시야 · 기동 · 돌입과 회수','Night vision · Mobility · Breach and retrieval','夜間視力・機動・突入と回収','夜间视力 · 机动 · 突入与回收'],
+ ['검은 고양이 출신 수인. 빠루로 진입로를 열고 인질을 안전한 곳으로 회수하는 블랙잭의 막내다.','A former black cat and Blackjack’s youngest beastfolk member. Opens routes with a crowbar and retrieves hostages to safety.','黒猫出身の獣人でブラックジャックの末っ子。バールで進入口を開き、人質を安全な場所へ回収する。','由黑猫而来的兽人，是黑杰克的忙内。用撬棍打开入口，将人质带回安全地点。'],
+ ['흑발 · 흑안 · 검은 체크 스카프','Black hair · Black eyes · Black check scarf','黒髪・黒い目・黒いチェックのスカーフ','黑发 · 黑眼睛 · 黑色格纹围巾'],
+ ['대테러 대응과 고위험 현장의 돌입·회수 임무를 수행한다.','Conducts counter-terror operations and high-risk breach and retrieval missions.','対テロ対応と高危険度現場での突入・回収を行う。','执行反恐应对及高风险现场突入、回收任务。'],
+ ['패가 나쁘면 판을 엎어라.','If the hand is bad, overturn the table.','手札が悪ければ、盤面を覆せ。','牌不好，就掀翻牌桌。'],
+ ['대테러 특수진압과 고위험 게이트 돌입, 인질 구출을 담당하는 특수 부대. 포커, 딜러, 리어, 판덴, 시소가 전술과 각성 능력을 결합합니다.','A special unit for counter-terror response, high-risk gate breaches and hostage rescue. Poker, Dealer, Rear, Panden and Siso combine tactics with awakened abilities.','対テロ制圧、高危険度ゲート突入、人質救出を担当。ポーカー、ディーラー、リア、パンデン、シソが戦術と覚醒能力を組み合わせる。','负责反恐制压、高风险门扉突入和人质救援。扑克、荷官、后卫、潘登、跷跷板结合战术与觉醒能力行动。'],
+];
+rows.forEach(row=>registerCopy(...row));

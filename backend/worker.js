@@ -362,7 +362,7 @@ async function handle(request, env) {
       await env.DB.prepare('DELETE FROM post_likes WHERE post_id=? AND voter=?')
         .bind(post.id, voter)
         .run();
-    const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM post_likes WHERE post_id=?')
+    const count = await env.DB.prepare('SELECT max(0,like_adjustment+(SELECT count(*) FROM post_likes WHERE post_id=posts.id)) AS n FROM posts WHERE id=?')
       .bind(post.id)
       .first();
     return json({ liked: data.liked, likes: count.n });
@@ -375,7 +375,7 @@ async function handle(request, env) {
     if (!['fan', 'artist', 'highlight'].includes(feed))
       throw new HTTPError(400, '잘못된 피드입니다.');
     const feedFilter =
-      feed === 'fan'
+      b === 'staff' ? '' : feed === 'fan'
         ? ' AND p.member_id IS NULL'
         : feed === 'artist'
           ? ' AND p.member_id IS NOT NULL'
@@ -392,7 +392,7 @@ async function handle(request, env) {
         ? 'likes DESC,p.created_at DESC,p.id DESC'
         : 'p.created_at DESC,p.id DESC';
     const { results } = await env.DB.prepare(
-      `SELECT ${postFields},(SELECT COUNT(*) FROM comments c WHERE c.post_id=p.id AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL))) AS comments,(SELECT COUNT(*) FROM post_likes l WHERE l.post_id=p.id) AS likes FROM posts p WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL ${feedFilter} ${staffFilter} AND (p.title LIKE ? ESCAPE '\\' OR p.body LIKE ? ESCAPE '\\') ORDER BY ${order} LIMIT 21 OFFSET ?`,
+      `SELECT ${postFields},(SELECT COUNT(*) FROM comments c WHERE c.post_id=p.id AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL))) AS comments,max(0,p.like_adjustment+(SELECT COUNT(*) FROM post_likes l WHERE l.post_id=p.id)) AS likes FROM posts p WHERE p.board=? AND p.hidden=0 AND p.deleted_at IS NULL ${feedFilter} ${staffFilter} AND (p.title LIKE ? ESCAPE '\\' OR p.body LIKE ? ESCAPE '\\') ORDER BY ${order} LIMIT 21 OFFSET ?`,
     )
       .bind(
         b,
@@ -416,13 +416,13 @@ async function handle(request, env) {
       .first();
     if (!row) throw new HTTPError(404, '게시물이 없거나 숨김 처리되었습니다.');
     const { results } = await env.DB.prepare(
-      `SELECT c.id,c.author,c.body,c.created_at,c.updated_at,c.member_id,c.parent_id,c.pin_length,m.name AS member_name,m.avatar_url,(SELECT COUNT(*) FROM comment_likes l WHERE l.comment_id=c.id) AS likes FROM comments c LEFT JOIN members m ON m.id=c.member_id WHERE c.post_id=? AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL)) ORDER BY c.created_at,c.id LIMIT 100`,
+      `SELECT c.id,c.author,c.body,c.created_at,c.updated_at,c.member_id,c.parent_id,c.pin_length,m.name AS member_name,m.avatar_url,max(0,c.like_adjustment+(SELECT COUNT(*) FROM comment_likes l WHERE l.comment_id=c.id)) AS likes FROM comments c LEFT JOIN members m ON m.id=c.member_id WHERE c.post_id=? AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL)) ORDER BY c.created_at,c.id LIMIT 100`,
     )
       .bind(row.id)
       .all();
     const { ip } = await identity(request, env);
     const voter = await hmac(env.IP_KEY, 'like:' + row.id + ':' + ip);
-    const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM post_likes WHERE post_id=?')
+    const count = await env.DB.prepare('SELECT max(0,like_adjustment+(SELECT count(*) FROM post_likes WHERE post_id=posts.id)) AS n FROM posts WHERE id=?')
       .bind(row.id)
       .first();
     const liked = await env.DB.prepare('SELECT post_id FROM post_likes WHERE post_id=? AND voter=?')
@@ -460,9 +460,10 @@ async function handle(request, env) {
         salt = random(),
         pwd = await passwordHash(data.password, salt, env.PASSWORD_PEPPER),
         created = now(),
-        author = text(data.author, 1, 24, '닉네임'),
+        author = text(data.author ?? '', 0, 24, '닉네임'),
         content = text(data.body, 1, path === '/posts' ? 5000 : 1000, '내용');
       let stmt;
+      const aliases = [];
       if (path === '/posts') {
         const meta = staffMeta(board(data.board), data.channel || 'free', data.tags || []);
         stmt = env.DB.prepare(
@@ -471,7 +472,7 @@ async function handle(request, env) {
           id,
           board(data.board),
           text(data.title, 1, 100, '제목'),
-          author,
+          author || 'ㅇㅇ',
           text(data.department || '', 0, 40, '부서'),
           content,
           salt,
@@ -493,20 +494,17 @@ async function handle(request, env) {
           .bind(parent.id)
           .first();
         if (count.n >= 100) throw new HTTPError(409, '게시물당 댓글은 100개까지 등록됩니다.');
+        const parentId = await parentComment(env, parent.id, data.parent_id);
+        const voter = await hmac(env.IP_KEY, 'comment-alias:' + parent.id + ':' + ip);
+        if (!author) aliases.push(env.DB.prepare(
+          'INSERT OR IGNORE INTO comment_aliases(post_id,voter,ordinal) SELECT ?,?,COALESCE(MAX(ordinal),0)+1 FROM comment_aliases WHERE post_id=?',
+        ).bind(parent.id, voter, parent.id));
         stmt = env.DB.prepare(
-          'INSERT INTO comments(id,post_id,author,body,salt,password_hash,created_at,parent_id,pin_length) VALUES (?,?,?,?,?,?,?,?,6)',
-        ).bind(
-          id,
-          parent.id,
-          author,
-          content,
-          salt,
-          pwd,
-          created,
-          await parentComment(env, parent.id, data.parent_id),
-        );
+          "INSERT INTO comments(id,post_id,author,body,salt,password_hash,created_at,parent_id,pin_length) VALUES (?,?,COALESCE(NULLIF(?,''),(SELECT '익명'||ordinal FROM comment_aliases WHERE post_id=? AND voter=?)),?,?,?,?,?,6)",
+        ).bind(id, parent.id, author, parent.id, voter, content, salt, pwd, created, parentId);
       }
       await env.DB.batch([
+        ...aliases,
         stmt,
         ...(path === '/posts' ? await imageChanges(env, id, data.images) : []),
         await sourceLog(env, id, path === '/posts' ? 'post' : 'comment', ip, hash),

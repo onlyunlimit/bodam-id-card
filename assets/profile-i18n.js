@@ -602,7 +602,7 @@ const profiles = {
   ],
 };
 export function installProfileTranslations() {
-  characters.forEach((c) =>
+  characters.filter((c) => profiles[c.id]).forEach((c) =>
     ['role', 'ability', 'bio', 'appearance', 'notes', 'location'].forEach((field, i) =>
       registerCopy(c[field], ...profiles[c.id].map((lang) => lang[i])),
     ),

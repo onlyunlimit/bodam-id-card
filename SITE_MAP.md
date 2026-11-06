@@ -1,6 +1,6 @@
 # 홈페이지 구성 안내
 
-> 확인일: **2026-10-05** · 기준: 현재 저장소의 라우터, 페이지 파일, 공개 빌드 목록.
+> 확인일: **2026-11-07** · 기준: 현재 저장소의 라우터, 페이지 파일, 공개 빌드 목록.
 > 홈페이지: https://onlyunlimit.github.io/ · 최근 변경: [CHANGELOG.md](CHANGELOG.md)
 >
 > 이 문서는 **현재 코드 구성**을 설명합니다. 배포 여부는 변경 이력의 배포 상태에서 별도로 확인합니다.
@@ -13,7 +13,7 @@
 / 또는 /index.html — SGIA 접속 대기실
 └─ /portal.html — SGIA 공통 포털
    ├─ 통합 관제 → 같은 페이지 아래에 각성관 층별 안내
-   ├─ 조직·부서 → 오리진 / 비콘 / 실드
+   ├─ 조직·부서 → 블랙잭 / 오리진 / 비콘 / 실드
    ├─ 엔터테인먼트 → 엘리시안·럭키트릭 / 헌터윈드·옵시더스
    ├─ 사건 기록실 → 같은 페이지 아래에 ORPÉ 위협 정보
    ├─ 세계관 안내서
@@ -44,10 +44,11 @@
 | [접속 대기실](https://onlyunlimit.github.io/index.html) | `/`, `/index.html` | 회전 게이트, 접속 연출, 접속 효과음, 언어·모션 설정. 접속 버튼으로 통합 관제 이동 | 공개 |
 | [통합 관제](https://onlyunlimit.github.io/portal.html) | `/portal.html` | 세계 지도와 미종결 사건 핀·구역, 위험 등급·게이트 집계, 부서 운용 상태, 서울 날씨, 한국 시각, 브리핑, 제작 도구 링크 | 공개 중심 |
 | [각성관 층별 안내](https://onlyunlimit.github.io/portal.html#headquarters) | `/portal.html#headquarters` | 통합 관제 아래 구역. 지상·지하 총 18개 층 선택, 실내 계획도, 방별 설명, 관련 부서 이동 | 일부 시설 직원 화면에서 열람 |
-| [조직·부서](https://onlyunlimit.github.io/departments.html) | `/departments.html` | 오리진·비콘·실드 3개 부서의 소개 및 상세 페이지 진입 | 공개 |
+| [조직·부서](https://onlyunlimit.github.io/departments.html) | `/departments.html` | 블랙잭·오리진·비콘·실드 4개 부서, 각각 다른 재질·구조·팔레트로 상세 페이지 진입 | 공개 |
 | [오리진](https://onlyunlimit.github.io/origin.html) | `/origin.html` | 부서 소개, 시간표, 브리핑, 소속 인물 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
 | [비콘](https://onlyunlimit.github.io/beacon.html) | `/beacon.html` | 추적관리팀 소개, 시간표, 브리핑, 소속 인물 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
 | [실드](https://onlyunlimit.github.io/shield.html) | `/shield.html` | 부서 소개, 시간표, 브리핑, 소속 인물 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
+| [블랙잭](https://onlyunlimit.github.io/blackjack.html) | `/blackjack.html` | 시소 참고의 올리브 금속 TV·크림 카드, 포커·딜러·리어·판덴·시소 5명, 작전 일정 안내·브리핑·메신저 | 공개 카드 / 직원 상세 |
 | [엔터테인먼트](https://onlyunlimit.github.io/entertainment.html) | `/entertainment.html` | 그룹별 입체 소개 패널 2개. 각 기획사 페이지로 이동 | 공개 |
 | [엘리시안·럭키트릭](https://onlyunlimit.github.io/elysian.html) | `/elysian.html` | 핑크 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
 | [헌터윈드·옵시더스](https://onlyunlimit.github.io/hunterwind.html) | `/hunterwind.html` | 금속·어두운 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
@@ -227,3 +228,17 @@
 6. **이미지·디자인 자산 출처는?** → [docs/ASSETS.md](docs/ASSETS.md).
 
 새 페이지·별칭·저장 방식이 바뀌면 이 문서와 변경 이력을 함께 수정합니다.
+
+## 2026-11-06 프로필·테마 연결
+
+- 조직 화면은 `assets/units.js` + `assets/team-design.js`, 팀별 재질·레이아웃·배경은 `assets/team-themes.css`. 블랙잭/오리진/비콘/실드는 독립 테마이며 각자 라이트/다크 팔레트를 갖습니다. 다른 경로로 이동하면 해당 팀 테마가 해제됩니다.
+- 기획사 대문은 인물 이미지 페이드, 이전/다음·일시 정지. 모션 줄이기 및 모션 OFF에서는 자동 전환을 정지하며 경로 이탈 때 타이머를 정리합니다.
+- `community.html?board=staff` 일반 멤버 목록은 27명(아티스트 8명 포함, ORPÉ 제외)을 검색하고 프로필/개인 피드를 엽니다. `?member=siso`처럼 직접 진입 가능. 인물 상세의 ‘커뮤니티 프로필 · 피드’ 링크도 연결됩니다.
+- 프로필·피드는 서버 D1에서 조회합니다. `GET /members/:id`, `GET /members/:id/feed`는 해당 멤버의 숨김/삭제되지 않은 글만 반환합니다. 프로필 편집은 관리자 화면에서 즉시 저장됩니다.
+- 관리자 멤버 스튜디오는 직원과 아티스트 모두 선택 가능. 글/댓글의 ‘좋아요 수 설정’은 인증된 서버 `PATCH /admin/posts/:id/likes`, `/admin/comments/:id/likes`에서 처리하고 관리 로그에 기록합니다.
+- 게시판 미리보기는 이미지 개수만 표시하고 실제 첨부는 상세에서 원본 비율로 표시하는 기존 동작을 유지합니다.
+
+### 2026-11-07 작성 옵션
+
+- 팬/사내 게시판 닉네임은 선택 입력. 미입력 게시글은 `ㅇㅇ`, 댓글/답글은 게시글별 동일 IP에 같은 익명 번호를 D1에 저장합니다. 기존 닉네임은 유지합니다.
+- 관리자 멤버 글 작성·수정에는 한국 시간 기준 작성 시각 입력이 있습니다. 공개 글 정렬에 반영하며 실제 감사 시각은 유지합니다. `backend/admin-composer.js`, `backend/fan.js`, `backend/worker.js`, `0009_comment_aliases.sql`이 담당합니다.

@@ -34,7 +34,7 @@ test('Internal navigation preserves the same playing BGM and records actions thr
   await expect(page.locator('.activity-lines')).toContainText('비콘');
   await page.keyboard.press('Escape');
   await page.goBack();
-  await expect(page.locator('.directory-card')).toHaveCount(3);
+  await expect(page.locator('.directory-card')).toHaveCount(4);
   await page.waitForTimeout(1100);
   expect(errors).toEqual([]);
   await page.locator('#sound-toggle').click();
