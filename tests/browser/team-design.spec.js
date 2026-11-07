@@ -36,6 +36,7 @@ test('Entertainment image controls change slides and reduced motion does not aut
 test('Artist introduction logos occupy the centered navigation slot at desktop and mobile widths',async({page})=>{
  for(const route of ['elysian','hunterwind']){
   await page.goto('/'+route+'.html');
+  await expect(page.locator('.agency-hero h1')).toHaveText(route==='elysian'?'ELYSIAN':'HUNTERWIND');
   await expect(page.locator('.agency-nav-logo')).toBeVisible();await expect(page.locator('.agency-hero .agency-wordmark')).toHaveCount(0);
   for(const width of [1440,320]){
    await page.setViewportSize({width,height:900});

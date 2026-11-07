@@ -392,7 +392,7 @@ test('Nickname is optional when submitting posts, comments and replies',async({p
  expect(f.comments[1].parent_id).toBe(f.comments[0].id);
 });
 
-test('Fan communities keep their own palette across mode changes and remove group logos',async({page})=>{
+test('Fan communities keep their own palette across mode changes and retain group logos',async({page})=>{
  await mock(page);
  const contrast=locator=>locator.evaluate(el=>{
   const c=getComputedStyle(el),rgb=s=>s.match(/[\d.]+/g).slice(0,3).map(Number);
@@ -400,7 +400,7 @@ test('Fan communities keep their own palette across mode changes and remove grou
   const values=[lum(rgb(c.color)),lum(rgb(c.backgroundColor))].sort((a,b)=>a-b);return (values[1]+.05)/(values[0]+.05);
  });
  for(const board of ['lucky','obsidus']){
-  await page.goto('/community.html?board='+board);await expect(page.locator('.fan-hero-art')).toHaveCount(0);
+  await page.goto('/community.html?board='+board);await expect(page.locator('.fan-hero-art')).toBeVisible();
   const sample=()=>page.evaluate(()=>{const selectors=['body','.fan-feed','#feed-title','#write-post','.member-panel'];return selectors.map(s=>{const c=getComputedStyle(document.querySelector(s));return [c.color,c.backgroundColor];});});
   await expect(page.locator('body')).toHaveCSS('background-color',board==='lucky'?'rgb(250, 243, 247)':'rgb(17, 18, 21)');
   const before=await sample();await page.locator('#theme-toggle').click();await expect.poll(sample).toEqual(before);

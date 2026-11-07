@@ -94,7 +94,7 @@
 | 금속 숫자 키패드·주파수 수신기 | 기록실 | [hardware.js](assets/hardware.js) | [game-ui.css](assets/game-ui.css), [forensic.css](assets/forensic.css): `.keypad-device`, `.hardware-keys`, `.receiver`, `.receiver-dial` |
 | 에이지·증거 문서·동선 추적 | 기록실 잠금 해제 후 | [monitor.js](assets/monitor.js): `renderOrpe`, [evidence.js](assets/evidence.js) | [forensic.css](assets/forensic.css): `.classified-board`, `.evidence-reader`, `.tracking-section` |
 | 세계관 안내서 | `/manual.html` | [guide.js](assets/guide.js), [manual-visuals.js](assets/manual-visuals.js) | [game-ui.css](assets/game-ui.css): `.manual-index`, `.guide-entry`, `.lore-diagram` |
-| 커뮤니티 상단·피드 (그룹 로고 없음) | `/community.html?board=lucky` 또는 `obsidus` | [community.js](assets/community.js) | [fan-community.css](assets/fan-community.css): `.fan-hero`, `.fan-feed-tabs`, `.fan-post-card`; 최종 색상은 `service-design.css` |
+| 커뮤니티 상단·그룹 로고·피드 | `/community.html?board=lucky` 또는 `obsidus` | [community.js](assets/community.js) | [fan-community.css](assets/fan-community.css): `.fan-hero`, `.fan-feed-tabs`, `.fan-post-card`; 최종 색상은 `service-design.css` |
 | 사내 라운지 | `/community.html?board=staff` | [community.js](assets/community.js), [staff-board.js](assets/staff-board.js) | [fan-community.css](assets/fan-community.css): `.staff`, `.staff-masthead`, `.staff-channel-nav` |
 | 글쓰기·첨부·댓글·태그 | 커뮤니티 팝업 | [community.js](assets/community.js), [community-media.js](assets/community-media.js), [staff-board.js](assets/staff-board.js) | [fan-community.css](assets/fan-community.css): `.upload-field`, `.upload-image`, `.attachment-remove`, `.comment-row`, `.selected-hashtag` |
 | 관리자 화면 | API의 `/admin` | [backend/admin.js](backend/admin.js), [backend/admin-composer.js](backend/admin-composer.js) | `admin.js` 안 `<style>`; 홈페이지 CSS와 별개. 수정 후 Worker 배포 필요 |
@@ -218,6 +218,6 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 ### 테마·로고·공개 이름 (2026-11-07)
 
 - 팬 커뮤니티는 모드와 무관하게 럭키트릭 밝은 핑크 / 옵시더스 블랙·실버·골드 고정. `service-design.css`의 `html[data-theme][data-community-theme=...]`가 최종 팔레트이며, 이탈하면 저장된 사이트 모드를 복원합니다. 사내 게시판은 사이트 모드를 따릅니다.
-- 커뮤니티 로고 마크업은 제거했습니다. 소개 페이지 로고는 `agencies.js`의 `.agency-nav-logo`, 중앙 정렬·크기는 `service-design.css` 맨 아래 규칙입니다. 히어로 아래 중복 로고는 없습니다.
+- 커뮤니티의 기존 `.fan-hero-art` 로고는 유지합니다. 크기는 `service-design.css`의 해당 선택자에서 조절합니다. 소개 페이지 로고는 `agencies.js`의 `.agency-nav-logo`, 중앙 정렬·크기는 `service-design.css` 맨 아래 규칙입니다. 소개 페이지의 히어로 아래 중복 로고는 없으며 큰 제목은 ELYSIAN/HUNTERWIND 영어 표기입니다.
 - 고정 재질의 인물 카드에는 카드 내부의 `--text`·`--muted`를 사용합니다. 페이지 모드의 색을 직접 물려주면 어두운 카드 위에 어두운 글씨가 생길 수 있습니다.
 - 공개 인물 이름·사진 캡션·고정 인물 태그에는 코드네임만 사용합니다. 본명이 비밀인 인물의 본명을 공개 데이터에 덧붙이지 마세요. 커뮤니티 이름은 D1 `members`에 별도 저장됩니다.
