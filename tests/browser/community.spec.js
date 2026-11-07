@@ -251,12 +251,12 @@ test('Community palette covers the shell and restores the saved theme on navigat
   }));
   await page.locator('.site-nav a[href="community.html"]').click();
   await expect(page.locator('html')).toHaveAttribute('data-community-theme', 'lucky');
-  await expect(page.locator('body')).toHaveCSS('background-color', base.theme === 'light' ? 'rgb(250, 243, 247)' : 'rgb(28, 19, 27)');
-  await expect(page.locator('.site-footer')).toHaveCSS('background-color', base.theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(43, 32, 42)');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(250, 243, 247)');
+  await expect(page.locator('.site-footer')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
   await page.locator('.community-switch a[href$="board=obsidus"]').click();
   await expect(page.locator('html')).toHaveAttribute('data-community-theme', 'obsidus');
-  await expect(page.locator('body')).toHaveCSS('background-color', base.theme === 'light' ? 'rgb(238, 238, 240)' : 'rgb(17, 18, 21)');
-  await expect(page.locator('.site-nav')).toHaveCSS('background-color', base.theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(29, 31, 36)');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(17, 18, 21)');
+  await expect(page.locator('.site-nav')).toHaveCSS('background-color', 'rgb(29, 31, 36)');
   expect(await page.locator('html').getAttribute('data-theme')).toBe(base.theme);
   await page.locator('.site-nav a[href="departments.html"]').click();
   await expect(page.locator('html')).not.toHaveAttribute('data-community-theme');
@@ -390,4 +390,26 @@ test('Nickname is optional when submitting posts, comments and replies',async({p
   await expect(page.locator('.comment-row')).toHaveCount(i+1);expect(f.comments[i].author).toBe('');
  }
  expect(f.comments[1].parent_id).toBe(f.comments[0].id);
+});
+
+test('Fan communities keep their own palette across mode changes and remove group logos',async({page})=>{
+ await mock(page);
+ const contrast=locator=>locator.evaluate(el=>{
+  const c=getComputedStyle(el),rgb=s=>s.match(/[\d.]+/g).slice(0,3).map(Number);
+  const lum=a=>a.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0);
+  const values=[lum(rgb(c.color)),lum(rgb(c.backgroundColor))].sort((a,b)=>a-b);return (values[1]+.05)/(values[0]+.05);
+ });
+ for(const board of ['lucky','obsidus']){
+  await page.goto('/community.html?board='+board);await expect(page.locator('.fan-hero-art')).toHaveCount(0);
+  const sample=()=>page.evaluate(()=>{const selectors=['body','.fan-feed','#feed-title','#write-post','.member-panel'];return selectors.map(s=>{const c=getComputedStyle(document.querySelector(s));return [c.color,c.backgroundColor];});});
+  await expect(page.locator('body')).toHaveCSS('background-color',board==='lucky'?'rgb(250, 243, 247)':'rgb(17, 18, 21)');
+  const before=await sample();await page.locator('#theme-toggle').click();await expect.poll(sample).toEqual(before);
+  await page.locator('#write-post').click();
+  const colors=await page.locator('#document-dialog').evaluate(el=>{const s=getComputedStyle(el);return {ink:s.color,paper:s.backgroundColor};});
+  expect(colors.ink).not.toBe(colors.paper);
+  expect(await contrast(page.locator('#post-form .primary'))).toBeGreaterThanOrEqual(4.5);
+  expect(await contrast(page.locator('#post-form [name=title]'))).toBeGreaterThanOrEqual(4.5);
+  if(board==='lucky')expect(colors.paper).toBe('rgb(255, 255, 255)');else expect(colors.paper).toBe('rgb(29, 31, 36)');
+  await page.keyboard.press('Escape');
+ }
 });

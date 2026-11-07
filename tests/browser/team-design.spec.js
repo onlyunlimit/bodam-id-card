@@ -32,3 +32,15 @@ test('Entertainment image controls change slides and reduced motion does not aut
  await page.waitForTimeout(6700);await expect(page.locator('#spotlight-count')).toHaveText('02 / 04');
  await page.locator('#spotlight-prev').click();await expect(page.locator('#spotlight-count')).toHaveText('01 / 04');
 });
+
+test('Artist introduction logos occupy the centered navigation slot at desktop and mobile widths',async({page})=>{
+ for(const route of ['elysian','hunterwind']){
+  await page.goto('/'+route+'.html');
+  await expect(page.locator('.agency-nav-logo')).toBeVisible();await expect(page.locator('.agency-hero .agency-wordmark')).toHaveCount(0);
+  for(const width of [1440,320]){
+   await page.setViewportSize({width,height:900});
+   const position=await page.locator('.agency-nav-logo').evaluate(el=>{const a=el.getBoundingClientRect(),b=el.parentElement.getBoundingClientRect();return Math.abs(a.x+a.width/2-b.x-b.width/2);});expect(position).toBeLessThan(2);
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  }
+ }
+});

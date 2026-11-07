@@ -4,7 +4,7 @@ export const characters = [
     "id": "ibex",
     "team": "origin",
     "code": "IBEX",
-    "name": "벡스 · 진우빈",
+    "name": "벡스",
     "rank": "ERROR",
     "age": 29,
     "role": "팀장 / 특수 추적",
@@ -21,7 +21,7 @@ export const characters = [
         "url": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/925a54a2-f0be-41a7-aae6-4c9ac9cb7be6?v=2d7273"
       },
       {
-        "label": "벡스 (과거 진우빈 시절)",
+        "label": "벡스 (과거 기록)",
         "url": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/1a868acd-f3f0-4acc-9678-691beed60ce7?v=07bfa6"
       }
     ]
@@ -30,7 +30,7 @@ export const characters = [
     "id": "slun",
     "team": "origin",
     "code": "SLUN",
-    "name": "슬런 · 이안 키스",
+    "name": "슬런",
     "rank": "ERROR",
     "age": 29,
     "role": "특별관리 / 침식자",
@@ -47,7 +47,7 @@ export const characters = [
         "url": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/9d6c0284-1f5d-4b84-a05f-17ba4681ee43?v=b08b4b"
       },
       {
-        "label": "슬런 (과거 게이트 사건 전 이안키스 시절)",
+        "label": "슬런 (과거 게이트 사건 전)",
         "url": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/9229629d-de46-4cd4-be99-423d9cbc7ae8?v=6466a2"
       }
     ]
@@ -82,7 +82,7 @@ export const characters = [
     "id": "bug",
     "team": "origin",
     "code": "BUG",
-    "name": "버그 · 박하늘",
+    "name": "버그",
     "rank": "ERROR",
     "age": 21,
     "role": "디지털 간섭 / 통과자",
@@ -598,7 +598,7 @@ export const characters = [
   "id": "poker",
   "team": "blackjack",
   "code": "POKER",
-  "name": "포커 · 강준겸",
+  "name": "포커",
   "rank": "SS+",
   "age": 35,
   "role": "팀장 / 데크 소환",
@@ -611,7 +611,7 @@ export const characters = [
   "notes": "대테러 대응과 고위험 현장의 돌입·회수 임무를 수행한다.",
   "gallery": [
     {
-      "label": "포커 · 강준겸",
+      "label": "포커",
       "url": "https://cdn.caveduck.io/cdn-cgi/image/anim=true,dpr=2,f=auto,w=500/charim-standard/c8574255-991d-416b-bf99-2dfac0c30357?v=e82871"
     }
   ]

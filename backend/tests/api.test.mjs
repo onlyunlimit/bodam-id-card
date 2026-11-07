@@ -28,6 +28,7 @@ async function fixture() {
   sql.exec(readFileSync(new URL('../migrations/0007_staff_profiles_likes.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
+  sql.exec(readFileSync(new URL('../migrations/0010_public_codenames.sql', import.meta.url), 'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -646,4 +647,12 @@ test('Only authenticated admin-written posts accept custom creation time, withou
  const visitor=await req('/posts','POST',post);
  assert.equal((await req('/admin/posts/'+visitor.data.id,'PATCH',patch,options)).status,403);
  assert.ok(sql.prepare("SELECT created_at FROM audit WHERE action='ARTIST_PUBLISH' AND target=?").get(id).created_at>stamp);
+});
+
+test('Public member directory and profiles use only codenames',async()=>{
+ const {req}=await fixture();const members=(await req('/members?board=staff')).data.members;
+ for(const [id,name] of [['ibex','벡스'],['slun','슬런'],['bug','버그'],['poker','포커']]){
+  assert.equal(members.find(m=>m.id===id).name,name);
+  assert.equal((await req('/members/'+id)).data.member.name,name);
+ }
 });

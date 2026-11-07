@@ -3,10 +3,10 @@ body[data-unit=blackjack]{--bg:#0b100b;--surface:#1c261b;--surface2:#2d3c29;--te
 body[data-unit=origin]{--bg:#100d1d;--surface:#21192f;--surface2:#312542;--text:#eee6ff;--muted:#b8a9cb;--accent:#c3a0f6;--line:#514260;--field:#1b1428;--control:#3b2d4d;background:radial-gradient(ellipse at 85% 30%,#54357d44,transparent 60%),var(--bg)}
 body[data-unit=beacon]{--bg:#101d27;--surface:#1c2b36;--surface2:#2c3d49;--text:#e5eef2;--muted:#a1b6c4;--accent:#98cee3;--line:#465b69;--field:#172630;--control:#304552;background:var(--bg)}
 body[data-unit=shield]{--bg:#191a18;--surface:#292b25;--surface2:#3a3c32;--text:#ede9d9;--muted:#bcb59e;--accent:#dabb76;--line:#5a5748;--field:#22241e;--control:#414133;background:linear-gradient(120deg,#39322135,transparent 70%),var(--bg)}
-html[data-theme=light] body[data-unit=blackjack]{--bg:#d9dfcc;--surface:#eef0e2;--surface2:#cbd4b9;--text:#25311f;--muted:#58674b;--accent:#49672e;--line:#a4b28f;--field:#f8f9ef;--control:#d4ddc4}
-html[data-theme=light] body[data-unit=origin]{--bg:#e3deec;--surface:#f3eef8;--surface2:#d9cde7;--text:#2c213b;--muted:#746183;--accent:#774ba8;--line:#bdadce;--field:#fbf8ff;--control:#e5daef}
-html[data-theme=light] body[data-unit=beacon]{--bg:#dfe7eb;--surface:#f6f8f8;--surface2:#d4e0e7;--text:#233848;--muted:#5d7786;--accent:#2d718d;--line:#aec4d0;--field:#fff;--control:#dce8ee}
-html[data-theme=light] body[data-unit=shield]{--bg:#e1ddcf;--surface:#f0eee5;--surface2:#d9d2bf;--text:#353426;--muted:#79715a;--accent:#8b6c29;--line:#bcb396;--field:#fffdf4;--control:#e2dcc9}
+:root[data-theme=light] body[data-unit=blackjack]{--bg:#d9dfcc;--surface:#eef0e2;--surface2:#cbd4b9;--text:#25311f;--muted:#58674b;--accent:#49672e;--line:#a4b28f;--field:#f8f9ef;--control:#d4ddc4}
+:root[data-theme=light] body[data-unit=origin]{--bg:#e3deec;--surface:#f3eef8;--surface2:#d9cde7;--text:#2c213b;--muted:#746183;--accent:#774ba8;--line:#bdadce;--field:#fbf8ff;--control:#e5daef}
+:root[data-theme=light] body[data-unit=beacon]{--bg:#dfe7eb;--surface:#f6f8f8;--surface2:#d4e0e7;--text:#233848;--muted:#5d7786;--accent:#2d718d;--line:#aec4d0;--field:#fff;--control:#dce8ee}
+:root[data-theme=light] body[data-unit=shield]{--bg:#e1ddcf;--surface:#f0eee5;--surface2:#d9d2bf;--text:#353426;--muted:#79715a;--accent:#8b6c29;--line:#bcb396;--field:#fffdf4;--control:#e2dcc9}
 body:is([data-unit=blackjack],[data-unit=origin],[data-unit=beacon],[data-unit=shield]) :is(.site-header,.site-nav,.site-footer,.agency-strip){background:var(--surface);color:var(--text);border-color:var(--line)}
 body .team-hero{position:relative;isolation:isolate;min-height:420px;padding:40px!important;border:1px solid var(--line);color:var(--text);background:var(--surface)!important}
 .team-hero h2{font-size:clamp(44px,6.5vw,96px);line-height:.95;letter-spacing:-.045em;margin:22px 0}
@@ -104,3 +104,23 @@ body .team-hero>.shield-hero-top,body .team-hero>.shield-hero-bottom{max-width:n
 body .team-hero.beacon-hero{border-left-color:#628a9f!important}
 body .team-hero>.field-tv{max-width:530px}
 body .team-hero>.origin-aperture{max-width:none}
+
+/* Fixed materials own their palette; mode changes must not invert their ink. */
+body .blackjack-hero{--text:#e6e5ce;--muted:#b7c2a4;--accent:#b4cd8d}
+body .origin-hero{--text:#eee6ff;--muted:#c1afcf;--accent:#d0b4f3}
+body .beacon-hero{--text:#233849;--muted:#405a6c;--accent:#2d617e;background-color:#e8eef1!important}
+body .shield-hero{--text:#e9e3cd;--muted:#cfc9ad;--accent:#e2c982;background-color:#22291f!important}
+body .shield-hero-bottom{background:#262e21;color:#efe4b8;border-left:8px solid #c1a65c}
+body .person-card[data-team=beacon] .card-face{--muted:#425f72}
+body .person-card[data-team=beacon] :is(.id-caption,.id-card-foot){--muted:#425f72;color:#425f72}
+body .person-card[data-team=blackjack] .card-face{--muted:#485a39}
+body .directory-grid>.directory-card[data-team=beacon]{--muted:#405e73}
+body .directory-grid>.directory-card[data-team=shield] .directory-window-label{background:#343e29;color:#fff4d2}
+:root[data-theme=light] body[data-unit=beacon]{--muted:#435f70}
+:root[data-theme=light] body[data-unit=shield]{--muted:#655d47}
+:root[data-theme=light] body[data-unit=origin]{--muted:#675474}
+
+body .directory-grid>.directory-card[data-team=blackjack]{--accent:#e0edbf}
+body .directory-grid>.directory-card[data-team=origin]{--accent:#e2c6fb}
+body .directory-grid>.directory-card[data-team=beacon]{--accent:#315b76}
+body .directory-grid>.directory-card[data-team=shield]{--accent:#efdc9e}

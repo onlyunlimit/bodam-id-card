@@ -33,11 +33,11 @@ export const staffTags = [
   },
   {
     id: 'member:ibex',
-    label: '인물 · 벡스 · 진우빈',
+    label: '인물 · 벡스',
   },
   {
     id: 'member:slun',
-    label: '인물 · 슬런 · 이안 키스',
+    label: '인물 · 슬런',
   },
   {
     id: 'member:jaeshin',
@@ -45,7 +45,7 @@ export const staffTags = [
   },
   {
     id: 'member:bug',
-    label: '인물 · 버그 · 박하늘',
+    label: '인물 · 버그',
   },
   {
     id: 'member:binjo',
