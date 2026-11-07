@@ -3,10 +3,17 @@
 날짜는 한국 시각 기준입니다. 최신 작업을 위에 기록합니다.
 **개발 변경 이력**이며, 홈페이지의 ‘접속 로그’와는 다릅니다. 작성 규칙은 [AGENTS.md](AGENTS.md), 현재 전체 구조는 [SITE_MAP.md](SITE_MAP.md)를 참고하세요.
 
+## 2026-11-07 — Pages 재배포·최종 공개 화면 확인
+
+- **상태:** 홈페이지 공개 배포 확인 완료. 코드 변경 없이 대기 중인 배포를 복구하고 이력 갱신.
+- **배포:** 동일 소스 [98d09a3](https://github.com/onlyunlimit/bodam-id-card/commit/98d09a3bdf31d810b58ff1b75b13ac0c1880f553) → 공개 커밋 [f19c886](https://github.com/onlyunlimit/onlyunlimit.github.io/commit/f19c886f8a632bf787a5dadcd195e7dbb6b294bd). 기존 실패 단계 재시도는 queued 상태가 지속되어 Pages 빌드를 새로 요청. [새 실행](https://github.com/onlyunlimit/onlyunlimit.github.io/actions/runs/42367171553)의 build/deploy/report 단계 모두 성공.
+- **확인:** 공개 릴리스 마커가 최종 소스와 일치하며 주요 JS/CSS 6개 SHA-256 일치. 공개 모바일 브라우저에서 두 커뮤니티 기존 로고·모드 전환과 무관한 고정 팔레트, 소개 페이지 상단 중앙 로고·ELYSIAN/HUNTERWIND 제목·아래 중복 로고 없음, 코드네임 프로필 확인. 가로 넘침·페이지 실행 오류 없음. 운영 글 작성 없이 읽기/화면 조작만 수행.
+- **문서 검사:** `git diff --check`, 기록한 로컬 문서 경로 확인. 구현 변경이 없어 기존 단위/전체 브라우저 검사는 반복하지 않음. 참고 자료·비공개 파일 배포 없음.
+
 ## 2026-11-07 — 커뮤니티 고정 테마·명도 대비·소개 로고·코드네임
 
-- **상태:** 로컬 구현·문서 작성·검사·서버/DB 배포 완료. 홈페이지 최종 배포는 GitHub Pages 동기화 시간 초과 후 재실행 대기 중 — 배포 미확인.
-- **배포 상태:** 최종 소스 [98d09a3](https://github.com/onlyunlimit/bodam-id-card/commit/98d09a3bdf31d810b58ff1b75b13ac0c1880f553)와 공개 저장소 [f19c886](https://github.com/onlyunlimit/onlyunlimit.github.io/commit/f19c886f8a632bf787a5dadcd195e7dbb6b294bd) 푸시 완료. [Pages 실행](https://github.com/onlyunlimit/onlyunlimit.github.io/actions/runs/42361428764)의 build 단계는 성공했으나 deploy가 `syncing_files`에서 시간 초과. 실패 단계 재실행을 요청했으며 마지막 조회는 queued. 공개 릴리스 마커는 앞선 `e2bc8d81ba392c6572c129c5fffb92013711f890`이므로 최종 커뮤니티 로고 복구·영문 제목 반영은 아직 확인하지 못함.
+- **상태:** 로컬 구현·문서 작성·검사·서버/DB·홈페이지 공개 배포 확인 완료. Pages 새 실행으로 시간 초과 복구.
+- **배포:** 최종 소스 `98d09a3` → 공개 저장소 `f19c886` 반영 확인. 최초 Pages 실행은 파일 동기화 시간 초과, 새 실행 `42367171553` 성공. 위 재배포 확인 항목 참고.
 - **커뮤니티:** 럭키트릭/옵시더스 상단 그룹 로고는 사용자 최종 요청에 따라 직전 디자인으로 복구. 럭키트릭 밝은 핑크, 옵시더스 블랙·실버·골드를 라이트/다크 선택과 무관하게 유지. 다른 경로는 저장된 모드 복원. 사내 게시판은 모드 전환 유지.
 - **대비:** 남아 있던 고정 팬 색상 변수를 현재 패널 색으로 연결. 제목·버튼·입력/placeholder·모달 닫기·메신저·태그·사내 채널의 대비 보정. 팀 카드의 고정 재질과 내부 글자 색을 연결하고 팀 페이지의 직원 라이트모드 우선순위 수정. 어두운 사건 기록물에는 밝은 글씨 유지.
 - **소개 페이지:** 엘리시안/헌터윈드 상단 중앙 텍스트 자리에 각 그룹 로고 배치, 히어로 아래 중복 제거, 큰 제목은 ELYSIAN/HUNTERWIND 영어 표기. 데스크톱/320px 중앙 정렬 확인.
