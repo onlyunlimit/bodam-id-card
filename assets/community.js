@@ -31,6 +31,8 @@ import { serviceConfig } from './service-config.js';
   ['글쓰기 ＋', 'Write ＋', '投稿 ＋', '发帖 ＋'],
   ['팬 글쓰기 ＋', 'Write as a fan ＋', 'ファンとして投稿 ＋', '发布粉丝帖 ＋'],
   ['답글', 'Reply', '返信', '回复'],
+  ['댓글 작성', 'Write a comment', 'コメントを書く', '写评论'],
+  ['작성 접기', 'Collapse editor', '入力欄を閉じる', '收起编辑框'],
   ['사진 첨부 · 최대 2장', 'Attach up to 2 photos', '写真を添付・最大2枚', '添加照片 · 最多2张'],
   ['사진 준비 완료', 'Photos ready', '写真の準備完了', '照片已就绪'],
   ['사진을 준비하고 있습니다…', 'Preparing photos…', '写真を準備中…', '正在处理照片…'],
@@ -493,9 +495,25 @@ export function renderCommunity() {
         .flatMap((c) => [c, ...data.comments.filter((r) => r.parent_id === c.id)]);
       communityModal(
         p.title,
-        `<div class="fan-post-detail" data-community="${board}"><div class="fan-author">${avatar(p.member?.avatar_url, p.member?.name || p.author)}<span data-user-content><b>${esc(p.member?.name || p.author)}</b>${p.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(p.created_at)}${p.updated_at ? ' · 수정됨' : ''}</time></span></div>${!fan ? tagsMarkup(p.tags) : ''}<div class="post-body" data-user-content>${esc(p.body)}</div>${photos(p.images)}<div class="post-controls"><button id="post-like" aria-pressed="${!!p.liked}">♡ <span>좋아요</span> <b>${p.likes || 0}</b></button>${!p.member_id ? '<button id="post-edit">수정</button><button id="post-delete">삭제</button>' : ''}<a href="${adminLink}&post=${encodeURIComponent(id)}" target="_blank" rel="noopener">관리자 관리 ↗</a></div><h3>댓글 ${data.comments.length}</h3><div class="comments">${ordered.map(commentMarkup).join('')}</div><form id="comment-form" class="board-form comment-form"><div id="reply-target" hidden><span></span><button id="reply-cancel" type="button">취소 ×</button></div><div class="form-row"><label>닉네임 (선택)<input name="author" maxlength="24" placeholder="비우면 익명 번호 자동 지정"></label>${pinInput()}</div><label>댓글<textarea name="body" maxlength="1000" required></textarea></label>${consent()}${captchaMarkup()}<button type="submit" class="primary">댓글 등록</button></form></div>`,
+        `<div class="fan-post-detail" data-community="${board}"><div class="fan-author">${avatar(p.member?.avatar_url, p.member?.name || p.author)}<span data-user-content><b>${esc(p.member?.name || p.author)}</b>${p.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(p.created_at)}${p.updated_at ? ' · 수정됨' : ''}</time></span></div>${!fan ? tagsMarkup(p.tags) : ''}<div class="post-body" data-user-content>${esc(p.body)}</div>${photos(p.images)}<div class="post-controls"><button id="post-like" aria-pressed="${!!p.liked}">♡ <span>좋아요</span> <b>${p.likes || 0}</b></button>${!p.member_id ? '<button id="post-edit">수정</button><button id="post-delete">삭제</button>' : ''}<a href="${adminLink}&post=${encodeURIComponent(id)}" target="_blank" rel="noopener">관리자 관리 ↗</a></div><h3>댓글 ${data.comments.length}</h3><div class="comments">${ordered.map(commentMarkup).join('')}</div><button id="comment-compose-toggle" type="button" aria-expanded="false" aria-controls="comment-compose-panel">댓글 작성</button><div id="comment-compose-panel" hidden><form id="comment-form" class="board-form comment-form"><div id="reply-target" hidden><span></span><button id="reply-cancel" type="button">취소 ×</button></div><div class="form-row"><label>닉네임 (선택)<input name="author" maxlength="24" placeholder="비우면 익명 번호 자동 지정"></label>${pinInput()}</div><label>댓글<textarea name="body" maxlength="1000" required></textarea></label>${consent()}${captchaMarkup()}<button type="submit" class="primary">댓글 등록</button></form></div></div>`,
         'community-post',
       );
+      const composePanel = $('#comment-compose-panel');
+      const composeToggle = $('#comment-compose-toggle');
+      let commentFormReady = false;
+      const setComposeOpen = (open) => {
+        composePanel.hidden = !open;
+        composeToggle.setAttribute('aria-expanded', String(open));
+        composeToggle.textContent = open ? '작성 접기' : '댓글 작성';
+        if (open) {
+          if (!commentFormReady) {
+            commentFormReady = true;
+            prepareCommentForm();
+          }
+          $('#comment-form textarea').focus();
+        }
+      };
+      composeToggle.onclick = () => setComposeOpen(composePanel.hidden);
       $('#post-like').onclick = (e) => like(e.currentTarget, '/posts/' + id + '/like');
       if ($('#post-edit')) $('#post-edit').onclick = () => edit('posts', p, id, false);
       if ($('#post-delete')) $('#post-delete').onclick = () => edit('posts', p, id, true);
@@ -529,14 +547,14 @@ export function renderCommunity() {
             replyTo = c.parent_id || c.id;
             $('#reply-target').hidden = false;
             $('#reply-target span').textContent = (c.member_name || c.author) + '에게 답글';
-            $('#comment-form textarea').focus();
+            setComposeOpen(true);
           }),
       );
       $('#reply-cancel').onclick = () => {
         replyTo = null;
         $('#reply-target').hidden = true;
       };
-      secureForm($('#comment-form'), async (form, captcha) => {
+      const prepareCommentForm = () => secureForm($('#comment-form'), async (form, captcha) => {
         if (!fan && !state.staff) throw Error('직원 채널에 다시 접속해 주세요.');
         await api('/posts/' + id + '/comments', 'POST', {
           ...form,

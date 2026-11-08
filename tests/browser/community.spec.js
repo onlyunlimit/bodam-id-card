@@ -112,6 +112,14 @@ test('Shared board creates and edits posts, posts comments with nickname/time an
   await page.locator('.post-row').click();
   await expect(page.locator('.post-body')).toContainText('<img src=x');
   await expect(page.locator('.post-body img')).toHaveCount(0);
+  await expect(page.locator('#comment-form')).toBeHidden();
+  await page.locator('#comment-compose-toggle').click();
+  await expect(page.locator('#comment-compose-toggle')).toHaveAttribute('aria-expanded', 'true');
+  await page.locator('#comment-form [name=body]').fill('임시 작성 내용');
+  await page.locator('#comment-compose-toggle').click();
+  await expect(page.locator('#comment-form')).toBeHidden();
+  await page.locator('#comment-compose-toggle').click();
+  await expect(page.locator('#comment-form [name=body]')).toHaveValue('임시 작성 내용');
   await page.locator('#comment-form [name=author]').fill('응원단');
   await page.locator('#comment-form [name=password]').fill('123456');
   await page.locator('#comment-form [name=body]').fill('오늘도 무사 귀환');
@@ -119,6 +127,7 @@ test('Shared board creates and edits posts, posts comments with nickname/time an
   await page.locator('#comment-form button[type=submit]').click();
   await expect(page.locator('.comment-row')).toContainText('응원단');
   await expect(page.locator('.comment-row')).toContainText('오늘도 무사 귀환');
+  await expect(page.locator('#comment-form')).toBeHidden();
   await page.locator('#post-edit').click();
   await page.locator('#edit-form [name=title]').fill('수정한 응원');
   await page.locator('#edit-form [name=password]').fill('012345');
@@ -176,6 +185,7 @@ test('Fan photos survive editing; replies and comment hearts work; artist feeds 
   expect(f.posts[0].images).toEqual([{ id: 'photo-0' }]);
   for (const [index, body] of ['첫 댓글', '대댓글'].entries()) {
     if (index) await page.locator('[data-reply]').first().click();
+    else await page.locator('#comment-compose-toggle').click();
     await page.locator('#comment-form [name=author]').fill('팬');
     await page.locator('#comment-form [name=password]').fill('654321');
     await page.locator('#comment-form [name=body]').fill(body);
@@ -386,6 +396,7 @@ test('Nickname is optional when submitting posts, comments and replies',async({p
  await page.locator('.post-row').click();
  for(let i=0;i<2;i++){
   if(i)await page.locator('[data-reply]').first().click();
+  else await page.locator('#comment-compose-toggle').click();
   await page.locator('#comment-form [name=password]').fill('123456');await page.locator('#comment-form [name=body]').fill('익명 대화 '+i);await page.locator('#comment-form [name=consent]').check();await page.locator('#comment-form button[type=submit]').click();
   await expect(page.locator('.comment-row')).toHaveCount(i+1);expect(f.comments[i].author).toBe('');
  }

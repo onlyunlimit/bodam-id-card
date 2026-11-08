@@ -221,3 +221,7 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 - 커뮤니티의 기존 `.fan-hero-art` 로고는 유지합니다. 크기는 `service-design.css`의 해당 선택자에서 조절합니다. 소개 페이지 로고는 `agencies.js`의 `.agency-nav-logo`, 중앙 정렬·크기는 `service-design.css` 맨 아래 규칙입니다. 소개 페이지의 히어로 아래 중복 로고는 없으며 큰 제목은 ELYSIAN/HUNTERWIND 영어 표기입니다.
 - 고정 재질의 인물 카드에는 카드 내부의 `--text`·`--muted`를 사용합니다. 페이지 모드의 색을 직접 물려주면 어두운 카드 위에 어두운 글씨가 생길 수 있습니다.
 - 공개 인물 이름·사진 캡션·고정 인물 태그에는 코드네임만 사용합니다. 본명이 비밀인 인물의 본명을 공개 데이터에 덧붙이지 마세요. 커뮤니티 이름은 D1 `members`에 별도 저장됩니다.
+
+### 댓글 작성 양식 접기/펼치기
+
+`assets/community.js`의 `openPost()` 안에서 `#comment-compose-toggle` 버튼과 `#comment-compose-panel`을 제어합니다. 기본은 접힌 상태이며 답글 선택 시 자동으로 펼칩니다. 양식을 처음 펼칠 때 보안 확인을 초기화합니다. 댓글 카드 모양은 기존 `assets/fan-community.css`의 `.comment-row`에서 수정합니다.
