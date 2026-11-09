@@ -12,6 +12,7 @@ const originalFetch = globalThis.fetch;
 let geocodeCalls=0;
 const geoResult={display_name:'Paris, France',lat:'48.8566',lon:'2.3522',address:{city:'Paris'},geojson:{type:'Polygon',coordinates:[[[2.3,48.8],[2.4,48.8],[2.4,48.9],[2.3,48.8]]]}};
 globalThis.fetch=async(url,...args)=>{
+ if(String(url).startsWith('https://images.example/'))return new Response(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aSp0AAAAASUVORK5CYII=','base64'),{headers:{'Content-Type':'image/png'}});
  if(String(url).startsWith('https://challenges.cloudflare.com/'))return Response.json({success:true,hostname:'onlyunlimit.github.io',action:'community'});
  if(String(url).startsWith('https://nominatim.openstreetmap.org/')){geocodeCalls++;assert.match(args[0].headers['User-Agent'],/onlyunlimit.github.io/);return Response.json(String(url).includes('/search')?[geoResult]:geoResult);}
  return originalFetch(url,...args);
@@ -443,7 +444,8 @@ test('Attachments enforce format, ownership and deletion visibility; admin can e
   const { req, key, post, sql } = await fixture();
   const png =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aSp0AAAAASUVORK5CYII=';
-  const a = await req('/posts', 'POST', { ...post, images: [png] });
+  assert.equal((await req('/posts', 'POST', { ...post, images: [png] })).status,201);
+  const a = await req('/posts', 'POST', { ...post, images: [{url:'https://images.example/photo.jpg'}] });
   assert.equal(a.status, 201, JSON.stringify(a.data));
   let detail = (await req('/posts/' + a.data.id)).data;
   const image = detail.post.images[0];
@@ -504,11 +506,11 @@ test('Staff channels and member/team tags remain separate, filterable and editab
  assert.equal((await req('/posts/'+b.data.id,'PATCH',{...post,channel:'free',tags:[]})).status,200);
  assert.equal((await req('/posts?board=staff&channel=free')).data.posts.length,2);
 });
-test('HTTPS image links persist and are gated with the parent post without upstream server fetches',async()=>{
+test('HTTPS image links persist and are gated with the parent post through a metadata-stripping media response',async()=>{
  const {req,post}=await fixture();
  const a=await req('/posts','POST',{...post,images:[{url:'https://images.example/photo.jpg'}]});assert.equal(a.status,201);
  const image=(await req('/posts/'+a.data.id)).data.post.images[0];
- const r=await req('/media/'+image.id);assert.equal(r.status,302);assert.equal(r.response.headers.get('Location'),'https://images.example/photo.jpg');
+ const r=await req('/media/'+image.id);assert.equal(r.status,200);assert.equal(r.response.headers.get('Location'),null);assert.equal(r.response.headers.get('Content-Type'),'image/png');
  assert.equal((await req('/posts','POST',{...post,images:[{url:'javascript:alert(1)'}]})).status,400);
  assert.equal((await req('/posts','POST',{...post,images:[{url:'https://name:secret@example.com/p.jpg'}]})).status,400);
  assert.equal((await req('/posts/'+a.data.id,'PATCH',{...post,images:[]})).status,200);
@@ -629,7 +631,7 @@ test('Blank names use stable per-post IP aliases across replies, deletion and ti
  const detail=await req('/posts/'+id);assert.equal(JSON.stringify(detail.data).includes('voter'),false);
 });
 
-test('Only authenticated admin-written posts accept custom creation time, without changing audit time',async()=>{
+test('Only authenticated administrators can change creation time, without changing audit time',async()=>{
  const {req,key,sql,post}=await fixture();
  const auth=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
  const options={origin:'https://sgia.test',headers:{Cookie:auth.response.headers.get('Set-Cookie').split(';')[0]}};
@@ -645,7 +647,7 @@ test('Only authenticated admin-written posts accept custom creation time, withou
  assert.equal((await req('/admin/posts/'+id,'PATCH',{title:'내용만',body:'시간 보존'},options)).status,200);assert.equal(row().created_at,patch.created_at);
  for(const value of [-1,'2024-01-01',null,1.5,1e16])assert.equal((await req('/admin/posts/'+id,'PATCH',{...patch,created_at:value},options)).status,400);
  const visitor=await req('/posts','POST',post);
- assert.equal((await req('/admin/posts/'+visitor.data.id,'PATCH',patch,options)).status,403);
+ assert.equal((await req('/admin/posts/'+visitor.data.id,'PATCH',patch,options)).status,200);
  assert.ok(sql.prepare("SELECT created_at FROM audit WHERE action='ARTIST_PUBLISH' AND target=?").get(id).created_at>stamp);
 });
 
@@ -655,4 +657,43 @@ test('Public member directory and profiles use only codenames',async()=>{
   assert.equal(members.find(m=>m.id===id).name,name);
   assert.equal((await req('/members/'+id)).data.member.name,name);
  }
+});
+
+test('Admin author, member and date edits preserve post IDs and reject cross-board member spoofing',async()=>{
+ const {req,key,sql,post}=await fixture();
+ const auth=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const options={origin:'https://sgia.test',headers:{Cookie:auth.response.headers.get('Set-Cookie').split(';')[0]}};
+ const made=await req('/posts','POST',{...post,board:'lucky'}),id=made.data.id;
+ const edit={title:'바뀐 제목',body:'본문',author:'새 닉네임',member_id:null,created_at:123456789};
+ assert.equal((await req('/admin/posts/'+id,'PATCH',edit,{origin:'https://sgia.test'})).status,401);
+ assert.equal((await req('/admin/posts/'+id,'PATCH',edit,options)).status,200);
+ let row=sql.prepare('SELECT * FROM posts WHERE id=?').get(id);assert.equal(row.author,'새 닉네임');assert.equal(row.created_at,123456789);assert.equal(row.member_id,null);
+ assert.equal((await req('/admin/posts/'+id,'PATCH',{...edit,member_id:'jaein'},options)).status,200);
+ row=sql.prepare('SELECT * FROM posts WHERE id=?').get(id);assert.equal(row.author,'재인');assert.equal(row.member_id,'jaein');
+ assert.equal((await req('/admin/posts/'+id,'PATCH',{...edit,member_id:'chabin'},options)).status,400);
+ const c=await req('/posts/'+id+'/comments','POST',{body:'댓글',author:'팬',password:'123456',consent:true,captcha:'verified'});
+ assert.equal((await req('/admin/comments/'+c.data.id,'PATCH',{body:'답글',author:'변경',member_id:'danjo',created_at:987654321},options)).status,200);
+ const comment=sql.prepare('SELECT * FROM comments WHERE id=?').get(c.data.id);assert.equal(comment.author,'단조');assert.equal(comment.created_at,987654321);assert.equal(comment.post_id,id);
+ assert.equal((await req('/admin/comments/'+c.data.id,'PATCH',{body:'답글',member_id:'chabin'},options)).status,400);
+});
+
+
+test('File attachments from existing clients are accepted, sanitized at rest, editable and supported in artist profiles', async () => {
+ const {req,key,post,sql}=await fixture();
+ const original=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aSp0AAAAASUVORK5CYII=','base64');
+ const marker=Buffer.from('private-source-metadata'),chunk=Buffer.alloc(12+marker.length);chunk.writeUInt32BE(marker.length);chunk.write('tEXt',4);marker.copy(chunk,8);
+ const uploaded='data:image/png;base64,'+Buffer.concat([original.subarray(0,33),chunk,original.subarray(33)]).toString('base64');
+ const created=await req('/posts','POST',{...post,images:[uploaded]});assert.equal(created.status,201,JSON.stringify(created.data));
+ const detail=(await req('/posts/'+created.data.id)).data.post;
+ const imageId=detail.images[0].id;
+ assert.deepEqual(Buffer.from(sql.prepare('SELECT data FROM images WHERE id=?').get(imageId).data),original);
+ assert.deepEqual(Buffer.from(await (await req('/media/'+imageId)).response.arrayBuffer()),original);
+ assert.equal((await req('/posts/'+created.data.id,'PATCH',{...post,body:'edited',images:[{id:imageId}]})).status,200);
+ const auth=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const options={origin:'https://sgia.test',headers:{Cookie:auth.response.headers.get('Set-Cookie').split(';')[0]}};
+ const artist=await req('/admin/publish','POST',{member_id:'jaein',title:'file upload',body:'clean image',images:[uploaded]},options);assert.equal(artist.status,201,JSON.stringify(artist.data));
+ const profile=await req('/admin/members/jaein','PATCH',{name:'재인',bio:'profile',image:uploaded},options);assert.equal(profile.status,200,JSON.stringify(profile.data));
+ const avatar=sql.prepare("SELECT avatar_url FROM members WHERE id='jaein'").get().avatar_url;
+ assert.deepEqual(Buffer.from(await (await req(avatar)).response.arrayBuffer()),original);
+ assert.equal(sql.prepare('SELECT COUNT(*) n FROM images WHERE hex(data) LIKE ?').get('%'+marker.toString('hex').toUpperCase()+'%').n,0);
 });
