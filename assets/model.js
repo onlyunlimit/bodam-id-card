@@ -229,7 +229,6 @@ export function isIncident(item) {
         item.support.length <= 80 &&
         Number.isInteger(item.personnel) &&
         item.personnel >= 1 &&
-        item.personnel <= 30 &&
         typeof item.requests === 'string' &&
         item.requests.length <= 500 &&
         Number.isFinite(item.occurredAt))) &&

@@ -86,7 +86,7 @@ test('Manual reports persist, open as dossiers, dispatch alerts and retain Korea
   await expect(page.locator('#address-status')).toContainText('Address and mapped boundary found.');
   await page.locator('[name=zone]').fill('Gate 03');
   await page.locator('[name=detail]').fill('Unidentified signal at the east entrance.');
-  await page.locator('[name=personnel]').fill('7');
+  await page.locator('[name=personnel]').fill('1250');
   await page.locator('[name=support]').selectOption('custom');
   await expect(page.locator('[name=customSupport]')).toBeVisible();
   await page.locator('[name=support]').selectOption('실드');
@@ -100,12 +100,14 @@ test('Manual reports persist, open as dossiers, dispatch alerts and retain Korea
   await expect(page.locator('.record-dossier')).toContainText('Night watch');
   await expect(page.locator('#typed-report')).toContainText('Unidentified signal');
   await expect(page.locator('.facts > div').filter({has:page.locator('dt', {hasText:'Requested unit'})}).locator('dd')).toHaveText('합동 <b>구조팀</b>');
+  await expect(page.locator('.facts > div').filter({has:page.locator('dt', {hasText:'Personnel required'})}).locator('dd')).toHaveText('1250');
   await expect(page.locator('.facts dd b')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await page.reload();
   await expect(page.locator('.case-content').first()).toContainText('Unidentified signal');
   await page.locator('.case-content').first().click();
   await expect(page.locator('.facts > div').filter({has:page.locator('dt', {hasText:'Requested unit'})}).locator('dd')).toHaveText('합동 <b>구조팀</b>');
+  await expect(page.locator('.facts > div').filter({has:page.locator('dt', {hasText:'Personnel required'})}).locator('dd')).toHaveText('1250');
 });
 test('Each of 18 floors has a distinct interior and rooms open their facility records', async ({
   page,

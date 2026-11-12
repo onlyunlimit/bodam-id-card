@@ -28,8 +28,8 @@ test('ORPE is a dark classified file with trace footprints and pause control', a
   await page.locator('#archive-pin').fill('0826');
   await page.locator('[data-key=ENTER]').click();
   await expect(page.locator('#open-sealed')).toHaveCount(0);
-  await expect(page.locator('.classified-header')).toContainText('TOP SECRET');
-  await expect(page.locator('.threat-class')).toContainText('UNMEASURABLE');
+  await expect(page.locator('.az-classification')).toContainText('RESTRICTED');
+  await expect(page.locator('.threat-class')).toContainText('위험도 측정 불가');
   await page.locator('#track-az').click();
   await expect(page.locator('.footprint-marker')).toHaveCount(2);
   await page.locator('#tracking-pause').click();

@@ -1337,28 +1337,6 @@ html[data-motion='off'] .release-pages > span {
 .unit-masthead small {
   color: var(--muted) !important;
 }
-.identity-terminal {
-  margin-top: 24px;
-  padding: 18px;
-  border: 1px solid #607b7866;
-  background: repeating-linear-gradient(#ffffff02 0 1px, #0000 1px 4px), #061211;
-  color: #85b8b1;
-  box-shadow: inset 0 0 30px #0008;
-  font: 7px/1.8 var(--mono);
-}
-.identity-terminal pre {
-  font: 11px/1.3 var(--mono);
-  text-align: center;
-  margin: 20px 0;
-  color: #a4d5cd;
-  white-space: pre;
-}
-.identity-terminal b {
-  display: block;
-  border-top: 1px solid #60807855;
-  padding-top: 12px;
-  font-size: 8px;
-}
 .evidence-index {
   margin: 35px 0 45px;
 }
@@ -1748,3 +1726,93 @@ html[data-motion='off'] .release-pages > span {
   .record-dossier { padding: 12px; }
   .record-dossier h3 { font-size: 19px; }
 }
+
+@font-face{font-family:'AZ Display';src:url('fonts/DoHyeon-Regular.ttf') format('truetype');font-display:swap}
+
+/* AZ archive: editorial case hierarchy, physical documents and live trace. */
+body .classified-board.az-dossier{
+  --text:#eae6df;--muted:#bdb4b2;--accent:#e7a0a0;--line:#4c3f42;
+  color:var(--text);padding:clamp(18px,4vw,48px);border:1px solid #4b333a;border-top:4px solid #7d2332;
+  border-radius:18px!important;
+  background:radial-gradient(ellipse at 0 0,#580e1b44,transparent 50%),linear-gradient(125deg,#141114,#090a0c)!important;
+  box-shadow:inset 0 1px 0 #ffffff15,0 12px 0 -6px #0b0c0e,0 28px 60px #0004;
+}
+.az-dossier .case-breadcrumb{padding:0 0 20px;color:#b9b1b0;font-size:9px;letter-spacing:.08em}
+.az-dossier .case-breadcrumb b{color:#e5a7a7}
+.az-case-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:30px 0;border-bottom:1px solid #52474a}
+.az-case-header .eyebrow{color:#beb4b3;font-size:9px;letter-spacing:.16em}
+.az-case-header h2{font-size:clamp(23px,3vw,36px);font-family:'AZ Display',sans-serif;font-weight:400;letter-spacing:-.02em;margin:10px 0 0}
+.az-classification{display:grid;gap:7px;border:1px solid #956466;border-radius:5px;color:#efb1ae;background:#36131b;padding:10px 16px;transform:rotate(-3deg);font:11px var(--mono);letter-spacing:.1em;text-align:center}
+.az-classification>span{color:#c6b8b7;font-size:9px}
+body .az-dossier .threat-layout{grid-template-columns:minmax(230px,.8fr) minmax(0,1.2fr)!important;gap:clamp(24px,5vw,64px);padding:36px 0;align-items:start}
+.az-dossier #az-profile{max-width:360px;margin:0 auto;width:100%}
+.az-dossier .person-card{width:100%;margin:0}
+.az-dossier .threat-intelligence{border:0;background:none;padding:8px 0}
+.az-dossier .threat-intelligence>.eyebrow{color:#c3b6b4;font-size:9px;letter-spacing:.18em}
+body .az-dossier .threat-intelligence h2{font:700 clamp(80px,10vw,140px)/.9 var(--display);font-size:clamp(80px,10vw,140px)!important;letter-spacing:-.04em;margin:22px 0;color:#dfd6cf;text-shadow:0 2px 0 #fff1,0 10px 30px #0008}
+.az-dossier .threat-intelligence h2 span{display:inline-block;font:16px/1.5 'Noto Sans KR',sans-serif;letter-spacing:.1em;margin-left:20px;color:#c8bcba}
+.az-dossier .threat-intelligence>p{color:#c9c1bc;font-size:13px;line-height:1.9;max-width:42em}
+.az-dossier .threat-class{display:grid;gap:9px;margin:24px 0;padding:18px 0;border-block:1px solid #5a4246;background:none;color:#f0b1ad}
+.az-dossier .threat-class>span:first-child{font:9px var(--mono);letter-spacing:.13em;color:#c5afac}
+.az-dossier .threat-class strong{font-size:20px;letter-spacing:-.02em}
+.az-risk-rule{height:3px;width:100%;background:linear-gradient(90deg,#b75058 0 28%,#744147 28% 58%,#422f35 58%);border-radius:3px}
+.az-dossier .threat-intelligence .facts{border:0;display:block}
+.az-dossier .threat-intelligence .facts>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:12px;border-color:#443b3f;background:none;padding:13px 0}
+.az-dossier .facts dt{color:#bfb0ad;font-size:11px;opacity:1}
+.az-dossier .facts dd{color:#ebe2dc;font-size:12px}
+.az-dossier #threat-log{margin-top:20px;border:1px solid #96646b;background:#3c242b;color:#f3d2d1;border-radius:7px;padding:12px 16px}
+.az-dossier .terminal-log{margin-top:14px;background:#111518;border-color:#3a454a;color:#b8ccc9;line-height:1.8;border-radius:8px}
+.az-dossier .evidence-index{margin:14px 0 42px;border-top:1px solid #52474a;padding-top:25px}
+.az-dossier .evidence-index>header{padding-bottom:22px;gap:14px}
+.az-dossier .evidence-index>header>span,.az-dossier .evidence-index>header>small{color:#bdb4b2;font-size:9px}
+.az-dossier .evidence-index>header>small{margin-left:auto}
+.az-dossier .evidence-files{gap:16px}
+.az-dossier .evidence-file{padding:20px;background:linear-gradient(145deg,#272025,#171418);border:1px solid #5b424a;border-left:4px solid #863344;border-radius:6px;color:#e8deda;box-shadow:inset 0 1px 0 #ffffff0d,0 3px 0 #08090a,0 12px 24px #0007;overflow:hidden}
+.az-dossier .evidence-file-tab{position:static;display:block;background:none;border:0;padding:0 0 9px;color:#e4a1a5;letter-spacing:.12em}
+.az-dossier .evidence-file>small{font-size:8px;color:#bfb1b5}
+.evidence-number{display:block;font:52px/.95 var(--display);color:#b48890;letter-spacing:-.02em;margin:20px 0 12px}
+.az-dossier .evidence-file>strong{font:22px/1.4 'AZ Display',sans-serif;margin:14px 0}
+.evidence-preview{font-size:11px;line-height:1.6;color:#c5b9bc;margin:0;min-height:2em}
+.az-dossier .evidence-file-state{border-top:1px solid #74545b66;padding-top:12px;color:#e2a6ac;font-size:9px}
+.evidence-facts{display:grid;gap:0;margin:24px 0;border-block:1px solid #82746b66}
+.evidence-facts>div{display:flex;justify-content:space-between;gap:15px;padding:14px 0;border-bottom:1px solid #82746b33}
+.evidence-facts dt{font:10px var(--mono);color:#bfb3a6}
+.evidence-facts dd{margin:0;font:12px var(--mono);color:#ece4d9;overflow-wrap:anywhere}
+.az-dossier .tracking-section{border-top:1px solid #52474a;padding-top:26px}
+.az-dossier .tracking-section .section-title{gap:12px;align-items:center}
+.az-dossier .tracking-section .section-title h2{margin-right:auto;font-size:21px}
+.az-dossier .tracking-section .badge{display:none}
+.az-dossier .tracking-section button{background:#2a292e;border:1px solid #66565d;color:#ece1dc;border-radius:6px;font-size:11px}
+body .az-dossier .tracking-layout{grid-template-columns:minmax(0,1.3fr) minmax(230px,.7fr)!important;gap:20px}
+body .az-dossier .tracking-layout .seoul-map{height:370px;min-height:300px;border:1px solid #66555c;filter:saturate(.35);border-radius:10px}
+.az-dossier #sighting-log{margin:0;max-height:370px;overflow:auto;padding:0 0 0 20px;border-left:1px solid #76525a}
+.az-dossier #sighting-log li{background:none;border:0;border-bottom:1px solid #4a3d43;padding:16px 0;border-radius:0}
+.az-dossier #sighting-log time{color:#d89a9c;font:10px var(--mono)}
+.az-dossier #sighting-log strong{color:#eee1db;font-size:13px}
+.az-dossier #sighting-log p{color:#c0b3b3;font-size:11px;line-height:1.8}
+.intercept-summary{margin:20px 0;font:9px var(--mono)}
+.intercept-summary>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #7775}
+.intercept-summary dd{margin:0}
+.acquisition-seal{border:1px solid #95646b;padding:24px;font:40px var(--display);letter-spacing:.08em}
+.acquisition-seal span{display:block;font:9px var(--mono);margin-top:12px}
+@media(max-width:760px){
+  .az-dossier .case-breadcrumb{flex-wrap:wrap;line-height:1.8}
+  .az-dossier .case-breadcrumb>span:last-child{display:none}
+  .az-case-header{align-items:flex-start;gap:12px;padding:22px 0}
+  .az-classification{font-size:8px;padding:9px;letter-spacing:0}
+  .az-case-header .eyebrow{font-size:7px}
+  body .az-dossier .threat-layout,body .az-dossier .tracking-layout{grid-template-columns:minmax(0,1fr)!important;gap:24px}
+  .az-dossier .evidence-files{grid-template-columns:1fr}
+  .az-dossier .evidence-file{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:18px}
+  .az-dossier .evidence-file-tab,.az-dossier .evidence-file>small,.az-dossier .evidence-preview{grid-column:1}
+  .az-dossier .evidence-number{grid-column:2;grid-row:1/4;margin:0;align-self:center}
+  .az-dossier .evidence-file>strong,.az-dossier .evidence-file-state{grid-column:1/-1}
+  .az-dossier .evidence-index>header>small{display:none}
+  .az-dossier .threat-intelligence .facts>div{grid-template-columns:78px minmax(0,1fr)}
+  .az-dossier #sighting-log{max-height:310px}
+  .evidence-facts>div{flex-wrap:wrap}
+}
+
+.az-dossier .evidence-index h2,.az-dossier .tracking-section h2{font-family:'AZ Display',sans-serif;font-weight:400}
+body .az-dossier .person-card .card-face{background:linear-gradient(140deg,#20171b,#100e11)!important;--text:#e8dfd8;--muted:#c2afb4;color:var(--text);border-color:#6b3341!important}
+body .az-dossier .person-card .id-card-head{background:#491522;color:#e8c7cc}

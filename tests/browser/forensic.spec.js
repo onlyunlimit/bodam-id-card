@@ -161,11 +161,11 @@ test('Fictional place names use approximate city pins and show errors above the 
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('sgia.incidents')).at(-1).location)).toBe('미등록 가상 기지');
 });
 
-test('Worldwide map zooms on two quick mobile taps', async ({browser}) => {
+test('Worldwide map zooms on two quick mobile taps', async ({browser,baseURL}) => {
  const context = await browser.newContext({hasTouch:true,isMobile:true,viewport:{width:390,height:844},reducedMotion:'reduce'});
  const page = await context.newPage();
  try {
-  await page.goto('http://127.0.0.1:4173/portal.html');
+  await page.goto(baseURL+'/portal.html');
   const map=page.locator('#seoul-map'); await map.scrollIntoViewIfNeeded();
   const zoom=()=>map.locator('img.leaflet-tile').evaluateAll(es=>Math.max(...es.map(e=>Number(e.src.match(/\/(\d+)\/\d+\/\d+\.png/)?.[1]||0))));
   await expect.poll(zoom).toBe(11); const box=await map.boundingBox();

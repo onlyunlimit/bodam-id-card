@@ -53,7 +53,7 @@
 | [엘리시안·럭키트릭](https://onlyunlimit.github.io/elysian.html) | `/elysian.html` | 핑크 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
 | [헌터윈드·옵시더스](https://onlyunlimit.github.io/hunterwind.html) | `/hunterwind.html` | 금속·어두운 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
 | [사건 기록실](https://onlyunlimit.github.io/records.html) | `/records.html` | 아날로그 수신기·주파수 조정, 사건 필터·목록·상세 문서, 지도, 신고서 작성, 긴급 수신 알림, 종결 승인·재개 | 신고·처리 업무는 직원 화면 |
-| [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 봉인 파일, 숫자 키패드·클릭음, 추적 커서, AZ 정보, ASCII 신원 화면, 증거 문서 3개, 동선 지도·감청 로그 | 코드 입력 연출 + 일부 직원 열람 |
+| [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 봉인 파일, 숫자 키패드·클릭음, 추적 커서, AZ 대상 관측 기록·위험 평가, 구조화된 증거 문서 3개, 동선 지도·감청 로그 | 코드 입력 연출 + 일부 직원 열람 |
 | [세계관 안내서](https://onlyunlimit.github.io/manual.html) | `/manual.html` | 용어 검색·목차, 게이트·각성자·가이딩·각인·매칭 등 설명, 등급표, 개념 도해, 명령어 복사 | 공개 |
 | [커뮤니티](https://onlyunlimit.github.io/community.html) | `/community.html` | 그룹별 4개 피드, 사진 첨부, 팬·아티스트 글/답글, 글·댓글 좋아요, 6자리 PIN 수정·삭제, 관리자 진입 | 팬 공개 / 사내는 직원 화면 |
 

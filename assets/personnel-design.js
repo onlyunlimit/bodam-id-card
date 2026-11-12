@@ -51,7 +51,7 @@ export function openSequence(dialog, c) {
             'IDENTITY CHANNEL MATCHED',
             c.code + ' / RECORD OPEN',
           ];
-  overlay.innerHTML = `<div class="acquisition-top"><span>PERSONNEL ARCHIVE</span><span>${v.number}</span></div><pre aria-hidden="true">${v.mode === 'fault' ? '0101  ////  1100\n!    INDEX LOST    !\n0010  ////  1011' : '+───┬───┬───+\n│ ░ │ ▒ │ ▓ │\n+───┴───┴───+'}</pre><strong>${esc(c.code)}</strong><span class="acquisition-line" data-no-translate>${lines[0]}</span><div class="acquisition-meter"><i></i></div><button class="acquisition-skip">열람 장면 건너뛰기</button>`;
+  overlay.innerHTML = `<div class="acquisition-top"><span>PERSONNEL ARCHIVE</span><span>${v.number}</span></div>${v.mode === 'classified' ? '<div class="acquisition-seal" aria-hidden="true">OR—001<span>RESTRICTED RECORD</span></div>' : `<pre aria-hidden="true">${v.mode === 'fault' ? '0101  ////  1100\n!    INDEX LOST    !\n0010  ////  1011' : '+───┬───┬───+\n│ ░ │ ▒ │ ▓ │\n+───┴───┴───+'}</pre>`}<strong>${esc(c.code)}</strong><span class="acquisition-line" data-no-translate>${lines[0]}</span><div class="acquisition-meter"><i></i></div><button class="acquisition-skip">열람 장면 건너뛰기</button>`;
   stage.prepend(overlay);
   stage.classList.add('acquiring');
   const timers = [];

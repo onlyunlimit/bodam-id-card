@@ -107,6 +107,8 @@ test('Incident boundaries validate GeoJSON and retain worldwide coordinates and 
  test('Manual reports retain custom support teams and reject empty or oversized names', () => {
  const record = {...generateIncident(1),manual:true,detail:'직접 작성한 현장 상황',reporter:'신고자',zone:'현장',support:'합동 구조팀',personnel:2,requests:'',occurredAt:Date.now()};
  assert.equal(isIncident(record),true);
+ for(const personnel of [1,30,31,1250,1000000]) assert.equal(isIncident({...record,personnel}),true);
+ for(const personnel of [0,-1,1.5,NaN,Infinity,'31']) assert.equal(isIncident({...record,personnel}),false);
  for(const support of ['', '   ', '가'.repeat(81), null]) assert.equal(isIncident({...record,support}),false);
  for(const support of ['실드','오리진','비콘']) assert.equal(isIncident({...record,support}),true);
  });
