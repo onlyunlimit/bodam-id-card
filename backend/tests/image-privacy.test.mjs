@@ -23,3 +23,11 @@ test('URL validation rejects credentials, private literal targets and executable
  assert.throws(()=>stripMetadata(Buffer.from('<svg><script>secret</script></svg>')));
  assert.match(imageURL('https://cdn.caveduck.io/cdn-cgi/image/f=auto,w=500/charim/a'),/metadata=none/);
 });
+test('Animated GIF keeps frames, timing and looping but drops comments and metadata applications',()=>{
+ const base=Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==','base64');
+ const frame=base.subarray(19,-1),loop=Buffer.from('21ff0b4e45545343415045322e300301000000','hex');
+ const comment=Buffer.from([0x21,0xfe,3,71,80,83,0]);
+ const input=Buffer.concat([base.subarray(0,19),loop,comment,frame,frame,Buffer.from([0x3b]),Buffer.from('private')]);
+ const clean=stripMetadata(input);assert.equal(clean.mime,'image/gif');assert.deepEqual(Buffer.from(clean.bytes),Buffer.concat([base.subarray(0,19),loop,frame,frame,Buffer.from([0x3b])]));
+ assert.throws(()=>stripMetadata(input.subarray(0,30)));
+});

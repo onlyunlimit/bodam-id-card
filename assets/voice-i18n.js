@@ -137,13 +137,13 @@ const translations = {
   jion: [
     [
       'Ready. Try to keep up. …You checked the safety locks, right?',
-      'I’m resting. DAIN’s in the next channel. Leave the urgent stuff with me.',
+      'I’m resting. DEIN’s in the next channel. Leave the urgent stuff with me.',
     ],
     [
       '準備できた。遅れるなよ。…安全装置は確認したよな？',
       '俺は休む。デインなら隣のチャンネル。急ぎの用は俺に残せ。',
     ],
-    ['准备好了，别落后。……安全装置检查了吧？', '我要休息。找DAIN去旁边频道，急事留给我。'],
+    ['准备好了，别落后。……安全装置检查了吧？', '我要休息。找DEIN去旁边频道，急事留给我。'],
   ],
   sando: [
     [

@@ -1,3 +1,5 @@
+import { notificationStatement } from './notifications.js';
+import { staffMeta } from './staff.js';
 import { imageURL, privateImageResponse, stripMetadata } from './image-privacy.js';
 import { HTTPError, text, board, hmac, random } from './security.js';
 const json = (data, status = 200) =>
@@ -13,9 +15,9 @@ function postTime(value, fallback) {
 }
 export const postFields =
   'p.id,p.board,p.title,p.author,p.department,p.body,p.created_at,p.updated_at,p.member_id,p.pin_length,p.channel,p.tags';
-export async function attachments(env, postId) {
+export async function attachments(env, postId, comment = false) {
   return (
-    await env.DB.prepare('SELECT id,mime FROM images WHERE post_id=? ORDER BY created_at,id')
+    await env.DB.prepare(`SELECT id,mime FROM ${comment ? 'comment_images' : 'images'} WHERE ${comment ? 'comment_id' : 'post_id'}=? ORDER BY created_at,id`)
       .bind(postId)
       .all()
   ).results;
@@ -36,22 +38,23 @@ export async function enrichPosts(env, rows) {
   );
 }
 function decodeImage(value) {
-  if (typeof value !== 'string' || value.length > 550000)
+  if (typeof value !== 'string' || value.length > 1450000)
     throw new HTTPError(400, '이미지 한 장은 400KB 이하여야 합니다.');
-  const m = value.match(/^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/);
-  if (!m) throw new HTTPError(400, 'JPG, PNG, WebP 이미지만 첨부할 수 있습니다.');
+  const m = value.match(/^data:image\/(jpeg|png|webp|gif);base64,([A-Za-z0-9+/]+={0,2})$/);
+  if (!m) throw new HTTPError(400, 'JPG, PNG, WebP, GIF 이미지만 첨부할 수 있습니다.');
   let bytes;
   try {
     bytes = Uint8Array.from(atob(m[2]), (c) => c.charCodeAt(0));
   } catch {
     throw new HTTPError(400, '이미지 데이터가 올바르지 않습니다.');
   }
-  if (bytes.length > 409600 || bytes.length < 12)
+  if (bytes.length > (m[1] === 'gif' ? 1048576 : 409600) || bytes.length < 12)
     throw new HTTPError(400, '이미지 크기를 확인해 주세요.');
   const sig = [...bytes.slice(0, 12)];
   const valid =
     m[1] === 'jpeg'
       ? sig[0] === 255 && sig[1] === 216 && sig[2] === 255
+      : m[1] === 'gif' ? /^GIF8[79]a$/.test(String.fromCharCode(...sig.slice(0,6)))
       : m[1] === 'png'
         ? sig.slice(0, 8).join(',') === '137,80,78,71,13,10,26,10'
         : String.fromCharCode(...sig.slice(0, 4)) === 'RIFF' &&
@@ -60,11 +63,12 @@ function decodeImage(value) {
   // Never persist source metadata, including when an older client uploads a file.
   return stripMetadata(bytes);
 }
-export async function imageChanges(env, postId, images) {
+export async function imageChanges(env, postId, images, comment = false) {
+  const table = comment ? 'comment_images' : 'images', owner = comment ? 'comment_id' : 'post_id';
   if (images === undefined) return [];
   if (!Array.isArray(images) || images.length > 2)
     throw new HTTPError(400, '사진은 두 장까지 첨부할 수 있습니다.');
-  const old = await attachments(env, postId),
+  const old = await attachments(env, postId, comment),
     keep = [],
     statements = [];
   for (const value of images) {
@@ -76,7 +80,7 @@ export async function imageChanges(env, postId, images) {
       const url = imageURL(text(value.url, 1, 2000, '이미지 URL'));
       statements.push(
         env.DB.prepare(
-          'INSERT INTO images(id,post_id,mime,data,created_at,url) VALUES (?,?,?,zeroblob(0),?,?)',
+          `INSERT INTO ${table}(id,${owner},mime,data,created_at,url) VALUES (?,?,?,zeroblob(0),?,?)`,
         ).bind(
           crypto.randomUUID(),
           postId,
@@ -88,14 +92,14 @@ export async function imageChanges(env, postId, images) {
     } else {
       const { mime, bytes } = decodeImage(value);
       statements.push(env.DB.prepare(
-        'INSERT INTO images(id,post_id,mime,data,created_at) VALUES (?,?,?,?,?)',
+        `INSERT INTO ${table}(id,${owner},mime,data,created_at) VALUES (?,?,?,?,?)`,
       ).bind(crypto.randomUUID(), postId, mime, bytes.buffer, Date.now()));
     }
   }
   for (const i of old)
     if (!keep.includes(i.id))
       statements.push(
-        env.DB.prepare('DELETE FROM images WHERE id=? AND post_id=?').bind(i.id, postId),
+        env.DB.prepare(`DELETE FROM ${table} WHERE id=? AND ${owner}=?`).bind(i.id, postId),
       );
   return statements;
 }
@@ -147,11 +151,12 @@ export async function publicFan(request, env, { identity, rate, blocked, body })
   }
   const media = path.match(/^\/media\/([a-f0-9-]{36})$/);
   if (media && method === 'GET') {
-    const row = await env.DB.prepare(
+    let row = await env.DB.prepare(
       'SELECT i.mime,i.data,i.url FROM images i LEFT JOIN posts p ON p.id=i.post_id WHERE i.id=? AND (i.member_id IS NOT NULL OR (p.hidden=0 AND p.deleted_at IS NULL))',
     )
       .bind(media[1])
       .first();
+    if (!row) row = await env.DB.prepare(`SELECT i.mime,i.data,i.url FROM comment_images i JOIN comments c ON c.id=i.comment_id JOIN posts p ON p.id=c.post_id WHERE i.id=? AND c.hidden=0 AND c.deleted_at IS NULL AND p.hidden=0 AND p.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL))`).bind(media[1]).first();
     if (!row) throw new HTTPError(404, '이미지를 찾을 수 없습니다.');
     return privateImageResponse(row);
   }
@@ -219,9 +224,10 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
   }
   const media = path.match(/^\/admin\/media\/([a-f0-9-]{36})$/);
   if (media && method === 'GET') {
-    const row = await env.DB.prepare('SELECT mime,data,url FROM images WHERE id=?')
+    let row = await env.DB.prepare('SELECT mime,data,url FROM images WHERE id=?')
       .bind(media[1])
       .first();
+    if (!row) row = await env.DB.prepare('SELECT mime,data,url FROM comment_images WHERE id=?').bind(media[1]).first();
     if (!row) throw new HTTPError(404, '이미지를 찾을 수 없습니다.');
     return privateImageResponse(row);
   }
@@ -323,7 +329,7 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
       changes.push(
         env.DB.prepare(
           "INSERT INTO comments(id,post_id,author,body,salt,password_hash,created_at,member_id,parent_id,pin_length) VALUES (?,?,?,?,'','',?,?,?,6)",
-        ).bind(id, post.id, m.name, text(data.body, 1, 1000, '내용'), time, m.id, parent),
+        ).bind(id, post.id, m.name, text(data.body ?? '', data.images?.length ? 0 : 1, 1000, '내용'), time, m.id, parent),
       );
     }
     const { ip, hash } = await identity(request, env);
@@ -338,6 +344,8 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
         time,
       ),
     );
+    if(path==='/admin/reply')changes.push(...await imageChanges(env,id,data.images,true));
+    changes.push(notificationStatement(env,id,path==='/admin/publish'?id:data.post_id,path==='/admin/publish'?'post':'comment'));
     await env.DB.batch(changes);
     return json({ id }, 201);
   }
@@ -350,33 +358,34 @@ export async function adminFan(request, env, { body, identity, sourceLog }) {
         .bind(id)
         .first();
     if (!row) throw new HTTPError(404, '기록이 없습니다.');
-    const postBoard = table === 'posts' ? row.board : (await env.DB.prepare('SELECT board FROM posts WHERE id=?').bind(row.post_id).first())?.board;
+    const postBoard = table === 'posts' ? board(data.board ?? row.board) : (await env.DB.prepare('SELECT board FROM posts WHERE id=?').bind(row.post_id).first())?.board;
     const memberId = data.member_id === undefined ? row.member_id : (data.member_id || null);
     let author = data.author === undefined ? row.author : text(data.author, 1, 24, '작성자 닉네임');
     if (memberId) {
       const member = await env.DB.prepare('SELECT id,board,name FROM members WHERE id=?').bind(text(memberId,1,80,'멤버')).first();
-      if (!member || member.board !== postBoard) throw new HTTPError(400, '같은 게시판의 멤버를 선택해 주세요.');
+      if (!member || (member.board !== postBoard && !(table === 'comments' && memberId === row.member_id))) throw new HTTPError(400, '같은 게시판의 멤버를 선택해 주세요.');
       author = member.name;
     }
+    const meta = table === 'posts' ? staffMeta(postBoard, postBoard==='staff' ? (data.channel ?? row.channel ?? 'free') : 'free', postBoard==='staff' ? JSON.parse(row.tags||'[]') : []) : null;
     const changes = [
       table === 'posts'
-        ? env.DB.prepare('UPDATE posts SET title=?,body=?,updated_at=?,created_at=?,author=?,member_id=? WHERE id=?').bind(
+        ? env.DB.prepare('UPDATE posts SET title=?,body=?,updated_at=?,created_at=?,author=?,member_id=?,board=?,channel=?,tags=? WHERE id=?').bind(
             text(data.title, 1, 100, '제목'),
             text(data.body, 1, 5000, '내용'),
             Date.now(),
             postTime(data.created_at, row.created_at),
-            author, memberId, id,
+            author, memberId, postBoard, meta.channel, meta.tags, id,
           )
         : env.DB.prepare('UPDATE comments SET body=?,updated_at=?,created_at=?,author=?,member_id=? WHERE id=?').bind(
-            text(data.body, 1, 1000, '내용'),
+            text(data.body ?? '', data.images?.length ? 0 : 1, 1000, '내용'),
             Date.now(), postTime(data.created_at, row.created_at), author, memberId, id,
           ),
     ];
-    if (table === 'posts') changes.push(...(await imageChanges(env, id, data.images)));
+    changes.push(...(await imageChanges(env, id, data.images, table === 'comments')));
     changes.push(
       env.DB.prepare('INSERT INTO audit(id,action,target,created_at) VALUES (?,?,?,?)').bind(
         random(),
-        'ADMIN_EDIT',
+        table==='posts' && (row.board!==postBoard || row.channel!==meta.channel) ? 'ADMIN_MOVE' : 'ADMIN_EDIT',
         id,
         Date.now(),
       ),

@@ -1,6 +1,6 @@
 # 홈페이지 구성 안내
 
-> 확인일: **2026-11-07** · 기준: 현재 저장소의 라우터, 페이지 파일, 공개 빌드 목록.
+> 확인일: **2026-11-19** · 기준: 현재 저장소의 라우터, 페이지 파일, 공개 빌드 목록.
 > 홈페이지: https://onlyunlimit.github.io/ · 최근 변경: [CHANGELOG.md](CHANGELOG.md)
 >
 > 이 문서는 **현재 코드 구성**을 설명합니다. 배포 여부는 변경 이력의 배포 상태에서 별도로 확인합니다.
@@ -249,3 +249,14 @@
 - 럭키트릭/옵시더스 커뮤니티의 기존 상단 그룹 로고 유지. 럭키트릭은 밝은 핑크, 옵시더스는 블랙·실버·골드 테마로 모드 전환과 무관하게 유지하며 이탈 시 사이트 모드로 복귀. 사내 게시판은 라이트/다크를 따릅니다.
 - `/elysian.html`, `/hunterwind.html` 상단 중앙 기획사 표기를 그룹 로고로 교체. 히어로 아래 로고는 제거하고 큰 제목은 ELYSIAN/HUNTERWIND 영어 표기.
 - 본명 병기가 있던 4명의 공개 인물 이름·사진 캡션·태그와 D1 멤버/공식 작성자 표기를 코드네임으로 정리. `0010_public_codenames.sql`은 관련 이름만 변경하고 글·댓글 본문과 프로필 사진은 보존합니다.
+
+## 커뮤니티 대화·관리 경로 (2026-11-19)
+
+| 화면/기능 | 경로 · 구현 | 저장 |
+| --- | --- | --- |
+| 게시글·댓글 언급, 본인 수정, 댓글 사진/GIF, BEST·답글 접기 | `community.html?board=lucky/obsidus/staff`, `assets/community.js`, `community-media.js`, `mentions.js` | 공유 D1 글·댓글·첨부 |
+| 관리자 게시판 이동·공식 댓글 첨부 | API 호스트 `/admin`, `backend/admin-composer.js`, `fan.js` | 기존 ID 유지, 감사 기록 |
+| 아이폰 홈 화면 관리자 웹앱 | API 호스트 `/admin`, `/admin/manifest.webmanifest`, `/admin/sw.js`, `backend/admin-pwa.js` | 로그인 쿠키·기기 푸시 구독 |
+| 관리자 새 활동 알림 | `/admin/notifications`, `/admin/push/*`, `backend/notifications.js` | 이벤트 30일·구독 최대 10개 |
+
+메신저 대기 문구 후보는 로컬 검토용 문서이며 홈페이지 문구에 자동 적용하지 않습니다. 아이폰 설치·권한 설정은 [운영 문서](docs/COMMUNITY-OPERATIONS.md)를 확인하세요.

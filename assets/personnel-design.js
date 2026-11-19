@@ -29,6 +29,7 @@ export function visualSignature(c) {
 }
 export function scanMarkup(c) {
   const v = visualSignature(c);
+  if (v.mode === 'studio') return '';
   return `<span class="video-echo" aria-hidden="true"><img src="${c.portrait}" alt="" loading="lazy" draggable="false"></span><span class="video-time" aria-hidden="true">REC <i></i> ${v.number} / ${c.code}</span><span class="video-scan" aria-hidden="true"></span><span class="video-corners" aria-hidden="true"></span>`;
 }
 export function openSequence(dialog, c) {
@@ -37,6 +38,7 @@ export function openSequence(dialog, c) {
   stage.dataset.mode = v.mode;
   stage.dataset.subject = c.id;
   stage.style.setProperty('--profile-skew', v.angle + 'deg');
+  if (v.mode === 'studio') return;
   if (!state.motion || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const overlay = document.createElement('div');
   overlay.className = 'profile-acquisition';

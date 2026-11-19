@@ -225,3 +225,12 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 ### 댓글 작성 양식 접기/펼치기
 
 `assets/community.js`의 `openPost()` 안에서 `#comment-compose-toggle` 버튼과 `#comment-compose-panel`을 제어합니다. 기본은 접힌 상태이며 답글 선택 시 자동으로 펼칩니다. 양식을 처음 펼칠 때 보안 확인을 초기화합니다. 댓글 카드 모양은 기존 `assets/fan-community.css`의 `.comment-row`에서 수정합니다.
+
+## 2026-11-19 커뮤니티 대화와 아티스트 프로필
+
+- 글·댓글 구조, 작성/수정 위치, 답글 접기, BEST 선정: `assets/community.js`의 `openPost`, `edit`, `updateBestComments`.
+- 작은 수정/삭제 글자, BEST 붉은 테두리, 답글 여백: `assets/team-themes.css` 맨 아래 `Community conversation controls` 블록.
+- @ 자동완성·키보드 선택·프로필 링크: `assets/mentions.js`. 관리자 문자열은 `node backend/scripts/build-admin-media.mjs`로 다시 생성합니다.
+- 첨부 선택·× 취소·GIF 입력 안내: `assets/community-media.js`.
+- 옵시더스/럭키트릭 소개 대비: `assets/team-themes.css`의 `--profile-surface`, `--profile-ink`, `--profile-accent`. 프로필 열람 대기 효과: `assets/personnel-design.js`의 studio 분기.
+- 관리자 홈 화면 앱·알림 버튼: `backend/admin-pwa.js`. 관리자 댓글/게시판 이동: `backend/admin-composer.js`. 변경 시 Worker를 별도 배포해야 합니다.

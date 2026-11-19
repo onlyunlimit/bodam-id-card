@@ -89,3 +89,8 @@
 - `assets/art/personnel-placeholder.svg`: 직접 제작한 인물 미등록용 도형 실루엣. 딜러·리어·판덴의 실제 외형으로 설명하지 않습니다.
 - 블랙잭 포커·시소의 인물 사진은 사용자가 로컬 소개 자료에 연결한 기존 Caveduck CDN URL을 사용합니다. 정확한 URL은 `assets/characters.js`의 해당 두 레코드에 있습니다. 원본 참고 이미지 파일을 복제하지 않았습니다.
 - 엔터테인먼트 화면은 [JYP 공식 사이트](https://www.jype.com/)의 큰 아티스트 비주얼과 [SM 아티스트 목록](https://www.smentertainment.com/artist/)의 탐색 구조를 참고했습니다. 해당 사이트 사진·로고·코드를 가져오지 않았으며 기존 SGIA 인물 사진·그룹 로고만 사용합니다.
+
+### 2026-11-19 프로필·관리자 앱
+
+- 시소 프로필: 사용자가 지정한 Caveduck CDN `charim-standard/8dd8f6f3-06b7-4f12-ad7f-5fa0754be21a?v=042da7`. 공개 설정은 WebP/metadata=none 변환 URL을 사용합니다. `assets/characters.js`, `backend/migrations/0012_siso_portrait.sql`.
+- SGIA 관리자 홈 화면 아이콘: 남색 바탕·금색 S 형태의 자체 코드 도형. 192/512px PNG를 `backend/admin-icons.js`에서 제공합니다. 외부 참고 사진이나 개인 자료를 포함하지 않습니다.

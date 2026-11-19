@@ -30,6 +30,7 @@ async function fixture() {
   sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0010_public_codenames.sql', import.meta.url), 'utf8'));
+  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -696,4 +697,76 @@ test('File attachments from existing clients are accepted, sanitized at rest, ed
  const avatar=sql.prepare("SELECT avatar_url FROM members WHERE id='jaein'").get().avatar_url;
  assert.deepEqual(Buffer.from(await (await req(avatar)).response.arrayBuffer()),original);
  assert.equal(sql.prepare('SELECT COUNT(*) n FROM images WHERE hex(data) LIKE ?').get('%'+marker.toString('hex').toUpperCase()+'%').n,0);
+});
+
+test('Admin board move preserves the post identity, comments, PIN and likes; rejects impersonation',async()=>{
+ const {sql,req,post,key}=await fixture();
+ const id=(await req('/posts','POST',{...post,channel:'soliloquy',tags:['team:shield']})).data.id;
+ await req('/posts/'+id+'/comments','POST',{author:'팬',body:'@데인 안녕하세요',password:'123456',captcha:'verified',consent:true});
+ await req('/posts/'+id+'/like','POST',{liked:true});
+ const old=sql.prepare('SELECT password_hash FROM posts WHERE id=?').get(id).password_hash;
+ const login=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const options={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
+ assert.equal((await req('/admin/posts/'+id,'PATCH',{title:'이동',body:'@재인 응원',board:'lucky',member_id:'dain'},options)).status,400);
+ assert.equal((await req('/admin/posts/'+id,'PATCH',{title:'이동',body:'@재인 응원',board:'lucky',member_id:null},options)).status,200);
+ const detail=(await req('/posts/'+id)).data;
+ assert.equal(detail.post.board,'lucky');assert.equal(detail.post.channel,'free');assert.deepEqual(detail.post.tags,[]);assert.equal(detail.post.likes,1);assert.equal(detail.comments.length,1);
+ assert.equal(sql.prepare('SELECT password_hash FROM posts WHERE id=?').get(id).password_hash,old);
+ assert.equal((await req('/posts?board=staff')).data.posts.length,0);
+ assert.equal((await req('/admin/posts?post='+id,undefined,undefined,options)).data.posts[0].id,id);
+ assert.equal((await req('/admin/posts/'+id,'PATCH',{title:'이동',body:'다시 이동',board:'staff',channel:'soliloquy'},options)).status,200);
+ assert.equal((await req('/posts/'+id)).data.post.channel,'soliloquy');
+});
+
+test('Admin notifications require authentication, persist creation only, and reject unsafe push endpoints',async()=>{
+ const {sql,env,req,post,key}=await fixture();
+ assert.equal((await req('/admin/notifications')).status,401);
+ const id=(await req('/posts','POST',post)).data.id;
+ const comment=(await req('/posts/'+id+'/comments','POST',{body:'@데인 확인',password:'123456',captcha:'verified',consent:true})).data.id;
+ assert.equal(sql.prepare('SELECT count(*) AS n FROM notification_events').get().n,2);
+ const login=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const options={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
+ const events=(await req('/admin/notifications','GET',undefined,options)).data.events;
+ assert.equal(events.length,2);assert.ok(events.every(e=>e.post_id===id));assert.ok(events.some(e=>e.id===comment));
+ assert.equal((await req('/admin/push/config','GET',undefined,options)).data.publicKey,null);
+ env.VAPID_PUBLIC_KEY='test';env.VAPID_PRIVATE_KEY='test';
+ for(const endpoint of ['https://127.0.0.1/push','https://fcm.googleapis.com.attacker.test/a','http://web.push.apple.com/a','https://user:pass@web.push.apple.com/a'])assert.equal((await req('/admin/push/subscription','POST',{endpoint,keys:{}},options)).status,400);
+ assert.equal((await req('/admin/push/revoke','POST',{}, {...options,origin:'https://attacker.test'})).status,403);
+ const pair=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+ const keys={p256dh:Buffer.from(await crypto.subtle.exportKey('raw',pair.publicKey)).toString('base64url'),auth:Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64url')};
+ const subscription={endpoint:'https://web.push.apple.com/test-subscription',keys};
+ assert.equal((await req('/admin/push/subscription','POST',subscription,options)).status,200);
+ assert.equal((await req('/admin/push/subscription','POST',subscription,options)).status,200);
+ assert.equal(sql.prepare('SELECT count(*) AS n FROM push_subscriptions').get().n,1);
+ assert.equal((await req('/admin/push/subscription','DELETE',{endpoint:subscription.endpoint},options)).status,200);
+ assert.equal(sql.prepare('SELECT count(*) AS n FROM push_subscriptions').get().n,0);
+ const manifest=await req('/admin/manifest.webmanifest');assert.equal(manifest.data.display,'standalone');
+ const sw=await req('/admin/sw.js');assert.match(await sw.response.text(),/notificationclick/);assert.equal(sw.response.headers.get('Service-Worker-Allowed'),'/admin');
+});
+
+test('Comment files, GIFs and links can be edited only with the owner PIN and follow visibility',async()=>{
+ const {req,key,post,sql}=await fixture();
+ const id=(await req('/posts','POST',post)).data.id;
+ const gif='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+ const input={body:'@재인 사진입니다',author:'처음 이름',password:'123456',captcha:'verified',consent:true,images:[gif,{url:'https://images.example/comment.png'}]};
+ const c=await req('/posts/'+id+'/comments','POST',input);assert.equal(c.status,201,JSON.stringify(c.data));
+ const cid=c.data.id;let detail=(await req('/posts/'+id)).data;
+ assert.equal(detail.comments[0].images.length,2);const image=detail.comments[0].images.find(x=>x.mime==='image/gif').id;
+ assert.equal((await req('/media/'+image)).response.headers.get('Content-Type'),'image/gif');
+ assert.equal((await req('/comments/'+cid,'PATCH',{...input,password:'000000',author:'탈취',images:[]})).status,403);
+ assert.equal(sql.prepare('SELECT count(*) n FROM comment_images').get().n,2);
+ assert.equal((await req('/comments/'+cid,'PATCH',{...input,author:'새 이름',body:'수정한 @재인',images:[{id:image}]})).status,200);
+ detail=(await req('/posts/'+id)).data;assert.equal(detail.comments[0].author,'새 이름');assert.equal(detail.comments[0].images.length,1);
+ assert.equal((await req('/posts/'+id,'PATCH',{...post,author:'게시글 새 이름'})).status,200);assert.equal((await req('/posts/'+id)).data.post.author,'게시글 새 이름');
+ const login=await req('/admin/login','POST',{key},{origin:'https://sgia.test'}),options={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
+ await req('/admin/moderate','POST',{kind:'comment',id:cid,action:'hide'},options);assert.equal((await req('/media/'+image)).status,404);assert.equal(sql.prepare('SELECT count(*) n FROM comment_images').get().n,1);
+ await req('/admin/moderate','POST',{kind:'comment',id:cid,action:'restore'},options);assert.equal((await req('/media/'+image)).status,200);
+ const c2=(await req('/posts/'+id+'/comments','POST',{...input,images:[]})).data.id;
+ assert.equal((await req('/comments/'+c2,'PATCH',{...input,images:[{id:image}]})).status,400);
+ const reply=(await req('/posts/'+id+'/comments','POST',{...input,parent_id:cid})).data.id;
+ const replyImage=sql.prepare('SELECT id FROM comment_images WHERE comment_id=?').get(reply).id;
+ await req('/admin/moderate','POST',{kind:'comment',id:cid,action:'hide'},options);assert.equal((await req('/media/'+replyImage)).status,404);
+ await req('/admin/moderate','POST',{kind:'comment',id:cid,action:'restore'},options);
+ assert.equal((await req('/comments/'+cid,'DELETE',{password:'123456',captcha:'verified'})).status,200);assert.equal((await req('/media/'+image)).status,404);
+ assert.equal(sql.prepare('SELECT count(*) n FROM comment_images WHERE comment_id=?').get(cid).n,0);
 });

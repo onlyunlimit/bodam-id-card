@@ -263,7 +263,7 @@ export const characters = [
   {
     "id": "dain",
     "team": "shield",
-    "code": "DAIN",
+    "code": "DEIN",
     "name": "데인",
     "rank": "S",
     "age": 25,
@@ -695,12 +695,12 @@ export const characters = [
   "appearance": "흑발 · 흑안 · 검은 체크 스카프",
   "location": "각성관 · 블랙잭",
   "link": null,
-  "portrait": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim-standard/dc108656-4e56-4d1a-a1c4-b2c18fa8eac4?v=8172d8",
+  "portrait": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=webp,w=800,metadata=none/charim-standard/8dd8f6f3-06b7-4f12-ad7f-5fa0754be21a?v=042da7",
   "notes": "대테러 대응과 고위험 현장의 돌입·회수 임무를 수행한다.",
   "gallery": [
     {
       "label": "시소",
-      "url": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim-standard/dc108656-4e56-4d1a-a1c4-b2c18fa8eac4?v=8172d8"
+      "url": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=webp,w=800,metadata=none/charim-standard/8dd8f6f3-06b7-4f12-ad7f-5fa0754be21a?v=042da7"
     }
   ]
 }

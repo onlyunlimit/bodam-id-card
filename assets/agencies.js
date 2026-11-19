@@ -25,7 +25,7 @@ export function renderAgency(agency) {
   listen($('#spotlight-prev'),'click',()=>advance(-1));
   listen($('#spotlight-next'),'click',()=>advance(1));
   listen($('#spotlight-pause'),'click',e=>{paused=!paused;e.currentTarget.setAttribute('aria-pressed',String(paused));e.currentTarget.textContent=paused?'재생':'일시 정지';});
-  every(()=>{if(!paused && state.motion && !document.hidden && !matchMedia('(prefers-reduced-motion: reduce)').matches) advance(1);},6500);
+  every(()=>{if(!document.querySelector('dialog[open]') && !paused && state.motion && !document.hidden && !matchMedia('(prefers-reduced-motion: reduce)').matches) advance(1);},6500);
   $$('[data-artist]').forEach(
     (b) => (b.onclick = () => dossier(people.find((c) => c.id === b.dataset.artist))),
   );

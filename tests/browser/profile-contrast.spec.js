@@ -53,3 +53,11 @@ test('AZ archive replaces text art with a readable evidence dossier and keeps tr
   await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
  }
 });
+
+for(const [team,path] of [['obsidus','hunterwind'],['lucky','elysian']])test(`${team} artist profile opens without blocking effects and remains readable`,async({page})=>{
+ await page.goto('/'+path+'.html');
+ const ids=await page.locator('.artist-strip [data-artist],.agency-lineup [data-artist]').evaluateAll(es=>[...new Set(es.map(e=>e.dataset.artist))]);
+ const all=ids.length?ids:await page.locator('[data-artist]').evaluateAll(es=>[...new Set(es.map(e=>e.dataset.artist))]);expect(all.length).toBe(4);
+ for(const theme of ['light','dark']){if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();for(const id of all){await page.locator('[data-artist="'+id+'"]').first().click();await expect(page.locator('.profile-stage')).toBeVisible();await expect(page.locator('.profile-acquisition,.profile-stage .video-echo')).toHaveCount(0);for(const field of await page.locator('.profile-document :is(h3,h3 small,p,dt,dd,a,.coming-soon),.profile-filebar').all())await expect.poll(()=>contrast(field),{message:id+'/'+theme+': '+await field.textContent()}).toBeGreaterThanOrEqual(4.5);await page.keyboard.press('Escape');}}
+ await page.setViewportSize({width:320,height:850});await page.locator('[data-artist]').first().click();expect(await page.locator('#document-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1)).toBe(true);
+});

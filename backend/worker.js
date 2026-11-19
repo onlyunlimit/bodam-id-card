@@ -1,3 +1,6 @@
+import { notificationAPI, notificationStatement, dispatchNotification } from './notifications.js';
+import { adminManifest, adminSW } from './admin-pwa.js';
+import { adminIcons } from './admin-icons.js';
 import { geocode } from './geocode.js';
 import { staffMeta, staffTagSuggestions } from './staff.js';
 import {
@@ -5,6 +8,7 @@ import {
   adminFan,
   postFields,
   enrichPosts,
+  attachments,
   imageChanges,
   parentComment,
 } from './fan.js';
@@ -40,7 +44,7 @@ async function body(request) {
     const { done, value } = await reader.read();
     if (done) break;
     total += value.length;
-    if (total > 1200000) {
+    if (total > 3000000) {
       await reader.cancel();
       throw new HTTPError(413, '본문이 너무 큽니다.');
     }
@@ -135,12 +139,15 @@ async function handle(request, env) {
       throw new HTTPError(403, '허용되지 않은 출처입니다.');
   }
   if (path === '/health') return json({ ready: !!env.TURNSTILE_SECRET });
+  if (method==='GET' && path==='/admin/manifest.webmanifest') return new Response(JSON.stringify(adminManifest),{headers:{'Content-Type':'application/manifest+json'}});
+  if (method==='GET' && path==='/admin/sw.js') return new Response(adminSW,{headers:{'Content-Type':'text/javascript','Service-Worker-Allowed':'/admin'}});
+  if (method==='GET' && adminIcons[path]) return new Response(Uint8Array.from(atob(adminIcons[path]),c=>c.charCodeAt(0)),{headers:{'Content-Type':'image/png'}});
   if (path === '/admin' && method === 'GET')
     return new Response(adminHTML, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Content-Security-Policy':
-          "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data: https:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+          "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; img-src 'self' data: https:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
       },
     });
   if (path === '/admin/app.js' && method === 'GET')
@@ -168,6 +175,9 @@ async function handle(request, env) {
   }
   if (isAdmin) {
     const hash = await session(request, env);
+    if(path.startsWith('/admin/push/') && method!=='GET') await rate(env,'push:'+hash,20,60);
+    const notificationResponse=await notificationAPI(request,env,body);
+    if(notificationResponse)return notificationResponse;
     const fanResponse = await adminFan(request, env, { body, identity, sourceLog });
     if (fanResponse) return fanResponse;
     if (path === '/admin/logout' && method === 'POST') {
@@ -182,9 +192,9 @@ async function handle(request, env) {
     if (path === '/admin/posts' && method === 'GET') {
       const offset = Math.max(0, Math.min(100000, Number(url.searchParams.get('offset')) || 0));
       const { results } = await env.DB.prepare(
-        'SELECT id,board,title,author,department,body,created_at,updated_at,hidden,deleted_at,member_id FROM posts ORDER BY created_at DESC LIMIT 30 OFFSET ?',
+        'SELECT id,board,title,author,department,body,created_at,updated_at,hidden,deleted_at,member_id,channel,tags FROM posts WHERE (? IS NULL OR id=?) ORDER BY created_at DESC LIMIT 30 OFFSET ?',
       )
-        .bind(offset)
+        .bind(url.searchParams.get('post'),url.searchParams.get('post'),url.searchParams.has('post')?0:offset)
         .all();
       return json({ posts: await enrichPosts(env, results), offset });
     }
@@ -194,7 +204,7 @@ async function handle(request, env) {
       )
         .bind(url.searchParams.get('post'))
         .all();
-      return json({ comments: results });
+      return json({ comments: await Promise.all(results.map(async c=>({...c,images:await attachments(env,c.id,true)}))) });
     }
     if (path === '/admin/ip' && method === 'POST') {
       const data = await body(request),
@@ -263,8 +273,10 @@ async function handle(request, env) {
           now(),
         ),
       );
-      if (data.action === 'delete' && data.kind === 'post')
-        changes.push(env.DB.prepare('DELETE FROM images WHERE post_id=?').bind(id));
+      if (data.action === 'delete') {
+        if(data.kind==='post')changes.push(env.DB.prepare('DELETE FROM images WHERE post_id=?').bind(id));
+        changes.push(env.DB.prepare(data.kind==='post'?'DELETE FROM comment_images WHERE comment_id IN (SELECT id FROM comments WHERE post_id=?)':'DELETE FROM comment_images WHERE comment_id=?').bind(id));
+      }
       await env.DB.batch(changes);
       return json({ ok: true });
     }
@@ -431,6 +443,7 @@ async function handle(request, env) {
     const comments = await Promise.all(
       results.map(async (c) => ({
         ...c,
+        images: await attachments(env,c.id,true),
         liked: !!(await env.DB.prepare(
           'SELECT comment_id FROM comment_likes WHERE comment_id=? AND voter=?',
         )
@@ -461,7 +474,7 @@ async function handle(request, env) {
         pwd = await passwordHash(data.password, salt, env.PASSWORD_PEPPER),
         created = now(),
         author = text(data.author ?? '', 0, 24, '닉네임'),
-        content = text(data.body, 1, path === '/posts' ? 5000 : 1000, '내용');
+        content = text(data.body ?? '', path !== '/posts' && data.images?.length ? 0 : 1, path === '/posts' ? 5000 : 1000, '내용');
       let stmt;
       const aliases = [];
       if (path === '/posts') {
@@ -506,7 +519,8 @@ async function handle(request, env) {
       await env.DB.batch([
         ...aliases,
         stmt,
-        ...(path === '/posts' ? await imageChanges(env, id, data.images) : []),
+        notificationStatement(env,id,path==='/posts'?id:match[2],path==='/posts'?'post':'comment'),
+        ...await imageChanges(env, id, data.images, path !== '/posts'),
         await sourceLog(env, id, path === '/posts' ? 'post' : 'comment', ip, hash),
       ]);
       return json({ id }, 201);
@@ -538,6 +552,7 @@ async function handle(request, env) {
       }
       if (method === 'PATCH') {
         const changes = [];
+        if(data.author !== undefined) changes.push(env.DB.prepare(`UPDATE ${table} SET author=? WHERE id=?`).bind(text(data.author,1,24,'작성자 닉네임'),id));
         if (row.pin_length === 4 || data.newPassword) {
           pin(data.newPassword);
           const salt = random();
@@ -572,11 +587,12 @@ async function handle(request, env) {
         } else
           changes.push(
             env.DB.prepare('UPDATE comments SET body=?,updated_at=? WHERE id=?').bind(
-              text(data.body, 1, 1000, '내용'),
+              text(data.body ?? '', (data.images === undefined ? (await attachments(env,id,true)).length : data.images?.length) ? 0 : 1, 1000, '내용'),
               now(),
               id,
             ),
           );
+        if(table==='comments')changes.push(...await imageChanges(env,id,data.images,true));
         await env.DB.batch(changes);
       } else {
         const statements = [
@@ -592,6 +608,7 @@ async function handle(request, env) {
           );
         if (table === 'posts')
           statements.push(env.DB.prepare('DELETE FROM images WHERE post_id=?').bind(id));
+        statements.push(env.DB.prepare(table==='posts'?'DELETE FROM comment_images WHERE comment_id IN (SELECT id FROM comments WHERE post_id=?)':'DELETE FROM comment_images WHERE comment_id=?').bind(id));
         await env.DB.batch(statements);
       }
       return json({ ok: true });
@@ -600,10 +617,11 @@ async function handle(request, env) {
   throw new HTTPError(404, '경로가 없습니다.');
 }
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     let response;
     try {
       response = await handle(request, env);
+      if(request.method==='POST'&&response.status===201&&(/^\/posts(?:\/[a-f0-9-]{36}\/comments)?$/.test(new URL(request.url).pathname)||['/admin/publish','/admin/reply'].includes(new URL(request.url).pathname))){const {id}=await response.clone().json();const delivery=dispatchNotification(env,id).catch(()=>{});if(ctx?.waitUntil)ctx.waitUntil(delivery);else await delivery;}
     } catch (e) {
       response = json(
         {
@@ -634,6 +652,7 @@ export default {
     const time = now(),
       cutoff = new Date(time - 3 * 86400000).toISOString().slice(0, 10);
     await env.DB.batch([
+      env.DB.prepare('DELETE FROM notification_events WHERE created_at<?').bind(time-30*86400000),
       env.DB.prepare('DELETE FROM access_logs WHERE created_at<?').bind(time - 30 * 86400000),
       env.DB.prepare('DELETE FROM rate_limits WHERE expires<?').bind(time),
       env.DB.prepare('DELETE FROM sessions WHERE expires<?').bind(time),

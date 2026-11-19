@@ -424,3 +424,26 @@ test('Fan communities keep their own palette across mode changes and retain grou
   await page.keyboard.press('Escape');
  }
 });
+
+test('Comment owner edits author, text and GIF attachments; best replies and reply folding stay usable',async({page})=>{
+ const f=await mock(page);const postId='11111111-1111-4111-8111-111111111111';
+ f.posts.push({id:postId,board:'lucky',title:'댓글 확인',body:'본문 @재인',author:'팬',pin_length:6,created_at:Date.now(),images:[]});
+ const root='22222222-2222-4222-8222-000000000001';
+ f.comments.push({id:root,post_id:postId,author:'첫 댓글',body:'원래 내용',pin_length:6,created_at:1,likes:3,images:[]});
+ for(let i=2;i<=5;i++)f.comments.push({id:'22222222-2222-4222-8222-'+String(i).padStart(12,'0'),post_id:postId,parent_id:root,author:'답글'+i,body:'답글 내용',pin_length:6,created_at:i,likes:i,images:[]});
+ await page.goto('/community.html?board=lucky');await page.locator('.post-row').click();
+ await expect(page.locator('.post-body .member-mention')).toHaveText('@재인');
+ await expect(page.locator('.reply-thread')).not.toHaveAttribute('open');await expect(page.locator('.best-comment')).toHaveCount(3);
+ await page.locator('.reply-thread summary').click();await expect(page.locator('.reply-thread')).toHaveAttribute('open','');
+ await page.locator('[data-comment-edit="'+root+'"]').click();await page.locator('#edit-form [name=author]').fill('바꾼 이름');await page.locator('#edit-form [name=body]').fill('@재');await page.getByRole('option',{name:'@재인 · LUCKY'}).click();
+ await page.locator('#edit-form [name=password]').fill('123456');
+ await page.locator('#edit-form [data-images]').setInputFiles({name:'test.gif',mimeType:'image/gif',buffer:Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==','base64')});
+ await expect(page.locator('.upload-image')).toHaveCount(1);await page.locator('#edit-form button[type=submit]').click();
+ await expect(page.locator('#comment-'+root)).toContainText('바꾼 이름');expect(f.comments[0].images[0]).toMatch(/^data:image\/gif;base64,/);expect(f.comments[0].body).toBe('@재인 ');
+ await expect(page.locator('.reply-thread')).toHaveAttribute('open','');
+ const footer=await page.locator('.post-controls').boundingBox(),body=await page.locator('.post-body').boundingBox();expect(footer.y).toBeGreaterThan(body.y);
+ await expect(page.locator('.fan-post-detail>.fan-author .record-edit-links #post-edit')).toBeVisible();
+ await page.locator('[data-reply="'+root+'"]').click();await page.locator('#comment-form [name=password]').fill('123456');await page.locator('#comment-form [name=body]').fill('새 답글');await page.locator('#comment-form [name=consent]').check();await page.locator('#comment-form button[type=submit]').click();
+ await expect(page.locator('.reply-thread')).toHaveAttribute('open','');await expect(page.locator('.reply-thread')).toContainText('새 답글');
+ await page.setViewportSize({width:320,height:850});expect(await page.locator('#document-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1)).toBe(true);
+});

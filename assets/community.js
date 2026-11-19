@@ -1,3 +1,4 @@
+import { attachMentions, mentionMarkup, mentionCSS } from './mentions.js';
 import {
   channelName,
   tagOptions,
@@ -280,6 +281,7 @@ export function renderCommunity() {
       delete document.documentElement.dataset.communityTheme;
     });
   }
+  const mentionStyle=document.createElement('style');mentionStyle.textContent=mentionCSS;document.head.append(mentionStyle);onDispose(()=>mentionStyle.remove());
   const adminLink = serviceConfig.api + '/admin?board=' + board;
   const communityModal = (title, html, kind) => {
     const d = modal(title, html, kind);
@@ -455,6 +457,7 @@ export function renderCommunity() {
       `<form id="post-form" class="board-form"><label>제목<input name="title" maxlength="100" required></label><div class="form-row"><label>닉네임 (선택)<input name="author" maxlength="24" placeholder="비우면 ㅇㅇ"></label>${pinInput()}</div>${!fan ? staffFields(channel) : ''}${!fan ? '<div class="form-row"><label>소속<select name="department" id="department-choice"><option>오리진</option><option>비콘</option><option>실드</option><option>블랙잭</option><option>가이드 관리국</option><option>센티넬 관리국</option><option>일반 행정</option><option>괴물</option><option>익명</option><option value="custom">직접 입력</option></select></label><label id="department-custom-label" hidden>직접 입력<input name="customDepartment" maxlength="40"></label></div>' : ''}<label>내용<textarea name="body" maxlength="5000" required></textarea></label>${uploadMarkup}${consent()}${captchaMarkup()}<button class="primary" type="submit">등록</button><small>작성 비밀번호를 기억해 주세요. 수정·삭제에 사용합니다.</small></form>`,
       'community-post',
     );
+    attachMentions($('#post-form textarea[name=body]'),()=>members);
     const f = $('#post-form'),
       images = attachmentPicker(f, [], mediaURL);
     if (!fan) connectStaffFields(f, api);
@@ -480,6 +483,7 @@ export function renderCommunity() {
       toast('게시물이 저장되었습니다.');
     });
   };
+  const expandedReplies=new Set();
   async function openPost(id) {
     if (!fan && !state.staff) return login(() => openPost(id));
     const ticket = ++detailRequest;
@@ -488,16 +492,21 @@ export function renderCommunity() {
       if (signal.aborted || ticket !== detailRequest || (!fan && !state.staff)) return;
       const p = data.post;
       let replyTo = null;
+      const bestIds=new Set([...data.comments].filter(c=>(c.likes||0)>0).sort((a,b)=>(b.likes||0)-(a.likes||0)||a.created_at-b.created_at||a.id.localeCompare(b.id)).slice(0,3).map(c=>c.id));
       const commentMarkup = (c) =>
-        `<article class="comment-row ${c.parent_id ? 'is-reply' : ''}" id="comment-${esc(c.id)}"><div class="fan-author">${avatar(c.avatar_url, c.member_name || c.author)}<span><b data-user-content>${esc(c.member_name || c.author)}</b>${c.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(c.created_at)}${c.updated_at ? ' · 수정됨' : ''}</time></span></div><p data-user-content>${esc(c.body)}</p><div class="comment-tools"><button data-comment-like="${esc(c.id)}" aria-pressed="${!!c.liked}">♡ ${c.likes || 0}</button><button data-reply="${esc(c.id)}">답글</button>${!c.member_id ? `<button data-comment-edit="${esc(c.id)}">수정</button><button data-comment-delete="${esc(c.id)}">삭제</button>` : ''}</div></article>`;
-      const ordered = data.comments
-        .filter((c) => !c.parent_id)
-        .flatMap((c) => [c, ...data.comments.filter((r) => r.parent_id === c.id)]);
+        `<article class="comment-row ${c.parent_id ? 'is-reply' : ''} ${bestIds.has(c.id)?'best-comment':''}" data-likes="${c.likes||0}" id="comment-${esc(c.id)}"><div class="fan-author">${avatar(c.avatar_url, c.member_name || c.author)}<span><b data-user-content>${esc(c.member_name || c.author)}</b>${c.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(c.created_at)}${c.updated_at ? ' · 수정됨' : ''}</time></span><span class="record-edit-links">${!c.member_id ? `<button data-comment-edit="${esc(c.id)}">수정</button><button data-comment-delete="${esc(c.id)}">삭제</button>` : ''}</span></div>${bestIds.has(c.id)?'<small class="best-comment-label">BEST</small>':''}<p data-user-content>${mentionMarkup(c.body,members)}</p>${photos(c.images)}<div class="comment-tools"><button data-comment-like="${esc(c.id)}" aria-pressed="${!!c.liked}">♡ ${c.likes || 0}</button><button data-reply="${esc(c.id)}">답글</button></div></article>`;
+      const threads=data.comments.filter(c=>!c.parent_id).map(c=>{
+        const replies=data.comments.filter(r=>r.parent_id===c.id);
+        return commentMarkup(c)+(replies.length>1?`<details class="reply-thread" data-thread="${esc(c.id)}" ${expandedReplies.has(c.id)?'open':''}><summary>답글 ${replies.length}개 <span class="thread-open">펼치기</span><span class="thread-close">접기</span></summary>${replies.map(commentMarkup).join('')}</details>`:replies.map(commentMarkup).join(''));
+      }).join('');
       communityModal(
         p.title,
-        `<div class="fan-post-detail" data-community="${board}"><div class="fan-author">${avatar(p.member?.avatar_url, p.member?.name || p.author)}<span data-user-content><b>${esc(p.member?.name || p.author)}</b>${p.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(p.created_at)}${p.updated_at ? ' · 수정됨' : ''}</time></span></div>${!fan ? tagsMarkup(p.tags) : ''}<div class="post-body" data-user-content>${esc(p.body)}</div>${photos(p.images)}<div class="post-controls"><button id="post-like" aria-pressed="${!!p.liked}">♡ <span>좋아요</span> <b>${p.likes || 0}</b></button>${!p.member_id ? '<button id="post-edit">수정</button><button id="post-delete">삭제</button>' : ''}<a href="${adminLink}&post=${encodeURIComponent(id)}" target="_blank" rel="noopener">관리자 관리 ↗</a></div><h3>댓글 ${data.comments.length}</h3><div class="comments">${ordered.map(commentMarkup).join('')}</div><button id="comment-compose-toggle" type="button" aria-expanded="false" aria-controls="comment-compose-panel">댓글 작성</button><div id="comment-compose-panel" hidden><form id="comment-form" class="board-form comment-form"><div id="reply-target" hidden><span></span><button id="reply-cancel" type="button">취소 ×</button></div><div class="form-row"><label>닉네임 (선택)<input name="author" maxlength="24" placeholder="비우면 익명 번호 자동 지정"></label>${pinInput()}</div><label>댓글<textarea name="body" maxlength="1000" required></textarea></label>${consent()}${captchaMarkup()}<button type="submit" class="primary">댓글 등록</button></form></div></div>`,
+        `<div class="fan-post-detail" data-community="${board}"><div class="fan-author">${avatar(p.member?.avatar_url, p.member?.name || p.author)}<span data-user-content><b>${esc(p.member?.name || p.author)}</b>${p.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(p.created_at)}${p.updated_at ? ' · 수정됨' : ''}</time></span><span class="record-edit-links">${!p.member_id ? '<button id="post-edit">수정</button><button id="post-delete">삭제</button>' : ''}</span></div>${!fan ? tagsMarkup(p.tags) : ''}<div class="post-body" data-user-content>${mentionMarkup(p.body,members)}</div>${photos(p.images)}<div class="post-controls"><button id="post-like" aria-pressed="${!!p.liked}">♡ <span>좋아요</span> <b>${p.likes || 0}</b></button><button id="comment-compose-toggle" type="button" aria-expanded="false" aria-controls="comment-compose-panel">댓글 작성</button><a class="post-admin-link" href="${adminLink}&post=${encodeURIComponent(id)}" target="_blank" rel="noopener">관리자 관리 ↗</a></div><h3>댓글 ${data.comments.length}</h3><div class="comments">${threads}</div><div id="comment-compose-panel" hidden><form id="comment-form" class="board-form comment-form"><div id="reply-target" hidden><span></span><button id="reply-cancel" type="button">취소 ×</button></div><div class="form-row"><label>닉네임 (선택)<input name="author" maxlength="24" placeholder="비우면 익명 번호 자동 지정"></label>${pinInput()}</div><label>댓글<textarea name="body" maxlength="1000"></textarea></label>${uploadMarkup}${consent()}${captchaMarkup()}<button type="submit" class="primary">댓글 등록</button></form></div></div>`,
         'community-post',
       );
+      attachMentions($('#comment-form textarea[name=body]'),()=>members);
+      $$('.reply-thread').forEach(el=>el.ontoggle=()=>{if(el.open)expandedReplies.add(el.dataset.thread);else expandedReplies.delete(el.dataset.thread);});
+      const commentImages=attachmentPicker($('#comment-form'),[],mediaURL);
       const composePanel = $('#comment-compose-panel');
       const composeToggle = $('#comment-compose-toggle');
       let commentFormReady = false;
@@ -559,9 +568,11 @@ export function renderCommunity() {
         await api('/posts/' + id + '/comments', 'POST', {
           ...form,
           parent_id: replyTo,
+          images:commentImages(),
           captcha,
           consent: form.consent === 'on',
         });
+        if(replyTo)expandedReplies.add(replyTo);
         await openPost(id);
         load();
         toast('댓글을 저장했습니다.');
@@ -570,12 +581,17 @@ export function renderCommunity() {
       if (!signal.aborted) toast(e.message);
     }
   }
+  function updateBestComments(){
+    const rows=$$('.comment-row'), best=new Set([...rows].filter(e=>Number(e.dataset.likes)>0).sort((a,b)=>Number(b.dataset.likes)-Number(a.dataset.likes)).slice(0,3));
+    rows.forEach(e=>{e.classList.toggle('best-comment',best.has(e));e.querySelector('.best-comment-label')?.remove();if(best.has(e))e.querySelector('.fan-author').insertAdjacentHTML('afterend','<small class="best-comment-label">BEST</small>');});
+  }
   async function like(button, path) {
     button.disabled = true;
     try {
       const r = await api(path, 'POST', { liked: button.getAttribute('aria-pressed') !== 'true' });
       button.setAttribute('aria-pressed', String(r.liked));
       button.textContent = (r.liked ? '♥ ' : '♡ ') + r.likes;
+      if(path.startsWith('/comments/')){button.closest('.comment-row').dataset.likes=r.likes;updateBestComments();}
       load();
     } catch (e) {
       toast(e.message);
@@ -588,12 +604,13 @@ export function renderCommunity() {
     // Replace the form in the open dialog. Closing/reopening here dispatches a delayed close event that destroys the new captcha widget.
     communityModal(
       deleting ? '작성 기록 삭제' : '작성 기록 수정',
-      `<form class="board-form" id="edit-form">${deleting ? '<p>삭제하면 본문을 복구할 수 없습니다. 게시글을 삭제하면 댓글도 함께 삭제됩니다.</p>' : `${kind === 'posts' ? `<label>제목<input name="title" maxlength="100" value="${esc(item.title)}" required></label>` : ''}<label>내용<textarea name="body" maxlength="${kind === 'posts' ? 5000 : 1000}" required>${esc(item.body)}</textarea></label>${kind === 'posts' ? uploadMarkup : ''}${kind === 'posts' && item.board === 'staff' ? staffFields(item.channel, item.tags) : ''}`}${pinInput(legacy ? 4 : 6, legacy ? '기존 작성 비밀번호' : '작성 비밀번호')}${legacy && !deleting ? pinInput(6, '새 비밀번호', 'newPassword') + '<small>기존 글은 이번 수정부터 6자리 비밀번호로 보호됩니다.</small>' : ''}${captchaMarkup()}<button class="primary" type="submit">${deleting ? '삭제 확인' : '수정 저장'}</button></form>`,
+      `<form class="board-form" id="edit-form">${deleting ? '<p>삭제하면 본문을 복구할 수 없습니다. 게시글을 삭제하면 댓글도 함께 삭제됩니다.</p>' : `${kind === 'posts' ? `<label>제목<input name="title" maxlength="100" value="${esc(item.title)}" required></label>` : ''}<label>작성자 이름<input name="author" maxlength="24" value="${esc(item.author)}" required></label><label>내용<textarea name="body" maxlength="${kind === 'posts' ? 5000 : 1000}" ${kind==='posts'?'required':''}>${esc(item.body)}</textarea></label>${uploadMarkup}${kind === 'posts' && item.board === 'staff' ? staffFields(item.channel, item.tags) : ''}`}${pinInput(legacy ? 4 : 6, legacy ? '기존 작성 비밀번호' : '작성 비밀번호')}${legacy && !deleting ? pinInput(6, '새 비밀번호', 'newPassword') + '<small>기존 글은 이번 수정부터 6자리 비밀번호로 보호됩니다.</small>' : ''}${captchaMarkup()}<button class="primary" type="submit">${deleting ? '삭제 확인' : '수정 저장'}</button></form>`,
       'community-post',
     );
+    attachMentions($('#edit-form textarea[name=body]'),()=>members);
     const f = $('#edit-form'),
       images =
-        !deleting && kind === 'posts' ? attachmentPicker(f, item.images || [], mediaURL) : null;
+        !deleting ? attachmentPicker(f, item.images || [], mediaURL) : null;
     if (!deleting && item.board === 'staff') connectStaffFields(f, api);
     secureForm(f, async (data, captcha) => {
       if (!fan && !state.staff) throw Error('직원 채널에 다시 접속해 주세요.');

@@ -1,5 +1,9 @@
 // Decode and re-encode uploads so orientation is applied and source metadata is removed.
 export async function compressImage(file) {
+  if(file.type==='image/gif'){
+    if(file.size>1048576)throw Error('움직이는 GIF는 1MB 이하 파일 또는 HTTPS 링크를 사용해 주세요.');
+    return await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('GIF 파일을 읽지 못했습니다.'));reader.readAsDataURL(file);});
+  }
   if (
     !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
     file.size > 20 * 1024 * 1024
@@ -95,4 +99,4 @@ export function attachmentPicker(form, initial = [], urlFor = (id) => id, limit 
   };
 }
 export const uploadMarkup =
-  '<div class="upload-field"><label>사진 첨부 · 최대 2장<input type="file" data-images accept="image/jpeg,image/png,image/webp" multiple></label><small>원본 20MB 이하 · 자동 압축 · 또는 HTTPS 이미지 링크</small><div class="image-url-row"><input type="url" data-image-url aria-label="이미지 URL" placeholder="https://… 이미지 주소"><button type="button" data-add-image-url>링크 추가</button></div><div class="upload-preview"></div><p class="upload-status" role="status"></p></div>';
+  '<div class="upload-field"><label>사진 첨부 · 최대 2장<input type="file" data-images accept="image/jpeg,image/png,image/webp,image/gif" multiple></label><small>사진 20MB 이하 · 자동 압축 / GIF 1MB 이하 · 또는 HTTPS 이미지 링크</small><div class="image-url-row"><input type="url" data-image-url aria-label="이미지 URL" placeholder="https://… 이미지 주소"><button type="button" data-add-image-url>링크 추가</button></div><div class="upload-preview"></div><p class="upload-status" role="status"></p></div>';

@@ -294,7 +294,7 @@ const profiles = {
       'Physical enhancement · Abnormal regeneration',
       'A front-line agent built for destruction rather than defense. Despite his direct combat style, defenseless beings can easily unsettle him.',
       '188 cm · Red hair · Red eyes',
-      'DAIN’s younger twin. Emotionally expressive; dislikes formal clothing that gets in the way of combat.',
+      'DEIN’s younger twin. Emotionally expressive; dislikes formal clothing that gets in the way of combat.',
       'SHIELD operations zone',
     ],
     [
@@ -310,7 +310,7 @@ const profiles = {
       '身体强化 · 异常恢复力',
       '比起防御更擅长破坏的前卫。战斗方式直接，却容易在毫无防备的存在面前动摇。',
       '188cm · 红发 · 红眼',
-      'DAIN的双胞胎弟弟，情绪变化明显，不喜欢妨碍战斗的正式着装。',
+      'DEIN的双胞胎弟弟，情绪变化明显，不喜欢妨碍战斗的正式着装。',
       'SHIELD作战区',
     ],
   ],

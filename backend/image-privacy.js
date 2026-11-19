@@ -1,10 +1,24 @@
 import { HTTPError } from './security.js';
-const fail = () => { throw new HTTPError(400, '메타데이터를 제거할 수 없는 이미지입니다. JPG·PNG·WebP 링크를 사용해 주세요.'); };
+const fail = () => { throw new HTTPError(400, '메타데이터를 제거할 수 없는 이미지입니다. JPG·PNG·WebP·GIF 링크를 사용해 주세요.'); };
 const concat = (parts) => { const out=new Uint8Array(parts.reduce((n,p)=>n+p.length,0));let offset=0;for(const p of parts){out.set(p,offset);offset+=p.length;}return out; };
 const ascii=(a)=>String.fromCharCode(...a);
 // Allow only rendering chunks, not EXIF/XMP/comments/profiles or trailing payloads.
 export function stripMetadata(input) {
  const a=new Uint8Array(input),v=new DataView(a.buffer,a.byteOffset,a.byteLength);let parts=[];
+ if(/^GIF8[79]a$/.test(ascii(a.slice(0,6)))){
+  if(a.length<13)fail();let p=13,frames=0,ended=false;
+  if(a[10]&128)p+=3*(1<<((a[10]&7)+1));if(p>a.length)fail();parts=[a.slice(0,p)];
+  const blocks=()=>{for(;;){if(p>=a.length)fail();const n=a[p++];if(!n)return;p+=n;if(p>a.length)fail();}};
+  while(p<a.length){const start=p,kind=a[p++];
+   if(kind===0x3b){parts.push(a.slice(start,p));ended=true;break;}
+   if(kind===0x2c){if(p+9>a.length)fail();const packed=a[p+8];p+=9;if(packed&128)p+=3*(1<<((packed&7)+1));if(p>=a.length)fail();const lzw=a[p++];if(lzw<2||lzw>8)fail();blocks();frames++;parts.push(a.slice(start,p));}
+   else if(kind===0x21){const label=a[p++];if(label===0xf9){if(a[p]!==4||p+6>a.length||a[p+5]!==0)fail();p+=6;parts.push(a.slice(start,p));}
+    else if(label===0xff){const n=a[p++];if(n!==11||p+n>a.length)fail();const name=ascii(a.slice(p,p+n));p+=n;const dataStart=p;blocks();if(['NETSCAPE2.0','ANIMEXTS1.0'].includes(name)&&p-dataStart===5&&a[dataStart]===3&&a[dataStart+1]===1)parts.push(a.slice(start,p));}
+    else if(label===0xfe||label===0x01){blocks();}else fail();
+   }else fail();
+  }
+  if(!ended||!frames)fail();return {mime:'image/gif',bytes:concat(parts)};
+ }
  if(a[0]===255&&a[1]===216){
   parts=[a.slice(0,2)];let p=2,ended=false;
   while(p<a.length){
@@ -41,7 +55,7 @@ export async function privateImageResponse(row){
  if(row.url){
   let url=imageURL(row.url),response;
   for(let hop=0;hop<4;hop++){
-   response=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(12000),headers:{Accept:'image/webp,image/png,image/jpeg'}});
+   response=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(12000),headers:{Accept:'image/webp,image/png,image/jpeg,image/gif'}});
    if([301,302,303,307,308].includes(response.status)){await response.body?.cancel();const target=response.headers.get('Location');if(!target)fail();url=imageURL(new URL(target,url).href);continue;}break;
   }
   if(!response?.ok)throw new HTTPError(502,'이미지 링크에 연결하지 못했습니다.');
