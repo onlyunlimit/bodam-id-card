@@ -30,7 +30,7 @@ async function fixture() {
   sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0010_public_codenames.sql', import.meta.url), 'utf8'));
-  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -728,6 +728,17 @@ test('Admin notifications require authentication, persist creation only, and rej
  const options={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
  const events=(await req('/admin/notifications','GET',undefined,options)).data.events;
  assert.equal(events.length,2);assert.ok(events.every(e=>e.post_id===id));assert.ok(events.some(e=>e.id===comment));
+ const snapshot=(await req('/admin/notifications','GET',undefined,options)).data;
+ assert.equal(snapshot.unread,2);
+ assert.equal((await req('/admin/notifications/read','POST',{postId:id,through:snapshot.asOf},{...options,origin:'https://attacker.test'})).status,403);
+ assert.equal((await req('/admin/notifications/read','POST',{postId:id,through:snapshot.asOf},options)).status,200);
+ assert.equal((await req('/admin/notifications','GET',undefined,options)).data.unread,0);
+ const later=(await req('/posts/'+id+'/comments','POST',{body:'새 답글',password:'123456',captcha:'verified',consent:true})).data.id;
+ sql.prepare('UPDATE notification_events SET created_at=? WHERE id=?').run(snapshot.asOf+5,later);
+ await req('/admin/notifications/read','POST',{all:true,through:snapshot.asOf},options);
+ assert.equal((await req('/admin/notifications','GET',undefined,options)).data.unread,1);
+ await req('/admin/notifications/read','POST',{all:true,through:snapshot.asOf+5},options);
+ assert.equal((await req('/admin/notifications','GET',undefined,options)).data.unread,0);
  assert.equal((await req('/admin/push/config','GET',undefined,options)).data.publicKey,null);
  env.VAPID_PUBLIC_KEY='test';env.VAPID_PRIVATE_KEY='test';
  for(const endpoint of ['https://127.0.0.1/push','https://fcm.googleapis.com.attacker.test/a','http://web.push.apple.com/a','https://user:pass@web.push.apple.com/a'])assert.equal((await req('/admin/push/subscription','POST',{endpoint,keys:{}},options)).status,400);

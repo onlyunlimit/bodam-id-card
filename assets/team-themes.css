@@ -159,3 +159,13 @@ body .fan-post-detail .reply-thread summary{cursor:pointer;padding:8px 0;font-si
 .reply-thread .thread-close,.reply-thread[open] .thread-open{display:none}.reply-thread[open] .thread-close{display:inline}
 body .fan-post-detail .comment-row .post-photos{max-width:540px}
 @media(max-width:480px){body .fan-post-detail .reply-thread{margin-left:8px}body .fan-post-detail .comment-row.best-comment{padding:12px}}
+
+/* Compact reply disclosure */
+body .fan-post-detail .reply-thread summary{display:flex;align-items:center;gap:8px;width:fit-content;padding:9px 4px;border:0;border-radius:6px;list-style:none;font-size:12px;font-weight:600;opacity:.82;transition:opacity .15s}
+body .fan-post-detail .reply-thread summary::-webkit-details-marker{display:none}
+body .fan-post-detail .reply-thread summary:hover{opacity:1}
+body .fan-post-detail .reply-thread summary:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.reply-thread-line{width:20px;height:1px;background:currentColor;opacity:.35}
+.reply-thread summary svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.5;transition:transform .15s}
+.reply-thread[open] summary svg{transform:rotate(180deg)}
+@media(prefers-reduced-motion:reduce){.reply-thread summary,.reply-thread summary svg{transition:none!important}}

@@ -260,3 +260,5 @@
 | 관리자 새 활동 알림 | `/admin/notifications`, `/admin/push/*`, `backend/notifications.js` | 이벤트 30일·구독 최대 10개 |
 
 메신저 대기 문구 후보는 로컬 검토용 문서이며 홈페이지 문구에 자동 적용하지 않습니다. 아이폰 설치·권한 설정은 [운영 문서](docs/COMMUNITY-OPERATIONS.md)를 확인하세요.
+
+관리자 앱의 새 소식은 D1 `notification_events.read_at`으로 관리자 공용 읽음 상태를 보존합니다. 게시글·댓글 열람 후 숨김, 모두 읽음, 앱 복귀/20초 간격 갱신을 지원합니다. 기기별 연결 확인·복구·전송 결과는 `/admin`의 알림 설정 및 `POST /admin/push/status`를 사용합니다.

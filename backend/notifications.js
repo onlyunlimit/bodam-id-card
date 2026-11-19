@@ -9,11 +9,23 @@ export function validEndpoint(value) {
 }
 export async function pushTo(env, sub, data) {
   const endpoint=validEndpoint(sub.endpoint);
-  const payload=await buildPushPayload({data:JSON.stringify(data),options:{ttl:3600}},JSON.parse(sub.subscription),{subject:'https://onlyunlimit.github.io',publicKey:env.VAPID_PUBLIC_KEY,privateKey:env.VAPID_PRIVATE_KEY});
-  const r=await fetch(endpoint,{...payload,redirect:'error',signal:AbortSignal.timeout(10000)});
-  if(r.status===404||r.status===410)await env.DB.prepare('DELETE FROM push_subscriptions WHERE id=?').bind(sub.id).run();
-  else if(!r.ok)throw new Error('Push delivery failed');
-  return r.ok;
+  let stage='encrypt',status=0;
+  try {
+    const payload=await buildPushPayload({data:JSON.stringify(data),options:{ttl:3600,urgency:'high'}},JSON.parse(sub.subscription),{subject:'https://onlyunlimit.github.io',publicKey:env.VAPID_PUBLIC_KEY,privateKey:env.VAPID_PRIVATE_KEY});
+    stage='transport';
+    // Fetch owns the wire length. A manually supplied Content-Length is not portable across runtimes.
+    delete payload.headers['content-length'];
+    const r=await fetch(endpoint,{...payload,method:'POST',redirect:'error',signal:AbortSignal.timeout(10000)});
+    status=r.status;
+    if(status===404||status===410){await env.DB.prepare('DELETE FROM push_subscriptions WHERE id=?').bind(sub.id).run();return false;}
+    if(!r.ok){stage='service';throw new Error('Rejected');}
+    await env.DB.prepare('UPDATE push_subscriptions SET last_attempt_at=?,last_status=?,last_error=NULL WHERE id=?').bind(Date.now(),status,sub.id).run();
+    return true;
+  } catch(error) {
+    const code=stage+':'+(status||error.name||'Error');
+    await env.DB.prepare('UPDATE push_subscriptions SET last_attempt_at=?,last_status=?,last_error=? WHERE id=?').bind(Date.now(),status,code,sub.id).run();
+    throw new HTTPError(502,'알림 전송에 실패했습니다 ('+code+'). 알림 연결 복구 후 다시 시도해 주세요.');
+  }
 }
 export function notificationStatement(env,id,postId,kind) {
   return env.DB.prepare('INSERT INTO notification_events(id,post_id,kind,created_at) VALUES (?,?,?,?)').bind(id,postId,kind,Date.now());
@@ -28,8 +40,24 @@ export async function dispatchNotification(env,id) {
 export async function notificationAPI(request,env,body) {
   const {pathname:path}=new URL(request.url),method=request.method;
   if(path==='/admin/notifications'&&method==='GET'){
-    const {results}=await env.DB.prepare(`SELECT e.id,e.post_id,e.kind,e.created_at,p.board,p.title FROM notification_events e JOIN posts p ON p.id=e.post_id WHERE p.deleted_at IS NULL AND p.hidden=0 ORDER BY e.created_at DESC,e.id DESC LIMIT 50`).all();
-    return json({events:results});
+    const {results}=await env.DB.prepare(`SELECT e.id,e.post_id,e.kind,e.created_at,p.board,p.title FROM notification_events e JOIN posts p ON p.id=e.post_id WHERE e.read_at IS NULL AND p.deleted_at IS NULL AND p.hidden=0 ORDER BY e.created_at DESC,e.id DESC LIMIT 50`).all();
+    const count=await env.DB.prepare('SELECT count(*) AS n FROM notification_events e JOIN posts p ON p.id=e.post_id WHERE e.read_at IS NULL AND p.deleted_at IS NULL AND p.hidden=0').first();
+    return json({events:results,unread:count.n,asOf:Date.now()});
+  }
+  if(path==='/admin/notifications/read'&&method==='POST'){
+    const data=await body(request),through=Number(data.through);
+    if(!Number.isSafeInteger(through)||through<0||through>Date.now()+60000)throw new HTTPError(400,'읽음 범위를 확인해 주세요.');
+    if(data.all===true)await env.DB.prepare('UPDATE notification_events SET read_at=? WHERE read_at IS NULL AND created_at<=?').bind(Date.now(),through).run();
+    else {
+      if(!/^[a-f0-9-]{36}$/.test(data.postId||''))throw new HTTPError(400,'게시글을 확인해 주세요.');
+      await env.DB.prepare('UPDATE notification_events SET read_at=? WHERE post_id=? AND read_at IS NULL AND created_at<=?').bind(Date.now(),data.postId,through).run();
+    }
+    return json({ok:true});
+  }
+  if(path==='/admin/push/status'&&method==='POST'){
+    const data=await body(request),id=await digest(validEndpoint(data.endpoint));
+    const row=await env.DB.prepare('SELECT last_attempt_at,last_status,last_error FROM push_subscriptions WHERE id=?').bind(id).first();
+    return json({registered:!!row,...(row||{})});
   }
   if(path==='/admin/push/config'&&method==='GET')return json({publicKey:env.VAPID_PUBLIC_KEY||null});
   if(path==='/admin/push/subscription'&&method==='POST'){

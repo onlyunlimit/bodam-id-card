@@ -234,3 +234,8 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 - 첨부 선택·× 취소·GIF 입력 안내: `assets/community-media.js`.
 - 옵시더스/럭키트릭 소개 대비: `assets/team-themes.css`의 `--profile-surface`, `--profile-ink`, `--profile-accent`. 프로필 열람 대기 효과: `assets/personnel-design.js`의 studio 분기.
 - 관리자 홈 화면 앱·알림 버튼: `backend/admin-pwa.js`. 관리자 댓글/게시판 이동: `backend/admin-composer.js`. 변경 시 Worker를 별도 배포해야 합니다.
+
+### 관리자 앱 소식과 답글 펼침 (2026-11-19)
+
+- 웹앱 소식 카드·설정 패널: `backend/admin-pwa.js`의 `notificationCSS`, `notificationClient`. 읽음 상태·전송 결과: `backend/notifications.js`.
+- 답글 보기의 짧은 선·화살표·여백: `assets/team-themes.css` 끝 `Compact reply disclosure`. 문구·개수: `assets/community.js`의 `.reply-thread`.
