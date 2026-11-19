@@ -22,9 +22,10 @@ export async function pushTo(env, sub, data) {
     await env.DB.prepare('UPDATE push_subscriptions SET last_attempt_at=?,last_status=?,last_error=NULL WHERE id=?').bind(Date.now(),status,sub.id).run();
     return true;
   } catch(error) {
-    const code=stage+':'+(status||error.name||'Error');
+    const reason=stage==='transport'?String(error.message||'').replace(/https?:\/\/[^\s]+/g,'[address]').replace(/[A-Za-z0-9_=-]{40,}/g,'[value]').slice(0,160):'';
+    const code=stage+':'+(status||error.name||'Error')+(reason?' · '+reason:'');
     await env.DB.prepare('UPDATE push_subscriptions SET last_attempt_at=?,last_status=?,last_error=? WHERE id=?').bind(Date.now(),status,code,sub.id).run();
-    throw new HTTPError(502,'알림 전송에 실패했습니다 ('+code+'). 알림 연결 복구 후 다시 시도해 주세요.');
+    throw new HTTPError(502,'알림 전송에 실패했습니다 ('+code+'). 잠시 후 다시 시도해 주세요.');
   }
 }
 export function notificationStatement(env,id,postId,kind) {
