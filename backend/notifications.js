@@ -15,15 +15,14 @@ export async function pushTo(env, sub, data) {
     stage='transport';
     // Fetch owns the wire length. A manually supplied Content-Length is not portable across runtimes.
     delete payload.headers['content-length'];
-    const r=await fetch(endpoint,{...payload,method:'POST',redirect:'error',signal:AbortSignal.timeout(10000)});
+    const r=await fetch(endpoint,{...payload,method:'POST',redirect:'manual',signal:AbortSignal.timeout(10000)});
     status=r.status;
     if(status===404||status===410){await env.DB.prepare('DELETE FROM push_subscriptions WHERE id=?').bind(sub.id).run();return false;}
     if(!r.ok){stage='service';throw new Error('Rejected');}
     await env.DB.prepare('UPDATE push_subscriptions SET last_attempt_at=?,last_status=?,last_error=NULL WHERE id=?').bind(Date.now(),status,sub.id).run();
     return true;
   } catch(error) {
-    const reason=stage==='transport'?String(error.message||'').replace(/https?:\/\/[^\s]+/g,'[address]').replace(/[A-Za-z0-9_=-]{40,}/g,'[value]').slice(0,160):'';
-    const code=stage+':'+(status||error.name||'Error')+(reason?' · '+reason:'');
+    const code=stage+':'+(status||error.name||'Error');
     await env.DB.prepare('UPDATE push_subscriptions SET last_attempt_at=?,last_status=?,last_error=? WHERE id=?').bind(Date.now(),status,code,sub.id).run();
     throw new HTTPError(502,'알림 전송에 실패했습니다 ('+code+'). 잠시 후 다시 시도해 주세요.');
   }

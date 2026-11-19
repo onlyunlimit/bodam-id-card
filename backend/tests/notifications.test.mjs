@@ -10,8 +10,10 @@ test('Push encrypts messages with VAPID and removes expired subscriptions',async
  const env={VAPID_PUBLIC_KEY:Buffer.from(await crypto.subtle.exportKey('raw',signing.publicKey)).toString('base64url'),VAPID_PRIVATE_KEY:jwk.d,DB:{prepare:()=>({bind:()=>({run:async()=>{removed=true}})})}};
  const original=globalThis.fetch;
  try{
-  globalThis.fetch=async(url,options)=>{assert.equal(url,subscription.endpoint);const h=new Headers(options.headers);assert.equal(h.get('Content-Encoding'),'aes128gcm');assert.match(h.get('Authorization'),/^vapid /);assert.ok(options.body.byteLength>32);assert.ok(!Buffer.from(options.body).includes(Buffer.from('private message')));assert.equal(options.redirect,'error');return new Response(null,{status:201});};
+  globalThis.fetch=async(url,options)=>{assert.equal(url,subscription.endpoint);const h=new Headers(options.headers);assert.equal(h.get('Content-Encoding'),'aes128gcm');assert.match(h.get('Authorization'),/^vapid /);assert.ok(options.body.byteLength>32);assert.ok(!Buffer.from(options.body).includes(Buffer.from('private message')));assert.equal(options.redirect,'manual');return new Response(null,{status:201});};
   assert.equal(await pushTo(env,{id:'x',endpoint:subscription.endpoint,subscription:JSON.stringify(subscription)},{body:'private message',url:'/admin'}),true);
+  let calls=0;globalThis.fetch=async()=>{calls++;return new Response(null,{status:302,headers:{Location:'https://untrusted.example'}});};
+  await assert.rejects(()=>pushTo(env,{id:'x',endpoint:subscription.endpoint,subscription:JSON.stringify(subscription)},{body:'test'}),/service:302/);assert.equal(calls,1);
   globalThis.fetch=async()=>new Response(null,{status:410});
   assert.equal(await pushTo(env,{id:'x',endpoint:subscription.endpoint,subscription:JSON.stringify(subscription)},{body:'private message'}),false);assert.equal(removed,true);
  }finally{globalThis.fetch=original;}
