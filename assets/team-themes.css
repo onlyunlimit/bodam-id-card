@@ -169,3 +169,24 @@ body .fan-post-detail .reply-thread summary:focus-visible{outline:2px solid curr
 .reply-thread summary svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.5;transition:transform .15s}
 .reply-thread[open] summary svg{transform:rotate(180deg)}
 @media(prefers-reduced-motion:reduce){.reply-thread summary,.reply-thread summary svg{transition:none!important}}
+
+/* One level of indentation for the complete conversation, including BEST replies. */
+body .fan-post-detail .reply-thread{margin:0 0 14px 0;padding:0;border:0;background:transparent}
+body .fan-post-detail .reply-thread summary{margin-left:2px;min-height:40px}
+body .fan-post-detail .reply-list{margin:2px 0 0 12px;padding-left:12px;border-left:1px solid var(--fan-line,var(--line))}
+body .fan-post-detail .reply-list .comment-row.is-reply{margin:0;padding:14px 0;border-left:0}
+body .fan-post-detail .reply-list .comment-row.is-reply.best-comment{padding:12px;margin:8px 0;border:1px solid #bf5c63}
+body .fan-post-detail .reply-list .fan-author{margin-bottom:8px}
+body .fan-post-detail .reply-list .comment-row p{margin:6px 0 10px}
+body .fan-post-detail .reply-list .comment-row:last-child{border-bottom:0}
+body .fan-post-detail .reply-list .comment-row.best-comment:last-child{border-bottom:1px solid #bf5c63}
+body .fan-post-detail .reply-collapse{display:block;margin:4px 0 0 24px;padding:8px 0;border:0;background:transparent;box-shadow:none;color:inherit;font-size:12px;opacity:.75;min-height:36px}
+body .fan-post-detail .reply-collapse:hover{opacity:1}
+body .fan-post-detail .reply-collapse:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(max-width:480px){body .fan-post-detail .reply-list{margin-left:6px;padding-left:10px}body .fan-post-detail .reply-collapse{margin-left:16px}}
+body .fan-post-detail .comment-row .fan-author{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:start;gap:8px}
+body .fan-post-detail .comment-row .fan-author .fan-avatar{width:28px!important;height:28px!important;margin:0}
+body .fan-post-detail .comment-row .fan-author>span{min-width:0}
+body .fan-post-detail .comment-row .fan-author time{font-size:9px;letter-spacing:0;line-height:1.5;margin-top:4px}
+body .fan-post-detail .comment-row .record-edit-links{margin:0;gap:6px;justify-self:end}
+body .fan-post-detail .comment-row .record-edit-links button{margin:0;padding:0;font-size:10px}

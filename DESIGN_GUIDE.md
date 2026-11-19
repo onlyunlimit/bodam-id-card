@@ -239,3 +239,5 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 
 - 웹앱 소식 카드·설정 패널: `backend/admin-pwa.js`의 `notificationCSS`, `notificationClient`. 읽음 상태·전송 결과: `backend/notifications.js`.
 - 답글 보기의 짧은 선·화살표·여백: `assets/team-themes.css` 끝 `Compact reply disclosure`. 문구·개수: `assets/community.js`의 `.reply-thread`.
+
+답글 목록 한 단계 들여쓰기·하단 접기·모바일 작성 정보는 `assets/team-themes.css` 끝의 `reply-list`, `reply-collapse`, `.comment-row .fan-author`에서 조정합니다.

@@ -446,4 +446,9 @@ test('Comment owner edits author, text and GIF attachments; best replies and rep
  await page.locator('[data-reply="'+root+'"]').click();await page.locator('#comment-form [name=password]').fill('123456');await page.locator('#comment-form [name=body]').fill('새 답글');await page.locator('#comment-form [name=consent]').check();await page.locator('#comment-form button[type=submit]').click();
  await expect(page.locator('.reply-thread')).toHaveAttribute('open','');await expect(page.locator('.reply-thread')).toContainText('새 답글');
  await page.setViewportSize({width:320,height:850});expect(await page.locator('#document-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1)).toBe(true);
+ const width=await page.locator('.comments').evaluate(e=>e.getBoundingClientRect().width);const replyWidth=await page.locator('.reply-list .comment-row').first().evaluate(e=>e.getBoundingClientRect().width);expect(width-replyWidth).toBeLessThan(25);
+ await page.screenshot({path:'private/checks/replies-expanded-mobile.png'});
+ await page.locator('[data-collapse-thread]').click();await expect(page.locator('.reply-thread')).not.toHaveAttribute('open');await expect(page.locator('.reply-thread summary')).toBeFocused();await expect(page.locator('.reply-list')).not.toBeVisible();await expect(page.locator('.reply-collapse')).not.toBeVisible();
+ await page.screenshot({path:'private/checks/replies-collapsed-mobile.png'});
+
 });
