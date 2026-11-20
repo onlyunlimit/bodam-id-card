@@ -5,8 +5,9 @@
 
 ## 2026-11-20 — 베스트 댓글 기능 제거
 
-- **상태:** 로컬 구현·검사 완료, 홈페이지 배포 대기.
+- **상태:** 로컬 구현·검사·홈페이지 배포 확인 완료.
 - **검사:** 공개 빌드·`git diff --check` 통과. 관련 브라우저 14개 중 8개 통과·6개 브라우저 세션/시간 초과 후 해당 6개 재실행 모두 통과. 좋아요 클릭 후 BEST 재생성 없음, 댓글 편집·첨부·답글 펼치기/접기·320px 배치 확인.
+- **배포:** 소스 [e76e274](https://github.com/onlyunlimit/bodam-id-card/commit/e76e274cee85620e541a49266d7c30a9b9647f92) → 공개 `a32977e7a3693ed601ac1c0d27ac2f7bbad96514`. [Pages 실행](https://github.com/onlyunlimit/onlyunlimit.github.io/actions/runs/44709645739) 성공, 공개 릴리스 소스와 변경 JS/CSS 2개 SHA-256 일치. 기존 로컬 갤러리 편집은 보존·배포 제외.
 - **변경:** 모든 커뮤니티에서 좋아요 순위 기반 BEST 선정·배지·붉은 강조 테두리 제거. 댓글/답글 좋아요, 기존 순서, 펼치기·접기, 본인 수정은 유지.
 - **파일:** `assets/community.js`, `assets/team-themes.css`, 관련 브라우저 검사 및 사이트/디자인 안내. 서버·DB 변경 없음.
 
