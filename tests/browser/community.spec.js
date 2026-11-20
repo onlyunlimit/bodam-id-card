@@ -425,7 +425,7 @@ test('Fan communities keep their own palette across mode changes and retain grou
  }
 });
 
-test('Comment owner edits author, text and GIF attachments; best replies and reply folding stay usable',async({page})=>{
+test('Comment owner edits author, text and GIF attachments; reply folding and likes remain usable without best badges',async({page})=>{
  const f=await mock(page);const postId='11111111-1111-4111-8111-111111111111';
  f.posts.push({id:postId,board:'lucky',title:'댓글 확인',body:'본문 @재인',author:'팬',pin_length:6,created_at:Date.now(),images:[]});
  const root='22222222-2222-4222-8222-000000000001';
@@ -433,8 +433,9 @@ test('Comment owner edits author, text and GIF attachments; best replies and rep
  for(let i=2;i<=5;i++)f.comments.push({id:'22222222-2222-4222-8222-'+String(i).padStart(12,'0'),post_id:postId,parent_id:root,author:'답글'+i,body:'답글 내용',pin_length:6,created_at:i,likes:i,images:[]});
  await page.goto('/community.html?board=lucky');await page.locator('.post-row').click();
  await expect(page.locator('.post-body .member-mention')).toHaveText('@재인');
- await expect(page.locator('.reply-thread')).not.toHaveAttribute('open');await expect(page.locator('.best-comment')).toHaveCount(3);
+ await expect(page.locator('.reply-thread')).not.toHaveAttribute('open');await expect(page.locator('.best-comment,.best-comment-label')).toHaveCount(0);
  await page.locator('.reply-thread summary').click();await expect(page.locator('.reply-thread')).toHaveAttribute('open','');
+ await page.locator('[data-comment-like]').last().click();await expect(page.locator('[data-comment-like]').last()).toHaveAttribute('aria-pressed','true');await expect(page.locator('.best-comment,.best-comment-label')).toHaveCount(0);
  await page.locator('[data-comment-edit="'+root+'"]').click();await page.locator('#edit-form [name=author]').fill('바꾼 이름');await page.locator('#edit-form [name=body]').fill('@재');await page.getByRole('option',{name:'@재인 · LUCKY'}).click();
  await page.locator('#edit-form [name=password]').fill('123456');
  await page.locator('#edit-form [data-images]').setInputFiles({name:'test.gif',mimeType:'image/gif',buffer:Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==','base64')});

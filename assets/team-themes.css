@@ -152,13 +152,10 @@ body .fan-post-detail .record-edit-links button:hover{text-decoration:underline;
 body .fan-post-detail .fan-author>span:first-of-type{min-width:0}
 body .fan-post-detail .post-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:20px 0}
 body .fan-post-detail .post-admin-link{margin-left:auto;font-size:10px}
-body .fan-post-detail .comment-row.best-comment{border:1px solid #bf5c63;border-radius:10px;padding:16px;box-shadow:inset 3px 0 0 #bf5c63}
-body .fan-post-detail .best-comment-label{display:inline-block;color:#a63442;background:#ffe9eb;padding:2px 6px;border-radius:4px;font-size:10px;letter-spacing:.08em;margin-top:8px;font-weight:700}
 body .fan-post-detail .reply-thread{margin:8px 0 16px 20px}
 body .fan-post-detail .reply-thread summary{cursor:pointer;padding:8px 0;font-size:12px;color:inherit}
 .reply-thread .thread-close,.reply-thread[open] .thread-open{display:none}.reply-thread[open] .thread-close{display:inline}
 body .fan-post-detail .comment-row .post-photos{max-width:540px}
-@media(max-width:480px){body .fan-post-detail .reply-thread{margin-left:8px}body .fan-post-detail .comment-row.best-comment{padding:12px}}
 
 /* Compact reply disclosure */
 body .fan-post-detail .reply-thread summary{display:flex;align-items:center;gap:8px;width:fit-content;padding:9px 4px;border:0;border-radius:6px;list-style:none;font-size:12px;font-weight:600;opacity:.82;transition:opacity .15s}
@@ -170,16 +167,14 @@ body .fan-post-detail .reply-thread summary:focus-visible{outline:2px solid curr
 .reply-thread[open] summary svg{transform:rotate(180deg)}
 @media(prefers-reduced-motion:reduce){.reply-thread summary,.reply-thread summary svg{transition:none!important}}
 
-/* One level of indentation for the complete conversation, including BEST replies. */
+/* One level of indentation for the complete conversation, including replies. */
 body .fan-post-detail .reply-thread{margin:0 0 14px 0;padding:0;border:0;background:transparent}
 body .fan-post-detail .reply-thread summary{margin-left:2px;min-height:40px}
 body .fan-post-detail .reply-list{margin:2px 0 0 12px;padding-left:12px;border-left:1px solid var(--fan-line,var(--line))}
 body .fan-post-detail .reply-list .comment-row.is-reply{margin:0;padding:14px 0;border-left:0}
-body .fan-post-detail .reply-list .comment-row.is-reply.best-comment{padding:12px;margin:8px 0;border:1px solid #bf5c63}
 body .fan-post-detail .reply-list .fan-author{margin-bottom:8px}
 body .fan-post-detail .reply-list .comment-row p{margin:6px 0 10px}
 body .fan-post-detail .reply-list .comment-row:last-child{border-bottom:0}
-body .fan-post-detail .reply-list .comment-row.best-comment:last-child{border-bottom:1px solid #bf5c63}
 body .fan-post-detail .reply-collapse{display:block;margin:4px 0 0 24px;padding:8px 0;border:0;background:transparent;box-shadow:none;color:inherit;font-size:12px;opacity:.75;min-height:36px}
 body .fan-post-detail .reply-collapse:hover{opacity:1}
 body .fan-post-detail .reply-collapse:focus-visible{outline:2px solid currentColor;outline-offset:3px}

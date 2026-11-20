@@ -254,7 +254,7 @@
 
 | 화면/기능 | 경로 · 구현 | 저장 |
 | --- | --- | --- |
-| 게시글·댓글 언급, 본인 수정, 댓글 사진/GIF, BEST·답글 접기 | `community.html?board=lucky/obsidus/staff`, `assets/community.js`, `community-media.js`, `mentions.js` | 공유 D1 글·댓글·첨부 |
+| 게시글·댓글 언급, 본인 수정, 댓글 사진/GIF, 답글 접기 | `community.html?board=lucky/obsidus/staff`, `assets/community.js`, `community-media.js`, `mentions.js` | 공유 D1 글·댓글·첨부 |
 | 관리자 게시판 이동·공식 댓글 첨부 | API 호스트 `/admin`, `backend/admin-composer.js`, `fan.js` | 기존 ID 유지, 감사 기록 |
 | 아이폰 홈 화면 관리자 웹앱 | API 호스트 `/admin`, `/admin/manifest.webmanifest`, `/admin/sw.js`, `backend/admin-pwa.js` | 로그인 쿠키·기기 푸시 구독 |
 | 관리자 새 활동 알림 | `/admin/notifications`, `/admin/push/*`, `backend/notifications.js` | 이벤트 30일·구독 최대 10개 |

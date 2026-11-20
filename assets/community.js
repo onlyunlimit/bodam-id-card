@@ -492,9 +492,8 @@ export function renderCommunity() {
       if (signal.aborted || ticket !== detailRequest || (!fan && !state.staff)) return;
       const p = data.post;
       let replyTo = null;
-      const bestIds=new Set([...data.comments].filter(c=>(c.likes||0)>0).sort((a,b)=>(b.likes||0)-(a.likes||0)||a.created_at-b.created_at||a.id.localeCompare(b.id)).slice(0,3).map(c=>c.id));
       const commentMarkup = (c) =>
-        `<article class="comment-row ${c.parent_id ? 'is-reply' : ''} ${bestIds.has(c.id)?'best-comment':''}" data-likes="${c.likes||0}" id="comment-${esc(c.id)}"><div class="fan-author">${avatar(c.avatar_url, c.member_name || c.author)}<span><b data-user-content>${esc(c.member_name || c.author)}</b>${c.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(c.created_at)}${c.updated_at ? ' · 수정됨' : ''}</time></span><span class="record-edit-links">${!c.member_id ? `<button data-comment-edit="${esc(c.id)}">수정</button><button data-comment-delete="${esc(c.id)}">삭제</button>` : ''}</span></div>${bestIds.has(c.id)?'<small class="best-comment-label">BEST</small>':''}<p data-user-content>${mentionMarkup(c.body,members)}</p>${photos(c.images)}<div class="comment-tools"><button data-comment-like="${esc(c.id)}" aria-pressed="${!!c.liked}">♡ ${c.likes || 0}</button><button data-reply="${esc(c.id)}">답글</button></div></article>`;
+        `<article class="comment-row ${c.parent_id ? 'is-reply' : ''}" id="comment-${esc(c.id)}"><div class="fan-author">${avatar(c.avatar_url, c.member_name || c.author)}<span><b data-user-content>${esc(c.member_name || c.author)}</b>${c.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(c.created_at)}${c.updated_at ? ' · 수정됨' : ''}</time></span><span class="record-edit-links">${!c.member_id ? `<button data-comment-edit="${esc(c.id)}">수정</button><button data-comment-delete="${esc(c.id)}">삭제</button>` : ''}</span></div><p data-user-content>${mentionMarkup(c.body,members)}</p>${photos(c.images)}<div class="comment-tools"><button data-comment-like="${esc(c.id)}" aria-pressed="${!!c.liked}">♡ ${c.likes || 0}</button><button data-reply="${esc(c.id)}">답글</button></div></article>`;
       const threads=data.comments.filter(c=>!c.parent_id).map(c=>{
         const replies=data.comments.filter(r=>r.parent_id===c.id);
         return commentMarkup(c)+(replies.length>1?`<details class="reply-thread" data-thread="${esc(c.id)}" ${expandedReplies.has(c.id)?'open':''}><summary><span class="reply-thread-line" aria-hidden="true"></span><span class="thread-open">답글 ${replies.length}개 보기</span><span class="thread-close">답글 접기</span><svg aria-hidden="true" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></svg></summary><div class="reply-list">${replies.map(commentMarkup).join('')}</div><button type="button" class="reply-collapse" data-collapse-thread="${esc(c.id)}">답글 접기 ↑</button></details>`:replies.length?`<div class="reply-list single-reply">${replies.map(commentMarkup).join('')}</div>`:'');
@@ -582,17 +581,12 @@ export function renderCommunity() {
       if (!signal.aborted) toast(e.message);
     }
   }
-  function updateBestComments(){
-    const rows=$$('.comment-row'), best=new Set([...rows].filter(e=>Number(e.dataset.likes)>0).sort((a,b)=>Number(b.dataset.likes)-Number(a.dataset.likes)).slice(0,3));
-    rows.forEach(e=>{e.classList.toggle('best-comment',best.has(e));e.querySelector('.best-comment-label')?.remove();if(best.has(e))e.querySelector('.fan-author').insertAdjacentHTML('afterend','<small class="best-comment-label">BEST</small>');});
-  }
   async function like(button, path) {
     button.disabled = true;
     try {
       const r = await api(path, 'POST', { liked: button.getAttribute('aria-pressed') !== 'true' });
       button.setAttribute('aria-pressed', String(r.liked));
       button.textContent = (r.liked ? '♥ ' : '♡ ') + r.likes;
-      if(path.startsWith('/comments/')){button.closest('.comment-row').dataset.likes=r.likes;updateBestComments();}
       load();
     } catch (e) {
       toast(e.message);
