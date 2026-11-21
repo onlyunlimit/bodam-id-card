@@ -1,5 +1,7 @@
+import { mockIncidents, reportConsent, confirmStatus } from './incident-fixture.js';
 import {mockGeocode} from './geocode-fixture.js';
 import { test, expect } from '@playwright/test';
+test.beforeEach(async ({page}) => { await mockIncidents(page); });
 async function login(p) {
   await p.locator('#viewer-toggle').click();
   await p.locator('#login-submit').click();
@@ -93,7 +95,7 @@ test('Manual reports persist, open as dossiers, dispatch alerts and retain Korea
   await expect(page.locator('[name=customSupport]')).toBeDisabled();
   await page.locator('[name=support]').selectOption('custom');
   await page.locator('[name=customSupport]').fill('  합동 <b>구조팀</b>  ');
-  await page.locator('#incident-form button[type=submit],#incident-form button.primary').click();
+  await reportConsent(page); await page.locator('#incident-form button[type=submit],#incident-form button.primary').click();
   await expect(page.locator('.emergency-window')).toHaveCount(3);
   await page.locator('#emergency-stack>button').click();
   await page.locator('.case-content').first().click();

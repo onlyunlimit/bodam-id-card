@@ -241,3 +241,9 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 - 답글 보기의 짧은 선·화살표·여백: `assets/team-themes.css` 끝 `Compact reply disclosure`. 문구·개수: `assets/community.js`의 `.reply-thread`.
 
 답글 목록 한 단계 들여쓰기·하단 접기·모바일 작성 정보는 `assets/team-themes.css` 끝의 `reply-list`, `reply-collapse`, `.comment-row .fan-author`에서 조정합니다.
+
+### 공유 사건 기록·넓은 현장 지도 (2026-11-20)
+
+- 화면·공유 등록·종결 비밀번호: `assets/monitor.js`의 `renderRecords`. 공유 요청·20초 갱신: `assets/incident-store.js`.
+- 현장 지도: `assets/forensic.css` 끝 `Shared incident desk`. PC 수신기 300px + 나머지 지도, 지도 높이 420~680px. 모바일은 세로 배치·높이 360px.
+- 이전 로컬 신고의 지도 복원: `assets/report-map.js`의 `restore`. 서버 검증/저장: `backend/incidents.js`, `0015_shared_incidents.sql`.

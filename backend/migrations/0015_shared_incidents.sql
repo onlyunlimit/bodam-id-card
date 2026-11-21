@@ -1,0 +1,9 @@
+CREATE TABLE incidents (
+  seq INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT NOT NULL UNIQUE,
+  record TEXT NOT NULL,
+  owner_hash TEXT NOT NULL,
+  pin_salt TEXT NOT NULL,
+  pin_hash TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);

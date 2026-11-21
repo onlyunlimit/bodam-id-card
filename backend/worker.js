@@ -1,3 +1,4 @@
+import { incidentAPI } from './incidents.js';
 import { notificationAPI, notificationStatement, dispatchNotification } from './notifications.js';
 import { adminManifest, adminSW } from './admin-pwa.js';
 import { adminIcons } from './admin-icons.js';
@@ -175,6 +176,8 @@ async function handle(request, env) {
   }
   if (isAdmin) {
     const hash = await session(request, env);
+    const incidentResponse = await incidentAPI(request, env, {identity,rate,blocked,body,captcha,sourceLog}, true);
+    if (incidentResponse) return incidentResponse;
     if(path.startsWith('/admin/push/') && method!=='GET') await rate(env,'push:'+hash,20,60);
     const notificationResponse=await notificationAPI(request,env,body);
     if(notificationResponse)return notificationResponse;
@@ -309,6 +312,8 @@ async function handle(request, env) {
     }
     throw new HTTPError(404, '관리 경로가 없습니다.');
   }
+  const incidentResponse = await incidentAPI(request, env, {identity,rate,blocked,body,captcha,sourceLog});
+  if (incidentResponse) return incidentResponse;
   const geocoded = await geocode(request, env, { identity, rate });
   if (geocoded) return geocoded;
   const fanResponse = await publicFan(request, env, { identity, rate, blocked, body });

@@ -1816,3 +1816,11 @@ body .az-dossier .tracking-layout .seoul-map{height:370px;min-height:300px;borde
 .az-dossier .evidence-index h2,.az-dossier .tracking-section h2{font-family:'AZ Display',sans-serif;font-weight:400}
 body .az-dossier .person-card .card-face{background:linear-gradient(140deg,#20171b,#100e11)!important;--text:#e8dfd8;--muted:#c2afb4;color:var(--text);border-color:#6b3341!important}
 body .az-dossier .person-card .id-card-head{background:#491522;color:#e8c7cc}
+
+/* Shared incident desk: wide field map above the record list. */
+#records-workspace:not([hidden]){grid-template-columns:minmax(0,1fr)}
+#records-workspace>.records-rack{grid-column:1;grid-row:auto;grid-template-columns:minmax(240px,300px) minmax(0,1fr);align-items:start;gap:24px}
+#records-workspace>.records-toolbar,#records-workspace>.incident-summary,#records-workspace>#incident-list,#records-workspace>.pagination,#records-workspace>p,#records-workspace>#legacy-incidents{grid-column:1}
+.records-location-panel .seoul-map{height:clamp(420px,56vh,680px);min-height:420px}
+#legacy-incidents button{margin:4px;max-width:100%;white-space:normal}
+@media(max-width:760px){#records-workspace>.records-rack{grid-template-columns:minmax(0,1fr)}.records-location-panel .seoul-map{height:360px;min-height:360px}}

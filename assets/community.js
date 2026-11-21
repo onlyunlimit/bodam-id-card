@@ -148,10 +148,10 @@ export async function initVisitors() {
 function consent() {
   return '<label class="consent"><input type="checkbox" name="consent" required><span>게시물 운영과 악성 작성 대응을 위한 IP 암호화 보관(30일), 관리자 열람 및 익명 번호 유지를 위한 게시글별 IP 해시 보관에 동의합니다.</span></label>';
 }
-function captchaMarkup() {
+export function captchaMarkup() {
   return '<div class="captcha-slot"><div class="captcha-widget"></div></div><p class="form-error" role="alert"></p>';
 }
-async function secureForm(form, submit) {
+export async function secureForm(form, submit) {
   const button = $('button[type=submit]', form),
     error = $('.form-error', form);
   let token = '',

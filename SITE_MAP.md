@@ -1,6 +1,6 @@
 # 홈페이지 구성 안내
 
-> 확인일: **2026-11-19** · 기준: 현재 저장소의 라우터, 페이지 파일, 공개 빌드 목록.
+> 확인일: **2026-11-21** · 기준: 현재 저장소의 라우터, 페이지 파일, 공개 빌드 목록.
 > 홈페이지: https://onlyunlimit.github.io/ · 최근 변경: [CHANGELOG.md](CHANGELOG.md)
 >
 > 이 문서는 **현재 코드 구성**을 설명합니다. 배포 여부는 변경 이력의 배포 상태에서 별도로 확인합니다.
@@ -52,7 +52,7 @@
 | [엔터테인먼트](https://onlyunlimit.github.io/entertainment.html) | `/entertainment.html` | 그룹별 입체 소개 패널 2개. 각 기획사 페이지로 이동 | 공개 |
 | [엘리시안·럭키트릭](https://onlyunlimit.github.io/elysian.html) | `/elysian.html` | 핑크 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
 | [헌터윈드·옵시더스](https://onlyunlimit.github.io/hunterwind.html) | `/hunterwind.html` | 금속·어두운 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
-| [사건 기록실](https://onlyunlimit.github.io/records.html) | `/records.html` | 아날로그 수신기·주파수 조정, 사건 필터·목록·상세 문서, 지도, 신고서 작성, 긴급 수신 알림, 종결 승인·재개 | 신고·처리 업무는 직원 화면 |
+| [사건 기록실](https://onlyunlimit.github.io/records.html) | `/records.html` | 아날로그 수신기·주파수 조정, 사건 필터·목록·상세 문서, 지도, 신고서 작성, 긴급 수신 알림, 종결 승인·재개 | 열람은 공개 · 작성 진입은 직원 화면 |
 | [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 봉인 파일, 숫자 키패드·클릭음, 추적 커서, AZ 대상 관측 기록·위험 평가, 구조화된 증거 문서 3개, 동선 지도·감청 로그 | 코드 입력 연출 + 일부 직원 열람 |
 | [세계관 안내서](https://onlyunlimit.github.io/manual.html) | `/manual.html` | 용어 검색·목차, 게이트·각성자·가이딩·각인·매칭 등 설명, 등급표, 개념 도해, 명령어 복사 | 공개 |
 | [커뮤니티](https://onlyunlimit.github.io/community.html) | `/community.html` | 그룹별 4개 피드, 사진 첨부, 팬·아티스트 글/답글, 글·댓글 좋아요, 6자리 PIN 수정·삭제, 관리자 진입 | 팬 공개 / 사내는 직원 화면 |
@@ -151,13 +151,15 @@
 
 사건 목록과 상세 문서의 제목은 **구역**, 별도 위치 줄은 **발생 위치**입니다. 자동 생성 사건은 발생 위치를 구역명으로 함께 저장하고, 구역이 없는 기존 자동 기록도 발생 위치를 제목으로 사용합니다. 직접 작성한 신고는 입력한 구역명을 우선하며, 없는 경우 ‘구역 미지정’으로 표시합니다. 신고서의 구역을 직접 작성하면 주소 검색이 해당 이름을 덮어쓰지 않습니다. 넓은 화면의 사건 목록은 3열, 좁은 화면은 2열/1열로 표시합니다.
 
-종결은 기록 삭제가 아닙니다. 재개하면 활성 목록과 지도에 다시 반영됩니다. 사건 데이터는 **현재 브라우저에만 저장**되며 다른 기기·사용자에게 실시간 공유되지 않습니다.
+종결은 기록 삭제가 아닙니다. 재개하면 활성 목록과 지도에 다시 반영됩니다. 사건 데이터는 **공유 D1 DB**에 저장되어 모든 방문자가 로그인 없이 열람합니다. 기록실·관제에서 20초 주기 및 화면 복귀 시 서버를 조회합니다. 종결·재개는 신고서의 6자리 비밀번호가 필요합니다. 수신 갱신은 공유 목록을 다시 읽으며 모의 사건을 생성하지 않습니다.
+
+이전에 브라우저에만 작성한 신고는 해당 브라우저에서 ‘이 단말의 이전 신고 → 공유 등록’으로 내용·위치 확인, 비밀번호·공개 동의·보안 확인 후 공유합니다. 다른 기기의 로컬 기록을 서버가 자동으로 가져올 수는 없습니다. 예전 무작위 모의 사건은 공유 목록에 넣지 않습니다.
 
 ## 6. 저장 위치와 로그인 의미
 
 | 대상 | 어디에 저장·처리되는가 | 구분할 점 |
 | --- | --- | --- |
-| 신고·좌표·구역·추정 반경·종결 상태 | 브라우저 localStorage의 `sgia.incidents` | 새로고침 후 유지. 브라우저 데이터 삭제 시 사라질 수 있음 |
+| 신고·좌표·구역·추정 반경·종결 상태 | D1 `incidents`, API `/incidents` | 모든 방문자 공용. 종결 기록 보존. 기존 localStorage는 이전 신고 공유용으로만 읽음 |
 | 업무 메신저 입력 | localStorage의 `sgia.chat.*` | 채널별 로컬 체험. 다른 방문자와 실시간 채팅하지 않음 |
 | 테마·모션 등 설정 | 브라우저 저장소 | 해당 브라우저 설정 |
 | 직원 화면 전환 | sessionStorage의 `sgia.staff` | 체험용 사원증 UI. 실제 직원 인증이 아님 |
@@ -192,7 +194,7 @@
 | 주소 검색·핀·구역 선택 / GeoJSON 검증 | `assets/report-map.js`, `assets/geo-model.js`, `backend/geocode.js` |
 | 사내 게시판 분류·인물/팀 태그 | `assets/staff-board.js`, `assets/staff-tags.js`, `backend/staff.js` |
 | 사건 상세 기록·긴급 알림 | `assets/incident-ui.js` |
-| 사건 데이터 검증·집계·시간표 계산 | `assets/model.js` |
+| 사건 데이터 검증·집계·시간표 계산 | `assets/model.js`, `assets/incident-store.js`, `backend/incidents.js` |
 | 봉인 파일·키패드·수신기·감청 단말 | `assets/hardware.js` |
 | ORPÉ 증거 색인·문서 열람 / 추적 커서 | `assets/evidence.js` / `assets/forensics.js` |
 | 부서·인물 카드·상세 프로필·메신저 | `assets/units.js`, `assets/personnel-design.js` |
@@ -262,3 +264,5 @@
 메신저 대기 문구 후보는 로컬 검토용 문서이며 홈페이지 문구에 자동 적용하지 않습니다. 아이폰 설치·권한 설정은 [운영 문서](docs/COMMUNITY-OPERATIONS.md)를 확인하세요.
 
 관리자 앱의 새 소식은 D1 `notification_events.read_at`으로 관리자 공용 읽음 상태를 보존합니다. 게시글·댓글 열람 후 숨김, 모두 읽음, 앱 복귀/20초 간격 갱신을 지원합니다. 기기별 연결 확인·복구·전송 결과는 `/admin`의 알림 설정 및 `POST /admin/push/status`를 사용합니다.
+
+공유 사건 API: `GET /incidents?after=<cursor>`(200건 단위), `POST /incidents`(신고·비밀번호·공개 동의·Turnstile), `PATCH /incidents/:id`(비밀번호로 종결/재개). 관리자는 인증된 `/admin/incidents/:id`에서 처리할 수 있습니다. 신규 신고는 서버 저장 성공 이후에만 완료 안내를 띄웁니다.

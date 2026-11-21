@@ -30,7 +30,7 @@ async function fixture() {
   sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0010_public_codenames.sql', import.meta.url), 'utf8'));
-  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -780,4 +780,28 @@ test('Comment files, GIFs and links can be edited only with the owner PIN and fo
  await req('/admin/moderate','POST',{kind:'comment',id:cid,action:'restore'},options);
  assert.equal((await req('/comments/'+cid,'DELETE',{password:'123456',captcha:'verified'})).status,200);assert.equal((await req('/media/'+image)).status,404);
  assert.equal(sql.prepare('SELECT count(*) n FROM comment_images WHERE comment_id=?').get(cid).n,0);
+});
+
+
+test('Incident reports are shared across visitors with protected closure, validated locations and idempotent creation', async () => {
+ const {req,sql,env}=await fixture();
+ const record={id:'abcdef01-1234-4123-8123-123456789abc',type:'괴물',grade:'B',location:'가상 연구동',zone:'서울 동부',reporter:'관측자',detail:'현장에서 미확인 신호를 발견했습니다.',support:'합동팀',supportCustom:true,personnel:1250,requests:'',occurredAt:Date.now(),coordinates:[37.56,126.97],approximate:true,area:{type:'Polygon',coordinates:[[[126,37],[127,37],[127,38],[126,37]]]},areaSource:'manual'};
+ const payload={record,password:'123456',consent:true,captcha:'verified'};
+ assert.equal((await req('/incidents','POST',payload,{origin:'https://evil.test'})).status,403);
+ assert.equal((await req('/incidents','POST',{...payload,consent:false})).status,400);
+ assert.equal((await req('/incidents','POST',{...payload,record:{...record,coordinates:[100,0]}})).status,400);
+ assert.equal((await req('/incidents','POST',{...payload,record:{...record,personnel:-1}})).status,400);
+ const created=await req('/incidents','POST',payload);assert.equal(created.status,200);assert.equal(created.data.incident.personnel,1250);
+ assert.equal((await req('/incidents','POST',payload)).status,200);assert.equal(sql.prepare('SELECT count(*) n FROM incidents').get().n,1);
+ const stranger=await req('/incidents','GET',null,{ip:'192.0.2.99'});assert.equal(stranger.status,200);assert.equal(stranger.data.incidents[0].location,record.location);assert.deepEqual(stranger.data.incidents[0].area,record.area);assert.ok(!JSON.stringify(stranger.data).includes('pin_hash'));assert.ok(!JSON.stringify(stranger.data).includes('owner_hash'));
+ assert.equal((await req('/incidents/'+record.id,'PATCH',{resolved:true,password:'000000'},{ip:'192.0.2.99'})).status,403);
+ assert.equal((await req('/incidents/'+record.id,'PATCH',{resolved:true,password:'123456'})).status,200);
+ assert.ok((await req('/incidents')).data.incidents[0].resolvedAt);
+ assert.equal((await req('/incidents/'+record.id,'PATCH',{resolved:false,password:'123456'})).status,200);
+ assert.equal((await req('/incidents')).data.incidents[0].resolvedAt,null);
+ // More than one page is returned through an explicit increasing cursor.
+ for(let i=0;i<205;i++)sql.prepare('INSERT INTO incidents(id,record,owner_hash,pin_salt,pin_hash,updated_at) VALUES (?,?,?,?,?,?)').run('seed-'+i,JSON.stringify({...created.data.incident,id:'seed-'+i}),'x','x','x',i);
+ const first=(await req('/incidents')).data;assert.equal(first.incidents.length,200);assert.ok(first.next);
+ const second=(await req('/incidents?after='+first.next)).data;assert.equal(second.incidents.length,6);assert.equal(second.next,null);
+ env.TURNSTILE_SECRET='';assert.equal((await req('/incidents','POST',{...payload,record:{...record,id:'abcdef02-1234-4123-8123-123456789abc'}})).status,503);
 });

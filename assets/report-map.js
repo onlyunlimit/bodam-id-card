@@ -377,6 +377,19 @@ export function mountReportMap(form, map, dialog) {
     status('지정 구역을 지웠습니다.');
   };
   return {
+    restore(record) {
+      if (record.coordinates) point(...record.coordinates);
+      approximate.checked = true;
+      $('#approximate-tools').hidden = false;
+      form.elements.radiusMeters.value = record.radiusMeters || '';
+      if (record.area && isArea(record.area)) {
+        if (record.areaSource === 'manual' && record.area.type === 'Polygon') {
+          mode.value = 'draw'; drawn = record.area.coordinates[0].slice(0,-1);
+        } else { mode.value = 'boundary'; boundary = record.area; }
+      }
+      paint(); map?.setView(selected, 13);
+      status('이전 신고 위치를 불러왔습니다. 내용을 확인한 후 공유해 주세요.');
+    },
     read() {
       if (!locationConfirmed) throw Error('주소 검색 결과를 선택하거나 지도에 발생 위치를 지정해 주세요.');
       if (pending && !approximate.checked) throw Error('주소 조회가 끝난 뒤 접수해 주세요.');

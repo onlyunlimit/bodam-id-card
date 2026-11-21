@@ -1,4 +1,6 @@
+import { mockIncidents, reportConsent, confirmStatus } from './incident-fixture.js';
 import { test, expect } from '@playwright/test';
+test.beforeEach(async ({page}) => { await mockIncidents(page); });
 test('Briefing connects, decodes, and acknowledges the selected message', async ({ page }) => {
   await page.goto('/portal.html');
   const row = page.locator('.bulletin').first();

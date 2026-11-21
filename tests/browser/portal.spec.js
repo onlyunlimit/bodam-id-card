@@ -1,4 +1,6 @@
+import { mockIncidents, reportConsent, confirmStatus } from './incident-fixture.js';
 import { test, expect } from '@playwright/test';
+test.beforeEach(async ({page}) => { await mockIncidents(page); });
 async function login(page) {
   await page.locator('#viewer-toggle').click();
   await page.locator('#login-submit').click();
@@ -87,22 +89,22 @@ test('Unit messenger unfolds with avatars, saves own messages and does not leak 
   await page.locator('.messenger-launch').click();
   await expect(page.locator('.chat-log')).toContainText('비콘만 보는 메시지');
 });
-test('Records require viewer entry, frequency changes, English seals persist and can reopen', async ({
+test('Records are publicly readable, frequency changes, English seals persist and can reopen', async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/records.html');
-  await expect(page.locator('#records-workspace')).not.toBeVisible();
+  await expect(page.locator('#records-workspace')).toBeVisible();
   await login(page);
   await page.locator('#frequency').fill('80');
   await expect(page.locator('#signal-quality')).toHaveText('신호 불안정');
-  await page.locator('[data-resolve]').first().click();
+  await page.locator('[data-resolve]').first().click(); await confirmStatus(page);
   await expect(page.locator('.stamp')).toHaveCount(0);
   await page.locator('#incident-status').selectOption('resolved');
   await expect(page.locator('.stamp').first()).toContainText('RESOLVED');
   await page.reload();
   await page.locator('#incident-status').selectOption('resolved');
   await expect(page.locator('.stamp').first()).toBeVisible();
-  await page.locator('[data-reopen]').first().click();
+  await page.locator('[data-reopen]').first().click(); await confirmStatus(page);
   await expect(page.locator('.stamp')).toHaveCount(0);
 });
