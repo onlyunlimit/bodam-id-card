@@ -214,7 +214,7 @@ iOS/iPadOS 16.4 이상 홈 화면 웹앱의 Web Push를 사용합니다. [WebKit
 - 서버는 구독별 마지막 전송 시각·HTTP 상태·오류 단계만 기록하며 키·endpoint를 UI나 로그에 노출하지 않습니다. 알림 서비스의 접수 성공은 기기의 표시·사용자 수신 확인과 구별합니다. 집중 모드·알림 표시 설정 등 실제 기기 설정은 사용자가 확인해야 합니다.
 - API: `GET /admin/notifications`, `POST /admin/notifications/read`, `POST /admin/push/status`. 모두 관리자 인증 필요. 읽음 시점·post ID 검증과 기존 Origin 검증을 유지합니다. DB 변경은 `0014_notification_state.sql`입니다.
 
-## 공유 사건 기록 (2026-11-20)
+## 공유 사건 기록 (2026-11-21)
 
 - `0015_shared_incidents.sql`: 신규 `incidents` 테이블. 기존 게시글·댓글·알림 테이블 변경 없음.
 - 모든 방문자 열람, 페이지당 200건 커서 조회. 기록실·관제에서 20초 및 화면 복귀 시 갱신. 서버 장애 시 저장 성공으로 표시하거나 로컬 저장으로 우회하지 않음.
