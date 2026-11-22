@@ -199,6 +199,7 @@ export function isIncident(item) {
     item.id.length < 80 &&
     incidentTypes.includes(item.type) &&
     (locations.includes(item.location) ||
+      (item.editorial === true && typeof item.location === 'string' && item.location.trim().length > 0 && item.location.length <= 140) ||
       (item.manual === true &&
         typeof item.location === 'string' &&
         item.location.trim().length > 0 &&
@@ -216,6 +217,7 @@ export function isIncident(item) {
         item.radiusMeters <= 2000000)) &&
     ['D', 'C', 'B', 'A'].includes(item.grade) &&
     (descriptions[item.type].includes(item.detail) ||
+      (item.editorial === true && typeof item.detail === 'string' && item.detail.length >= 5 && item.detail.length <= 1500) ||
       (item.manual === true &&
         typeof item.detail === 'string' &&
         item.detail.length >= 5 &&

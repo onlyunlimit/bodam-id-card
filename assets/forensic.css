@@ -1824,3 +1824,5 @@ body .az-dossier .person-card .id-card-head{background:#491522;color:#e8c7cc}
 .records-location-panel .seoul-map{height:clamp(420px,56vh,680px);min-height:420px}
 #legacy-incidents button{margin:4px;max-width:100%;white-space:normal}
 @media(max-width:760px){#records-workspace>.records-rack{grid-template-columns:minmax(0,1fr)}.records-location-panel .seoul-map{height:360px;min-height:360px}}
+
+#incident-list .incident-origin{display:block;margin-top:4px;color:var(--muted);font-size:11px}

@@ -805,3 +805,31 @@ test('Incident reports are shared across visitors with protected closure, valida
  const second=(await req('/incidents?after='+first.next)).data;assert.equal(second.incidents.length,6);assert.equal(second.next,null);
  env.TURNSTILE_SECRET='';assert.equal((await req('/incidents','POST',{...payload,record:{...record,id:'abcdef02-1234-4123-8123-123456789abc'}})).status,503);
 });
+
+
+test('Legacy reports automatically import once, preserve history, and only admins can edit or delete them',async()=>{
+ const {req,sql,key}=await fixture();
+ const {generateIncident}=await import('../../assets/model.js');
+ const automatic=generateIncident(1,()=>.2,1000000);
+ const manual={...generateIncident(2,()=>.3,2000000),manual:true,reporter:'이전 신고자',zone:'이전 구역',location:'가상 현장',detail:'다른 브라우저에서도 확인할 기존 신고입니다.',support:'실드',personnel:99,requests:'',occurredAt:1500000,resolvedAt:3000000,coordinates:[37.5,127]};
+ const data={records:[automatic,manual]};
+ assert.equal((await req('/incidents/import','POST',data,{origin:'https://evil.test'})).status,403);
+ assert.equal((await req('/incidents/import','POST',{records:[{...manual,coordinates:[999,0]}]})).status,400);
+ const imported=await req('/incidents/import','POST',data);assert.equal(imported.status,200);
+ const id=imported.data.accepted[1].id;
+ assert.equal((await req('/incidents/import','POST',data,{ip:'192.0.2.44'})).status,200);
+ assert.equal(sql.prepare('SELECT count(*) n FROM incidents').get().n,2);
+ let rows=(await req('/incidents','GET',null,{ip:'192.0.2.99'})).data.incidents;
+ const record=rows.find(r=>r.id===id);assert.equal(record.created,2000000);assert.equal(record.resolvedAt,3000000);assert.deepEqual(record.coordinates,[37.5,127]);assert.equal(record.reporter,manual.reporter);
+ assert.equal((await req('/incidents/'+id,'PATCH',{resolved:false,password:'123456'})).status,403);
+ assert.equal((await req('/admin/incidents/'+id,'DELETE',null,{origin:'https://sgia.test'})).status,401);
+ const auth=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const admin={origin:'https://sgia.test',headers:{Cookie:auth.response.headers.get('Set-Cookie').split(';')[0]}};
+ assert.equal((await req('/admin/incidents/'+id,'PATCH',{detail:'관리자가 수정한 사건 설명입니다.',zone:'수정 구역',resolved:false},admin)).status,200);
+ assert.equal((await req('/incidents')).data.incidents.find(r=>r.id===id).zone,'수정 구역');
+ await req('/incidents/import','POST',data);assert.equal((await req('/incidents')).data.incidents.find(r=>r.id===id).zone,'수정 구역');
+ assert.equal((await req('/admin/incidents/'+id,'DELETE',null,admin)).status,200);
+ await req('/incidents/import','POST',data);assert.equal((await req('/incidents')).data.incidents.length,1);
+ assert.equal(sql.prepare("SELECT count(*) n FROM audit WHERE action LIKE 'INCIDENT_%'").get().n,2);
+ assert.deepEqual(JSON.parse(sql.prepare('SELECT record FROM incidents WHERE id=?').get(id).record),{id,deleted:true});
+});

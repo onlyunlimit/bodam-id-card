@@ -1,4 +1,5 @@
-import { incidents, incidentRequest, acceptIncident, watchIncidents } from './incident-store.js';
+import { serviceConfig } from './service-config.js';
+import { incidents, incidentRequest, acceptIncident, watchIncidents, rebuildIncidents } from './incident-store.js';
 export { incidents } from './incident-store.js';
 import { secureForm, captchaMarkup } from './community.js';
 import { reportMapControls, mountReportMap } from './report-map.js';
@@ -15,6 +16,12 @@ import { registerCopy, tr } from './i18n.js';
   ["종결·재개 시 사용합니다.", "Used to close or reopen this case.", "事件の終結・再開時に使用します。", "用于结案或重新开启案件。"],
   ["신고서 작성 비밀번호", "Report PIN", "通報作成時の暗証番号", "报案密码"],
   ["신고 내용·신고자·위치가 모든 방문자에게 공개되며, 운영을 위한 IP 암호화 보관(30일) 및 관리자 열람에 동의합니다.", "I agree to make the report, reporter name and location public, and to encrypted IP retention for 30 days with administrator access.", "通報内容・通報者名・位置の公開、および運営のためのIPの暗号化保存（30日間）と管理者による閲覧に同意します。", "我同意公开报案内容、报案人及位置，并同意为运营目的加密保存IP 30天，供管理员查阅。"],
+  ['이 기기의 이전 신고', 'Previous report on this device', 'この端末の以前の通報', '此设备上的旧报案'],
+  ['자동 관측 · 이 기기', 'Automatic observation · this device', '自動観測・この端末', '自动观测 · 此设备'],
+  ['자동 관측 기록', 'Automatic observation', '自動観測記録', '自动观测记录'],
+  ['자동 공유 대기', 'Waiting to sync', '自動共有待機中', '等待自动共享'],
+  ['이전 기록 자동 공유 재시도 중 · 원본은 이 기기에 보존됩니다.', 'Retrying automatic sync · originals remain on this device.', '自動共有を再試行中・原本は端末に保存されています。', '正在重试自动共享 · 原记录保留在此设备上。'],
+  ['공유 신고', 'Shared report', '共有通報', '共享报案'],
   ['대상 관측 기록', 'Subject observation file', '対象観測記録', '目标观测记录'],
   ['위험도 측정 불가', 'Threat level unmeasurable', '危険度測定不能', '危险等级无法测定'],
   ['신고 접수가 완료되었습니다.', 'Report submitted successfully.', '通報を受け付けました。', '报案已成功提交。'],
@@ -262,7 +269,7 @@ export function renderRecords() {
   let page = 0;
   $('#main').innerHTML =
     heading('INCIDENT ARCHIVE / RESPONSE', '사건 기록실', '신고 접수 · 현장 대응 · 종결 기록') +
-    `<section id="records-workspace"><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><p id="report-success" class="panel" role="status" tabindex="-1" hidden></p><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p id="incident-sync-status" class="muted" role="status">공유 기록 불러오는 중…</p><div id="legacy-incidents" class="panel" hidden></div></section>`;
+    `<section id="records-workspace"><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><p id="report-success" class="panel" role="status" tabindex="-1" hidden></p><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p id="incident-sync-status" class="muted" role="status">공유 기록 불러오는 중…</p></section>`;
   const rack = document.createElement('aside');
   rack.className = 'records-rack';
   const receiver = $('.receiver');
@@ -274,6 +281,7 @@ export function renderRecords() {
   );
   const recordMap = createMap($('#records-map'));
   const update = () => {
+    rebuildIncidents();
     recordMap?.syncSignals(incidents);
     delay(() => recordMap?.refreshSize(), 60);
     const type = $('#incident-type').value,
@@ -298,7 +306,7 @@ export function renderRecords() {
         .slice(page * 6, page * 6 + 6)
         .map(
           (i) =>
-            `<article class="case-file ${i.resolvedAt ? 'closed' : ''}" data-incident="${esc(i.id)}" tabindex="0" aria-label="${esc(incidentZone(i))} 기록 열람"><div class="case-tab"><b>${i.grade}</b><span>${i.type}</span></div><div class="case-content"><small class="mono">${esc(i.id)}</small><h3 data-user-content>${esc(incidentZone(i))}</h3><div class="case-location"><span>발생 위치</span><span data-user-content>${esc(i.location)}</span></div><p>${esc(i.detail)}</p><time>접수 ${koreaTime(new Date(i.created)).date} ${koreaTime(new Date(i.created)).clock}</time></div><div class="case-action">${i.resolvedAt ? `<span class="stamp">RESOLVED<small>SGIA · CASE CLOSED</small></span><button data-reopen="${i.id}" class="subtle">다시 열기</button>` : `<button data-resolve="${i.id}">종결 승인 ↗</button>`}</div></article>`,
+            `<article class="case-file ${i.resolvedAt ? 'closed' : ''}" data-incident="${esc(i.id)}" tabindex="0" aria-label="${esc(incidentZone(i))} 기록 열람"><div class="case-tab"><b>${i.grade}</b><span>${i.type}</span></div><div class="case-content"><small class="mono">${esc(i.id)}</small><small class="incident-origin">${tr(i.localOnly ? '자동 공유 대기' : i.manual ? '공유 신고' : '자동 관측 기록')}</small><h3 data-user-content>${esc(incidentZone(i))}</h3><div class="case-location"><span>발생 위치</span><span data-user-content>${esc(i.location)}</span></div><p>${esc(i.detail)}</p><time>접수 ${koreaTime(new Date(i.created)).date} ${koreaTime(new Date(i.created)).clock}</time></div><div class="case-action">${i.localOnly ? '<span>자동 공유 대기</span>' : i.managed ? `<a href="${serviceConfig.api}/admin?incident=${encodeURIComponent(i.id)}" target="_blank" rel="noopener">관리자 관리 ↗</a>${i.resolvedAt ? '<span class="stamp">RESOLVED</span>' : ''}` : i.resolvedAt ? `<span class="stamp">RESOLVED<small>SGIA · CASE CLOSED</small></span><button data-reopen="${i.id}" class="subtle">다시 열기</button>` : `<button data-resolve="${i.id}">종결 승인 ↗</button>`}</div></article>`,
         )
         .join('') || '<p class="empty-state">해당 기록이 없습니다.</p>';
   };
@@ -317,17 +325,8 @@ export function renderRecords() {
   };
   const refresh = watchIncidents(update, message => { $('#incident-sync-status').textContent = message; });
   $('#refresh-incidents').onclick = refresh;
-  const previous = read('incidents', null) || (() => { try { return JSON.parse(localStorage.getItem('onlyunlimit.sgia.incidents.v1')); } catch { return []; } })();
-  const legacy = Array.isArray(previous) ? previous.filter(r => r.manual && isIncident(r)) : [];
-  const published = read('incidents.published', {});
-  const renderLegacy = () => {
-    const drafts = legacy.filter(r => !published[r.id]), panel = $('#legacy-incidents');
-    panel.hidden = !drafts.length;
-    panel.innerHTML = '<h3>이 단말의 이전 신고</h3><p>아직 다른 사람에게 공개되지 않은 기록입니다. 내용을 확인한 후 공유 등록하세요.</p>' + drafts.map((r,index) => `<button type="button" data-publish-draft="${index}">${esc(incidentZone(r))} · ${tr('공유 등록')}</button>`).join('');
-    panel.querySelectorAll('[data-publish-draft]').forEach(button => button.onclick = () => openReport(drafts[Number(button.dataset.publishDraft)]));
-  };
   $('#new-incident').onclick = () => openReport();
-  function openReport(draft) {
+  function openReport() {
     if (!state.staff) return login();
     const requestId = crypto.randomUUID();
     const reportDialog = modal(
@@ -343,18 +342,8 @@ export function renderRecords() {
       customSupport.required = custom;
       if (custom) customSupport.focus();
     };
-    if (draft) {
-      const form = $('#incident-form');
-      for (const key of ['reporter','zone','location','type','grade','personnel','detail','requests']) form.elements[key].value = draft[key] ?? '';
-      form.elements.occurred.value = koreaTime(new Date(draft.occurredAt)).date.replaceAll('.', '-') + 'T' + koreaTime(new Date(draft.occurredAt)).clock.slice(0,5);
-      form.elements.support.value = draft.supportCustom ? 'custom' : draft.support;
-      if (!form.elements.support.value) form.elements.support.value = 'custom';
-      supportChoice.onchange(); customSupport.value = draft.support;
-      if (draft.coordinates) { form.elements.latitude.value = draft.coordinates[0]; form.elements.longitude.value = draft.coordinates[1]; }
-    }
     const picker = createMap($('#report-map'), []);
     const mapInput = mountReportMap($('#incident-form'), picker, reportDialog);
-    if (draft) mapInput.restore(draft);
     delay(() => {
       if (reportDialog.open) picker?.refreshSize();
     }, 200);
@@ -391,10 +380,8 @@ export function renderRecords() {
       delete item.password; delete item.consent; delete item.occurred;
       const result = await incidentRequest('/incidents', 'POST', {record:item, password:data.password, consent:data.consent === 'on', captcha});
       acceptIncident(result.incident);
-      if (draft) { published[draft.id] = result.incident.id; save('incidents.published', published); }
       if (signal.aborted || !form.isConnected) return;
       reportDialog.close();
-      renderLegacy();
       page = 0;
       $('#incident-type').value = 'all';
       $('#incident-status').value = 'open';
@@ -407,7 +394,6 @@ export function renderRecords() {
       emergencyAlert(result.incident);
     });
   }
-  renderLegacy();
   $('#incident-list').onkeydown = (e) => {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-incident]')) {
       e.preventDefault();
@@ -415,6 +401,7 @@ export function renderRecords() {
     }
   };
   $('#incident-list').onclick = (e) => {
+    if (e.target.closest('a')) return;
     const b = e.target.closest('[data-resolve],[data-reopen]');
     if (!b) {
       const card = e.target.closest('[data-incident]');
