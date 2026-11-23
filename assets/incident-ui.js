@@ -18,7 +18,7 @@ export function emergencyAlert(record) {
   const messages = [
     ['PRIORITY ' + record.grade, record.location],
     ['DISPATCH REQUEST', record.support || '중앙 통제 본부'],
-    ['SIGNAL RECEIVED', record.id],
+    ['SIGNAL RECEIVED', '신고 수신 완료'],
   ];
   messages.forEach(([label, body], i) =>
     delay(
@@ -73,39 +73,38 @@ export function openIncident(record) {
     ['추가 요청사항', record.requests || '현장 접근 전 파장 측정. 주민 통제선 확보.'],
   ];
   const d = modal(
-    'CASE / ' + record.id,
+    '사건 기록 · ' + incidentZone(record),
     `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><small class="dossier-zone-label">구역</small><h3 data-user-content>${esc(incidentZone(record))}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd${(k === '지원 요청 팀' && record.supportCustom) || k === '발생 위치' ? ' data-user-content' : ''}>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><div class="report-controls"><button id="report-pause">일시 정지</button><button id="report-complete">전체 읽기</button></div><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
     'record',
   );
-  const text = tr(record.detail),
-    out = $('#typed-report');
-  const letters = Array.from(text);
-  let n = 0,
-    timer,
-    paused = false;
+  const text = record.manual || record.editorial ? record.detail : tr(record.detail);
+  const out = d.querySelector('#typed-report');
+  const pause = d.querySelector('#report-pause');
+  const complete = d.querySelector('#report-complete');
+  const letters = Array.from(text || '');
+  let n = 0, timer, paused = false, finished = false;
+  const valid = () => d.open && out.isConnected && d.contains(out);
+  const stop = () => { clearTimeout(timer); finished = true; };
   const type = () => {
-    if (!d.open || !out.isConnected || paused) return;
+    if (!valid() || paused || finished) return;
     out.textContent = letters.slice(0, ++n).join('');
-    if (n < letters.length) timer = delay(type, /[.,。!?。！？]/.test(letters[n - 1]) ? 420 : 75);
-    else $('#report-pause').disabled = true;
+    if (n < letters.length) timer = delay(type, /[.,。!?！？]/.test(letters[n - 1]) ? 220 : 32);
+    else { finished = true; pause.disabled = true; }
   };
-  $('#report-pause').onclick = (e) => {
+  pause.onclick = () => {
     paused = !paused;
-    e.currentTarget.textContent = tr(paused ? '계속 읽기' : '일시 정지');
+    pause.textContent = tr(paused ? '계속 읽기' : '일시 정지');
     clearTimeout(timer);
     if (!paused) type();
   };
-  $('#report-complete').onclick = () => {
-    clearTimeout(timer);
-    n = letters.length;
-    out.textContent = text;
-    $('#report-pause').disabled = true;
+  complete.onclick = () => {
+    stop(); out.textContent = text; pause.disabled = true;
   };
-  if (state.motion) type();
-  else {
-    out.textContent = text;
-    $('#report-pause').disabled = true;
-  }
-  d.addEventListener('close', () => clearTimeout(timer), { once: true });
+  // An old dialog close event can arrive after a new dossier has opened.
+  // Each reader owns its own nodes and timeout, never the shared dialog's next contents.
+  d.addEventListener('close', () => { if (!valid()) stop(); }, {once:true});
+  onDispose(stop);
+  if (state.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches) type();
+  else { out.textContent = text; pause.disabled = true; }
   return d;
 }

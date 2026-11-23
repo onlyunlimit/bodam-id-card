@@ -94,3 +94,8 @@
 
 - 시소 프로필: 사용자가 지정한 Caveduck CDN `charim-standard/8dd8f6f3-06b7-4f12-ad7f-5fa0754be21a?v=042da7`. 공개 설정은 WebP/metadata=none 변환 URL을 사용합니다. `assets/characters.js`, `backend/migrations/0012_siso_portrait.sql`.
 - SGIA 관리자 홈 화면 아이콘: 남색 바탕·금색 S 형태의 자체 코드 도형. 192/512px PNG를 `backend/admin-icons.js`에서 제공합니다. 외부 참고 사진이나 개인 자료를 포함하지 않습니다.
+
+## 2026-11-23 — 기획사 갤러리
+
+- `assets/agency-gallery.js`: 사용자가 제공한 이미지 링크 중 공개 CDN 이미지 67개. 편집 페이지·중복 링크·개인 메모는 제외. 기획사 및 인물 갤러리용. CDN WebP 변환·`metadata=none` 사용, 67개 실제 응답의 EXIF/XMP/ICC/주석 없음 확인. 원본 MD는 로컬 전용.
+- 배경 이미지 표시는 일반 길게 누르기/드래그를 제한하지만 다운로드 자체를 막지 않음. 파생 이미지도 공개 URL로 접근 가능. 운영 DB 백업은 로컬 비공개 경로에 보관.

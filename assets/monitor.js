@@ -306,7 +306,7 @@ export function renderRecords() {
         .slice(page * 6, page * 6 + 6)
         .map(
           (i) =>
-            `<article class="case-file ${i.resolvedAt ? 'closed' : ''}" data-incident="${esc(i.id)}" tabindex="0" aria-label="${esc(incidentZone(i))} 기록 열람"><div class="case-tab"><b>${i.grade}</b><span>${i.type}</span></div><div class="case-content"><small class="mono">${esc(i.id)}</small><small class="incident-origin">${tr(i.localOnly ? '자동 공유 대기' : i.manual ? '공유 신고' : '자동 관측 기록')}</small><h3 data-user-content>${esc(incidentZone(i))}</h3><div class="case-location"><span>발생 위치</span><span data-user-content>${esc(i.location)}</span></div><p>${esc(i.detail)}</p><time>접수 ${koreaTime(new Date(i.created)).date} ${koreaTime(new Date(i.created)).clock}</time></div><div class="case-action">${i.localOnly ? '<span>자동 공유 대기</span>' : i.managed ? `<a href="${serviceConfig.api}/admin?incident=${encodeURIComponent(i.id)}" target="_blank" rel="noopener">관리자 관리 ↗</a>${i.resolvedAt ? '<span class="stamp">RESOLVED</span>' : ''}` : i.resolvedAt ? `<span class="stamp">RESOLVED<small>SGIA · CASE CLOSED</small></span><button data-reopen="${i.id}" class="subtle">다시 열기</button>` : `<button data-resolve="${i.id}">종결 승인 ↗</button>`}</div></article>`,
+            `<article class="case-file ${i.resolvedAt ? 'closed' : ''}" data-incident="${esc(i.id)}" tabindex="0" aria-label="${esc(incidentZone(i))} 기록 열람"><div class="case-tab"><b>${i.grade}</b><span>${i.type}</span></div><div class="case-content"><small class="incident-origin">${tr(i.localOnly ? '자동 공유 대기' : i.manual ? '공유 신고' : '자동 관측 기록')}</small><h3 data-user-content>${esc(incidentZone(i))}</h3><div class="case-location"><span>발생 위치</span><span data-user-content>${esc(i.location)}</span></div><p>${esc(i.detail)}</p><time>접수 ${koreaTime(new Date(i.created)).date} ${koreaTime(new Date(i.created)).clock}</time></div><div class="case-action">${i.localOnly ? '<span>자동 공유 대기</span>' : i.managed ? `<a href="${serviceConfig.api}/admin?incident=${encodeURIComponent(i.id)}" target="_blank" rel="noopener">관리자 관리 ↗</a>${i.resolvedAt ? '<span class="stamp">RESOLVED</span>' : ''}` : i.resolvedAt ? `<span class="stamp">RESOLVED<small>SGIA · CASE CLOSED</small></span><button data-reopen="${i.id}" class="subtle">다시 열기</button>` : `<button data-resolve="${i.id}">종결 승인 ↗</button>`}</div></article>`,
         )
         .join('') || '<p class="empty-state">해당 기록이 없습니다.</p>';
   };
@@ -324,7 +324,11 @@ export function renderRecords() {
     update();
   };
   const refresh = watchIncidents(update, message => { $('#incident-sync-status').textContent = message; });
-  $('#refresh-incidents').onclick = refresh;
+  $('#refresh-incidents').onclick = async e => {
+    const button = e.currentTarget;
+    button.disabled = true; button.textContent = '수신 중…';
+    try { await refresh(); } finally { if(button.isConnected) { button.disabled = false; button.textContent = '수신 갱신 ↻'; } }
+  };
   $('#new-incident').onclick = () => openReport();
   function openReport() {
     if (!state.staff) return login();
@@ -388,7 +392,7 @@ export function renderRecords() {
       update();
       const success = $('#report-success');
       success.hidden = false;
-      success.textContent = tr('신고 접수가 완료되었습니다.') + ' · ' + item.id;
+      success.textContent = tr('신고 접수가 완료되었습니다.');
       success.focus();
       success.scrollIntoView({ block: 'center' });
       emergencyAlert(result.incident);

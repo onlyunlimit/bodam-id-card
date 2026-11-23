@@ -30,10 +30,13 @@ function managedEditor(kind,item){
  images=attachmentPicker(form,item.images||[],id=>'/admin/media/'+id);
  if(kind==='post'){const boardField=form.elements.board;boardField.value=item.board;form.elements.channel.value=item.channel||'free';const update=()=>{form.querySelector('[data-channel-field]').hidden=boardField.value!=='staff';const selected=form.elements.member_id.value;form.elements.member_id.innerHTML='<option value="">일반 작성자 · 닉네임 입력</option>'+memberOptions(boardField.value,selected);};boardField.onchange=update;update();}
 }
-async function artistReply(postId){
+async function artistReply(postId,replyId=null){
  const p=adminPosts.find(p=>p.id===postId);if(!p)throw Error('게시물을 찾을 수 없습니다.');
- const {comments}=await api('comments?post='+postId);
+ const recent=await api('comments?post='+postId);
+ const comments=[...new Map([...(adminCommentCache.get(postId)||[]),...recent.comments].map(c=>[c.id,c])).values()];
+ const target=comments.find(c=>c.id===replyId);
  let images;const form=editor('멤버 댓글·답글','<form><label>작성 멤버<select name="member_id">'+memberOptions(p.board,$('#studio-member').value)+'</select></label><label>답글 대상<select name="parent_id"><option value="">게시물에 새 댓글</option>'+comments.filter(c=>!c.deleted_at&&!c.hidden&&!c.parent_id).map(c=>'<option value="'+esc(c.id)+'">'+esc(c.author+': '+c.body.slice(0,60))+'</option>').join('')+'</select></label><label>내용<textarea name="body" maxlength="1000"></textarea></label>'+uploadMarkup+'<button type="submit">공식 답글 등록</button></form>',async data=>{await api('reply','POST',{...data,post_id:postId,images:images()});});
+ if(target){const option=document.createElement('option');option.value=target.id;option.textContent=target.author+': '+target.body.slice(0,60);form.elements.parent_id.append(option);form.elements.parent_id.value=target.id;}
  images=attachmentPicker(form,[],id=>'/admin/media/'+id);
 }
 `;

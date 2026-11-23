@@ -1,4 +1,3 @@
-// New in-world messages based on each character's established speech, not raw prompt excerpts.
 export const voices = {
   ibex: [
     '위치 확인했습니다. 통제선 밖에서 대기하십시오. 나머지는 제가 처리합니다.',
@@ -87,6 +86,24 @@ export const voices = {
   ],
   az: ['…들려?', '부재중. 찾지 마.'],
 };
+export const waitingVoices = {
+  ibex: '용건은 짧게. 급한 일이면 위치부터 남기십시오. 규칙을 지키면, 불필요하게 다칠 일도 줄어듭니다.',
+  slun: '잠깐 눈 좀 붙일게. 깨울 만한 일이면 깨워.',
+  jaeshin: '인형 하나 만들고 있었어요. 무슨 일이신가요?',
+  bug: '지금 머리 식히는 중. 오류 나면 그때 불러요.',
+  binjo: '연락은 확인 중입니다. 임무 관련 연락은 개인 회선으로 남겨 주십시오.',
+  levit: '심 심 해', shepherd: '위치 보내주십시오.',
+  seowon: '잠깐 자리를 비웠습니다. 확인하면 제가 연락드릴게요.',
+  yeomyeong: '메시지 남겨 주세요. 조금 있다가 확인할게요.', wonhyeol: '미확인 게이트 관측 시 연락바람.',
+  dain: '지금은 잠깐 쉬고 있어요. 아프거나 불안하면 꼭 호출해 주세요.', jion: '나 쉰다.',
+  sando: '좋은 소식이면 짧게, 나쁜 소식이면 자세히.', baekjin: '오늘 기록은 마감했습니다! 추가 사항은 메시지 남겨 주세요.',
+  jaein: '오늘 일정 끝! 응원은 전부 읽고 있어. 이제 럭키 얘기 들을 차례 💜', danjo: '배고프당~.~', unsae: '안녕하세요...',
+  yujin: '오빠한테 전달하는 창구 아닙니다-.- 내 얘기 좀 합시다.', chabin: '훈련 아니면 임무 중.', hanho: '안뇽 안뇽',
+  mohyun: '필요한 게 있으면 말씀하십시오.', yuhwan: '오늘도 수고했다! 이 말은 자동 응답 아니고 진심.',
+  poker: '판은 잠깐 접어 뒀다. 무슨 일이냐.', dealer: '잠깐 쉬고 돌아오겠습니다. 급한 건 따로 표시 바람.',
+  lear: '마지막 사람까지 돌아왔는지 확인하고 있습니다.', panden: '확인할 장소와 시간을 함께 남겨 주세요.', siso: '어려운 말 말고. 짧게 해줘',
+  az: '위치는 묻지 마. 너 있는 곳은 아니니까. 아직은.',
+};
 export function voice(person, active) {
-  return voices[person.id]?.[active ? 0 : 1] || '확인했습니다.';
+  return (!active && waitingVoices[person.id]) || voices[person.id]?.[active ? 0 : 1] || '확인했습니다.';
 }

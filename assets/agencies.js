@@ -29,27 +29,29 @@ export function renderAgency(agency) {
   $$('[data-artist]').forEach(
     (b) => (b.onclick = () => dossier(people.find((c) => c.id === b.dataset.artist))),
   );
-  const pictures = [
-    ...people.map((c) => ({ url: detailImage(c), caption: c.code })),
-    ...(agencyGallery[team] || []),
-  ];
-  $('.gallery-grid').innerHTML = pictures
-    .map(
-      (g, i) =>
-        `<button data-gallery-index="${i}"><img src="${g.url}" alt="${esc(g.caption)}" loading="lazy"><span>${esc(g.caption)} <small>0${i + 1} ↗</small></span></button>`,
-    )
-    .join('');
+  const pictures = agencyGallery[team]?.length ? agencyGallery[team] : people.map(c=>({url:detailImage(c),caption:c.code,member:c.id}));
+  const grid=$('.gallery-grid');
+  const filters=document.createElement('nav');filters.className='gallery-filters';filters.setAttribute('aria-label','갤러리 멤버');
+  filters.innerHTML='<button data-gallery-member="all" aria-pressed="true">전체</button>'+people.map(c=>`<button data-gallery-member="${c.id}" aria-pressed="false">${esc(personName(c))}</button>`).join('');
+  grid.before(filters);
+  let visible=pictures.map((_,i)=>i);
+  function drawGallery(member='all') {
+    visible=pictures.map((g,i)=>({g,i})).filter(({g})=>member==='all'||g.member===member).map(({i})=>i);
+    grid.innerHTML=visible.map(i=>{const g=pictures[i];return `<button data-gallery-index="${i}"><img data-preserve-ratio src="${esc(g.url)}" alt="${esc(g.caption)}" loading="lazy"><span>${esc(g.caption)}<small>${String(i+1).padStart(2,'0')} ↗</small></span></button>`;}).join('');
+    grid.querySelectorAll('[data-gallery-index]').forEach(b=>b.onclick=()=>show(+b.dataset.galleryIndex));
+  }
+  filters.onclick=e=>{const b=e.target.closest('[data-gallery-member]');if(!b)return;filters.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));drawGallery(b.dataset.galleryMember);};
   const show = (i) => {
     const g = pictures[(i + pictures.length) % pictures.length];
     const d = modal(
       g.caption,
-      `<div class="gallery-lightbox"><img src="${g.url}" alt="${esc(g.caption)}"><div><button id="gallery-prev" aria-label="이미지 이전">←</button><span>${((i + pictures.length) % pictures.length) + 1} / ${pictures.length}</span><button id="gallery-next" aria-label="이미지 다음">→</button></div></div>`,
+      `<div class="gallery-lightbox"><img src="${g.url}" alt="${esc(g.caption)}"><div><button id="gallery-prev" aria-label="이미지 이전">←</button><span>${visible.indexOf(i) + 1} / ${visible.length}</span><button id="gallery-next" aria-label="이미지 다음">→</button></div></div>`,
       'gallery',
     );
-    $('#gallery-prev').onclick = () => show((i - 1 + pictures.length) % pictures.length);
-    $('#gallery-next').onclick = () => show((i + 1) % pictures.length);
+    $('#gallery-prev').onclick = () => show(visible[(visible.indexOf(i)-1+visible.length)%visible.length]);
+    $('#gallery-next').onclick = () => show(visible[(visible.indexOf(i)+1)%visible.length]);
   };
-  $$('[data-gallery-index]').forEach((b) => (b.onclick = () => show(+b.dataset.galleryIndex)));
+  drawGallery();
 }
 
 export function renderAgencyDirectory() {

@@ -833,3 +833,47 @@ test('Legacy reports automatically import once, preserve history, and only admin
  assert.equal(sql.prepare("SELECT count(*) n FROM audit WHERE action LIKE 'INCIDENT_%'").get().n,2);
  assert.deepEqual(JSON.parse(sql.prepare('SELECT record FROM incidents WHERE id=?').get(id).record),{id,deleted:true});
 });
+
+test('Large comment threads paginate, focus an old reply, and include member replies in profiles',async()=>{
+ const {req,sql,post,key}=await fixture();const created=await req('/posts','POST',{...post,board:'lucky'});const id=created.data.id;
+ const ids=Array.from({length:125},()=>crypto.randomUUID());
+ for(let i=0;i<125;i++)sql.prepare("INSERT INTO comments(id,post_id,author,body,salt,password_hash,created_at,parent_id,member_id) VALUES (?,?,?,'댓글','','',?,?,?)").run(ids[i],id,'ㅇㅇ',1000+i,i===124?ids[0]:null,i===124?'jaein':null);
+ let r=await req('/posts/'+id);assert.equal(r.data.commentTotal,125);assert.equal(r.data.comments.length,50);assert.equal(r.data.nextComments,50);
+ r=await req('/posts/'+id+'/comments?offset=100');assert.equal(r.data.comments.length,26);assert.equal(r.data.nextComments,null);assert.ok(r.data.comments.some(c=>c.id===ids[0]));
+ r=await req('/posts/'+id+'?focus='+ids[124]);assert.ok(r.data.comments.some(c=>c.id===ids[124]));
+ const feed=await req('/members/jaein/feed');assert.ok(feed.data.items.some(c=>c.kind==='comment'&&c.id===ids[124]));
+ sql.prepare('UPDATE comments SET hidden=1 WHERE id=?').run(ids[0]);
+ assert.equal((await req('/posts/'+id+'?focus='+ids[124])).data.comments.some(c=>c.id===ids[124]),false);
+ assert.equal((await req('/members/jaein/feed')).data.items.some(c=>c.id===ids[124]),false);
+ const login=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});const admin={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
+ const first=await req('/admin/comments?post='+id,'GET',null,admin),second=await req('/admin/comments?post='+id+'&offset=30','GET',null,admin);
+ assert.equal(first.data.next,30);assert.equal(second.data.comments.length,30);assert.equal(first.data.comments.some(c=>second.data.comments.some(d=>c.id===d.id)),false);
+});
+
+test('Bulk incident moderation is authenticated, validates the whole selection, and preserves deletion tombstones',async()=>{
+ const {req,sql,key}=await fixture();const {generateIncident}=await import('../../assets/model.js');
+ const records=[generateIncident(31,()=>.3,1000000),generateIncident(32,()=>.4,2000000)];
+ const imported=await req('/incidents/import','POST',{records});const ids=imported.data.accepted.map(x=>x.id);
+ assert.equal((await req('/admin/incidents/bulk','POST',{ids,action:'delete'},{origin:'https://sgia.test'})).status,401);
+ const login=await req('/admin/login','POST',{key},{origin:'https://sgia.test'}),admin={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
+ assert.equal((await req('/admin/incidents/bulk','POST',{ids:[...ids,crypto.randomUUID()],action:'delete'},admin)).status,409);
+ assert.equal((await req('/incidents')).data.incidents.length,2);
+ assert.equal((await req('/admin/incidents/bulk','POST',{ids,action:'resolve'},admin)).status,200);
+ assert.ok((await req('/incidents')).data.incidents.every(r=>r.resolvedAt&&r.detail));
+ assert.equal((await req('/admin/incidents/bulk','POST',{ids,action:'delete'},admin)).data.count,2);
+ await req('/incidents/import','POST',{records});assert.equal((await req('/incidents')).data.incidents.length,0);
+ assert.equal(sql.prepare('SELECT count(*) n FROM incidents').get().n,2);
+});
+
+test('Translation sends only requested visible text and never hidden comments or unsupported targets',async()=>{
+ const {req,sql,post}=await fixture();const id=(await req('/posts','POST',post)).data.id;
+ const saved=globalThis.fetch;let calls=0;
+ globalThis.fetch=async(url,...args)=>{if(String(url).startsWith('https://api.mymemory.translated.net/')){calls++;assert.equal(new URL(url).searchParams.get('langpair'),'ko|en');return Response.json({responseStatus:200,responseData:{translatedText:'This is a post.'}});}return saved(url,...args);};
+ try{
+  assert.equal((await req('/translate?kind=post&id='+id+'&target=en')).data.text,'This is a post.');assert.equal(calls,1);
+  assert.equal((await req('/translate?kind=post&id='+id+'&target=ko')).data.text,post.body);assert.equal(calls,1);
+  sql.prepare('UPDATE posts SET hidden=1 WHERE id=?').run(id);
+  assert.equal((await req('/translate?kind=post&id='+id+'&target=en')).status,404);assert.equal(calls,1);
+  assert.equal((await req('/translate?kind=post&id='+id+'&target=xx')).status,400);
+ }finally{globalThis.fetch=saved;}
+});

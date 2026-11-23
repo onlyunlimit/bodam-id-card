@@ -72,19 +72,27 @@ export async function syncIncidents() {
   return incidents;
 }
 export function watchIncidents(update, status = () => {}) {
-  let busy = false;
+  let pending = null;
   const signal = routeSignal();
-  const refresh = async () => {
-    if (busy || signal.aborted) return;
-    busy = true;
-    try {
-      let migrationError = false;
-      try { await importPreviousIncidents(); } catch { migrationError = true; }
-      await syncIncidents();
-      if (!signal.aborted) { update(); status(migrationError ? '이전 기록 자동 공유 재시도 중 · 원본은 이 기기에 보존됩니다.' : '공유 기록 최신 상태 · 20초마다 갱신'); }
-    } catch (e) {
-      if (!signal.aborted) status('공유 서버 연결 실패 · 수신 갱신으로 다시 시도해 주세요.');
-    } finally { busy = false; }
+  const refresh = () => {
+    if (signal.aborted) return Promise.resolve();
+    if (pending) return pending;
+    status('공유 기록 수신 중…');
+    pending = (async () => {
+      try {
+        let migrationError = false;
+        try { await importPreviousIncidents(); } catch { migrationError = true; }
+        await syncIncidents();
+        if (!signal.aborted) {
+          update();
+          const time = new Date().toLocaleTimeString('ko-KR', {hour12:false});
+          status(migrationError ? '이전 기록 자동 공유 재시도 중 · 원본은 이 기기에 보존됩니다.' : '최신 기록 수신 완료 · ' + time + ' · 공유 기록 ' + incidents.length + '건');
+        }
+      } catch (e) {
+        if (!signal.aborted) status('공유 서버 연결 실패 · 수신 갱신으로 다시 시도해 주세요.');
+      } finally { pending = null; }
+    })();
+    return pending;
   };
   every(() => { if (!document.hidden) refresh(); }, 20000);
   listen(document, 'visibilitychange', () => { if (!document.hidden) refresh(); });

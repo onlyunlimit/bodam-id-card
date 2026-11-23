@@ -114,7 +114,7 @@ body .profile-stage:is([data-team=blackjack],[data-team=origin],[data-team=beaco
 .team-hero .team-division{display:block}
 body .team-hero>.blackjack-checker{max-width:none}
 body .team-hero>.shield-hero-top,body .team-hero>.shield-hero-bottom{max-width:none}
-body .team-hero.beacon-hero{border-left-color:#628a9f!important}
+body .team-hero.beacon-hero{border-left:0!important}
 body .team-hero>.field-tv{max-width:530px}
 body .team-hero>.origin-aperture{max-width:none}
 

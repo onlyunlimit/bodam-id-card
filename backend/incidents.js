@@ -39,6 +39,22 @@ export async function incidentAPI(request, env, helpers, admin = false) {
   await blocked(env, hash);
   await rate(env, 'incident-write:' + hash, 30, 3600);
   const data = method === 'DELETE' ? {} : await body(request);
+  if (admin && method === 'POST' && path === '/incidents/bulk') {
+    if(!Array.isArray(data.ids)||!data.ids.length||data.ids.length>100||!['delete','resolve','reopen'].includes(data.action))throw new HTTPError(400,'100건 이하의 기록과 처리 종류를 선택해 주세요.');
+    const ids=[...new Set(data.ids.map(uuid))],time=Date.now();
+    const rows=(await env.DB.prepare(`SELECT id FROM incidents WHERE id IN (${ids.map(()=>'?').join(',')}) AND json_extract(record,'$.deleted') IS NOT 1`).bind(...ids).all()).results;
+    if(rows.length!==ids.length)throw new HTTPError(409,'변경되거나 삭제된 기록이 있습니다. 목록을 새로고침한 뒤 다시 선택해 주세요.');
+    const statements=[];
+    for(let offset=0;offset<ids.length;offset+=40) {
+      const group=ids.slice(offset,offset+40),where=`id IN (${group.map(()=>'?').join(',')}) AND json_extract(record,'$.deleted') IS NOT 1`;
+      statements.push(data.action==='delete'
+        ?env.DB.prepare(`UPDATE incidents SET record=json_object('id',id,'deleted',json('true')),updated_at=? WHERE ${where}`).bind(time,...group)
+        :env.DB.prepare(`UPDATE incidents SET record=json_set(record,'$.resolvedAt',?,'$.editorial',json('true')),updated_at=? WHERE ${where}`).bind(data.action==='resolve'?time:null,time,...group));
+    }
+    statements.push(env.DB.prepare('INSERT INTO audit(id,action,target,created_at) VALUES (?,?,?,?)').bind(random(),'INCIDENT_BULK_'+data.action.toUpperCase(),JSON.stringify(ids),time));
+    await env.DB.batch(statements);
+    return json({ok:true,count:ids.length});
+  }
   if (method === 'POST' && path === '/incidents/import' && !admin) {
     if (!Array.isArray(data.records) || !data.records.length || data.records.length > 25) throw new HTTPError(400, '이전 기록 묶음을 확인해 주세요.');
     const accepted = [], commands = [];

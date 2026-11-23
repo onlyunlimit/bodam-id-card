@@ -12,14 +12,14 @@ export async function compressImage(file) {
   const bitmap = await createImageBitmap(file);
   try {
     const canvas = document.createElement('canvas');
-    for (const edge of [1600, 1200, 900, 640, 480]) {
+    for (const edge of [2560, 2240, 1920, 1600]) {
       const scale = Math.min(1, edge / Math.max(bitmap.width, bitmap.height));
       canvas.width = Math.max(1, Math.round(bitmap.width * scale));
       canvas.height = Math.max(1, Math.round(bitmap.height * scale));
       canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      for (const quality of [0.86, 0.72, 0.55]) {
+      for (const quality of [0.94, 0.90, 0.86]) {
         const data = canvas.toDataURL('image/webp', quality);
-        if (data.length < 540000) return data;
+        if (data.length <= 2400023) return data;
       }
     }
     throw Error('사진을 처리하지 못했습니다. 다른 파일이나 이미지 URL을 사용해 주세요.');
@@ -99,4 +99,4 @@ export function attachmentPicker(form, initial = [], urlFor = (id) => id, limit 
   };
 }
 export const uploadMarkup =
-  '<div class="upload-field"><label>사진 첨부 · 최대 2장<input type="file" data-images accept="image/jpeg,image/png,image/webp,image/gif" multiple></label><small>사진 20MB 이하 · 자동 압축 / GIF 1MB 이하 · 또는 HTTPS 이미지 링크</small><div class="image-url-row"><input type="url" data-image-url aria-label="이미지 URL" placeholder="https://… 이미지 주소"><button type="button" data-add-image-url>링크 추가</button></div><div class="upload-preview"></div><p class="upload-status" role="status"></p></div>';
+  '<div class="upload-field"><label>사진 첨부 · 최대 2장<input type="file" data-images accept="image/jpeg,image/png,image/webp,image/gif" multiple></label><small>사진 20MB 이하 · 고화질 변환 / GIF 1MB 이하 · 또는 HTTPS 이미지 링크</small><div class="image-url-row"><input type="url" data-image-url aria-label="이미지 URL" placeholder="https://… 이미지 주소"><button type="button" data-add-image-url>링크 추가</button></div><div class="upload-preview"></div><p class="upload-status" role="status"></p></div>';

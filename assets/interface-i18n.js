@@ -77,7 +77,6 @@ CCTV 시각과 출입 기록 불일치. 흔적 복원 중.|CCTV timestamps confl
 미세 감각 각성 · 민간 생활·정기 검진|Minor sensory awakening · Civilian life and screening|微細な感覚覚醒・民間生活と定期検診|轻微感官觉醒 · 平民生活与定期体检
 훈련용 · 24–48시간 내 자연 소멸|Training level · Dissipates in 24–48 hours|訓練用・24〜48時間以内に自然消滅|训练用 · 24至48小时内自然消散
 일반 등급 언급은 있으나 상세 기준 미기재|Recognized grade; detailed criteria unpublished|等級の記載はあるが詳細基準は未記載|等级有记载，详细标准未公布
-개별 인물의 SS·ERROR 표기는 원본 프로필의 별도 표기를 유지합니다.|Individual SS and ERROR designations follow the original personnel files.|人物ごとのSS・ERROR表記は原プロフィールの特記を維持しています。|个别人物的SS、ERROR标记沿用原始档案中的特殊分类。
 캐릭터 대화창에서 사용하는 명령어입니다. 홈페이지에서는 복사만 수행합니다.|These commands are used in character chats. Click to copy them here.|キャラクターとの会話で使うコマンドです。このサイトではクリックでコピーできます。|这些指令用于角色聊天，点击即可在本站复制。
 C급 게이트 출현과 대응 임무|Class C gate and response mission|C級ゲート出現と対応任務|C级门扉出现与应对任务
 지정 인물 또는 팀의 단독 임무|Solo mission for a selected person or team|指定人物・チームの単独任務|指定人物或团队的独立任务

@@ -1,4 +1,4 @@
-import { voices } from './voices.js';
+import { voices, waitingVoices } from './voices.js';
 import { registerCopy } from './i18n.js';
 const translations = {
   ibex: [
@@ -265,7 +265,27 @@ const translations = {
   ],
 };
 export function installVoiceTranslations() {
+  Object.entries(waitingVoices).forEach(([id,line])=>registerCopy(line,...waitingTranslations[id]));
   Object.entries(voices).forEach(([id, lines]) =>
     lines.forEach((line, i) => registerCopy(line, ...translations[id].map((a) => a[i]))),
   );
 }
+
+const waitingTranslations={
+ ibex:['Keep it brief. If it is urgent, leave your location first. Following the rules prevents unnecessary injuries.','用件は短く。急ぎなら位置を先に。規則を守れば、無駄な怪我も減ります。','有事简短说。急事先留位置。遵守规则，就能少受不必要的伤。'],
+ slun:['I am getting some sleep. Wake me if it is worth waking up for.','少し寝るね。起こすほどの用なら起こして。','我眯一会儿。值得叫醒我的事再叫我。'],
+ jaeshin:['I was making a doll. What can I do for you?','人形を作っていました。どうなさいましたか？','刚才在做一个娃娃。有什么事吗？'],
+ bug:['Cooling my head. Call me when something breaks.','頭を冷やしてるところ。エラーが出たら呼んで。','正在放空。出错了再叫我。'],
+ binjo:['I am checking messages. Leave mission-related matters on my private line.','連絡は確認中です。任務に関する連絡は個人回線へお願いします。','正在查看消息。任务相关事项请留在私人线路。'],
+ levit:['B o r e d','ひ ま','好 无 聊'],shepherd:['Send your location.','位置を送ってください。','请发送位置。'],
+ seowon:['I have stepped away briefly. I will contact you when I see this.','少し席を外しています。確認でき次第、こちらから連絡します。','暂时离开一下，看到后我会联系您。'],
+ yeomyeong:['Leave a message. I will check in a bit.','メッセージを残してください。あとで確認します。','请留言，稍后查看。'],wonhyeol:['Report any unidentified gate sightings.','未確認ゲートを観測した場合は連絡されたし。','发现未确认的门时请联系。'],
+ dain:['Taking a short break. Please call if you feel hurt or uneasy.','少し休んでいます。痛かったり不安だったりしたら、必ず呼んでください。','正在休息一会儿。不舒服或不安的话一定叫我。'],jion:['On break.','休む。','我休息了。'],
+ sando:['Good news: keep it brief. Bad news: give me the details.','良い知らせは短く、悪い知らせは詳しく。','好消息简短说，坏消息详细说。'],baekjin:['Today’s records are closed! Leave any additions in a message.','本日の記録は締めました！追加事項はメッセージでお願いします。','今天的记录已结！补充事项请留言。'],
+ jaein:['Done for today! I am reading all your support. Now it is Lucky’s turn to talk 💜','今日の日程終了！応援は全部読んでるよ。今度はラッキーの話を聞く番 💜','今天的行程结束！大家的应援我都在看。现在轮到听Lucky说啦 💜'],danjo:['Hungryyy ~.~','おなかすいた~.~','饿啦~.~'],unsae:['Hello...','こんにちは…','你好……'],
+ yujin:['This is not a message desk for my brother -.- Let’s talk about me.','兄への伝言窓口ではありません-.- 私の話をしましょう。','这里不是给哥哥传话的窗口-.- 聊聊我吧。'],chabin:['Training or on a mission.','訓練か任務中。','训练或执行任务中。'],hanho:['Hii hii','やほやほ','嗨嗨'],
+ mohyun:['Please let me know if you need anything.','必要なものがあればお申し付けください。','有需要请告诉我。'],yuhwan:['Good work today! This is not an auto-reply. I mean it.','今日もお疲れ！これは自動応答じゃなくて本心。','今天也辛苦了！这不是自动回复，是真心话。'],
+ poker:['The game is on hold. What is it?','勝負はひとまずお預けだ。何の用だ。','牌局先停一会儿。什么事。'],dealer:['I will return after a short break. Please flag anything urgent.','少し休んで戻ります。急ぎの件は印を付けてください。','休息片刻就回来。急事请单独标记。'],
+ lear:['Making sure the last person is back.','最後の一人まで戻ったか確認中です。','正在确认最后一个人是否归队。'],panden:['Leave the place and time to check.','確認する場所と時刻を一緒に残してください。','请一并留下需要确认的地点和时间。'],siso:['No big words. Keep it short.','難しい言葉はなし。短くして。','别说难懂的话。简短点。'],
+ az:['Don’t ask where I am. Not where you are. Not yet.','居場所は聞くな。お前のいる場所じゃない。まだな。','别问我在哪。不在你那儿。暂时。'],
+};

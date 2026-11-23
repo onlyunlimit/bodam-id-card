@@ -1,3 +1,4 @@
+import { translationAPI } from './translation.js';
 import { incidentAPI } from './incidents.js';
 import { notificationAPI, notificationStatement, dispatchNotification } from './notifications.js';
 import { adminManifest, adminSW } from './admin-pwa.js';
@@ -9,6 +10,7 @@ import {
   adminFan,
   postFields,
   enrichPosts,
+  enrichComments,
   attachments,
   imageChanges,
   parentComment,
@@ -45,7 +47,7 @@ async function body(request) {
     const { done, value } = await reader.read();
     if (done) break;
     total += value.length;
-    if (total > 3000000) {
+    if (total > 5000000) {
       await reader.cancel();
       throw new HTTPError(413, '본문이 너무 큽니다.');
     }
@@ -202,12 +204,13 @@ async function handle(request, env) {
       return json({ posts: await enrichPosts(env, results), offset });
     }
     if (path === '/admin/comments' && method === 'GET') {
+      const offset=Math.max(0,Math.floor(Number(url.searchParams.get('offset'))||0));
       const { results } = await env.DB.prepare(
-        'SELECT id,post_id,author,body,created_at,updated_at,hidden,deleted_at,member_id,parent_id FROM comments WHERE post_id=? ORDER BY created_at DESC LIMIT 100',
+        'SELECT id,post_id,author,body,created_at,updated_at,hidden,deleted_at,member_id,parent_id FROM comments WHERE post_id=? ORDER BY created_at DESC,id DESC LIMIT 31 OFFSET ?',
       )
-        .bind(url.searchParams.get('post'))
+        .bind(url.searchParams.get('post'),offset)
         .all();
-      return json({ comments: await Promise.all(results.map(async c=>({...c,images:await attachments(env,c.id,true)}))) });
+      return json({ comments: await Promise.all(results.slice(0,30).map(async c=>({...c,images:await attachments(env,c.id,true)}))),next:results.length>30?offset+30:null });
     }
     if (path === '/admin/ip' && method === 'POST') {
       const data = await body(request),
@@ -424,6 +427,8 @@ async function handle(request, env) {
       more: results.length > 20,
     });
   }
+  const translationResponse=await translationAPI(request,env,{identity,rate});
+  if(translationResponse)return translationResponse;
   const match = path.match(/^\/(posts|comments)\/([a-f0-9-]{36})(?:\/(comments))?$/);
   if (match && method === 'GET' && match[1] === 'posts') {
     const row = await env.DB.prepare(
@@ -432,11 +437,20 @@ async function handle(request, env) {
       .bind(match[2])
       .first();
     if (!row) throw new HTTPError(404, '게시물이 없거나 숨김 처리되었습니다.');
-    const { results } = await env.DB.prepare(
-      `SELECT c.id,c.author,c.body,c.created_at,c.updated_at,c.member_id,c.parent_id,c.pin_length,m.name AS member_name,m.avatar_url,max(0,c.like_adjustment+(SELECT COUNT(*) FROM comment_likes l WHERE l.comment_id=c.id)) AS likes FROM comments c LEFT JOIN members m ON m.id=c.member_id WHERE c.post_id=? AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL)) ORDER BY c.created_at,c.id LIMIT 100`,
-    )
-      .bind(row.id)
-      .all();
+    const offset = Math.max(0,Math.min(1000000,Math.floor(Number(url.searchParams.get('offset'))||0)));
+    const visible = `c.post_id=? AND c.hidden=0 AND c.deleted_at IS NULL AND (c.parent_id IS NULL OR EXISTS(SELECT 1 FROM comments root WHERE root.id=c.parent_id AND root.hidden=0 AND root.deleted_at IS NULL))`;
+    const commentFields = `c.id,c.author,c.body,c.created_at,c.updated_at,c.member_id,c.parent_id,c.pin_length,m.name AS member_name,m.avatar_url,max(0,c.like_adjustment+(SELECT COUNT(*) FROM comment_likes l WHERE l.comment_id=c.id)) AS likes`;
+    const page = (await env.DB.prepare(`SELECT ${commentFields} FROM comments c LEFT JOIN members m ON m.id=c.member_id WHERE ${visible} ORDER BY c.created_at,c.id LIMIT 51 OFFSET ?`).bind(row.id,offset).all()).results;
+    const results = page.slice(0,50);
+    const focus=url.searchParams.get('focus');
+    if(focus&&!results.some(c=>c.id===focus)) {
+      const focused=await env.DB.prepare(`SELECT ${commentFields} FROM comments c LEFT JOIN members m ON m.id=c.member_id WHERE ${visible} AND c.id=?`).bind(row.id,focus).first();
+      if(focused)results.push(focused);
+    }
+    // Include a reply's root when it belongs to an earlier page; clients deduplicate by ID.
+    const missing = [...new Set(results.map(c=>c.parent_id).filter(id=>id&&!results.some(c=>c.id===id)))];
+    if(missing.length) results.push(...(await env.DB.prepare(`SELECT ${commentFields} FROM comments c LEFT JOIN members m ON m.id=c.member_id WHERE ${visible} AND c.id IN (${missing.map(()=>'?').join(',')})`).bind(row.id,...missing).all()).results);
+    const total = (await env.DB.prepare(`SELECT count(*) AS n FROM comments c WHERE ${visible}`).bind(row.id).first()).n;
     const { ip } = await identity(request, env);
     const voter = await hmac(env.IP_KEY, 'like:' + row.id + ':' + ip);
     const count = await env.DB.prepare('SELECT max(0,like_adjustment+(SELECT count(*) FROM post_likes WHERE post_id=posts.id)) AS n FROM posts WHERE id=?')
@@ -445,20 +459,10 @@ async function handle(request, env) {
     const liked = await env.DB.prepare('SELECT post_id FROM post_likes WHERE post_id=? AND voter=?')
       .bind(row.id, voter)
       .first();
-    const comments = await Promise.all(
-      results.map(async (c) => ({
-        ...c,
-        images: await attachments(env,c.id,true),
-        liked: !!(await env.DB.prepare(
-          'SELECT comment_id FROM comment_likes WHERE comment_id=? AND voter=?',
-        )
-          .bind(c.id, await hmac(env.IP_KEY, 'comment-like:' + c.id + ':' + ip))
-          .first()),
-      })),
-    );
+    const comments = await enrichComments(env,results,ip);
     return json({
       post: { ...(await enrichPosts(env, [row]))[0], likes: count.n, liked: !!liked },
-      comments,
+      comments, commentTotal:total, nextComments:page.length>50?offset+50:null,
     });
   }
   if ((path === '/posts' || match) && ['POST', 'PATCH', 'DELETE'].includes(method)) {
@@ -506,12 +510,7 @@ async function handle(request, env) {
           .bind(match[2])
           .first();
         if (!parent) throw new HTTPError(404, '게시물이 없습니다.');
-        const count = await env.DB.prepare(
-          'SELECT COUNT(*) AS n FROM comments WHERE post_id=? AND deleted_at IS NULL',
-        )
-          .bind(parent.id)
-          .first();
-        if (count.n >= 100) throw new HTTPError(409, '게시물당 댓글은 100개까지 등록됩니다.');
+
         const parentId = await parentComment(env, parent.id, data.parent_id);
         const voter = await hmac(env.IP_KEY, 'comment-alias:' + parent.id + ':' + ip);
         if (!author) aliases.push(env.DB.prepare(

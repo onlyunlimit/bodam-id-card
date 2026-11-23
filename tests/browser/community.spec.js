@@ -304,7 +304,8 @@ test('Attachments show the whole portrait and landscape for fan and artist posts
   await page.goto('/community.html?board=lucky');
   await page.locator('[data-feed='+ (artist?'artist':'fan') +']').click();
   await expect(page.locator('.post-row .post-photos')).toHaveCount(0);
-  await expect(page.locator('.post-attachment-indicator')).toHaveText('▧ 이미지 첨부 · 2장');
+  if(artist)await expect(page.locator('.feed-thumbnail')).toBeVisible();
+  else await expect(page.locator('.post-attachment-indicator')).toHaveText('▧ 이미지 첨부 · 2장');
   await page.locator('.post-row').click();
   for(const width of [1280,320]) {
    await page.setViewportSize({width,height:900});
@@ -403,7 +404,7 @@ test('Nickname is optional when submitting posts, comments and replies',async({p
  expect(f.comments[1].parent_id).toBe(f.comments[0].id);
 });
 
-test('Fan communities keep their own palette across mode changes and retain group logos',async({page})=>{
+test('Fan communities keep their own palette across mode changes and show English mastheads without logos',async({page})=>{
  await mock(page);
  const contrast=locator=>locator.evaluate(el=>{
   const c=getComputedStyle(el),rgb=s=>s.match(/[\d.]+/g).slice(0,3).map(Number);
@@ -411,7 +412,7 @@ test('Fan communities keep their own palette across mode changes and retain grou
   const values=[lum(rgb(c.color)),lum(rgb(c.backgroundColor))].sort((a,b)=>a-b);return (values[1]+.05)/(values[0]+.05);
  });
  for(const board of ['lucky','obsidus']){
-  await page.goto('/community.html?board='+board);await expect(page.locator('.fan-hero-art')).toBeVisible();
+  await page.goto('/community.html?board='+board);await expect(page.locator('.fan-hero-art')).toHaveCount(0);await expect(page.locator('.community-masthead h1')).toHaveText(board==='lucky'?'LUCKYTRICK':'OBSIDUS');
   const sample=()=>page.evaluate(()=>{const selectors=['body','.fan-feed','#feed-title','#write-post','.member-panel'];return selectors.map(s=>{const c=getComputedStyle(document.querySelector(s));return [c.color,c.backgroundColor];});});
   await expect(page.locator('body')).toHaveCSS('background-color',board==='lucky'?'rgb(250, 243, 247)':'rgb(17, 18, 21)');
   const before=await sample();await page.locator('#theme-toggle').click();await expect.poll(sample).toEqual(before);

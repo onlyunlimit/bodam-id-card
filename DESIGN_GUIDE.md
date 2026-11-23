@@ -247,3 +247,25 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 - 화면·공유 등록·종결 비밀번호: `assets/monitor.js`의 `renderRecords`. 공유 요청·20초 갱신: `assets/incident-store.js`.
 - 현장 지도: `assets/forensic.css` 끝 `Shared incident desk`. PC 수신기 300px + 나머지 지도, 지도 높이 420~680px. 모바일은 세로 배치·높이 360px.
 - 이전 로컬 신고의 지도 복원: `assets/report-map.js`의 `restore`. 서버 검증/저장: `backend/incidents.js`, `0015_shared_incidents.sql`.
+
+### 커뮤니티 영문 대문·갤러리 (2026-11-08)
+
+- 대문: `assets/community.js`의 `.community-masthead`, 최종 스타일 `assets/service-design.css` 맨 아래. LUCKYTRICK 핑크·OBSIDUS 블랙/실버/골드, 커뮤니티 대문 로고 없음. 기획사 소개 페이지 로고는 유지.
+- 갤러리 링크: `assets/agency-gallery.js`. 인물 이름과 번호만 공개하고 개인 참고 메모는 넣지 않습니다. `assets/characters.js`에서 인물 갤러리에도 연결합니다.
+- 관리자 작성자/시간: `backend/admin-composer.js`와 `backend/fan.js`. 첨부 표시/링크 입력은 `assets/community-media.js`, 서버 메타데이터 제거는 `backend/image-privacy.js`.
+
+
+## 2026-11-23 편집 위치
+
+| 수정할 부분 | 파일 |
+| --- | --- |
+| 아티스트 목록·멤버 글/댓글 피드 | `assets/community.js`, `assets/service-design.css` |
+| 업로드 화질·첨부 변환 | `assets/community-media.js`, `backend/fan.js` |
+| 멤버 언급 후보·선택·포커스 | `assets/mentions.js` (관리자 사본은 생성 스크립트 사용) |
+| 선택 번역 링크·번역문 | `assets/community-translation.js`, `assets/service-design.css` |
+| 갤러리 목록·멤버 필터·확대 | `assets/agency-gallery.js`, `assets/agencies.js`, `assets/service-design.css` |
+| 메신저 대기 문구·각 언어 | `assets/voices.js`, `assets/voice-i18n.js` |
+| 사건 상황 설명 타이핑 | `assets/incident-ui.js` |
+| 관리자 사건 비교·일괄 작업 | `backend/admin-incidents.js`, `backend/admin.js` |
+
+공개 화면에는 제작 메모·원본 자료 비교·수정 이력을 넣지 않습니다. 개발 이력은 이 문서와 CHANGELOG에서만 관리합니다.

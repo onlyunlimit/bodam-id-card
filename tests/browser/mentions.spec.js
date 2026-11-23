@@ -14,3 +14,23 @@ test('Mention picker supports repeated mentions, keyboard selection, IME and saf
  await field.fill('@');await field.press('Escape');await expect(page.getByRole('listbox')).toBeHidden();
  await field.fill('메일 test@example.com');await expect(page.getByRole('listbox')).toBeHidden();
 });
+
+test('Mention taps after existing text preserve the field and do not jump the page',async({browser,baseURL})=>{
+ const context=await browser.newContext({hasTouch:true,isMobile:true,viewport:{width:390,height:844}});
+ const page=await context.newPage();
+ try{
+  await page.goto(baseURL+'/community.html?board=lucky');
+  await page.evaluate(async()=>{
+   const {attachMentions}=await import('/assets/mentions.js');
+   document.body.innerHTML='<div style="height:500px"></div><label>댓글<textarea id="touch-mention" style="width:300px;height:80px"></textarea></label><div style="height:1400px"></div>';
+   attachMentions(document.querySelector('textarea'),()=>Array.from({length:25},(_,i)=>({id:'member-'+i,name:'멤버'+i,board:'lucky'})));
+  });
+  const field=page.locator('#touch-mention');await field.fill('오늘도 고생했어요 ');await field.tap();
+  const before=await page.evaluate(()=>scrollY);await field.pressSequentially('@멤버');
+  expect(Math.abs(await page.evaluate(()=>scrollY)-before)).toBeLessThan(30);
+  await page.getByRole('option').first().tap();
+  await expect(field).toHaveValue('오늘도 고생했어요 @멤버0 ');await expect(field).toBeFocused();
+  await field.pressSequentially('고마워요 @');await page.getByRole('option').nth(1).tap();
+  await expect(field).toHaveValue('오늘도 고생했어요 @멤버0 고마워요 @멤버1 ');
+ }finally{await context.close();}
+});
