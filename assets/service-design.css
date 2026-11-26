@@ -15,7 +15,7 @@ body :is(button,a,input,textarea,select):focus-visible{outline:2px solid var(--a
 .directory-grid>.directory-card{padding:24px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,color-mix(in srgb,var(--team) 9%,var(--surface)),var(--surface) 70%);box-shadow:var(--soft-shadow),inset 0 1px 0 #ffffff28;transform:none;overflow:hidden;transition:transform .25s,box-shadow .25s}
 .directory-grid>.directory-card:hover{transform:translateY(-5px);box-shadow:0 22px 45px #0003}
 .directory-card .directory-visual{height:260px;margin:20px 0 24px;border-radius:14px;border:0;background:var(--control);overflow:hidden;isolation:isolate}
-.directory-card .directory-visual img{transform:none!important;filter:saturate(.7);border:0!important;height:100%;object-fit:cover;object-position:50% 25%;border-radius:0!important}
+.directory-card .directory-visual img{transform:none!important;filter:saturate(.7);border:0!important;height:100%;object-fit:cover;object-position:50% 25%;}
 .directory-card .directory-number{font-size:64px;opacity:.65;z-index:2;right:14px;top:12px}
 .directory-card .directory-window-label{background:color-mix(in srgb,var(--team) 75%,#151719);color:#fff;padding:9px 14px;letter-spacing:.13em}
 .directory-card .directory-title h2{font-size:clamp(26px,3vw,40px);line-height:1.2;letter-spacing:-.05em}
@@ -129,8 +129,8 @@ html[data-motion=off] .spotlight-frame{transition:none;transform:none}
 html[data-community-theme] body[data-page=community] :is(.agency-strip,.site-nav,.site-footer){background:var(--surface);color:var(--text);border-color:var(--line)}
 
 body .directory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-body .directory-grid>.directory-card,body .unit-masthead{color:var(--text);--muted:inherit;--line:inherit;--accent:inherit;border-radius:24px!important}
-body .directory-grid>.directory-card{box-shadow:var(--soft-shadow)!important}
+body .directory-grid>.directory-card,body .unit-masthead{color:var(--text);--muted:inherit;--line:inherit;--accent:inherit;}
+body .directory-grid>.directory-card{}
 body .directory-grid .directory-title{color:var(--text)}
 body .person-card{--card-text:var(--text);--card-muted:var(--muted);--card-line:var(--line);--card-accent:var(--team)}
 body .fan-community .fan-hero-art{padding:0}
@@ -218,7 +218,6 @@ body .obsidus .community-masthead .masthead-symbol {color:#cbb888;}
 .agency-gallery .gallery-grid img { width:100%; height:auto; aspect-ratio:auto; display:block; object-fit:contain; border-radius:0; }
 .agency-gallery .gallery-grid>button>span { position:static; display:flex; justify-content:space-between; padding:14px 16px; background:none; color:inherit; font-size:11px; }
 .agency-gallery .gallery-grid>button:hover { box-shadow:0 10px 30px #0002; }
-.fan-community .reply-context,.fan-community .official-post,.community-profile .profile-feed-post { border-left:0; }
 @media(max-width:800px) { .agency-gallery .gallery-grid { columns:2; column-gap:12px; } .agency-gallery .gallery-grid>button { margin-bottom:14px; border-radius:12px; } }
 @media(max-width:480px) { .feed-title-line { flex-wrap:wrap; gap:0 8px; } .feed-title-line time { margin-left:auto; } .feed-title-line h3,.feed-title-line h5 { flex-basis:100%; } .agency-gallery .gallery-grid>button>span { padding:10px; font-size:9px; } }
 
@@ -299,7 +298,7 @@ body[data-page=playlists] .staff-ribbon{display:none!important}
 .fan-post-detail .record-edit-links button{font-size:11px;padding:3px 5px}
 .fan-post-detail .comments .comment-row{border:1px solid var(--fan-line,var(--line));border-radius:18px;padding:16px 18px;margin:12px 0;background:var(--fan-surface,var(--surface));box-shadow:none}
 .fan-post-detail .comments .comment-row p{font-size:14px;line-height:1.8;margin:10px 0 12px}
-.fan-post-detail .comments .comment-row.is-reply{margin-left:28px;border-left:0;background:color-mix(in srgb,var(--fan-accent,var(--accent)) 5%,var(--fan-surface,var(--surface)))}
+.fan-post-detail .comments .comment-row.is-reply{margin-left:28px;background:color-mix(in srgb,var(--fan-accent,var(--accent)) 5%,var(--fan-surface,var(--surface)))}
 .fan-post-detail .comment-tools{gap:14px}
 .fan-post-detail .reply-thread>summary{padding:8px 0 10px 28px;font-size:12px}
 .fan-post-detail[data-community=staff] .comments .comment-row{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:20px 4px;margin:0;background:transparent}

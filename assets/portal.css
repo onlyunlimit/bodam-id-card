@@ -4805,7 +4805,7 @@ a:focus-visible,
   background: #25181c;
   color: #f0d9dc;
   border: 1px solid #a13e52;
-  border-left: 4px solid #ec536f;
+
   border-radius: 12px;
   padding: 16px 18px;
   box-shadow: 0 10px 40px #0005;
@@ -5285,7 +5285,7 @@ body[data-page='entertainment'] .ent-directory .directory-card {
   border-radius: 12px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-left: 3px solid var(--accent);
+
   box-shadow: none;
 }
 .unit-masthead h2 {
@@ -5515,7 +5515,7 @@ progress {
 .case-file {
   border-radius: 5px;
   box-shadow: 3px 3px 0 #0002;
-  border-left: 2px solid var(--line);
+
 }
 .card-face {
   border-radius: 16px;

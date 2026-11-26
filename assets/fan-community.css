@@ -573,7 +573,7 @@
   border-color: var(--fan-line);
 }
 .reply-context {
-  border-left: 2px solid var(--fan-accent);
+
   background: var(--fan-soft);
   padding: 12px;
   font-size: 11px;
@@ -653,7 +653,7 @@
 .fan-post-detail .comment-row.is-reply {
   margin-left: 35px;
   padding-left: 15px;
-  border-left: 2px solid var(--fan-line);
+
 }
 .fan-post-detail .comment-row p {
   font-size: 13px;

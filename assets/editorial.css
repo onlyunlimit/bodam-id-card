@@ -119,11 +119,11 @@ body {
   gap: 26px;
 }
 .directory-card {
-  padding: 18px !important;
+
   position: relative;
-  border-radius: 5px !important;
+
   overflow: visible;
-  box-shadow: 6px 6px 0 #0002 !important;
+
 }
 .directory-card > .eyebrow {
   display: block;
@@ -209,7 +209,7 @@ body[data-page='entertainment'] .ent-directory .directory-card {
   color: #181b21;
   border: 1px solid #222;
   transform: rotate(-1deg);
-  padding: 22px !important;
+
   display: flex;
 }
 body[data-page='entertainment'] .ent-directory .directory-card:nth-child(2) {
@@ -317,21 +317,6 @@ body[data-page='entertainment'] .avatar-stack {
   color: white;
   font: 9px var(--mono);
   padding: 4px 8px;
-}
-.unit-masthead[data-team='beacon'] {
-  border-left: 8px solid #3450d8;
-}
-.unit-masthead[data-team='origin'] {
-  border-left: 8px solid #6c9480;
-}
-.unit-masthead[data-team='shield'] {
-  border-left: 8px solid #b26344;
-}
-.unit-masthead[data-team='lucky'] {
-  border-left: 8px solid #234bfa;
-}
-.unit-masthead[data-team='obsidus'] {
-  border-left: 8px solid #b71c36;
 }
 .unit-workspace {
   margin-top: 30px;
@@ -570,9 +555,6 @@ body[data-viewer='public'] .unit-contact-sheet img {
   border: 1px solid #465673;
   box-shadow: 5px 7px 0 #1e335833;
 }
-.person-card[data-team='beacon'] .id-caption {
-  border-left: 5px solid #2a50c3;
-}
 .person-card[data-team='shield'] {
   --card-bg: #e5dfd0;
   --card-text: #24251f;
@@ -608,14 +590,11 @@ body[data-viewer='public'] .unit-contact-sheet img {
 .person-card[data-team='obsidus'] .id-caption {
   background: #ede8df;
   color: #20171b;
-  border-left: 7px solid #b51935;
+
 }
 .person-card[data-character='bug'] {
   --card-accent: #8de7a1;
   --card-line: #8de7a166;
-}
-.person-card[data-character='bug'] .id-caption {
-  border-left: 4px solid #8de7a1;
 }
 .person-card[data-character='bug'] .video-scan:after {
   animation-name: bug-tracking;
@@ -625,9 +604,6 @@ body[data-viewer='public'] .unit-contact-sheet img {
   --card-text: #ece6dd;
   --card-line: #8f303e;
   --card-muted: #c07c7e;
-}
-.person-card[data-team='orpe'] .id-caption {
-  border-left: 4px solid #ad2337;
 }
 .person-card[data-team='orpe'] .id-card-head {
   background: #561421;

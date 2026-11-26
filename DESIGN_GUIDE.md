@@ -1,6 +1,6 @@
 # SGIA 디자인 수정 안내
 
-> 기준: 2026-11-06 · 화면 구조는 [SITE_MAP.md](SITE_MAP.md), 변경 내역은 [CHANGELOG.md](CHANGELOG.md).
+> 기준: 2026-11-27 · 화면 구조는 [SITE_MAP.md](SITE_MAP.md), 변경 내역은 [CHANGELOG.md](CHANGELOG.md).
 > **색상·크기·여백은 CSS, 화면 구성·버튼 문구는 JS, 사진 URL은 데이터 파일을 수정합니다.**
 
 ## 1. GitHub에서 어떤 저장소를 열어야 하나요?
@@ -22,7 +22,22 @@
 원본의 [pages.yml](.github/workflows/pages.yml)은 **수동 실행 전용**이며, 현재 서비스용 저장소로 파일을 복사하는 작업과 다릅니다. 원본 커밋만으로 `onlyunlimit.github.io`가 바뀌는 구조는 아닙니다. 관리자 화면은 GitHub Pages가 아니라 별도의 Worker 배포가 필요합니다.
 
 
-## 최신 수정 위치 — 2026-11-06
+## 부서·엔터테인먼트 표면 디자인 — 2026-11-27
+
+최종 여백·모서리·표면 스타일은 `assets/team-themes.css` 하단의 `Department and label surfaces` 구간에서 수정합니다. 이 구간이 이전 카드 규칙보다 나중에 적용됩니다.
+
+| 화면 | 검색할 선택자 / 변수 |
+| --- | --- |
+| 조직·부서 목록 | `.directory-card`, `--team`, `--glass`, `--ink`, `--subtle` |
+| 부서 소개 상단·본문 | `.team-hero`, `.unit-workspace .panel`, `.beacon-hero` 등 팀별 클래스 |
+| 엔터테인먼트 목록 | `.label-directory .label-showcase`, `--label-text`, `--label-muted`, `--label-bg`, `--label-tint` |
+| 기획사 상단·멤버 선택 | `.agency-hero`, `.agency-lineup`, `.agency-site .agency-lineup button` |
+| 소속 아티스트·갤러리 | `.artist-roster`, `.artist-strip`, `.agency-gallery` |
+| 모바일 크기 | 같은 구간의 `max-width: 800px`, `max-width: 600px` |
+
+팀별 색상은 유지하고 라이트모드용 글자·배경 변수를 별도로 지정합니다. 장식용 왼쪽 세로선은 제거했습니다. 주파수 눈금과 일정 연결선은 정보 표시 기능으로 유지합니다.
+
+## 기존 화면별 수정 위치 — 2026-11-06
 
 새 디자인은 **아래 두 CSS가 마지막으로 적용**됩니다. 이전 파일의 같은 선택자를 고쳐도 이 규칙이 덮어쓸 수 있습니다.
 

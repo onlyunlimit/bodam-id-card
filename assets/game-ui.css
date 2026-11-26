@@ -23,13 +23,10 @@
 .person-card[data-team='beacon'] .id-caption,
 .person-card[data-team='shield'] .id-caption {
   border: 1px solid var(--card-line);
-  border-left: 3px solid var(--card-accent);
+
 }
 .person-card .id-caption {
   transform: none;
-}
-.person-card[data-character='bug'] .id-caption {
-  border-left-color: #aca1c5;
 }
 .person-card .card-face {
   background: var(--card-bg) !important;
@@ -143,7 +140,7 @@
 .profile-stage .profile-document {
   padding: 34px !important;
   border: 0 !important;
-  border-left: 1px solid #9bafbf33 !important;
+
   background: transparent !important;
   transform: none !important;
   box-shadow: none !important;
@@ -308,7 +305,7 @@
     sans-serif;
 }
 .vault-ledger {
-  border-left: 1px solid #6d696155;
+
   padding-left: 24px;
   font: 9px var(--mono);
   color: #817d73;
