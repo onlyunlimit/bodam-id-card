@@ -1,3 +1,4 @@
+import { playlistAPI } from './playlists.js';
 import { translationAPI } from './translation.js';
 import { incidentAPI } from './incidents.js';
 import { notificationAPI, notificationStatement, dispatchNotification } from './notifications.js';
@@ -178,6 +179,8 @@ async function handle(request, env) {
   }
   if (isAdmin) {
     const hash = await session(request, env);
+    const music = await playlistAPI(request,env,{body},true);
+    if(music)return music;
     const incidentResponse = await incidentAPI(request, env, {identity,rate,blocked,body,captcha,sourceLog}, true);
     if (incidentResponse) return incidentResponse;
     if(path.startsWith('/admin/push/') && method!=='GET') await rate(env,'push:'+hash,20,60);
@@ -317,6 +320,8 @@ async function handle(request, env) {
   }
   const incidentResponse = await incidentAPI(request, env, {identity,rate,blocked,body,captcha,sourceLog});
   if (incidentResponse) return incidentResponse;
+  const music=await playlistAPI(request,env,{body});
+  if(music)return music;
   const geocoded = await geocode(request, env, { identity, rate });
   if (geocoded) return geocoded;
   const fanResponse = await publicFan(request, env, { identity, rate, blocked, body });

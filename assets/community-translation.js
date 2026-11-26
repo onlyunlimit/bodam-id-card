@@ -1,5 +1,19 @@
 import { language } from './i18n.js';
 const labels={ko:['번역보기','원문 보기','번역 중…','다시 번역하기'],en:['See translation','Show original','Translating…','Retry translation'],ja:['翻訳を見る','原文を見る','翻訳中…','再試行'],zh:['查看翻译','显示原文','翻译中…','重新翻译']};
+async function directTranslation(text,source,target) {
+  const chunks=[];let part='',bytes=0;
+  for(const char of text){const size=new TextEncoder().encode(char).length;if(bytes+size>450){chunks.push(part);part='';bytes=0;}part+=char;bytes+=size;}
+  if(part)chunks.push(part);
+  const results=[],signal=AbortSignal.timeout(25000);
+  for(const chunk of chunks){
+    const url=new URL('https://api.mymemory.translated.net/get');
+    url.searchParams.set('q',chunk);url.searchParams.set('langpair',(source==='zh'?'zh-CN':source)+'|'+(target==='zh'?'zh-CN':target));
+    const response=await fetch(url,{signal,credentials:'omit',referrerPolicy:'no-referrer'}),data=await response.json();
+    if(!response.ok||Number(data.responseStatus)!==200||typeof data.responseData?.translatedText!=='string')throw Error('Translation is temporarily unavailable.');
+    results.push(data.responseData.translatedText);
+  }
+  return {text:results.join('')};
+}
 export function attachTranslation(node,kind,id,api) {
   if(!node?.textContent.trim()||node.dataset.translationReady)return;
   node.dataset.translationReady='true';
@@ -18,7 +32,13 @@ export function attachTranslation(node,kind,id,api) {
     if(loaded){output.hidden=!output.hidden;button.textContent=output.hidden?words[0]:words[1];button.setAttribute('aria-expanded',String(!output.hidden));return;}
     button.disabled=true;button.textContent=words[2];status.textContent='';
     try{
-      const data=await api('/translate?kind='+kind+'&id='+encodeURIComponent(id)+'&target='+target);
+      let data;
+      try{data=await api('/translate?kind='+kind+'&id='+encodeURIComponent(id)+'&target='+target);}
+      catch(error){
+        if(!node.isConnected||error.status!==503)throw error;
+        // The public provider supports CORS; use it only after an explicit request and server outage.
+        data=await directTranslation(text,source,target);
+      }
       if(!node.isConnected)return;
       // The provider can return encoded punctuation. Decode only as text, never as markup.
       const decoder=document.createElement('textarea');decoder.innerHTML=data.text.replace(/</g,'&lt;').replace(/>/g,'&gt;');

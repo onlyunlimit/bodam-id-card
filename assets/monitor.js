@@ -306,7 +306,7 @@ export function renderRecords() {
         .slice(page * 6, page * 6 + 6)
         .map(
           (i) =>
-            `<article class="case-file ${i.resolvedAt ? 'closed' : ''}" data-incident="${esc(i.id)}" tabindex="0" aria-label="${esc(incidentZone(i))} 기록 열람"><div class="case-tab"><b>${i.grade}</b><span>${i.type}</span></div><div class="case-content"><small class="incident-origin">${tr(i.localOnly ? '자동 공유 대기' : i.manual ? '공유 신고' : '자동 관측 기록')}</small><h3 data-user-content>${esc(incidentZone(i))}</h3><div class="case-location"><span>발생 위치</span><span data-user-content>${esc(i.location)}</span></div><p>${esc(i.detail)}</p><time>접수 ${koreaTime(new Date(i.created)).date} ${koreaTime(new Date(i.created)).clock}</time></div><div class="case-action">${i.localOnly ? '<span>자동 공유 대기</span>' : i.managed ? `<a href="${serviceConfig.api}/admin?incident=${encodeURIComponent(i.id)}" target="_blank" rel="noopener">관리자 관리 ↗</a>${i.resolvedAt ? '<span class="stamp">RESOLVED</span>' : ''}` : i.resolvedAt ? `<span class="stamp">RESOLVED<small>SGIA · CASE CLOSED</small></span><button data-reopen="${i.id}" class="subtle">다시 열기</button>` : `<button data-resolve="${i.id}">종결 승인 ↗</button>`}</div></article>`,
+            `<article class="case-file ${i.resolvedAt ? 'closed' : ''}" data-incident="${esc(i.id)}" tabindex="0" aria-label="${esc(incidentZone(i))} 기록 열람"><div class="case-tab"><b>${i.grade}</b><span>${i.type}</span></div><div class="case-content"><small class="incident-origin">${tr(i.localOnly ? '자동 공유 대기' : i.manual ? '공유 신고' : '자동 관측 기록')}</small><h3 data-user-content>${esc(incidentZone(i))}</h3><div class="case-location"><span>발생 위치</span><span data-user-content>${esc(i.location)}</span></div><p>${esc(i.detail)}</p><time>접수 ${koreaTime(new Date(i.created)).date} ${koreaTime(new Date(i.created)).clock}</time></div><div class="case-action">${i.localOnly ? '<span>자동 공유 대기</span>' : i.managed ? `<a href="${serviceConfig.api}/admin?incident=${encodeURIComponent(i.id)}" target="_blank" rel="noopener">${i.resolvedAt ? '사건 재개' : '종결 승인'}</a>${i.resolvedAt ? '<span class="stamp">RESOLVED</span>' : ''}` : i.resolvedAt ? `<span class="stamp">RESOLVED<small>SGIA · CASE CLOSED</small></span><button data-reopen="${i.id}" class="subtle">다시 열기</button>` : `<button data-resolve="${i.id}">종결 승인 ↗</button>`}</div></article>`,
         )
         .join('') || '<p class="empty-state">해당 기록이 없습니다.</p>';
   };
@@ -323,7 +323,7 @@ export function renderRecords() {
     page++;
     update();
   };
-  const refresh = watchIncidents(update, message => { $('#incident-sync-status').textContent = message; });
+  const refresh = watchIncidents(update, message => { const label=$('#incident-sync-status');label.textContent=message;label.hidden=message.startsWith('최신 기록 수신 완료'); });
   $('#refresh-incidents').onclick = async e => {
     const button = e.currentTarget;
     button.disabled = true; button.textContent = '수신 중…';
@@ -414,8 +414,9 @@ export function renderRecords() {
         const d = openIncident(record);
         $('.record-dossier', d).insertAdjacentHTML(
           'beforeend',
-          '<div id="case-location-map" class="seoul-map"></div>',
+          '<div id="case-location-map" class="seoul-map"></div>' + (record.localOnly ? '' : record.managed ? `<a class="case-status-link" href="${serviceConfig.api}/admin?incident=${encodeURIComponent(record.id)}" target="_blank" rel="noopener">${record.resolvedAt ? '사건 재개' : '종결 승인'} ↗</a>` : `<button class="case-status-link" id="case-status-change">${record.resolvedAt ? '사건 재개' : '종결 승인'}</button>`),
         );
+        d.querySelector('#case-status-change')?.addEventListener('click',()=>document.querySelector(`[data-${record.resolvedAt?'reopen':'resolve'}="${CSS.escape(record.id)}"]`)?.click());
         const m = createMap($('#case-location-map'), [{ ...record, resolvedAt: null }]);
         if (record.area && m)
           m.fitBounds(L.geoJSON(record.area).getBounds(), { padding: [20, 20] });
@@ -443,8 +444,8 @@ export function renderRecords() {
     };
   };
   let context, osc, gain;
-  onDispose(() => context?.close());
-  const sound = () => {
+  onDispose(() => { const old=context;context=null;osc=null;old?.close().catch(()=>{}); });
+  const sound = async () => {
     if (context) {
       context.close();
       context = null;
@@ -452,18 +453,23 @@ export function renderRecords() {
       $('#radio-sound').setAttribute('aria-pressed', 'false');
       return;
     }
-    if (!state.staff) return;
     try {
-      context = new AudioContext();
+      const Audio=window.AudioContext || window.webkitAudioContext;
+      if(!Audio)throw Error();
+      context = new Audio();
+      const current=context;
+      await context.resume();
+      if(context!==current)return;
       osc = context.createOscillator();
       gain = context.createGain();
-      gain.gain.value = 0.018;
-      osc.frequency.value = Number($('#frequency').value);
+      gain.gain.value = 0.045;
+      osc.frequency.value = Number($('#frequency').value) * 6;
       osc.connect(gain).connect(context.destination);
       osc.start();
       $('#radio-sound').textContent = '수신음 ON';
       $('#radio-sound').setAttribute('aria-pressed', 'true');
     } catch {
+      context?.close();context=null;
       toast('수신음을 재생할 수 없습니다.');
     }
   };
@@ -473,11 +479,9 @@ export function renderRecords() {
     $('#frequency-label').textContent = f.toFixed(1) + ' Hz';
     $('#signal-quality').textContent = Math.abs(f - 98.6) < 1 ? '수신 양호' : '신호 불안정';
     $('#records-workspace').style.setProperty('--noise', Math.min(0.3, Math.abs(f - 98.6) / 60));
-    if (osc && context) osc.frequency.setTargetAtTime(f, context.currentTime, 0.05);
+    if (osc && context) osc.frequency.setTargetAtTime(f * 6, context.currentTime, 0.05);
   };
-  listen(document, 'sgia:viewer', () => {
-    if (!state.staff && context) sound();
-  });
+
   listen(document, 'visibilitychange', () => {
     if (document.hidden && context) sound();
   });

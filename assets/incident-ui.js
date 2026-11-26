@@ -74,7 +74,7 @@ export function openIncident(record) {
   ];
   const d = modal(
     '사건 기록 · ' + incidentZone(record),
-    `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><small class="dossier-zone-label">구역</small><h3 data-user-content>${esc(incidentZone(record))}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd${(k === '지원 요청 팀' && record.supportCustom) || k === '발생 위치' ? ' data-user-content' : ''}>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><div class="report-controls"><button id="report-pause">일시 정지</button><button id="report-complete">전체 읽기</button></div><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
+    `<article class="record-dossier"><div class="dossier-strip"><span>INCIDENT RESPONSE DIVISION</span><b>${record.grade} / ${esc(record.type)}</b></div><small class="dossier-zone-label">구역</small><h3 data-user-content>${esc(incidentZone(record))}</h3><dl class="facts">${fields.map(([k, v]) => `<div><dt>${k}</dt><dd${(k === '지원 요청 팀' && record.supportCustom) || k === '발생 위치' ? ' data-user-content' : ''}>${esc(v)}</dd></div>`).join('')}</dl><h4>상황 설명</h4><div class="report-controls"><button id="report-pause">일시 정지</button><button id="report-complete">전체 읽기</button><button id="report-replay">다시 읽기</button></div><p id="typed-report" class="typed-report" data-no-translate></p>${record.resolvedAt ? '<img class="record-seal" src="assets/art/resolved-seal.webp" alt="RESOLVED">' : '<span class="pending-tag">AWAITING RESPONSE</span>'}</article>`,
     'record',
   );
   const text = record.manual || record.editorial ? record.detail : tr(record.detail);
@@ -97,6 +97,7 @@ export function openIncident(record) {
     clearTimeout(timer);
     if (!paused) type();
   };
+  d.querySelector('#report-replay').onclick=()=>{clearTimeout(timer);n=0;paused=false;finished=false;pause.disabled=false;pause.textContent=tr('일시 정지');type();};
   complete.onclick = () => {
     stop(); out.textContent = text; pause.disabled = true;
   };

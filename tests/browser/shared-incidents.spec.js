@@ -47,7 +47,9 @@ test('Previous reports automatically become public without review and keep their
   expect(state.records).toHaveLength(1);
   expect(state.records[0].coordinates).toEqual(old.coordinates);expect(state.records[0].area).toEqual(old.area);expect(state.records[0].created).toBe(old.created);
   await reader.goto(baseURL+'/records.html');await expect(reader.locator('.case-content h3')).toHaveText('예전 구역');
-  await expect(reader.locator('.case-action a')).toHaveText('관리자 관리 ↗');
+  await expect(reader.locator('.case-action a')).toHaveText('종결 승인');
+  await expect(reader.locator('.case-action a')).toHaveAttribute('href',/\/admin\?incident=/);
+  await expect(owner.locator('#incident-sync-status')).toBeHidden();
   await owner.reload();await expect(owner.locator('#incident-sync-status')).toContainText('최신');
   expect(state.records).toHaveLength(1);
   expect(await owner.evaluate(()=>JSON.parse(localStorage.getItem('sgia.incidents')))).toEqual([old]);

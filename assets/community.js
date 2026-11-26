@@ -113,7 +113,7 @@ async function api(path, method = 'GET', data, persistent = false) {
     credentials: 'omit',
   });
   const result = await response.json();
-  if (!response.ok) throw Error(result.error || '서버 연결을 확인해 주세요.');
+  if (!response.ok) throw Object.assign(Error(result.error || '서버 연결을 확인해 주세요.'), {status: response.status});
   return result;
 }
 const date = (value) =>
@@ -290,7 +290,7 @@ export function renderCommunity() {
     return d;
   };
   $('#main').innerHTML =
-    `<div class="fan-community ${board}" data-community="${board}"><nav class="community-switch"><a href="community.html?board=lucky" ${board === 'lucky' ? 'aria-current="page"' : ''}>LUCKYTRICK</a><a href="community.html?board=obsidus" ${board === 'obsidus' ? 'aria-current="page"' : ''}>OBSIDUS</a><a href="community.html?board=staff" ${!fan ? 'aria-current="page"' : ''}>SGIA 사내</a></nav>${fan ? `<header class="fan-hero community-masthead"><div class="community-brand-copy"><span>${board === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND'} · OFFICIAL COMMUNITY</span><h1 translate="no">${board === 'lucky' ? 'LUCKYTRICK' : 'OBSIDUS'}</h1><p>${board === 'lucky' ? 'A little luck. A lot of us.' : 'Closer, beyond the spotlight.'}</p></div><span class="masthead-symbol" aria-hidden="true">${board === 'lucky' ? '✳' : '✦'}</span></header>` : heading('SGIA / INTERNAL VOICES', '사내 게시판', '동료들과 일상을 나누는 공간.')}<div class="fan-layout"><aside class="fan-sidebar"><section class="member-panel"><div class="fan-panel-bar"><b>${fan ? 'ARTISTS' : 'SGIA'}</b><span>− □ ×</span></div><div id="community-members"></div>${fan ? `<a class="agency-return" href="${board === 'lucky' ? 'elysian' : 'hunterwind'}.html">아티스트 페이지 ↗</a>` : ''}</section><section class="fan-welcome"><span>DEAR ${board === 'lucky' ? 'LUCKY HEARTS' : board === 'obsidus' ? 'OUR ORBIT' : 'COLLEAGUES'}</span><h2>오늘의 이야기를<br>들려주세요.</h2><p>마음에 드는 글에는 하트를,<br>함께하고 싶은 순간에는 답글을.</p><a class="community-admin" href="${adminLink}" target="_blank" rel="noopener">관리자 로그인 ↗</a></section></aside><section class="fan-feed"><div id="board-connection" class="board-connection" role="status">채널 연결 중…</div>${fan ? `<nav class="fan-feed-tabs" aria-label="피드 선택"><button data-feed="highlight">Highlight</button><button data-feed="fan">Fan</button><button data-feed="artist">From ${group}</button><button data-feed="comments">Comments by ${group}</button></nav>` : ''}<div id="staff-board-lock" class="access-lock" hidden><h2>SGIA 직원 채널</h2><p>사내 게시판을 열려면 직원 채널에 접속하세요.</p><button id="board-login" class="primary">직원 로그인</button></div><div id="board-workspace"><div class="fan-feed-heading"><div><span id="feed-kicker">OUR COMMUNITY</span><h2 id="feed-title"></h2></div><button id="write-post" class="primary">글쓰기 ＋</button></div><form class="board-search"><input id="board-search" aria-label="게시물 검색" placeholder="궁금한 이야기를 찾아보세요" maxlength="60"><button>검색</button></form><div id="board-list" class="fan-post-list"></div><div class="pagination"><button id="board-prev">← 이전</button><span id="board-page"></span><button id="board-next">다음 →</button></div></div></section></div></div>`;
+    `<div class="fan-community ${board}" data-community="${board}"><nav class="community-switch"><a href="community.html?board=lucky" ${board === 'lucky' ? 'aria-current="page"' : ''}>LUCKYTRICK</a><a href="community.html?board=obsidus" ${board === 'obsidus' ? 'aria-current="page"' : ''}>OBSIDUS</a><a href="community.html?board=staff" ${!fan ? 'aria-current="page"' : ''}>SGIA 사내</a></nav>${fan ? `<header class="fan-hero community-masthead"><div class="community-brand-copy"><span>${board === 'lucky' ? 'ELYSIAN' : 'HUNTERWIND'} · OFFICIAL COMMUNITY</span><h1 translate="no">${board === 'lucky' ? 'LUCKYTRICK' : 'OBSIDUS'}</h1><p>${board === 'lucky' ? 'A little luck. A lot of us.' : 'Closer, beyond the spotlight.'}</p></div><span class="masthead-symbol" aria-hidden="true">${board === 'lucky' ? '♡' : '✦'}</span></header>` : heading('SGIA / INTERNAL VOICES', '사내 게시판', '동료들과 일상을 나누는 공간.')}<div class="fan-layout"><aside class="fan-sidebar"><section class="member-panel"><div class="fan-panel-bar"><b>${fan ? 'ARTISTS' : 'SGIA'}</b><span>− □ ×</span></div><div id="community-members"></div>${fan ? `<a class="agency-return" href="${board === 'lucky' ? 'elysian' : 'hunterwind'}.html">아티스트 페이지 ↗</a>` : ''}</section><section class="fan-welcome"><span>DEAR ${board === 'lucky' ? 'LUCKY HEARTS' : board === 'obsidus' ? 'OUR ORBIT' : 'COLLEAGUES'}</span><h2>오늘의 이야기를<br>들려주세요.</h2><p>마음에 드는 글에는 하트를,<br>함께하고 싶은 순간에는 답글을.</p><a class="community-admin" href="${adminLink}" target="_blank" rel="noopener">관리자 로그인 ↗</a></section></aside><section class="fan-feed"><div id="board-connection" class="board-connection" role="status">채널 연결 중…</div>${fan ? `<nav class="fan-feed-tabs" aria-label="피드 선택"><button data-feed="highlight">Highlight</button><button data-feed="fan">Fan</button><button data-feed="artist">From ${group}</button><button data-feed="comments">Comments by ${group}</button></nav>` : ''}<div id="staff-board-lock" class="access-lock" hidden><h2>SGIA 직원 채널</h2><p>사내 게시판을 열려면 직원 채널에 접속하세요.</p><button id="board-login" class="primary">직원 로그인</button></div><div id="board-workspace"><div class="fan-feed-heading"><div><span id="feed-kicker">OUR COMMUNITY</span><h2 id="feed-title"></h2></div><button id="write-post" class="primary">글쓰기 ＋</button></div><form class="board-search"><input id="board-search" aria-label="게시물 검색" placeholder="궁금한 이야기를 찾아보세요" maxlength="60"><button>검색</button></form><div id="board-list" class="fan-post-list"></div><div class="pagination"><button id="board-prev">← 이전</button><span id="board-page"></span><button id="board-next">다음 →</button></div></div></section></div></div>`;
   const communityFooter = document.createElement('footer');
   communityFooter.className = 'community-footer';
   communityFooter.append($('.community-admin'));
@@ -328,9 +328,17 @@ export function renderCommunity() {
         .join('') || '<p class="muted">INTERNAL / STAFF CHANNEL</p>';
     $$('[data-member]').forEach(b => b.onclick = () => showMember(members.find(m => m.id === b.dataset.member)));
   }
+  function profileLink(id,url,name) {
+    return id ? `<button type="button" class="member-avatar-link" data-profile="${esc(id)}" aria-label="${esc(name)} 프로필">${avatar(url,name)}</button>` : avatar(url,name);
+  }
+  async function openMember(id) {
+    let member=members.find(m=>m.id===id);
+    if(!member) {try {const result=await api('/members?board=staff');member=result.members?.find(m=>m.id===id);}catch(e){toast(e.message);return;}}
+    if(!signal.aborted)showMember(member);
+  }
   function showMember(m) {
     if (!m) return;
-    const d = communityModal(m.name, `<article class="community-profile">${avatar(m.avatar_url,m.name)}<span class="profile-team">${esc(m.team?.toUpperCase() || 'SGIA')}</span><h3 data-user-content>${esc(m.name)}</h3><p data-user-content>${esc(m.bio)}</p><a class="profile-admin-link" href="${adminLink}&member=${encodeURIComponent(m.id)}" target="_blank" rel="noopener">관리자 프로필 편집 ↗</a><section class="profile-feed"><h4>피드</h4><div class="profile-feed-items" role="status">불러오는 중…</div><button class="profile-feed-more" hidden>더 보기</button></section></article>`, 'community-post');
+    const d = communityModal(m.name, `<article class="community-profile">${avatar(m.avatar_url,m.name)}<span class="profile-team">${esc(m.team?.toUpperCase() || 'SGIA')}</span><h3 data-user-content>${esc(m.name)}</h3><p data-user-content>${esc(m.bio)}</p><section class="profile-feed"><h4>피드</h4><div class="profile-feed-items" role="status">불러오는 중…</div><button class="profile-feed-more" hidden>더 보기</button></section></article>`, 'community-post');
     const article=d.querySelector('.community-profile'), items=article.querySelector('.profile-feed-items'), more=article.querySelector('.profile-feed-more');
     let pageOffset=0,busy=false;
     async function next() {
@@ -418,9 +426,9 @@ export function renderCommunity() {
         rows
           .map((p) =>
             feed === 'comments'
-              ? `<button class="post-row artist-comment-card" data-post="${esc(p.post_id)}"><div class="fan-author">${avatar(p.avatar_url, p.name)}<span><b data-user-content>${esc(p.name)}</b><i class="artist-badge">MEMBER ✓</i><time>${date(p.created_at)}</time></span></div><p class="feed-body" data-user-content>${esc(p.body)}</p><div class="reply-context" data-user-content>↳ ${esc(p.title)}</div><span class="feed-counts">♡ ${p.likes || 0} · 대화 보기 ↗</span></button>`
-              : feed==='artist' ? `<button class="post-row fan-post-card official-post artist-feed-compact" data-post="${esc(p.id)}"><div class="fan-author">${avatar(p.member?.avatar_url,p.member?.name||p.author)}<b data-user-content>${esc(p.member?.name||p.author)}</b><i class="artist-badge">MEMBER ✓</i></div><div class="feed-title-line"><h3 data-user-content>${esc(p.title)}</h3><time>${date(p.created_at)}</time></div>${feedThumbnail(p.images)}<div class="feed-counts"><span>♡ ${p.likes||0}</span><span>댓글 ${p.comments||0}</span></div></button>`
-              : `<button class="post-row fan-post-card ${p.member_id ? 'official-post' : ''}" data-post="${esc(p.id)}"><div class="fan-author">${avatar(p.member?.avatar_url, p.member?.name || p.author)}<span><b data-user-content>${esc(p.member?.name || p.author)}</b>${p.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : fan ? '<small>FAN</small>' : '<small>SGIA</small>'}<time>${date(p.created_at)}${p.updated_at ? ' · 수정됨' : ''}</time></span></div>${!fan ? tagsMarkup(p.tags) : ''}<h3 data-user-content>${esc(p.title)}</h3><p class="feed-body" data-user-content>${esc((p.body || '').slice(0, 280))}</p>${p.images?.length ? `<small class="post-attachment-indicator">▧ 이미지 첨부 · ${p.images.length}장</small>` : ''}<div class="feed-counts"><span>♡ ${p.likes || 0}</span><span>↳ ${p.comments || 0}</span>${p.department ? `<small data-user-content>${esc(p.department)}</small>` : ''}<b>이야기 보기 ↗</b></div></button>`,
+              ? `<article role="button" tabindex="0" class="post-row artist-comment-card" data-post="${esc(p.post_id)}"><div class="fan-author">${profileLink(p.member_id,p.avatar_url,p.name)}<span><b data-user-content>${esc(p.name)}</b><i class="artist-badge">MEMBER ✓</i><time>${date(p.created_at)}</time></span></div><p class="feed-body" data-user-content>${esc(p.body)}</p><div class="reply-context" data-user-content>↳ ${esc(p.title)}</div><span class="feed-counts">♡ ${p.likes || 0} · 대화 보기 ↗</span></article>`
+              : feed==='artist' ? `<article role="button" tabindex="0" class="post-row fan-post-card official-post artist-feed-compact" data-post="${esc(p.id)}"><div class="fan-author">${profileLink(p.member_id,p.member?.avatar_url,p.member?.name||p.author)}<b data-user-content>${esc(p.member?.name||p.author)}</b><i class="artist-badge">MEMBER ✓</i></div><div class="feed-title-line"><h3 data-user-content>${esc(p.title)}</h3><time>${date(p.created_at)}</time></div>${feedThumbnail(p.images)}<div class="feed-counts"><span>♡ ${p.likes||0}</span><span>댓글 ${p.comments||0}</span></div></article>`
+              : `<article role="button" tabindex="0" class="post-row fan-post-card ${p.member_id ? 'official-post' : ''}" data-post="${esc(p.id)}"><div class="fan-author">${p.member_id ? `<button type="button" class="member-avatar-link" data-profile="${esc(p.member_id)}" aria-label="${esc(p.member?.name || p.author)} 프로필">${avatar(p.member?.avatar_url,p.member?.name || p.author)}</button>` : avatar(null,p.author)}<span><b data-user-content>${esc(p.member?.name || p.author)}</b>${p.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : fan ? '<small>FAN</small>' : '<small>SGIA</small>'}<time>${date(p.created_at)}${p.updated_at ? ' · 수정됨' : ''}</time></span></div>${!fan ? tagsMarkup(p.tags) : ''}<h3 data-user-content>${esc(p.title)}</h3><p class="feed-body" data-user-content>${esc((p.body || '').slice(0, 280))}</p>${p.images?.length ? `<small class="post-attachment-indicator">▧ 이미지 첨부 · ${p.images.length}장</small>` : ''}<div class="feed-counts"><span>♡ ${p.likes || 0}</span><span>↳ ${p.comments || 0}</span>${p.department ? `<small data-user-content>${esc(p.department)}</small>` : ''}<b>이야기 보기 ↗</b></div></article>`,
           )
           .join('') ||
         `<div class="fan-empty"><span>✧</span><h3>${feed === 'artist' || feed === 'comments' ? '아티스트의 소식을 기다리고 있어요.' : '아직 등록된 이야기가 없어요.'}</h3><p>${feed === 'fan' || feed === 'highlight' ? '첫 이야기를 남겨 보세요.' : '새로운 소식이 도착하면 이곳에 표시됩니다.'}</p></div>`;
@@ -449,9 +457,12 @@ export function renderCommunity() {
     load();
   };
   $('#board-list').onclick = (e) => {
+    const profile=e.target.closest('[data-profile]');
+    if(profile){openMember(profile.dataset.profile);return;}
     const b = e.target.closest('[data-post]');
     if (b) openPost(b.dataset.post);
   };
+  $('#board-list').onkeydown=e=>{if(e.target.matches('[data-post]') && ['Enter',' '].includes(e.key)){e.preventDefault();e.target.click();}};
   $('#write-post').onclick = () => {
     if (!fan && !state.staff) return login();
     communityModal(
@@ -489,20 +500,22 @@ export function renderCommunity() {
   async function openPost(id, focusComment = null) {
     if (!fan && !state.staff) return login(() => openPost(id, focusComment));
     const ticket = ++detailRequest;
+    const pending = communityModal('게시글', '<div class="community-loading" role="status"><span class="loading-orbit" aria-hidden="true"></span><p>게시글을 불러오는 중…</p></div>', 'community-post');
+    const placeholder=pending.querySelector('.community-loading');
     try {
       const data = await api('/posts/' + id + (focusComment?'?focus='+encodeURIComponent(focusComment):''));
-      if (signal.aborted || ticket !== detailRequest || (!fan && !state.staff)) return;
+      if (signal.aborted || ticket !== detailRequest || !pending.open || !placeholder.isConnected || (!fan && !state.staff)) return;
       const p = data.post;
       let replyTo = null;
       const commentMarkup = (c) =>
-        `<article class="comment-row ${c.parent_id ? 'is-reply' : ''}" id="comment-${esc(c.id)}"><div class="fan-author">${avatar(c.avatar_url, c.member_name || c.author)}<span><b data-user-content>${esc(c.member_name || c.author)}</b>${c.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(c.created_at)}${c.updated_at ? ' · 수정됨' : ''}</time></span><span class="record-edit-links">${!c.member_id ? `<button data-comment-edit="${esc(c.id)}">수정</button><button data-comment-delete="${esc(c.id)}">삭제</button>` : ''}</span></div><p data-user-content>${mentionMarkup(c.body,members)}</p>${photos(c.images)}<div class="comment-tools"><button data-comment-like="${esc(c.id)}" aria-pressed="${!!c.liked}">♡ ${c.likes || 0}</button><button data-reply="${esc(c.id)}">답글</button></div></article>`;
+        `<article class="comment-row ${c.parent_id ? 'is-reply' : ''}" id="comment-${esc(c.id)}"><div class="fan-author">${c.member_id ? `<button type="button" class="member-avatar-link" data-profile="${esc(c.member_id)}" aria-label="${esc(c.member_name || c.author)} 프로필">${avatar(c.avatar_url,c.member_name || c.author)}</button>` : avatar(null,c.author)}<span><b data-user-content>${esc(c.member_name || c.author)}</b>${c.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(c.created_at)}${c.updated_at ? ' · 수정됨' : ''}</time></span><span class="record-edit-links">${!c.member_id ? `<button data-comment-edit="${esc(c.id)}">수정</button><button data-comment-delete="${esc(c.id)}">삭제</button>` : ''}</span></div><p data-user-content>${mentionMarkup(c.body,members)}</p>${photos(c.images)}<div class="comment-tools"><button data-comment-like="${esc(c.id)}" aria-pressed="${!!c.liked}">♡ ${c.likes || 0}</button><button data-reply="${esc(c.id)}">답글</button></div></article>`;
       const threads=()=>data.comments.filter(c=>!c.parent_id).map(c=>{
         const replies=data.comments.filter(r=>r.parent_id===c.id);
         return commentMarkup(c)+(replies.length>1?`<details class="reply-thread" data-thread="${esc(c.id)}" ${expandedReplies.has(c.id)?'open':''}><summary><span class="reply-thread-line" aria-hidden="true"></span><span class="thread-open">답글 ${replies.length}개 보기</span><span class="thread-close">답글 접기</span><svg aria-hidden="true" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></svg></summary><div class="reply-list">${replies.map(commentMarkup).join('')}</div><button type="button" class="reply-collapse" data-collapse-thread="${esc(c.id)}">답글 접기 ↑</button></details>`:replies.length?`<div class="reply-list single-reply">${replies.map(commentMarkup).join('')}</div>`:'');
       }).join('');
       communityModal(
         p.title,
-        `<div class="fan-post-detail" data-community="${board}"><div class="fan-author">${avatar(p.member?.avatar_url, p.member?.name || p.author)}<span data-user-content><b>${esc(p.member?.name || p.author)}</b>${p.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(p.created_at)}${p.updated_at ? ' · 수정됨' : ''}</time></span><span class="record-edit-links">${!p.member_id ? '<button id="post-edit">수정</button><button id="post-delete">삭제</button>' : ''}</span></div>${!fan ? tagsMarkup(p.tags) : ''}<div class="post-body" data-user-content>${mentionMarkup(p.body,members)}</div>${photos(p.images)}<div class="post-controls"><button id="post-like" aria-pressed="${!!p.liked}">♡ <span>좋아요</span> <b>${p.likes || 0}</b></button><button id="comment-compose-toggle" type="button" aria-expanded="false" aria-controls="comment-compose-panel">댓글 작성</button><a class="post-admin-link" href="${adminLink}&post=${encodeURIComponent(id)}" target="_blank" rel="noopener">관리자 관리 ↗</a></div><h3>댓글 ${data.commentTotal ?? data.comments.length}</h3><div class="comments">${threads()}</div><button class="comments-more" type="button" ${data.nextComments==null?'hidden':''}>댓글 더 보기</button><div id="comment-compose-panel" hidden><form id="comment-form" class="board-form comment-form"><div id="reply-target" hidden><span></span><button id="reply-cancel" type="button">취소 ×</button></div><div class="form-row"><label>닉네임 (선택)<input name="author" maxlength="24" placeholder="비우면 익명 번호 자동 지정"></label>${pinInput()}</div><label>댓글<textarea name="body" maxlength="1000"></textarea></label>${uploadMarkup}${consent()}${captchaMarkup()}<button type="submit" class="primary">댓글 등록</button></form></div></div>`,
+        `<div class="fan-post-detail" data-community="${board}"><div class="fan-author">${p.member_id ? `<button type="button" class="member-avatar-link" data-profile="${esc(p.member_id)}" aria-label="${esc(p.member?.name || p.author)} 프로필">${avatar(p.member?.avatar_url,p.member?.name || p.author)}</button>` : avatar(null,p.author)}<span data-user-content><b>${esc(p.member?.name || p.author)}</b>${p.member_id ? '<i class="artist-badge">MEMBER ✓</i>' : ''}<time>${date(p.created_at)}${p.updated_at ? ' · 수정됨' : ''}</time></span><span class="record-edit-links">${!p.member_id ? '<button id="post-edit">수정</button><button id="post-delete">삭제</button>' : ''}</span></div>${!fan ? tagsMarkup(p.tags) : ''}<div class="post-body" data-user-content>${mentionMarkup(p.body,members)}</div>${photos(p.images)}<div class="post-controls"><button id="post-like" aria-pressed="${!!p.liked}">♡ <span>좋아요</span> <b>${p.likes || 0}</b></button><button id="comment-compose-toggle" type="button" aria-expanded="false" aria-controls="comment-compose-panel">댓글 작성</button><a class="post-admin-link" href="${adminLink}&post=${encodeURIComponent(id)}" target="_blank" rel="noopener">관리자 관리 ↗</a></div><h3>댓글 ${data.commentTotal ?? data.comments.length}</h3><div class="comments">${threads()}</div><button class="comments-more" type="button" ${data.nextComments==null?'hidden':''}>댓글 더 보기</button><div id="comment-compose-panel" hidden><form id="comment-form" class="board-form comment-form"><div id="reply-target" hidden><span></span><button id="reply-cancel" type="button">취소 ×</button></div><div class="form-row"><label>닉네임 (선택)<input name="author" maxlength="24" placeholder="비우면 익명 번호 자동 지정"></label>${pinInput()}</div><label>댓글<textarea name="body" maxlength="1000"></textarea></label>${uploadMarkup}${consent()}${captchaMarkup()}<button type="submit" class="primary">댓글 등록</button></form></div></div>`,
         'community-post',
       );
       attachMentions($('#comment-form textarea[name=body]'),()=>members);
@@ -530,6 +543,7 @@ export function renderCommunity() {
       if ($('#post-delete')) $('#post-delete').onclick = () => edit('posts', p, id, true);
       attachTranslation($('.post-body'),'post',id,api);
       function bindComments() {
+        $$('[data-profile]', $('#document-dialog')).forEach(b=>b.onclick=()=>openMember(b.dataset.profile));
         data.comments.forEach(c=>attachTranslation(document.getElementById('comment-'+c.id)?.querySelector('p[data-user-content]'),'comment',c.id,api));
       $$('[data-comment-edit]').forEach(
         (b) =>
@@ -589,6 +603,8 @@ export function renderCommunity() {
       $('#reply-cancel').onclick = () => {
         replyTo = null;
         $('#reply-target').hidden = true;
+        setComposeOpen(false);
+        composeToggle.focus({preventScroll:true});
       };
       const prepareCommentForm = () => secureForm($('#comment-form'), async (form, captcha) => {
         if (!fan && !state.staff) throw Error('직원 채널에 다시 접속해 주세요.');
@@ -605,7 +621,7 @@ export function renderCommunity() {
         toast('댓글을 저장했습니다.');
       });
     } catch (e) {
-      if (!signal.aborted) toast(e.message);
+      if (!signal.aborted && ticket===detailRequest && placeholder.isConnected) {placeholder.innerHTML='<p role="alert">'+esc(e.message)+'</p><button type="button">다시 시도</button>';placeholder.querySelector('button').onclick=()=>openPost(id,focusComment);}
     }
   }
   async function like(button, path) {

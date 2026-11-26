@@ -220,7 +220,7 @@ test('Fan photos survive editing; replies and comment hearts work; artist feeds 
   await expect(page.locator('.post-row')).toContainText('고마워요');
   await page.locator('[data-member=jaein]').click();
   await expect(page.locator('.community-profile')).toContainText('반가워요');
-  await expect(page.locator('.community-profile a')).toHaveAttribute('href', /admin.*member=jaein/);
+  await expect(page.locator('.community-profile a[href*=admin]')).toHaveCount(0);
 });
 test('Both community themes fit small screens and expose four feeds', async ({
   page,
@@ -345,7 +345,7 @@ test('Hashtags suggest shared saved tags, support keyboard selection and survive
  await page.setViewportSize({width:320,height:800});await page.locator('#staff-hashtags').scrollIntoViewIfNeeded();expect(await page.locator('#post-form').evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);await page.screenshot({path:testInfo.outputPath('hashtags-mobile.png')});
  await page.keyboard.press('Escape');await expect(page.locator('#document-dialog')).toBeVisible();await page.keyboard.press('Tab');await page.keyboard.press('Escape');
  // Read and remove a tag from an existing post, preserving identifiers.
- f.posts.shift();await page.reload();await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('#staff-hashtags')).toHaveValue('');await expect(page.locator('.selected-hashtag')).toHaveCount(5);await page.getByRole('button',{name:'야간근무 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'새로운주제 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'다섯번째 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'여섯번째 태그 삭제',exact:true}).click();await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();expect(f.posts[0].tags).toEqual(['team:shield']);
+ f.posts.shift();await page.reload();await page.locator('.post-row').click();await page.locator('#post-edit').click();await expect(page.locator('#staff-hashtags')).toHaveValue('');await expect(page.locator('.selected-hashtag')).toHaveCount(5);await page.getByRole('button',{name:'야간근무 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'새로운주제 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'다섯번째 태그 삭제',exact:true}).click();await page.getByRole('button',{name:'여섯번째 태그 삭제',exact:true}).click();await page.locator('#edit-form [name=password]').fill('123456');await page.locator('#edit-form button[type=submit]').click();await expect.poll(()=>f.posts[0].tags).toEqual(['team:shield']);
 });
 
 test('Tag names need no hash and typing or selecting never focuses required nickname', async ({page}) => {
@@ -415,6 +415,7 @@ test('Fan communities keep their own palette across mode changes and show Englis
   await page.goto('/community.html?board='+board);await expect(page.locator('.fan-hero-art')).toHaveCount(0);await expect(page.locator('.community-masthead h1')).toHaveText(board==='lucky'?'LUCKYTRICK':'OBSIDUS');
   const sample=()=>page.evaluate(()=>{const selectors=['body','.fan-feed','#feed-title','#write-post','.member-panel'];return selectors.map(s=>{const c=getComputedStyle(document.querySelector(s));return [c.color,c.backgroundColor];});});
   await expect(page.locator('body')).toHaveCSS('background-color',board==='lucky'?'rgb(250, 243, 247)':'rgb(17, 18, 21)');
+  await expect(page.locator('body')).toHaveCSS('color',board==='lucky'?'rgb(56, 43, 53)':'rgb(233, 232, 229)');
   const before=await sample();await page.locator('#theme-toggle').click();await expect.poll(sample).toEqual(before);
   await page.locator('#write-post').click();
   const colors=await page.locator('#document-dialog').evaluate(el=>{const s=getComputedStyle(el);return {ink:s.color,paper:s.backgroundColor};});
@@ -453,4 +454,12 @@ test('Comment owner edits author, text and GIF attachments; reply folding and li
  await page.locator('[data-collapse-thread]').click();await expect(page.locator('.reply-thread')).not.toHaveAttribute('open');await expect(page.locator('.reply-thread summary')).toBeFocused();await expect(page.locator('.reply-list')).not.toBeVisible();await expect(page.locator('.reply-collapse')).not.toBeVisible();
  await page.screenshot({path:'private/checks/replies-collapsed-mobile.png'});
 
+});
+test('Author profiles open from list and detail; reply cancel collapses the composer and pending requests are visible',async({page})=>{
+ const f=await mock(page);f.posts.push({id:'official',board:'lucky',title:'공식 소식',body:'안녕하세요',member_id:'jaein',member:f.members[0],created_at:Date.now()});f.comments.push({id:'one',post_id:'official',author:'팬',body:'응원해요',created_at:Date.now()});
+ await page.goto('/community.html?board=lucky&feed=artist');await page.locator('.post-row [data-profile=jaein]').click();await expect(page.locator('.community-profile')).toBeVisible();await expect(page.locator('.community-profile')).not.toContainText('관리자 프로필 편집');await page.keyboard.press('Escape');
+ await page.route('**/posts/official',async route=>{await new Promise(r=>setTimeout(r,300));await route.fallback();});
+ await page.locator('.post-row h3').click();await expect(page.locator('.community-loading')).toBeVisible();await expect(page.locator('.fan-post-detail')).toBeVisible();
+ await page.locator('[data-reply]').click();await expect(page.locator('#comment-compose-panel')).toBeVisible();await page.locator('#reply-cancel').click();await expect(page.locator('#comment-compose-panel')).toBeHidden();await expect(page.locator('#comment-compose-toggle')).toHaveAttribute('aria-expanded','false');
+ await page.locator('.fan-post-detail [data-profile=jaein]').click();await expect(page.locator('.community-profile')).toBeVisible();
 });

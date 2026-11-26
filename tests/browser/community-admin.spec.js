@@ -126,3 +126,30 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await page.locator('#logout').click();
   await expect(page.locator('#workspace')).not.toBeVisible();
 });
+
+test('Admin curates shared playlists with track ordering, editing and deletion',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));let authenticated=false,playlists=[];
+ await page.route('https://admin.test/**',async route=>{
+  const req=route.request(),path=new URL(req.url()).pathname;
+  if(path==='/admin')return route.fulfill({contentType:'text/html',body:adminHTML});
+  if(path==='/admin/app.js')return route.fulfill({contentType:'text/javascript',body:adminJS});
+  if(path==='/admin/login'){authenticated=true;return route.fulfill({json:{ok:true}});}
+  if(!authenticated)return route.fulfill({status:401,json:{error:'인증 필요'}});
+  if(path.startsWith('/admin/playlists')){
+   if(req.method()==='GET')return route.fulfill({json:{playlists}});
+   if(req.method()==='DELETE')playlists=[];
+   else{const d=req.postDataJSON();playlists=[{...d,id:'11111111-1111-4111-8111-111111111111',tracks:d.tracks.map(t=>({...t,video_id:new URL(t.url).searchParams.get('v')}))}];}
+   return route.fulfill({json:{ok:true}});
+  }
+  return route.fulfill({json:path==='/admin/members'?{members:[{id:'jaein',board:'lucky',name:'재인',bio:'',avatar_url:''}]}:path==='/admin/posts'?{posts:[]}:{comments:[]}});
+ });
+ await page.goto('https://admin.test/admin');await page.locator('#key').fill('test-secret');await page.locator('#login button').click();
+ await page.locator('#playlist-manage').click();await page.locator('#playlist-new').click();
+ const form=page.locator('#playlist-edit-form');await form.locator('[name=title]').fill('퇴근길');await form.locator('[name=member_id]').selectOption('jaein');
+ for(const [title,id]of [['첫 곡','abcdefghijk'],['두 번째','zyxwvutsrqp']]){await page.locator('#playlist-add-track').click();const row=form.locator('fieldset').last();await row.locator('[data-track-title]').fill(title);await row.locator('[data-track-url]').fill('https://www.youtube.com/watch?v='+id);}
+ await form.locator('fieldset').last().locator('[data-up]').click();await form.locator('[type=submit]').click();
+ await expect(page.locator('#admin-editor')).not.toBeVisible();expect(playlists[0].tracks.map(t=>t.title)).toEqual(['두 번째','첫 곡']);
+ await page.locator('[data-playlist-edit]').click();await expect(form.locator('[name=member_id]')).toHaveValue('jaein');await form.locator('[name=title]').fill('밤의 선곡');await form.locator('fieldset').last().locator('[data-remove]').click();await form.locator('[type=submit]').click();
+ await expect(page.locator('#playlist-admin-list')).toContainText('밤의 선곡');expect(playlists[0].tracks).toHaveLength(1);
+ page.once('dialog',d=>d.accept());await page.locator('[data-playlist-delete]').click();await expect(page.locator('[data-playlist-edit]')).toHaveCount(0);expect(errors).toEqual([]);
+});

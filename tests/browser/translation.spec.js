@@ -16,3 +16,17 @@ test('Translation is opt-in, preserves original text and renders provider output
  await fixture.getByRole('button',{name:'Show original'}).click();await expect(fixture.locator('.translated-copy')).toBeHidden();
  await fixture.getByRole('button',{name:'See translation'}).click();expect(await page.evaluate(()=>window.translationRequests)).toHaveLength(1);
 });
+
+test('A provider connection outage uses CORS fallback only after the translation click',async({page})=>{
+ let requests=0;
+ await page.route('https://api.mymemory.translated.net/get?**',async route=>{requests++;await route.fulfill({json:{responseStatus:200,responseData:{translatedText:'Rest well.'}},headers:{'Access-Control-Allow-Origin':'*'}});});
+ await page.goto('/community.html?board=lucky');
+ await page.evaluate(async()=>{
+  const {setLanguage}=await import('/assets/i18n.js');setLanguage('en');
+  const {attachTranslation}=await import('/assets/community-translation.js');
+  const panel=document.createElement('section');panel.id='translation-fallback';panel.innerHTML='<p>푹 쉬세요.</p>';document.body.prepend(panel);
+  attachTranslation(panel.firstChild,'post','test',async()=>{throw Object.assign(Error('Unavailable'),{status:503});});
+ });
+ expect(requests).toBe(0);const panel=page.locator('#translation-fallback');await panel.getByRole('button',{name:'See translation'}).click();
+ await expect(panel.locator('.translated-copy')).toHaveText('Rest well.');expect(requests).toBe(1);
+});

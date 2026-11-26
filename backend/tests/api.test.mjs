@@ -30,7 +30,7 @@ async function fixture() {
   sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0010_public_codenames.sql', import.meta.url), 'utf8'));
-  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql','0016_music_playlists.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -876,4 +876,22 @@ test('Translation sends only requested visible text and never hidden comments or
   assert.equal((await req('/translate?kind=post&id='+id+'&target=en')).status,404);assert.equal(calls,1);
   assert.equal((await req('/translate?kind=post&id='+id+'&target=xx')).status,400);
  }finally{globalThis.fetch=saved;}
+});
+
+test('Playlist catalog is shared, admin-only writes validate videos and retain ordering',async()=>{
+ const {req,key}=await fixture();
+ assert.equal((await req('/playlists')).data.playlists.length,0);
+ assert.equal((await req('/admin/playlists','POST',{} ,{origin:'https://sgia.test'})).status,401);
+ const auth=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const options={origin:'https://sgia.test',headers:{Cookie:auth.response.headers.get('Set-Cookie').split(';')[0]}};
+ const draft={title:'재인 — 퇴근길',member_id:'jaein',description:'운영자 선곡',tracks:[{title:'첫 곡',artist:'가수',url:'https://youtu.be/abcdefghijk'},{title:'다음 곡',artist:'',url:'https://www.youtube.com/watch?v=zyxwvutsrqp'}]};
+ const saved=await req('/admin/playlists','POST',draft,options);assert.equal(saved.status,200);
+ let list=(await req('/playlists')).data.playlists;assert.equal(list[0].tracks[1].video_id,'zyxwvutsrqp');
+ assert.equal((await req('/admin/playlists/'+saved.data.id,'PATCH',{...draft,tracks:[{title:'bad',url:'https://youtube.com.evil.example/watch?v=abcdefghijk'}]},options)).status,400);
+ assert.equal((await req('/admin/playlists/'+saved.data.id,'PATCH',{...draft,tracks:[{title:'bad',url:'javascript:alert(1)'}]},options)).status,400);
+ assert.equal((await req('/admin/playlists/'+saved.data.id,'PATCH',{...draft,member_id:'not-a-member'},options)).status,400);
+ assert.equal((await req('/playlists','POST',draft)).status,405);
+ await req('/admin/playlists/'+saved.data.id,'PATCH',{...draft,title:'수정',tracks:[]},options);
+ list=(await req('/playlists')).data.playlists;assert.equal(list[0].title,'수정');assert.deepEqual(list[0].tracks,[]);
+ await req('/admin/playlists/'+saved.data.id,'DELETE',{},options);assert.equal((await req('/playlists')).data.playlists.length,0);
 });

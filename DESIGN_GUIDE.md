@@ -269,3 +269,31 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 | 관리자 사건 비교·일괄 작업 | `backend/admin-incidents.js`, `backend/admin.js` |
 
 공개 화면에는 제작 메모·원본 자료 비교·수정 이력을 넣지 않습니다. 개발 이력은 이 문서와 CHANGELOG에서만 관리합니다.
+
+
+## 최신 수정 위치 — 2026-11-25
+
+| 바꾸려는 화면 | 구성·동작 | 디자인 |
+| --- | --- | --- |
+| 팬·사내 피드, 게시글 로딩창 | `assets/community.js` | `assets/service-design.css` 하단의 커뮤니티 정리 규칙 |
+| 작은 수신 단말기 | `assets/monitor.js` | `assets/forensic.css` 하단 수신기 규칙 |
+| 상황 설명 다시 읽기·일시 정지 | `assets/incident-ui.js` | 기존 사건 문서 스타일 |
+| 음악 목록·곡 선택·공통 재생창 | `assets/playlists.js`, `assets/app.js` 초기화 | `assets/playlists.css` (`.music-grid`, `.music-tracks`, `#music-player`) |
+| 관리자 선곡 편집 | `backend/admin-playlists.js` | 관리자 공통 폼 및 해당 모듈의 곡 입력 필드 |
+
+플레이어는 왼쪽 아래, 업무 메신저는 오른쪽에 배치합니다. 320px 화면에서는 메신저 위치를 위로 조정합니다. 공식 영상 플레이어는 숨기거나 잘라내지 않습니다. 재생 목록을 누르면 현재 재생 중인 곡 목록을 다시 엽니다.
+
+
+## 2026-11-26 — 플레이리스트 전용 페이지
+
+| 수정 대상 | 파일 / 위치 |
+| --- | --- |
+| 전용 페이지 진입·라우팅 | `playlists.html`, `assets/app.js` |
+| CD·곡 목록·검색·체크 선택·셔플·테마 스와이프 | `assets/playlist-page.js` |
+| 입체 플라스틱 본체·금속 축·반사·그림자 | `assets/playlists.css` — `.deck-body`, `.deck-well`, `.disc`, `.disc-hub`, `.deck-glaze` |
+| 유리 곡 목록·활성 곡 색상·물결 | 같은 CSS — `.glass`, `.room-track`, `.track-current`, `.track-ripple` |
+| 멤버 커버·이름·색상·팀 묶음 | `assets/playlist-themes.js` |
+| 공통 YouTube 플레이어·페이지 이동 중 유지 | `assets/playlists.js` |
+| 실제 곡명·유튜브 링크·순서 | 관리자 앱 → 음악 플레이리스트. D1 저장이며 소스 수정 불필요 |
+
+CD 회전은 실제 재생 상태에 맞추며, 모션 줄이기 설정에서는 정지합니다. 커버 원본 파일과 작업용 자료는 배포하지 않습니다.

@@ -1,3 +1,5 @@
+import { renderPlaylists } from './playlist-page.js';
+import { initPlaylists } from './playlists.js';
 import { initImageSurfaces } from './image-surfaces.js';
 import { initForensicCursor } from './forensics.js';
 import { renderAgency, renderAgencyDirectory } from './agencies.js';
@@ -14,6 +16,7 @@ import { renderCommunity, initVisitors } from './community.js';
 import { disposeRoute } from './lifecycle.js';
 import { initI18n, translateDOM, tr } from './i18n.js';
 const titles = {
+  playlists: '플레이리스트',
   overview: '통합 관제',
   departments: '조직·부서',
   entertainment: '헌터 엔터테인먼트',
@@ -24,6 +27,7 @@ const titles = {
   agency: '아티스트',
 };
 const routes = {
+  playlists: 'playlists',
   portal: 'overview',
   departments: 'departments',
   entertainment: 'entertainment',
@@ -47,6 +51,7 @@ installInterfaceTranslations();
 installVoiceTranslations();
 installFacilityTranslations();
 initShell('SGIA', 'overview');
+initPlaylists();
 initImageSurfaces();
 initForensicCursor();
 initI18n();
@@ -76,6 +81,7 @@ function route(url = location.href, push = false) {
       : a.removeAttribute('aria-current'),
   );
   const render = {
+    playlists: renderPlaylists,
     overview: renderOverview,
     departments: () => renderDirectory(),
     entertainment: renderAgencyDirectory,

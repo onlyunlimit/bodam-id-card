@@ -194,7 +194,7 @@ export function renderManual() {
   const initial = new URLSearchParams(location.search).get('q') || '';
   $('#main').innerHTML =
     heading(
-      'PUBLIC REFERENCE / LOREBOOK',
+      'SGIA / FIELD GUIDE',
       '세계관 안내서',
       '국가 각성자 통합관리청의 제도·분류·용어와 세계관 이용 명령어',
     ) +

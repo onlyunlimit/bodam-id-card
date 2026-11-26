@@ -33,7 +33,7 @@ export async function translationAPI(request,env,{identity,rate}) {
   const cached=await cache?.match(key);if(cached)return cached;
   await rate(env,'translation:'+hash,20,3600);
   const translated=[];
-  const timeout=AbortSignal.timeout(25000);
+  const timeout=AbortSignal.timeout(8000);
   for(const chunk of translationChunks(row.body)) {
     const endpoint=new URL('https://api.mymemory.translated.net/get');
     endpoint.searchParams.set('q',chunk);endpoint.searchParams.set('langpair',source+'|'+to);
