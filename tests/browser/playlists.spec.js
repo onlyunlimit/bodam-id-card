@@ -118,3 +118,35 @@ test('Bookmark lower corners remain buried in the CD including raised tabs',asyn
   }
  }
 });
+
+test('Native audio keeps one element through collapse/navigation, seeks and respects exclusive BGM',async({page})=>{
+ const samples=8000*30,wav=Buffer.alloc(44+samples*2);wav.write('RIFF');wav.writeUInt32LE(wav.length-8,4);wav.write('WAVEfmt ',8);wav.writeUInt32LE(16,16);wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);wav.writeUInt32LE(8000,24);wav.writeUInt32LE(16000,28);wav.writeUInt16LE(2,32);wav.writeUInt16LE(16,34);wav.write('data',36);wav.writeUInt32LE(samples*2,40);
+ const audioURL='https://sgia-community.sgia-community-api.workers.dev/audio/'+'a'.repeat(64)+'.mp3';
+ await page.route('**/audio/*.mp3',r=>{
+  const range=r.request().headers().range?.match(/bytes=(\d+)-(\d*)/),start=range?Number(range[1]):0,end=range&&range[2]?Math.min(Number(range[2]),wav.length-1):wav.length-1;
+  return r.fulfill({status:range?206:200,contentType:'audio/wav',headers:{'accept-ranges':'bytes',...(range?{'content-range':`bytes ${start}-${end}/${wav.length}`}:{})},body:wav.subarray(start,end+1)});
+ });
+ await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'no-preference'});
+ const lists=structuredClone(mixes);lists[0].tracks.forEach(t=>t.audio_url=audioURL);
+ await room(page,lists);await page.evaluate(()=>document.documentElement.dataset.motion='off');
+ await page.locator('[data-room-track]').first().click();
+ await expect.poll(()=>page.locator('#music-audio').evaluate(a=>a.currentTime)).toBeGreaterThan(.1);
+ expect(await page.evaluate(()=>window.YT)).toBeUndefined();
+ await expect.poll(()=>page.locator('.disc').evaluate(e=>e.getAnimations().length)).toBe(1);
+ await page.evaluate(()=>{window.__native=document.querySelector('#music-audio');window.__spin=document.querySelector('.disc').getAnimations()[0];});
+ await expect(page.locator('[data-music-prev]')).toHaveText('◀◀');await expect(page.locator('[data-music-next]')).toHaveText('▶▶');
+ await page.locator('[data-music-collapse]').click();await page.locator('[data-music-collapse]').click();
+ expect(await page.locator('#music-audio').evaluate(a=>a.paused)).toBe(false);
+ await page.locator('[data-room-next]').click();await expect.poll(()=>page.locator('#music-audio').evaluate(a=>a.currentTime)).toBeGreaterThan(.1);
+ expect(await page.evaluate(()=>document.querySelector('.disc').getAnimations()[0]===window.__spin)).toBe(true);
+ await page.locator('.track-current .room-progress input').fill('12');await page.locator('.track-current .room-progress input').dispatchEvent('change');
+ await expect.poll(()=>page.locator('#music-audio').evaluate(a=>a.currentTime)).toBeGreaterThanOrEqual(12);
+ await page.locator('.site-nav a[href="manual.html"]').click();
+ expect(await page.evaluate(()=>window.__native===document.querySelector('#music-audio')&&!window.__native.paused)).toBe(true);
+ await page.locator('[data-music-collapse]').click();await page.locator('[data-music-queue]').click();
+ await expect(page.locator('#music-library')).toHaveClass(/is-queue/);await expect(page.locator('.music-tracks [aria-current=true]')).toHaveCount(1);
+ expect(await page.locator('#music-library').evaluate(e=>e.scrollWidth<=e.clientWidth)).toBe(true);
+ await page.keyboard.press('Escape');await page.locator('#work-channel-open').click();await expect.poll(()=>page.locator('#music-audio').evaluate(a=>a.paused)).toBe(true);
+ await page.locator('#work-channel-open').click();await page.locator('[data-music-close]').click();await expect(page.locator('#music-player')).toBeHidden();
+ expect(await page.locator('#music-audio').getAttribute('src')).toBeNull();
+});

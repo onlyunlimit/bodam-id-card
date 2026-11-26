@@ -1,4 +1,5 @@
 import { playlistAPI } from './playlists.js';
+import { musicAudio } from './music-audio.js';
 import { translationAPI } from './translation.js';
 import { incidentAPI } from './incidents.js';
 import { notificationAPI, notificationStatement, dispatchNotification } from './notifications.js';
@@ -629,7 +630,7 @@ export default {
   async fetch(request, env, ctx) {
     let response;
     try {
-      response = await handle(request, env);
+      response = await musicAudio(request, env) || await handle(request, env);
       if(request.method==='POST'&&response.status===201&&(/^\/posts(?:\/[a-f0-9-]{36}\/comments)?$/.test(new URL(request.url).pathname)||['/admin/publish','/admin/reply'].includes(new URL(request.url).pathname))){const {id}=await response.clone().json();const delivery=dispatchNotification(env,id).catch(()=>{});if(ctx?.waitUntil)ctx.waitUntil(delivery);else await delivery;}
     } catch (e) {
       response = json(
@@ -644,7 +645,7 @@ export default {
     }
     const h = new Headers(response.headers),
       url = new URL(request.url);
-    h.set('Cache-Control', 'no-store');
+    if(!url.pathname.startsWith('/audio/')||!response.ok)h.set('Cache-Control', 'no-store');
     h.set('X-Content-Type-Options', 'nosniff');
     h.set('Referrer-Policy', 'no-referrer');
     h.set('X-Frame-Options', 'DENY');

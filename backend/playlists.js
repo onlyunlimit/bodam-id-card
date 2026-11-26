@@ -1,4 +1,5 @@
 import {HTTPError, text} from './security.js';
+import {audioPath} from './music-audio.js';
 const json=data=>Response.json(data);
 export function videoID(value) {
   if(typeof value!=='string')throw new HTTPError(400,'유튜브 링크를 확인해 주세요.');
@@ -19,7 +20,7 @@ export async function playlistAPI(request,env,{body},admin=false) {
   const id=path.slice(base.length+1), method=request.method;
   if(method==='GET'&&!id) {
     const rows=await env.DB.prepare('SELECT * FROM music_playlists ORDER BY updated_at DESC,id').all();
-    return json({playlists:rows.results.map(p=>({...p,tracks:JSON.parse(p.tracks)}))});
+    return json({playlists:rows.results.map(p=>({...p,tracks:JSON.parse(p.tracks).map(t=>({...t,...(env.MUSIC_ASSETS&&audioPath(t.video_id)?{audio_url:new URL(audioPath(t.video_id),request.url).href}:{})}))}))});
   }
   if(!admin)throw new HTTPError(405,'읽기 전용입니다.');
   if(id&&!/^[a-f0-9-]{36}$/.test(id))throw new HTTPError(400,'목록을 확인해 주세요.');

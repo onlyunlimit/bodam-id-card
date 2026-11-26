@@ -299,6 +299,12 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 | 공통 YouTube 플레이어·페이지 이동 중 유지 | `assets/playlists.js` |
 | 실제 곡명·유튜브 링크·순서 | 관리자 앱 → 음악 플레이리스트. D1 저장이며 소스 수정 불필요 |
 
-CD 회전은 `rotateDisc()`의 Web Animations로 처리합니다. 같은 인물의 곡 전환에는 기존 회전을 유지하고, 일시정지 시 정방향으로 돌아옵니다. 인물 변경 시 커버를 교체하며 모션 줄이기 설정에서는 정지합니다. `.room-aura` 배경은 현재 곡 앨범 커버를 블러 처리합니다. 공통 미니 플레이어의 `.is-collapsed`는 접기 상태이며, 영상 위에 `.music-cover-play`로 곡 앨범을 표시합니다. 접으면 커버·제목·조작부만 작게 표시하며 iframe 인스턴스는 유지합니다. 광고 제거 기능은 아닙니다. 커버 원본 파일과 작업용 자료는 배포하지 않습니다.
+CD 회전은 `rotateDisc()`의 Web Animations로 처리합니다. 같은 인물의 곡 전환에는 기존 회전을 유지하고, 일시정지 시 정방향으로 돌아옵니다. 인물 변경 시 커버를 교체하며 기기의 동작 줄이기 설정에서는 정지합니다. 사이트의 장식용 `모션 OFF`는 재생 상태를 나타내는 CD 회전을 끄지 않습니다. `.room-aura` 배경은 현재 곡 앨범 커버를 블러 처리합니다. 공통 미니 플레이어의 `.is-collapsed`는 접기 상태이며, 영상 위에 `.music-cover-play`로 곡 앨범을 표시합니다. 접으면 커버·제목·조작부만 작게 표시하며 iframe 인스턴스는 유지합니다. 광고 제거 기능은 아닙니다. 커버 원본 파일과 작업용 자료는 배포하지 않습니다.
 
 모바일 현재 곡의 재생 조작은 `.track-current .room-transport`에서 조절합니다. 공통 재생창은 `#music-player`로 고정하며 현재 행 위에 겹쳐 배치하지 않습니다. 모바일 원호는 `orbit()`에서 `.deck-body` 중심·반지름을 기준으로 계산합니다. `.deck-column`과 `.theme-dots`의 쌓임 순서로 탭 클릭 영역을 유지합니다. 일반 곡 높이는 모바일 `.track-hit`의 `min-height`입니다. 업무 채널 진입 버튼은 `playlists.js`의 `#work-channel-open`, 닫기는 `app.js`의 `#comms-hide`입니다. `body[data-widget]`로 업무 채널/음악 표시를 전환합니다. 미니 플레이어의 반투명도·유리 블러는 `#music-player`의 `background`, `backdrop-filter`와 라이트 모드 규칙에서 조절합니다.
+
+### 2026-11-27 재생목록 글래스·직접 재생
+
+- `assets/playlists.css` 마지막 `#music-library` 규칙: 재생목록의 반투명 유리, 앨범 블러, 인물 테마 색, 현재 곡 강조, 모바일 썸네일 크기.
+- `assets/playlists.js`의 `render()`: 재생 순서·앨범 썸네일·현재 곡 표시. 공통 Audio 요소는 내부 화면 이동과 접기에서 유지합니다.
+- `assets/playlist-page.js`의 `rotateDisc()`: 재생 회전·정방향 복귀. 모바일 `.deck-column`은 오른쪽으로 20px 이동하며 원호 계산은 실제 CD 위치를 따릅니다. 이전/다음은 `◀◀` / `▶▶`로 표시합니다.

@@ -131,3 +131,29 @@ body[data-widget=work] #floating-comms{left:auto!important;right:16px!important;
 #music-player.is-collapsed .music-controls{grid-column:2;grid-row:2;margin:0;justify-content:flex-start;gap:14px}
 #music-player.is-collapsed .music-controls button{padding:0 4px!important;font-size:17px!important}
 #music-player.is-collapsed [data-music-status]{grid-column:1 / -1}
+
+/* Queue shares the album-tinted glass used by the persistent player. */
+#music-library{--music-tint:#a9a2c9;--music-ink:#fafaff;--music-muted:#d5d5e2;isolation:isolate;width:min(620px,calc(100vw - 28px));padding:30px 24px 24px;border-radius:32px;background:linear-gradient(140deg,#ffffff20,#ffffff08 50%,#ffffff14),color-mix(in srgb,var(--music-tint) 20%,#141823a8);border:1px solid #ffffff65;box-shadow:inset 1px 1px 2px #ffffff91,inset -1px -1px 2px #ffffff35,0 28px 90px #0006;backdrop-filter:blur(34px) saturate(145%);-webkit-backdrop-filter:blur(34px) saturate(145%)}
+#music-library::before{content:'';position:absolute;inset:0;background-image:var(--queue-cover);background-size:cover;background-position:center;filter:blur(65px);opacity:.2;z-index:-1;pointer-events:none}
+#music-library::backdrop{background:#070c234a;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#music-library.is-queue>.music-eyebrow,#music-library.is-queue>.music-intro,#music-library.is-queue>h2{display:none}
+#music-library.is-queue .music-playlist-heading{display:block;padding:0 42px 20px 2px;margin:0}
+#music-library.is-queue .music-playlist-heading>.music-cover,#music-library.is-queue .music-playlist-heading div>small:first-child,#music-library.is-queue .music-playlist-heading p{display:none}
+#music-library .music-playlist-heading h3{color:inherit;margin:0 0 6px;font-size:24px;letter-spacing:-.5px}
+#music-library .music-playlist-heading small{color:var(--music-muted)}
+#music-library .music-tracks{display:grid;gap:7px}
+#music-library .music-tracks button{padding:11px 12px!important;gap:12px;border:1px solid #ffffff22!important;border-radius:20px!important;background:linear-gradient(130deg,#ffffff14,#ffffff05);box-shadow:inset 0 1px #fff2;transition:background .18s,transform .22s}
+#music-library .music-tracks button:hover{background:#ffffff20!important;transform:translateY(-1px)}
+#music-library .music-tracks [aria-current=true]{color:var(--music-ink)!important;background:linear-gradient(125deg,#ffffff30,#ffffff0c),color-mix(in srgb,var(--music-tint) 30%,transparent)!important;border-color:#ffffff70!important;box-shadow:inset 0 1px #ffffff7a,0 5px 20px #0002}
+#music-library .music-tracks .queue-art{flex:0 0 42px;width:42px;height:42px;border-radius:11px;background-size:cover;background-position:center;background-color:#ffffff13;display:grid;place-items:center;color:inherit;box-shadow:0 2px 7px #0002}
+#music-library .music-tracks b{font-weight:600;font-size:14px;line-height:1.4}
+#music-library .music-tracks small{font-size:12px;line-height:1.4;color:var(--music-muted)}
+#music-library .music-tracks em{color:inherit;width:18px;text-align:center;opacity:.65}
+#music-library .music-tracks [aria-current=true] em{opacity:1}
+#music-library .music-close{background:#ffffff16;border:1px solid #ffffff35;box-shadow:inset 0 1px #fff5}
+html[data-theme=light] #music-library{--music-ink:#202536;--music-muted:#4b5163;color:var(--music-ink);color-scheme:light;background:linear-gradient(135deg,#ffffffe0,#ffffff9c),color-mix(in srgb,var(--music-tint) 22%,transparent);border-color:#fff9;box-shadow:inset 1px 1px #fff,0 25px 70px #25304b30}
+html[data-theme=light] #music-library .music-tracks button{border-color:#25304b14!important;background:#ffffff38}
+html[data-theme=light] #music-library .music-tracks [aria-current=true]{background:color-mix(in srgb,var(--music-tint) 24%,#ffffffa6)!important;border-color:#25304b30!important}
+.music-skip{font-family:Arial,sans-serif;font-size:12px;letter-spacing:-2px;line-height:1;white-space:nowrap}
+@media(max-width:680px){.deck-column{left:-85px}.room-tracks{padding-right:160px}#music-library{padding:24px 16px 18px;border-radius:27px;max-height:84dvh}#music-library .music-tracks button{gap:9px;padding:9px!important}#music-library .music-tracks .queue-art{flex-basis:36px;width:36px;height:36px;border-radius:9px}#music-library .music-tracks b{font-size:13px}}
+@media(prefers-reduced-motion:reduce){#music-library .music-tracks button{transition:none;transform:none!important}}

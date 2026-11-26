@@ -35,45 +35,61 @@ export function initPlaylists(){
  library.innerHTML='<button class="music-close" aria-label="'+tr('닫기')+'">×</button><p class="music-eyebrow">CHARACTER MIXES</p><h2 id="music-library-title">'+tr('플레이리스트')+'</h2><p class="music-intro">'+tr('제작자가 고른, 그 사람의 음악.')+'</p><div class="music-library-content"></div>';
  document.body.append(library);library.querySelector('.music-close').onclick=()=>library.close();
  const dock=document.createElement('aside');dock.id='music-player';dock.hidden=true;dock.setAttribute('aria-label',tr('재생 목록'));
- dock.innerHTML='<div class="music-now"><span class="music-note" aria-hidden="true">♫</span><div><strong data-music-title></strong><small data-music-artist></small></div><button data-music-collapse aria-expanded="true" aria-label="'+tr('플레이어 접기')+'">⌃</button><button data-music-close aria-label="'+tr('정지하고 닫기')+'">×</button></div><div class="music-artwork" aria-hidden="true"></div><div class="music-video"><div id="music-youtube"></div><button class="music-cover-play" aria-label="'+tr('재생 / 일시정지')+'"></button></div><div class="music-seek"><input type="range" min="0" max="100" value="0" disabled aria-label="'+tr('재생 위치')+'"><span>0:00</span></div><div class="music-controls"><button data-music-prev aria-label="'+tr('이전 곡')+'">⏮</button><button data-music-play aria-label="'+tr('재생 / 일시정지')+'">▶</button><button data-music-next aria-label="'+tr('다음 곡')+'">⏭</button><button data-music-queue>'+tr('재생 목록')+'</button></div><p data-music-status role="status"></p>';
+ dock.innerHTML='<div class="music-now"><span class="music-note" aria-hidden="true">♫</span><div><strong data-music-title></strong><small data-music-artist></small></div><button data-music-collapse aria-expanded="true" aria-label="'+tr('플레이어 접기')+'">⌃</button><button data-music-close aria-label="'+tr('정지하고 닫기')+'">×</button></div><div class="music-artwork" aria-hidden="true"></div><div class="music-video"><div id="music-youtube"></div><button class="music-cover-play" aria-label="'+tr('재생 / 일시정지')+'"></button></div><div class="music-seek"><input type="range" min="0" max="100" value="0" disabled aria-label="'+tr('재생 위치')+'"><span>0:00</span></div><div class="music-controls"><button data-music-prev aria-label="'+tr('이전 곡')+'"><span class="music-skip" aria-hidden="true">◀◀</span></button><button data-music-play aria-label="'+tr('재생 / 일시정지')+'">▶</button><button data-music-next aria-label="'+tr('다음 곡')+'"><span class="music-skip" aria-hidden="true">▶▶</span></button><button data-music-queue>'+tr('재생 목록')+'</button></div><p data-music-status role="status"></p>';
  document.body.append(dock);if(matchMedia('(max-width:680px)').matches){dock.classList.add('is-collapsed');dock.querySelector('[data-music-collapse]').setAttribute('aria-expanded','false');dock.querySelector('[data-music-collapse]').setAttribute('aria-label',tr('플레이어 펼치기'));dock.querySelector('[data-music-collapse]').textContent='⌄';}
  const seek=dock.querySelector('.music-seek input');seek.onchange=()=>music.seek(Number(seek.value));setInterval(()=>{if(dock.hidden)return;const p=music.progress();seek.disabled=!p.duration;seek.max=p.duration||100;if(document.activeElement!==seek)seek.value=p.time;dock.querySelector('.music-seek span').textContent=Math.floor(p.time/60)+':'+String(Math.floor(p.time%60)).padStart(2,'0');},1000);
+ const audio=new Audio();audio.id='music-audio';audio.preload='metadata';document.body.append(audio);
  const subscribers=new Set();let playing=false,intent=false,hasPlayed=false,previousCharacter='';
- let playlists=[],members=[],queue=[],index=-1,selected=null,activePlaylist=null,player,playerReady=false,request=0,filter='',loadRequest=0;
+ let playlists=[],members=[],queue=[],index=-1,selected=null,activePlaylist=null,player,playerReady=false,request=0,filter='',loadRequest=0,source='youtube';
+ const pause=()=>source==='audio'?audio.pause():player?.pauseVideo?.();
+ function audioState(active){if(source!=='audio'||dock.hidden)return;playing=active;if(active){hasPlayed=true;pauseBGM();status('');}dock.querySelector('[data-music-play]').textContent=active?'Ⅱ':'▶';emit();}
+ audio.addEventListener('playing',()=>audioState(true));
+ audio.addEventListener('pause',()=>{if(source!=='audio'||!audio.paused)return;intent=false;audioState(false);});
+ audio.addEventListener('waiting',()=>{if(source==='audio')status(tr('음악을 불러오는 중…'));});
+ audio.addEventListener('ended',()=>{if(source!=='audio')return;if(index<queue.length-1)play(index+1);else{intent=false;audioState(false);}});
+ audio.addEventListener('error',()=>{if(source!=='audio'||dock.hidden)return;intent=false;audioState(false);status(tr('이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));});
  const workLaunch=document.createElement('button');workLaunch.id='work-channel-open';workLaunch.textContent=tr('업무 채널');workLaunch.setAttribute('aria-expanded','false');workLaunch.setAttribute('aria-controls','floating-comms');$('.header-controls').append(workLaunch);
  function selectWidget(mode){document.body.dataset.widget=mode;workLaunch.setAttribute('aria-expanded',String(mode==='work'));}
  selectWidget('music');
- workLaunch.onclick=()=>{const opening=document.body.dataset.widget!=='work';if(opening)player?.pauseVideo?.();selectWidget(opening?'work':'music');};
+ workLaunch.onclick=()=>{const opening=document.body.dataset.widget!=='work';if(opening)pause();selectWidget(opening?'work':'music');};
  document.addEventListener('sgia:comms-close',()=>selectWidget('music'));
  const emit=()=>{dock.classList.toggle('is-active',playing||intent);subscribers.forEach(fn=>fn(music.state()));};
  const status=t=>{dock.querySelector('[data-music-status]').textContent=t;};
  function pauseBGM(){const audio=$('#ambient-audio');audio?.pause();$('#sound-toggle').setAttribute('aria-pressed','false');$('#sound-toggle span').textContent='BGM OFF';$('#sound-toggle').setAttribute('aria-label',tr('BGM 켜기'));}
- $('#ambient-audio')?.addEventListener('play',()=>player?.pauseVideo?.());
+ $('#ambient-audio')?.addEventListener('play',pause);
  function update(){const t=queue[index];if(!t)return;dock.style.setProperty('--music-tint',t.color||'#a9a2c9');for(const el of dock.querySelectorAll('.music-artwork,.music-note,.music-cover-play')){el.style.backgroundImage=t.artwork?`url(${JSON.stringify(t.artwork)})`:'';el.textContent=t.artwork?'':'♫';}dock.querySelector('[data-music-title]').textContent=t.title;dock.querySelector('[data-music-artist]').textContent=t.artist;dock.querySelector('[data-music-prev]').disabled=index===0;dock.querySelector('[data-music-next]').disabled=index>=queue.length-1;}
  async function play(i){
-  if(i<0||i>=queue.length)return;index=i;const identity=queue[i].character||queue[i].cover||queue[i].key;if(identity!==previousCharacter)hasPlayed=false;previousCharacter=identity;intent=true;const ticket=++request;dock.hidden=false;selectWidget('music');update();status(tr('음악을 불러오는 중…'));pauseBGM();playing=false;emit();
-  try{const YT=await youtube();if(ticket!==request||dock.hidden)return;
+  if(i<0||i>=queue.length)return;source='switching';audio.pause();player?.stopVideo?.();index=i;const identity=queue[i].character||queue[i].cover||queue[i].key;if(identity!==previousCharacter)hasPlayed=false;previousCharacter=identity;intent=true;const ticket=++request;dock.hidden=false;selectWidget('music');update();status(tr('음악을 불러오는 중…'));pauseBGM();playing=false;emit();
+  try{
+   const candidate=queue[index].audio_url;
+   if(candidate){
+    const url=new URL(candidate,serviceConfig.api);if(url.origin!==new URL(serviceConfig.api).origin||!/^\/audio\/[a-f0-9]{64}\.mp3$/.test(url.pathname))throw Error('Invalid audio source');
+    source='audio';audio.src=url.href;audio.load();await audio.play();if(ticket!==request)return;return;
+   }
+   source='youtube';const YT=await youtube();if(ticket!==request||dock.hidden||source!=='youtube')return;
    if(playerReady){player.loadVideoById(queue[index].video_id);return;}
    if(player)return;
    player=new YT.Player('music-youtube',{host:'https://www.youtube-nocookie.com',width:'100%',height:'200',videoId:queue[index].video_id,playerVars:{playsinline:1,origin:location.origin,autoplay:1},events:{
-    onReady:e=>{playerReady=true;if(dock.hidden){e.target.stopVideo();return;}status(tr('재생 버튼을 눌러 주세요.'));e.target.loadVideoById(queue[index].video_id);},
-    onStateChange:e=>{if(dock.hidden)return;playing=e.data===1;if(playing)hasPlayed=true;if(e.data===2||(e.data===0&&index===queue.length-1))intent=false;emit();dock.querySelector('[data-music-play]').textContent=e.data===1?'Ⅱ':'▶';if(e.data===1){pauseBGM();status('');}if(e.data===3)status(tr('음악을 불러오는 중…'));if(e.data===0&&index<queue.length-1)play(index+1);},
-    onAutoplayBlocked:()=>{intent=false;emit();status(tr('재생 버튼을 눌러 주세요.'));},
-    onError:()=>{intent=false;playing=false;emit();status(tr('이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));},
+    onReady:e=>{playerReady=true;if(dock.hidden||source!=='youtube'){e.target.stopVideo();return;}status(tr('재생 버튼을 눌러 주세요.'));e.target.loadVideoById(queue[index].video_id);},
+    onStateChange:e=>{if(dock.hidden||source!=='youtube')return;playing=e.data===1;if(playing)hasPlayed=true;if(e.data===2||(e.data===0&&index===queue.length-1))intent=false;emit();dock.querySelector('[data-music-play]').textContent=e.data===1?'Ⅱ':'▶';if(e.data===1){pauseBGM();status('');}if(e.data===3)status(tr('음악을 불러오는 중…'));if(e.data===0&&index<queue.length-1)play(index+1);},
+    onAutoplayBlocked:()=>{if(source!=='youtube')return;intent=false;emit();status(tr('재생 버튼을 눌러 주세요.'));},
+    onError:()=>{if(source!=='youtube')return;intent=false;playing=false;emit();status(tr('이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));},
    }});
-  }catch{if(ticket===request){intent=false;playing=false;emit();status(tr('이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));}}
+  }catch(error){if(ticket===request){intent=false;playing=false;emit();status(tr(error?.name==='NotAllowedError'?'재생 버튼을 눌러 주세요.':'이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));}}
  }
- dock.querySelector('[data-music-close]').onclick=()=>{++request;player?.stopVideo?.();dock.hidden=true;intent=false;playing=false;hasPlayed=false;emit();};
- dock.querySelector('[data-music-play]').onclick=()=>{if(!playerReady){play(index);return;}if(player.getPlayerState()===1)player.pauseVideo();else{intent=true;pauseBGM();player.playVideo();}};
+ dock.querySelector('[data-music-close]').onclick=()=>{++request;source='stopped';audio.pause();audio.removeAttribute('src');audio.load();player?.stopVideo?.();dock.hidden=true;intent=false;playing=false;hasPlayed=false;emit();};
+ dock.querySelector('[data-music-play]').onclick=()=>{if(source==='audio'){if(audio.paused){intent=true;pauseBGM();audio.play().catch(()=>{intent=false;emit();status(tr('재생 버튼을 눌러 주세요.'));});}else audio.pause();return;}if(!playerReady){play(index);return;}if(player.getPlayerState()===1)player.pauseVideo();else{intent=true;pauseBGM();player.playVideo();}};
  dock.querySelector('[data-music-collapse]').onclick=e=>{const collapsed=dock.classList.toggle('is-collapsed');e.currentTarget.textContent=collapsed?'⌄':'⌃';e.currentTarget.setAttribute('aria-expanded',String(!collapsed));e.currentTarget.setAttribute('aria-label',tr(collapsed?'플레이어 펼치기':'플레이어 접기'));};
  dock.querySelector('.music-cover-play').onclick=()=>music.toggle();
  dock.querySelector('[data-music-prev]').onclick=()=>play(index-1);dock.querySelector('[data-music-next]').onclick=()=>play(index+1);
- dock.querySelector('[data-music-queue]').onclick=()=>{++loadRequest;selected=activePlaylist||{title:tr('재생 목록'),description:'',member_id:'',tracks:queue};if(!library.open)library.showModal();render();};
+ dock.querySelector('[data-music-queue]').onclick=()=>{++loadRequest;selected={...(activePlaylist||{}),title:tr('재생 목록'),description:'',tracks:queue};if(!library.open)library.showModal();render();};
  function render(){
   const content=library.querySelector('.music-library-content');
   const member=members.find(m=>m.id===selected?.member_id);
+  const current=queue[index]||selected?.tracks?.[0];library.style.setProperty('--music-tint',current?.color||'#a9a2c9');library.style.setProperty('--queue-cover',current?.artwork?`url(${JSON.stringify(current.artwork)})`:'none');
+  library.classList.toggle('is-queue',!!selected);
   if(selected){
-   content.innerHTML='<header class="music-playlist-heading"><span class="music-cover" aria-hidden="true">♫</span><div><small data-user-content>'+esc(member?.name||'CREATOR MIX')+'</small><h3 data-user-content>'+esc(selected.title)+'</h3><p data-user-content>'+esc(selected.description)+'</p><small>'+selected.tracks.length+' '+tr('곡')+'</small></div></header><div class="music-tracks">'+selected.tracks.map((t,i)=>'<button data-track="'+i+'" '+(queue===selected.tracks&&i===index?'aria-current="true"':'')+'><span>'+String(i+1).padStart(2,'0')+'</span><div data-user-content><b>'+esc(t.title)+'</b><small>'+esc(t.artist)+'</small></div><em>▶</em></button>').join('')+'</div>'+(selected.tracks.length?'':'<p>'+tr('곡을 준비하고 있어요.')+'</p>');
+   content.innerHTML='<header class="music-playlist-heading"><span class="music-cover" aria-hidden="true">♫</span><div><small data-user-content>'+esc(member?.name||'CREATOR MIX')+'</small><h3 data-user-content>'+esc(selected.title)+'</h3><p data-user-content>'+esc(selected.description)+'</p><small>'+selected.tracks.length+' '+tr('곡')+'</small></div></header><div class="music-tracks">'+selected.tracks.map((t,i)=>'<button data-track="'+i+'" '+(queue===selected.tracks&&i===index?'aria-current="true"':'')+'><span class="queue-art" aria-hidden="true" style="'+(t.artwork?'background-image:url('+esc(JSON.stringify(t.artwork))+')':'')+'">'+(t.artwork?'':String(i+1).padStart(2,'0'))+'</span><div data-user-content><b>'+esc(t.title)+'</b><small>'+esc(t.artist)+'</small></div><em>▶</em></button>').join('')+'</div>'+(selected.tracks.length?'':'<p>'+tr('곡을 준비하고 있어요.')+'</p>');
    content.querySelectorAll('[data-track]').forEach(b=>b.onclick=()=>{activePlaylist=selected;queue=selected.tracks;play(Number(b.dataset.track));library.close();});return;
   }
   const ids=[...new Set(playlists.map(p=>p.member_id).filter(Boolean))];
@@ -92,8 +108,8 @@ export function initPlaylists(){
   toggle:()=>dock.querySelector('[data-music-play]').click(),
   previous:()=>play(index-1),next:()=>play(index+1),
   stop:()=>dock.querySelector('[data-music-close]').click(),
-  progress:()=>({time:player?.getCurrentTime?.()||0,duration:player?.getDuration?.()||0}),
-  seek(seconds){if(playerReady&&Number.isFinite(seconds))player.seekTo?.(seconds,true);},
+  progress:()=>source==='audio'?{time:audio.currentTime||0,duration:Number.isFinite(audio.duration)?audio.duration:0}:{time:player?.getCurrentTime?.()||0,duration:player?.getDuration?.()||0},
+  seek(seconds){if(!Number.isFinite(seconds))return;if(source==='audio'){if(Number.isFinite(audio.duration))audio.currentTime=Math.max(0,Math.min(seconds,audio.duration));}else if(playerReady)player.seekTo?.(seconds,true);},
   library:open
  });
 }

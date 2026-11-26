@@ -10,6 +10,7 @@ import { musicTeams, playlistThemes } from './playlist-themes.js';
  ['모든 목록','All mixes','すべてのミックス','全部歌单'],['이전 테마','Previous theme','前のテーマ','上一个主题'],['다음 테마','Next theme','次のテーマ','下一个主题'],['재생 위치','Playback position','再生位置','播放进度'],['곡을 선택해 주세요.','Choose a track.','楽曲を選んでください。','请选择歌曲。'],['선택한 테마에 곡이 없습니다.','No tracks in this theme.','このテーマには楽曲がありません。','此主题暂无歌曲。'],['테마 둘러보기','Browse themes','テーマを探す','浏览主题'],['전체 재생','Play all','すべて再生','播放全部'],['곡을 불러오지 못했습니다.','Unable to load tracks.','楽曲を読み込めませんでした。','无法载入歌曲。']
 ].forEach(row=>registerCopy(...row));
 const icon = (name) => {
+ if(name==='prev'||name==='next')return `<span class="music-skip" aria-hidden="true">${name==='prev'?'◀◀':'▶▶'}</span>`;
  const paths={play:'M9 5v14l11-7z',pause:'M8 5v14M16 5v14',next:'M5 5v14l10-7zM19 5v14',prev:'M19 5v14L9 12zM5 5v14',shuffle:'M3 6h3c5 0 7 12 12 12h3m-4-4 4 4-4 4M3 18h3c2 0 4-3 6-6s4-6 6-6h3m-4-4 4 4-4 4',left:'m15 5-7 7 7 7',right:'m9 5 7 7-7 7',search:'M20 20l-5-5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0'};
  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]}" fill="${['play','next','prev'].includes(name)?'currentColor':'none'}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 };
@@ -33,7 +34,8 @@ export function renderPlaylists(){
 
  // The disc animation is kept alive across tracks from the same character.
  const disc=root.querySelector('.disc');let spin=null,settle=null,discCharacter='',wasSpinning=false;
- const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||document.documentElement.dataset.motion==='off';
+ // Playback feedback is independent of the portal's decorative-motion switch.
+ const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
  function rotateDisc(track,running){
   const character=track?.character||'';
   if(character!==discCharacter){spin?.cancel();settle?.cancel();spin=settle=null;disc.style.transform='rotate(0deg)';wasSpinning=false;discCharacter=character;}

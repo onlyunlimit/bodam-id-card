@@ -10,5 +10,6 @@
 .env*
 /backend/node_modules/
 /backend/.wrangler/
+/backend/.music-assets/
 /backend/.dev.vars
 /backend/.env*
