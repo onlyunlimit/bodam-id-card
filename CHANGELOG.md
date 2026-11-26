@@ -6,12 +6,13 @@
 
 ## 2026-11-27 — 부서 신분증 카드·사내 게시판 여백·추천곡 문구
 
-- **상태:** 로컬 구현·검사 완료. 홈페이지 배포 대기.
+- **상태:** 로컬 구현·검사·홈페이지 공개 배포 확인 완료.
 - **부서 카드:** BEACON·ORIGIN·SHIELD·BLACKJACK 소속 요원 카드를 은색 유리 신분증으로 교체. 팀별 색상, 실제 등급·능력·소속 정보, 앞뒷면 회전과 직원/공개 화면 구분 유지. 모바일에서 카드 내용·모서리가 넘치지 않도록 크기 조정.
 - **사내 게시판:** 글 바깥 여백을 늘리고 중첩 박스·테두리를 정리. 제목·본문·반응 영역의 간격을 분리하고 댓글 구분선·답글 들여쓰기 조정. 모바일 글 영역을 넓힘.
 - **PLAYLIST:** 신청 제목을 ‘추천 곡 추가 신청’으로 변경. onlyunlimit의 캐릭터라면 모두 신청 가능하며 미등록 캐릭터는 추후 추가될 수 있다고 안내. Dealer의 CD 이미지를 새 이미지로 변경하고 곡별 앨범 이미지는 유지.
 - **주요 파일:** `assets/units.js`, `assets/team-themes.css`, `assets/music-request.js`, `assets/playlist-themes.js`, `tests/browser/team-design.spec.js`, `DESIGN_GUIDE.md`, `docs/ASSETS.md`, `REQUEST_STATUS.md`.
 - **검사:** 빌드·단위 22개·최종 전체 브라우저 101개 통과. 320px 부서 카드 앞뒷면 넘침·실제 등급·키보드 회전 검사 포함.
+- **배포:** 소스 [f354c09](https://github.com/onlyunlimit/bodam-id-card/commit/f354c094277b6778a2c71e2a671ee888a1d0dc62) → 공개 `2a2b36bc0ca3d7fce94edd383d05290db71e9a5b`. [Pages 실행](https://github.com/onlyunlimit/onlyunlimit.github.io/actions/runs/45880408250) 성공, 공개 릴리스 소스·변경 자산 4개 바이트 일치 확인. Dealer 이미지 브라우저 로드 확인. 등록 앱 1대 완료 알림 201 접수(기기 수신 미확인). 배포 기록은 후속 문서 커밋으로 추가.
 - **제약:** 실제 iPhone Safari 기기 검사는 미실시. 서버·DB 변경 없음.
 
 ## 2026-11-27 — 추천곡 관리자 알림·모바일 상단 및 커뮤니티 정돈
