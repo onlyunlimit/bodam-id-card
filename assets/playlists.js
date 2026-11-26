@@ -1,8 +1,10 @@
 import {esc,$} from './runtime.js';
 import {serviceConfig} from './service-config.js';
 import {tr,registerCopy} from './i18n.js';
+import {albumArtwork} from './music-artwork.js';
 import {playlistThemes} from './playlist-themes.js';
 const copy=[
+ ['재생 위치','Playback position','再生位置','播放进度'],['플레이어 접기','Collapse player','プレーヤーを折りたたむ','收起播放器'],['플레이어 펼치기','Expand player','プレーヤーを開く','展开播放器'],
  ['플레이리스트','Playlists','プレイリスト','播放列表'],['제작자가 고른, 그 사람의 음악.','Music chosen for each character.','キャラクターに寄り添う選曲。','为角色挑选的音乐。'],
  ['아직 공개된 플레이리스트가 없습니다.','No playlists yet.','公開プレイリストはまだありません。','暂无公开播放列表。'],['곡을 준비하고 있어요.','Tracks are coming soon.','楽曲を準備中です。','歌曲准备中。'],
  ['재생 목록','Queue','再生待ち','待播列表'],['재생 / 일시정지','Play / pause','再生 / 一時停止','播放 / 暂停'],['이전 곡','Previous track','前の曲','上一首'],['다음 곡','Next track','次の曲','下一首'],['정지하고 닫기','Stop and close','停止して閉じる','停止并关闭'],
@@ -32,38 +34,40 @@ export function initPlaylists(){
  library.innerHTML='<button class="music-close" aria-label="'+tr('닫기')+'">×</button><p class="music-eyebrow">CHARACTER MIXES</p><h2 id="music-library-title">'+tr('플레이리스트')+'</h2><p class="music-intro">'+tr('제작자가 고른, 그 사람의 음악.')+'</p><div class="music-library-content"></div>';
  document.body.append(library);library.querySelector('.music-close').onclick=()=>library.close();
  const dock=document.createElement('aside');dock.id='music-player';dock.hidden=true;dock.setAttribute('aria-label',tr('재생 목록'));
- dock.innerHTML='<div class="music-now"><span class="music-note" aria-hidden="true">♫</span><div><strong data-music-title></strong><small data-music-artist></small></div><button data-music-close aria-label="'+tr('정지하고 닫기')+'">×</button></div><div class="music-video"><div id="music-youtube"></div></div><div class="music-controls"><button data-music-prev aria-label="'+tr('이전 곡')+'">⏮</button><button data-music-play aria-label="'+tr('재생 / 일시정지')+'">▶</button><button data-music-next aria-label="'+tr('다음 곡')+'">⏭</button><button data-music-queue>'+tr('재생 목록')+'</button></div><p data-music-status role="status"></p>';
- document.body.append(dock);
- const subscribers=new Set();let playing=false;
+ dock.innerHTML='<div class="music-now"><span class="music-note" aria-hidden="true">♫</span><div><strong data-music-title></strong><small data-music-artist></small></div><button data-music-collapse aria-expanded="true" aria-label="'+tr('플레이어 접기')+'">⌃</button><button data-music-close aria-label="'+tr('정지하고 닫기')+'">×</button></div><div class="music-artwork" aria-hidden="true"></div><div class="music-video"><div id="music-youtube"></div></div><div class="music-seek"><input type="range" min="0" max="100" value="0" disabled aria-label="'+tr('재생 위치')+'"><span>0:00</span></div><div class="music-controls"><button data-music-prev aria-label="'+tr('이전 곡')+'">⏮</button><button data-music-play aria-label="'+tr('재생 / 일시정지')+'">▶</button><button data-music-next aria-label="'+tr('다음 곡')+'">⏭</button><button data-music-queue>'+tr('재생 목록')+'</button></div><p data-music-status role="status"></p>';
+ document.body.append(dock);if(matchMedia('(max-width:680px)').matches){dock.classList.add('is-collapsed');dock.querySelector('[data-music-collapse]').setAttribute('aria-expanded','false');dock.querySelector('[data-music-collapse]').setAttribute('aria-label',tr('플레이어 펼치기'));dock.querySelector('[data-music-collapse]').textContent='⌄';}
+ const seek=dock.querySelector('.music-seek input');seek.onchange=()=>music.seek(Number(seek.value));setInterval(()=>{if(dock.hidden)return;const p=music.progress();seek.disabled=!p.duration;seek.max=p.duration||100;if(document.activeElement!==seek)seek.value=p.time;dock.querySelector('.music-seek span').textContent=Math.floor(p.time/60)+':'+String(Math.floor(p.time%60)).padStart(2,'0');},1000);
+ const subscribers=new Set();let playing=false,intent=false,hasPlayed=false,previousCharacter='';
  let playlists=[],members=[],queue=[],index=-1,selected=null,activePlaylist=null,player,playerReady=false,request=0,filter='',loadRequest=0;
- const emit=()=>subscribers.forEach(fn=>fn(music.state()));
+ const emit=()=>{dock.classList.toggle('is-active',playing||intent);subscribers.forEach(fn=>fn(music.state()));};
  const status=t=>{dock.querySelector('[data-music-status]').textContent=t;};
  function pauseBGM(){const audio=$('#ambient-audio');audio?.pause();$('#sound-toggle').setAttribute('aria-pressed','false');$('#sound-toggle span').textContent='BGM OFF';$('#sound-toggle').setAttribute('aria-label',tr('BGM 켜기'));}
  $('#ambient-audio')?.addEventListener('play',()=>player?.pauseVideo?.());
- function update(){const t=queue[index];if(!t)return;dock.querySelector('[data-music-title]').textContent=t.title;dock.querySelector('[data-music-artist]').textContent=t.artist;dock.querySelector('[data-music-prev]').disabled=index===0;dock.querySelector('[data-music-next]').disabled=index>=queue.length-1;}
+ function update(){const t=queue[index];if(!t)return;dock.style.setProperty('--music-tint',t.color||'#a9a2c9');for(const el of dock.querySelectorAll('.music-artwork,.music-note')){el.style.backgroundImage=t.artwork?`url(${JSON.stringify(t.artwork)})`:'';el.textContent=t.artwork?'':'♫';}dock.querySelector('[data-music-title]').textContent=t.title;dock.querySelector('[data-music-artist]').textContent=t.artist;dock.querySelector('[data-music-prev]').disabled=index===0;dock.querySelector('[data-music-next]').disabled=index>=queue.length-1;}
  async function play(i){
-  if(i<0||i>=queue.length)return;index=i;const ticket=++request;dock.hidden=false;update();status(tr('음악을 불러오는 중…'));pauseBGM();playing=false;emit();
+  if(i<0||i>=queue.length)return;index=i;const identity=queue[i].character||queue[i].cover||queue[i].key;if(identity!==previousCharacter)hasPlayed=false;previousCharacter=identity;intent=true;const ticket=++request;dock.hidden=false;update();status(tr('음악을 불러오는 중…'));pauseBGM();playing=false;emit();
   try{const YT=await youtube();if(ticket!==request||dock.hidden)return;
    if(playerReady){player.loadVideoById(queue[index].video_id);return;}
    if(player)return;
    player=new YT.Player('music-youtube',{host:'https://www.youtube-nocookie.com',width:'100%',height:'200',videoId:queue[index].video_id,playerVars:{playsinline:1,origin:location.origin,autoplay:1},events:{
-    onReady:e=>{playerReady=true;if(dock.hidden){e.target.stopVideo();return;}e.target.loadVideoById(queue[index].video_id);status(tr('재생하려면 영상의 재생 버튼을 눌러 주세요.'));},
-    onStateChange:e=>{if(dock.hidden)return;playing=e.data===1;emit();dock.querySelector('[data-music-play]').textContent=e.data===1?'Ⅱ':'▶';if(e.data===1){pauseBGM();status('');}if(e.data===3)status(tr('음악을 불러오는 중…'));if(e.data===0&&index<queue.length-1)play(index+1);},
-    onAutoplayBlocked:()=>status(tr('재생하려면 영상의 재생 버튼을 눌러 주세요.')),
-    onError:()=>{playing=false;emit();status(tr('이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));},
+    onReady:e=>{playerReady=true;if(dock.hidden){e.target.stopVideo();return;}status(tr('재생하려면 영상의 재생 버튼을 눌러 주세요.'));e.target.loadVideoById(queue[index].video_id);},
+    onStateChange:e=>{if(dock.hidden)return;playing=e.data===1;if(playing)hasPlayed=true;if(e.data===2||(e.data===0&&index===queue.length-1))intent=false;emit();dock.querySelector('[data-music-play]').textContent=e.data===1?'Ⅱ':'▶';if(e.data===1){pauseBGM();status('');}if(e.data===3)status(tr('음악을 불러오는 중…'));if(e.data===0&&index<queue.length-1)play(index+1);},
+    onAutoplayBlocked:()=>{intent=false;emit();status(tr('재생하려면 영상의 재생 버튼을 눌러 주세요.'));},
+    onError:()=>{intent=false;playing=false;emit();status(tr('이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));},
    }});
-  }catch{if(ticket===request)status(tr('이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));}
+  }catch{if(ticket===request){intent=false;playing=false;emit();status(tr('이 곡은 재생할 수 없습니다. 다른 곡을 선택해 주세요.'));}}
  }
- dock.querySelector('[data-music-close]').onclick=()=>{++request;player?.stopVideo?.();dock.hidden=true;playing=false;emit();};
- dock.querySelector('[data-music-play]').onclick=()=>{if(!playerReady){play(index);return;}if(player.getPlayerState()===1)player.pauseVideo();else{pauseBGM();player.playVideo();}};
+ dock.querySelector('[data-music-close]').onclick=()=>{++request;player?.stopVideo?.();dock.hidden=true;intent=false;playing=false;hasPlayed=false;emit();};
+ dock.querySelector('[data-music-play]').onclick=()=>{if(!playerReady){play(index);return;}if(player.getPlayerState()===1)player.pauseVideo();else{intent=true;pauseBGM();player.playVideo();}};
+ dock.querySelector('[data-music-collapse]').onclick=e=>{const collapsed=dock.classList.toggle('is-collapsed');e.currentTarget.textContent=collapsed?'⌄':'⌃';e.currentTarget.setAttribute('aria-expanded',String(!collapsed));e.currentTarget.setAttribute('aria-label',tr(collapsed?'플레이어 펼치기':'플레이어 접기'));};
  dock.querySelector('[data-music-prev]').onclick=()=>play(index-1);dock.querySelector('[data-music-next]').onclick=()=>play(index+1);
  dock.querySelector('[data-music-queue]').onclick=()=>{++loadRequest;selected=activePlaylist||{title:tr('재생 목록'),description:'',member_id:'',tracks:queue};if(!library.open)library.showModal();render();};
  function render(){
   const content=library.querySelector('.music-library-content');
   const member=members.find(m=>m.id===selected?.member_id);
   if(selected){
-   content.innerHTML='<button class="music-back">← '+tr('전체')+'</button><header class="music-playlist-heading"><span class="music-cover" aria-hidden="true">♫</span><div><small data-user-content>'+esc(member?.name||'CREATOR MIX')+'</small><h3 data-user-content>'+esc(selected.title)+'</h3><p data-user-content>'+esc(selected.description)+'</p><small>'+selected.tracks.length+' '+tr('곡')+'</small></div></header><div class="music-tracks">'+selected.tracks.map((t,i)=>'<button data-track="'+i+'" '+(queue===selected.tracks&&i===index?'aria-current="true"':'')+'><span>'+String(i+1).padStart(2,'0')+'</span><div data-user-content><b>'+esc(t.title)+'</b><small>'+esc(t.artist)+'</small></div><em>▶</em></button>').join('')+'</div>'+(selected.tracks.length?'':'<p>'+tr('곡을 준비하고 있어요.')+'</p>');
-   content.querySelector('.music-back').onclick=()=>{selected=null;render();};content.querySelectorAll('[data-track]').forEach(b=>b.onclick=()=>{activePlaylist=selected;queue=selected.tracks;play(Number(b.dataset.track));library.close();});return;
+   content.innerHTML='<header class="music-playlist-heading"><span class="music-cover" aria-hidden="true">♫</span><div><small data-user-content>'+esc(member?.name||'CREATOR MIX')+'</small><h3 data-user-content>'+esc(selected.title)+'</h3><p data-user-content>'+esc(selected.description)+'</p><small>'+selected.tracks.length+' '+tr('곡')+'</small></div></header><div class="music-tracks">'+selected.tracks.map((t,i)=>'<button data-track="'+i+'" '+(queue===selected.tracks&&i===index?'aria-current="true"':'')+'><span>'+String(i+1).padStart(2,'0')+'</span><div data-user-content><b>'+esc(t.title)+'</b><small>'+esc(t.artist)+'</small></div><em>▶</em></button>').join('')+'</div>'+(selected.tracks.length?'':'<p>'+tr('곡을 준비하고 있어요.')+'</p>');
+   content.querySelectorAll('[data-track]').forEach(b=>b.onclick=()=>{activePlaylist=selected;queue=selected.tracks;play(Number(b.dataset.track));library.close();});return;
   }
   const ids=[...new Set(playlists.map(p=>p.member_id).filter(Boolean))];
   content.innerHTML='<nav class="music-filters" aria-label="'+tr('플레이리스트')+'"><button data-music-filter="" aria-pressed="'+!filter+'">'+tr('전체')+'</button>'+ids.map(id=>'<button data-music-filter="'+esc(id)+'" aria-pressed="'+(filter===id)+'">'+esc(members.find(m=>m.id===id)?.name||id)+'</button>').join('')+'</nav><div class="music-grid">'+playlists.filter(p=>!filter||p.member_id===filter).map((p,i)=>'<button class="music-card" data-playlist="'+esc(p.id)+'"><span class="music-cover tone-'+i%4+'" aria-hidden="true"><i>♫</i><b>'+esc((members.find(m=>m.id===p.member_id)?.name||'MIX').slice(0,8))+'</b></span><strong data-user-content>'+esc(p.title)+'</strong><small>'+p.tracks.length+' '+tr('곡')+'</small></button>').join('')+'</div>'+(playlists.length?'':'<p class="music-empty">'+tr('아직 공개된 플레이리스트가 없습니다.')+'</p>');
@@ -72,10 +76,10 @@ export function initPlaylists(){
  async function open(){if(!library.open)library.showModal();const ticket=++loadRequest;const content=library.querySelector('.music-library-content');content.textContent=tr('음악을 불러오는 중…');try{
   const response=await fetch(serviceConfig.api+'/playlists',{signal:AbortSignal.timeout(12000)});if(!response.ok)throw Error();const data=await response.json();
   if(!members.length){try{const r=await fetch(serviceConfig.api+'/members?board=staff',{signal:AbortSignal.timeout(5000)});if(r.ok)members=(await r.json()).members||[];}catch{}}
-  if(ticket!==loadRequest)return;playlists=(data.playlists||[]).map(p=>{const m=playlistThemes.find(m=>m.playlist_id===p.id)||playlistThemes.find(m=>m.id===p.member_id);return {...p,tracks:p.tracks.map((t,i)=>({...t,key:p.id+':'+i,team:m?.team||'mixes',character:m?.label||p.title,cover:m?.cover||'',color:m?.color||'#a9a2c9'}))};});selected=null;filter='';render();
+  if(ticket!==loadRequest)return;playlists=(data.playlists||[]).map(p=>{const m=playlistThemes.find(m=>m.playlist_id===p.id)||playlistThemes.find(m=>m.id===p.member_id);return {...p,tracks:p.tracks.map((t,i)=>({...t,key:p.id+':'+i,team:m?.team||'mixes',character:m?.label||p.title,cover:m?.cover||'',artwork:albumArtwork[t.video_id]||'',color:m?.color||'#a9a2c9'}))};});selected=null;filter='';render();
  }catch{if(ticket!==loadRequest)return;content.innerHTML='<p>'+tr('음악을 불러오지 못했습니다.')+'</p><button class="music-retry">'+tr('다시 시도')+'</button>';content.querySelector('button').onclick=open;}}
  Object.assign(music,{
-  state:()=>({track:dock.hidden?null:queue[index],queue,index,playing,playlist:activePlaylist}),
+  state:()=>({track:dock.hidden?null:queue[index],queue,index,playing,spinning:playing||(intent&&hasPlayed),playlist:activePlaylist}),
   subscribe(fn){subscribers.add(fn);return()=>subscribers.delete(fn);},
   start(tracks,i=0,playlist=null){queue=tracks;activePlaylist=playlist;play(i);},
   toggle:()=>dock.querySelector('[data-music-play]').click(),

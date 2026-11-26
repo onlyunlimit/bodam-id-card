@@ -281,7 +281,7 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 | 음악 목록·곡 선택·공통 재생창 | `assets/playlists.js`, `assets/app.js` 초기화 | `assets/playlists.css` (`.music-grid`, `.music-tracks`, `#music-player`) |
 | 관리자 선곡 편집 | `backend/admin-playlists.js` | 관리자 공통 폼 및 해당 모듈의 곡 입력 필드 |
 
-플레이어는 왼쪽 아래, 업무 메신저는 오른쪽에 배치합니다. 320px 화면에서는 메신저 위치를 위로 조정합니다. 공식 영상 플레이어는 숨기거나 잘라내지 않습니다. 재생 목록을 누르면 현재 재생 중인 곡 목록을 다시 엽니다.
+미니 플레이어는 데스크톱·모바일 우측 상단에 배치합니다. 업무 메신저는 우측 하단을 유지하며, 높이 850px 이하 PC 창에서는 재생창과 겹치지 않도록 좌측 하단으로 이동합니다. 공식 영상 플레이어는 숨기거나 잘라내지 않습니다. 재생 목록을 누르면 현재 재생 중인 곡 목록을 다시 엽니다.
 
 
 ## 2026-11-26 — 플레이리스트 전용 페이지
@@ -289,11 +289,16 @@ SGIA 미니에서만 기존 인물·화보와 공개 커뮤니티 프로필을 �
 | 수정 대상 | 파일 / 위치 |
 | --- | --- |
 | 전용 페이지 진입·라우팅 | `playlists.html`, `assets/app.js` |
-| CD·곡 목록·검색·체크 선택·셔플·테마 스와이프 | `assets/playlist-page.js` |
-| 입체 플라스틱 본체·금속 축·반사·그림자 | `assets/playlists.css` — `.deck-body`, `.deck-well`, `.disc`, `.disc-hub`, `.deck-glaze` |
-| 유리 곡 목록·활성 곡 색상·물결 | 같은 CSS — `.glass`, `.room-track`, `.track-current`, `.track-ripple` |
+| CD·곡 목록·체크 선택·셔플·테마 스와이프 | `assets/playlist-page.js` |
+| 정면 원형 CD·금속 축·반사·그림자 | `assets/playlists.css` — `.deck-body`, `.deck-well`, `.disc`, `.disc-hub`, `.deck-glaze` |
+| 반투명 유리 곡 목록·인물별 색상·선택 반응 | 같은 CSS — `.glass`, `.room-track`, `.track-current`, `.track-ripple` |
+| CD 뒤에 끼운 ALL / BEACON / BLACKJACK / HKU 책갈피 | `assets/playlist-themes.js`, `playlist-page.js`의 `tabsLayout()`, CSS `.theme-dots` |
+| 원호 스크롤 위치·이동 폭 | `assets/playlist-page.js`의 `orbit()`, CSS `--orbit-x`, `.room-tracks` |
+| 곡별 앨범 커버 | `assets/music-artwork.js`, `assets/art/music-albums/` |
 | 멤버 커버·이름·색상·팀 묶음 | `assets/playlist-themes.js` |
 | 공통 YouTube 플레이어·페이지 이동 중 유지 | `assets/playlists.js` |
 | 실제 곡명·유튜브 링크·순서 | 관리자 앱 → 음악 플레이리스트. D1 저장이며 소스 수정 불필요 |
 
-CD 회전은 실제 재생 상태에 맞추며, 모션 줄이기 설정에서는 정지합니다. 커버 원본 파일과 작업용 자료는 배포하지 않습니다.
+CD 회전은 `rotateDisc()`의 Web Animations로 처리합니다. 같은 인물의 곡 전환에는 기존 회전을 유지하고, 일시정지 시 정방향으로 돌아옵니다. 인물 변경 시 커버를 교체하며 모션 줄이기 설정에서는 정지합니다. `.room-aura` 배경은 현재 곡 앨범 커버를 블러 처리합니다. 공통 미니 플레이어의 `.is-collapsed`는 접기 상태이며, 공식 YouTube 영상은 재생 중 계속 표시합니다. 커버 원본 파일과 작업용 자료는 배포하지 않습니다.
+
+모바일 현재 곡의 재생 조작은 `.track-current`, `.track-player-slot`, `#music-player.is-row-player`에서 조절합니다. `placeMobilePlayer()`는 지속 재생 iframe을 이동하지 않고 현재 행 위치에 맞춰 표시합니다. 일반 곡 높이는 모바일 `.track-hit`의 `min-height`입니다. 미니 플레이어의 반투명도·유리 블러는 `#music-player`의 `background`, `backdrop-filter`와 라이트 모드 규칙에서 조절합니다.

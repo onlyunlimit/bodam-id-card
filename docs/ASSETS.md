@@ -103,7 +103,8 @@
 
 ## 음악 페이지 표시 자료 — 2026-11-26
 
-- `assets/playlist-themes.js`: 운영자가 홈페이지 사용 목적으로 제공한 캐릭터 커버의 공개 CDN 주소. 정지 이미지에는 크기/형식 변환 URL을 사용합니다.
+- `assets/art/music-{binjo,levit,yeomyeong,seowon,shepherd,poker,taeim}.webp`: 운영자가 홈페이지 CD 커버로 지정한 공개 CDN 인물 이미지의 표시용 파생본. 최대 1000px WebP 재인코딩, EXIF/XMP 제거. 인물 커버의 대표색을 유리 색상에 사용합니다.
 - `assets/art/music-joker.webp`, `assets/art/music-siso.webp`: 운영자가 제공한 커버 URL의 영상에서 추출한 표시용 정지 프레임. WebP로 재인코딩했으며 EXIF/XMP가 없습니다. 원본 영상은 공개 빌드에 포함하지 않습니다.
-- CD 플레이어의 본체·금속 축·유리 반사·곡 목록은 HTML/CSS로 직접 구현했습니다. 참고 스크린샷을 공개 자산으로 복사하지 않았습니다.
-- 음악은 공식 YouTube 임베드로 재생합니다. 오디오나 앨범 이미지를 다운로드하여 호스팅하지 않습니다.
+- `assets/art/music-albums/*.webp`: 운영자가 곡 목록·미니 플레이어용으로 지정한 앨범 이미지 32장의 표시용 파생본. 최대 800px WebP, EXIF/XMP 제거. `assets/music-artwork.js`에서 영상 ID와 연결하며, 재생 페이지의 블러 배경에도 사용합니다. 원본 이미지·기획 문서·참고 스크린샷은 배포하지 않습니다.
+- CD·금속 축·유리 반사·곡 목록·책갈피는 HTML/CSS로 직접 구현했습니다.
+- 음악은 공식 YouTube 임베드로 재생합니다. 별도 음원 파일은 사용·배포하지 않습니다.
