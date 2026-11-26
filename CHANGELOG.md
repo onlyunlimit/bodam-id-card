@@ -7,12 +7,14 @@
 
 ## 2026-11-27 — 부서·엔터테인먼트 표면 정돈과 장식선 제거
 
-- **상태:** 로컬 구현·검사 완료. 공개 배포 대기.
+- **상태:** 로컬 구현·검사·홈페이지 공개 배포 확인 완료.
 - **공통:** 카드·본문·안내·사건 문서의 장식용 왼쪽 세로선 제거. 주파수 눈금과 일정 연결선은 기능상 유지.
 - **조직·부서:** 목록 카드를 넉넉한 여백·둥근 모서리·은은한 반사와 그림자로 정돈. 비콘 청회색·오리진 보라·실드 카키/황동·블랙잭 녹색 구분 유지. 팀 소개 상단·본문 패널의 글자 크기와 간격 조정.
 - **엔터테인먼트:** 목록·기획사 상단·멤버 선택·아티스트 목록·갤러리의 표면과 여백 개선. 럭키트릭 핑크·옵시더스 실버/골드 계열 유지. 반투명 컨트롤과 부드러운 전환, 모바일 레이아웃·모션 줄이기 대응.
 - **주요 파일:** `assets/team-themes.css`, `editorial.css`, `forensic.css`, `service-design.css`, `fan-community.css`, `game-ui.css`, `portal.css`, `purikura.css`, `DESIGN_GUIDE.md`.
 - **검사:** 공개 빌드 통과. 데스크톱·390px 화면 및 최종 카드 여백/모서리 적용 확인. `npm run test:browser` 101개 통과(4.1분). `git diff --check` 통과.
+- **배포:** 소스 [`c2bb9c6`](https://github.com/onlyunlimit/bodam-id-card/commit/c2bb9c66b839dcddae37f65e3e92c10225c5c14e), 공개 빌드 [`146bebd`](https://github.com/onlyunlimit/onlyunlimit.github.io/commit/146bebd341125262f4f79dce299a2ae4cdb7f8e9). [Pages 실행](https://github.com/onlyunlimit/onlyunlimit.github.io/actions/runs/45894171847) 성공, 공개 릴리스의 소스 해시와 수정 CSS 8개가 로컬 빌드와 일치함을 확인.
+- **완료 알림:** 등록된 기기 1대에 발송하여 푸시 서비스 HTTP 201 접수 확인. 실제 기기 수신은 미확인.
 - **제약:** 실제 iPhone Safari 기기 검사 미실시. 서버·DB 변경 없음.
 
 ## 2026-11-27 — 부서 신분증 카드·사내 게시판 여백·추천곡 문구
