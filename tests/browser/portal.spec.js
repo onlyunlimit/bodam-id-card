@@ -76,6 +76,7 @@ test('Unit messenger unfolds with avatars, saves own messages and does not leak 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/beacon.html');
   await login(page);
+  await page.locator('#work-channel-open').click();
   await page.locator('.messenger-launch').click();
   await expect(page.locator('.chat-message')).toHaveCount(4);
   await expect(page.locator('.chat-message img')).toHaveCount(4);
@@ -83,9 +84,11 @@ test('Unit messenger unfolds with avatars, saves own messages and does not leak 
   await page.locator('.chat-form button').click();
   await expect(page.locator('.chat-log')).toContainText('비콘만 보는 메시지');
   await page.goto('/origin.html');
+  await page.locator('#work-channel-open').click();
   await page.locator('.messenger-launch').click();
   await expect(page.locator('.chat-log')).not.toContainText('비콘만 보는 메시지');
   await page.goto('/beacon.html');
+  await page.locator('#work-channel-open').click();
   await page.locator('.messenger-launch').click();
   await expect(page.locator('.chat-log')).toContainText('비콘만 보는 메시지');
 });

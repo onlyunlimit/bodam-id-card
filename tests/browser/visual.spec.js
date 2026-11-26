@@ -43,6 +43,7 @@ test('Long profile backs and a messenger fit at mobile width', async ({ page }) 
   await page.locator('#viewer-toggle').click();
   await page.locator('#login-submit').click();
   await expect(page.locator('body')).toHaveAttribute('data-viewer', 'staff');
+  await page.locator('#work-channel-open').click();
   await page.locator('.messenger-launch').click();
   await page.locator('.card-turner').first().focus();
   await page.keyboard.press('ArrowRight');

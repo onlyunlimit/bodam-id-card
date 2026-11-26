@@ -118,13 +118,12 @@ function route(url = location.href, push = false) {
     ? unit
     : 'beacon';
   $('#floating-comms').innerHTML =
-    '<div class="channel-switch"><label>업무 채널 <select id="comms-channel"><option value="origin">ORIGIN</option><option value="beacon">BEACON</option><option value="shield">SHIELD</option><option value="blackjack">BLACKJACK</option><option value="lucky">LUCKY TRICK</option><option value="obsidus">OBSIDUS</option></select></label><button id="comms-hide" aria-label="업무 채널 최소화">−</button></div><div id="floating-messenger"></div>';
+    '<div class="channel-switch"><label>업무 채널 <select id="comms-channel"><option value="origin">ORIGIN</option><option value="beacon">BEACON</option><option value="shield">SHIELD</option><option value="blackjack">BLACKJACK</option><option value="lucky">LUCKY TRICK</option><option value="obsidus">OBSIDUS</option></select></label><button id="comms-hide" aria-label="업무 채널 닫기">×</button></div><div id="floating-messenger"></div>';
   $('#comms-channel').value = channel;
   messenger(channel, $('#floating-messenger'));
   $('#comms-channel').onchange = (e) => messenger(e.target.value, $('#floating-messenger'));
   $('#comms-hide').onclick = () => {
-    const collapsed = $('#floating-comms').classList.toggle('minimized');
-    $('#comms-hide').textContent = collapsed ? '+' : '−';
+    document.dispatchEvent(new Event('sgia:comms-close'));
   };
   applyViewer();
   translateDOM(document.body);

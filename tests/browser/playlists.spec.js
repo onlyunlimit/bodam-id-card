@@ -10,7 +10,7 @@ test('Curated music survives navigation, pauses BGM, supports queue and close',a
  await page.locator('#music-library-open').click();await expect(page.locator('.room-library')).toHaveCount(0);
  await page.locator('[data-music-queue]').click();await expect(page.locator('#music-library')).toBeVisible();await expect(page.locator('[data-track]')).toHaveCount(2);await expect(page.locator('[data-track="1"]')).toHaveAttribute('aria-current','true');await page.keyboard.press('Escape');
  await page.setViewportSize({width:320,height:800});await expect(page.locator('#music-player')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.locator('.track-current').scrollIntoViewIfNeeded();await page.locator('[data-music-close]').click();await expect(page.locator('#music-player')).toBeHidden();
+ if(await page.locator('[data-music-collapse]').getAttribute('aria-expanded')==='false')await page.locator('[data-music-collapse]').click();await page.locator('[data-music-close]').click();await expect(page.locator('#music-player')).toBeHidden();
 });
 test('Empty playlists and network retry remain usable',async({page})=>{
  let calls=0;await page.route('**/playlists',r=>++calls===1?r.fulfill({status:503,body:'unavailable'}):r.fulfill({json:{playlists:[]}}));await page.route('**/members?board=staff',r=>r.fulfill({json:{members:[]}}));
@@ -41,14 +41,13 @@ test('Mobile rows stay slim and expand playback controls inside the current song
  const stage=page.locator('.deck-stage');await stage.dispatchEvent('pointerdown',{button:0,clientX:220,clientY:100});await stage.dispatchEvent('pointerup',{clientX:80,clientY:110});await expect(page.locator('.theme-title')).toHaveText('BLACKJACK');
  await stage.focus();await page.keyboard.press('ArrowLeft');await expect(page.locator('.theme-title')).toHaveText('BEACON');
  await expect(page.locator('.track-search')).toHaveCount(0);await page.locator('[data-room-track]').nth(1).click();
- await expect(page.locator('#music-player')).toHaveClass(/is-row-player/);await expect(page.locator('.track-current .track-player-slot')).toBeVisible();
- const row=await page.locator('.track-current').boundingBox(),player=await page.locator('#music-player').boundingBox();expect(player.x).toBeGreaterThan(row.x);expect(player.x+player.width).toBeLessThanOrEqual(row.x+row.width);expect(player.y).toBeGreaterThan(row.y);
+ await expect(page.locator('#music-player')).toBeVisible();await expect(page.locator('.track-player-slot')).toHaveCount(0);
  const sizes=await page.locator('.room-track').evaluateAll(es=>es.map(e=>({current:e.classList.contains('track-current'),height:e.getBoundingClientRect().height})));
  expect(sizes.filter(e=>!e.current).every(e=>e.height<=55)).toBe(true);expect(sizes.find(e=>e.current).height).toBeGreaterThan(100);
- await page.locator('#music-player .music-seek input').fill('65');await page.locator('#music-player .music-seek input').dispatchEvent('change');await expect.poll(()=>page.evaluate(()=>window.__seek)).toBe(65);
+ await page.locator('.track-current .room-progress input').fill('65');await page.locator('.track-current .room-progress input').dispatchEvent('change');await expect.poll(()=>page.evaluate(()=>window.__seek)).toBe(65);
  await expect(page.locator('.listening-room')).toHaveClass(/is-playing/);expect(await page.locator('.disc').evaluate(e=>getComputedStyle(e).animationName)).toBe('none');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.locator('[data-music-next]').click();await expect(page.locator('.track-current .track-copy strong')).toHaveText('Three');await expect(page.locator('.track-player-slot')).toHaveCount(1);
+ await page.locator('[data-music-next]').click();await expect(page.locator('.track-current .track-copy strong')).toHaveText('Three');await expect(page.locator('.track-player-slot')).toHaveCount(0);
  await page.locator('.site-nav a[href="manual.html"]').click();await expect(page.locator('#music-player')).not.toHaveClass(/is-row-player/);await expect(page.locator('#music-player')).toBeVisible();
 });
 test('Disc keeps its animation between same-character songs and settles upright when paused',async({page})=>{
@@ -69,9 +68,11 @@ test('Album artwork differs from the character disc and the compact player survi
  await expect(page.locator('.track-art').first()).toHaveCSS('background-image',/music-albums\/T_V76Dm42bY.webp/);
  await page.locator('[data-room-track]').first().click();await expect(page.locator('.disc-print')).toHaveCSS('background-image',/music-binjo.webp/);
  await expect(page.locator('.room-aura')).toHaveCSS('background-image',/music-albums\/T_V76Dm42bY.webp/);
- await expect(page.locator('.music-artwork')).toHaveCSS('background-image',/music-albums\/T_V76Dm42bY.webp/);
+ await expect(page.locator('.music-cover-play')).toHaveCSS('background-image',/music-albums\/T_V76Dm42bY.webp/);
+ await expect(page.locator('.music-cover-play')).toBeVisible();
  await page.locator('[data-music-collapse]').click();await expect(page.locator('.music-artwork')).toBeHidden();await expect(page.locator('.music-video')).toBeVisible();
- await page.locator('[data-music-play]').click();await expect(page.locator('.music-video')).toBeHidden();
+ expect(await page.locator('#music-player').evaluate(e=>e.getBoundingClientRect().height)).toBeLessThan(110);
+ await page.locator('[data-music-play]').click();await expect(page.locator('.music-video')).toBeVisible();
  await page.locator('.site-nav a[href="manual.html"]').click();await expect(page.locator('#music-player')).toHaveClass(/is-collapsed/);await expect(page.locator('[data-music-title]')).toHaveText('One');
  await page.locator('[data-music-play]').click();await expect(page.locator('.music-video')).toBeVisible();
 });
@@ -86,12 +87,34 @@ test('ALL bookmarks and circular scrolling work at 320px with a long catalogue',
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
-test('Short desktop windows keep the messenger away from music controls',async({page})=>{
- for(const viewport of [{width:1280,height:720},{width:900,height:650}]){
+test('Music and work panels are exclusive; collapse and routing preserve the player',async({page})=>{
+ for(const viewport of [{width:1280,height:720},{width:390,height:844}]){
   await page.setViewportSize(viewport);await room(page);await page.locator('[data-room-track]').first().click();
-  const dock=await page.locator('#music-player').boundingBox(),messenger=await page.locator('#floating-comms').boundingBox();
-  expect(dock.x).toBeGreaterThan(messenger.x+messenger.width);expect(dock.y).toBeGreaterThanOrEqual(90);
-  await page.locator('[data-music-play]').click();await expect(page.locator('.listening-room')).not.toHaveClass(/is-playing/);
-  await page.locator('[data-music-close]').click();
+  await expect(page.locator('.listening-room')).toHaveClass(/is-playing/);
+  await expect(page.locator('#floating-comms')).toBeHidden();
+  await page.evaluate(()=>{window.__mediaNode=document.querySelector('#music-youtube');window.__loads=window.__music.length;});
+  await page.locator('[data-music-collapse]').click();
+  await expect(page.locator('.listening-room')).toHaveClass(/is-playing/);
+  await expect(page.locator('.music-video')).toBeVisible();
+  await page.locator('.site-nav a[href="manual.html"]').click();
+  await expect(page.locator('#music-player')).toBeVisible();
+  expect(await page.evaluate(()=>document.querySelector('#music-youtube')===window.__mediaNode&&window.__music.length===window.__loads)).toBe(true);
+  await page.locator('#work-channel-open').click();await expect(page.locator('#music-player')).toBeHidden();await expect(page.locator('#floating-comms')).toBeVisible();
+  await page.locator('#comms-hide').click();await expect(page.locator('#floating-comms')).toBeHidden();await expect(page.locator('#music-player')).toBeVisible();
+  await expect(page.locator('[data-music-play]')).toHaveText('▶');await page.locator('[data-music-play]').click();await expect(page.locator('[data-music-play]')).toHaveText('Ⅱ');
+ }
+});
+
+test('Bookmark lower corners remain buried in the CD including raised tabs',async({page})=>{
+ for(const width of [320,390,768,1440]){
+  await page.setViewportSize({width,height:1000});await room(page);
+  for(const i of [0,1,2,3]){
+   await page.locator(`[data-theme="${i}"]`).click();
+   // Allow the bookmark spring to settle before measuring the raised bottom edge.
+   await expect.poll(()=>page.evaluate(()=>{
+    const d=document.querySelector('.deck-body').getBoundingClientRect(),r=d.width/2;
+    return [...document.querySelectorAll('.theme-dots [data-theme]')].every(b=>{const t=b.getBoundingClientRect();return [t.left+1,t.right-1].every(x=>Math.hypot(x-d.left-r,t.bottom-1-d.top-r)<r);});
+   })).toBe(true);
+  }
  }
 });

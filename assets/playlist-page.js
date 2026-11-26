@@ -53,33 +53,22 @@ export function renderPlaylists(){
  const listElement=root.querySelector('.room-tracks');let orbitFrame=0;
  function orbit(){
   orbitFrame=0;if(disposed)return;
+  const mobile=innerWidth<681,box=listElement.getBoundingClientRect(),discBox=root.querySelector('.deck-body').getBoundingClientRect();
   const h=listElement.clientHeight,center=listElement.scrollTop+h/2,radius=h*.52;
   listElement.querySelectorAll('.room-track').forEach(el=>{
-   const y=(el.offsetTop+el.offsetHeight/2-center)/radius;
-   const curve=Math.sqrt(Math.max(0,1-Math.min(1,y*y)));
-   const mobile=innerWidth<681,current=el.classList.contains('track-current');
-   const x=curve*(mobile?(current?Math.max(0,listElement.clientWidth-226):150):165);
-   el.style.setProperty('--orbit-x',`${x.toFixed(2)}px`);
+   let x;
+   if(mobile){
+    const r=discBox.width/2+14,cx=discBox.left+discBox.width/2-box.left;
+    const y=el.offsetTop+el.offsetHeight/2-listElement.scrollTop+box.top-(discBox.top+discBox.height/2);
+    x=cx+Math.sqrt(Math.max(0,r*r-y*y));
+   }else{
+    const y=(el.offsetTop+el.offsetHeight/2-center)/radius;
+    x=Math.sqrt(Math.max(0,1-Math.min(1,y*y)))*165;
+   }
+   el.style.setProperty('--orbit-x',`${Math.max(0,x).toFixed(2)}px`);
   });
-  placeMobilePlayer();
  }
 
- // Keep the iframe in its persistent parent: moving it between rows reloads playback.
- const dock=document.getElementById('music-player');const slot=document.createElement('div');slot.className='track-player-slot';slot.setAttribute('aria-hidden','true');
- function resetMobilePlayer(){const close=dock?.querySelector('[data-music-close]');if(close&&close.parentElement!==dock.querySelector('.music-now'))dock.querySelector('.music-now').append(close);dock?.classList.remove('is-row-player');for(const key of ['left','top','width','clip-path'])dock?.style.removeProperty(key);slot.remove();root.classList.remove('has-row-player');}
- function placeMobilePlayer(){
-  const row=root.querySelector('.track-current');
-  if(!dock||dock.hidden||innerWidth>680||!row){resetMobilePlayer();return;}
-  if(slot.parentElement!==row)row.append(slot);root.classList.add('has-row-player');dock.classList.add('is-row-player');const close=dock.querySelector('[data-music-close]');if(close.parentElement!==dock.querySelector('.music-controls'))dock.querySelector('.music-controls').append(close);
-  const box=row.getBoundingClientRect(),bounds=listElement.getBoundingClientRect();
-  dock.style.width=(box.width-20)+'px';slot.style.height=dock.offsetHeight+'px';
-  const gap=slot.getBoundingClientRect();dock.style.left=(box.left+10)+'px';dock.style.top=gap.top+'px';
-  const top=Math.max(0,bounds.top-gap.top),bottom=Math.max(0,gap.top+dock.offsetHeight-Math.min(innerHeight,bounds.bottom));
-  dock.style.clipPath=`inset(${top}px 0 ${bottom}px 0)`;
- }
- onDispose(resetMobilePlayer);
- window.addEventListener('scroll',()=>placeMobilePlayer(),{passive:true,signal:abort.signal});
- const dockResize=new ResizeObserver(()=>{placeMobilePlayer();orbitSoon();});if(dock)dockResize.observe(dock);onDispose(()=>dockResize.disconnect());
  const orbitSoon=()=>{if(!orbitFrame)orbitFrame=requestAnimationFrame(orbit);};
  listElement.addEventListener('scroll',orbitSoon,{passive:true,signal:abort.signal});
  function tabsLayout(){
@@ -88,7 +77,7 @@ export function renderPlaylists(){
   const stage=root.querySelector('.deck-stage').getBoundingClientRect(),room=root.getBoundingClientRect();
   const visibleLeft=innerWidth<=680?Math.max(0,room.left+14-stage.left):0;
   let edge=Math.min(w-total-4,Math.max(4,(visibleLeft+w-total)/2));
-  buttons.forEach((b,i)=>{const x=edge+widths[i]/2;edge+=widths[i]+gap;const y=r-Math.sqrt(Math.max(0,r*r-(x-r)**2));b.style.left=x+'px';b.style.top=(y-b.offsetHeight+16)+'px';});
+  buttons.forEach((b,i)=>{const x=edge+widths[i]/2;edge+=widths[i]+gap;const outer=Math.max(Math.abs(x-widths[i]/2-r),Math.abs(x+widths[i]/2-r));const y=r-Math.sqrt(Math.max(0,r*r-outer**2));b.style.left=x+'px';b.style.top=(y-b.offsetHeight+48)+'px';});
  }
  const resize=new ResizeObserver(()=>{orbitSoon();tabsLayout();});resize.observe(root.querySelector('.deck-stage'));resize.observe(listElement);onDispose(()=>{resize.disconnect();cancelAnimationFrame(orbitFrame);});
  const team=()=>teams[teamIndex];
@@ -97,7 +86,7 @@ export function renderPlaylists(){
  function begin(rows){if(!rows.length)return;music.start(shuffled?shuffle(rows):rows);}
  function selectionUI(){root.querySelector('.track-selection').hidden=!selecting;root.querySelector('[data-selection-count]').textContent=`${selected.size} / ${tracks().length}`;root.querySelector('[data-play-selection]').disabled=!selected.size;root.querySelector('[data-room-select]').setAttribute('aria-pressed',String(selecting));}
  function rows(){
-  slot.remove();parking.append(transport);const list=root.querySelector('.room-tracks');list.setAttribute('aria-busy','false');
+  parking.append(transport);const list=root.querySelector('.room-tracks');list.setAttribute('aria-busy','false');
   list.innerHTML=tracks().map((t,i)=>`<article class="glass room-track" data-key="${esc(t.key)}" style="--track-tint:${t.color}"><label class="track-check" ${selecting?'':'hidden'}><input type="checkbox" data-track-check="${esc(t.key)}" ${selected.has(t.key)?'checked':''} aria-label="${esc(t.title)} ${tr('선택')}"></label><button class="track-hit" data-room-track="${esc(t.key)}"><span class="track-art" aria-hidden="true"></span><span class="track-copy" data-no-translate><small>${esc(t.character)}</small><strong>${esc(t.title)}</strong><span>${esc(t.artist)}</span></span><span class="track-index" aria-hidden="true">${String(i+1).padStart(2,'0')}</span><span class="track-equalizer" aria-hidden="true"><i></i><i></i><i></i></span></button></article>`).join('')||`<p class="room-empty">${tr('선택한 테마에 곡이 없습니다.')}</p>`;
   list.querySelectorAll('[data-key]').forEach(el=>{const t=all.find(t=>t.key===el.dataset.key);if(t.artwork)el.querySelector('.track-art').style.backgroundImage=`url(${JSON.stringify(t.artwork)})`;else el.querySelector('.track-art').textContent=t.character.slice(0,1);});
   selectionUI();sync();list.scrollTop=0;requestAnimationFrame(orbit);
