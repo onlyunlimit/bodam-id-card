@@ -1,3 +1,4 @@
+import { musicRequests } from './music-requests.js';
 import { playlistAPI } from './playlists.js';
 import { musicAudio } from './music-audio.js';
 import { translationAPI } from './translation.js';
@@ -180,6 +181,8 @@ async function handle(request, env) {
   }
   if (isAdmin) {
     const hash = await session(request, env);
+    const suggestions=await musicRequests(request,env,{body},true);
+    if(suggestions)return suggestions;
     const music = await playlistAPI(request,env,{body},true);
     if(music)return music;
     const incidentResponse = await incidentAPI(request, env, {identity,rate,blocked,body,captcha,sourceLog}, true);
@@ -321,6 +324,8 @@ async function handle(request, env) {
   }
   const incidentResponse = await incidentAPI(request, env, {identity,rate,blocked,body,captcha,sourceLog});
   if (incidentResponse) return incidentResponse;
+  const suggestions=await musicRequests(request,env,{identity,blocked,rate,body});
+  if(suggestions)return suggestions;
   const music=await playlistAPI(request,env,{body});
   if(music)return music;
   const geocoded = await geocode(request, env, { identity, rate });

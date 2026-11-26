@@ -30,7 +30,7 @@ async function fixture() {
   sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0010_public_codenames.sql', import.meta.url), 'utf8'));
-  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql','0016_music_playlists.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql','0016_music_playlists.sql','0017_music_requests.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -894,4 +894,28 @@ test('Playlist catalog is shared, admin-only writes validate videos and retain o
  await req('/admin/playlists/'+saved.data.id,'PATCH',{...draft,title:'수정',tracks:[]},options);
  list=(await req('/playlists')).data.playlists;assert.equal(list[0].title,'수정');assert.deepEqual(list[0].tracks,[]);
  await req('/admin/playlists/'+saved.data.id,'DELETE',{},options);assert.equal((await req('/playlists')).data.playlists.length,0);
+});
+
+test('Song suggestions are private, retry-safe, validated and readable only by administrators',async()=>{
+ const {req,key}=await fixture();const id=crypto.randomUUID();
+ const draft={id,character:'직접 입력 인물',title:'추천곡',artist:'가수',url:''};
+ assert.equal((await req('/music-requests','POST',draft,{origin:'https://evil.example'})).status,403);
+ assert.equal((await req('/music-requests','POST',{...draft,artist:''})).status,400);
+ assert.equal((await req('/music-requests','POST',{...draft,url:'https://youtube.com.evil.example/watch?v=abcdefghijk'})).status,400);
+ assert.equal((await req('/music-requests','POST',draft)).status,201);
+ assert.equal((await req('/music-requests','POST',draft)).status,200);
+ assert.equal((await req('/music-requests')).status,405);
+ assert.equal((await req('/music-requests/'+id)).status,405);
+ assert.equal((await req('/admin/music-requests')).status,401);
+ assert.equal((await req('/admin/music-requests/'+id,'PATCH',{},{origin:'https://sgia.test'})).status,401);
+ const login=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const admin={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
+ const inbox=await req('/admin/music-requests','GET',undefined,admin);
+ assert.equal(inbox.data.requests.length,1);assert.equal(inbox.data.requests[0].character,draft.character);
+ assert.equal(inbox.data.requests[0].youtube_url,'');assert.equal(inbox.response.headers.get('Cache-Control'),'no-store');
+ assert.equal((await req('/admin/music-requests/'+id,'PATCH',{},admin)).status,200);
+ assert.equal((await req('/admin/music-requests','GET',undefined,admin)).data.requests.length,0);
+ assert.equal((await req('/admin/music-requests?filter=all','GET',undefined,admin)).data.requests.length,1);
+ for(let i=0;i<5;i++)assert.equal((await req('/music-requests','POST',{...draft,id:crypto.randomUUID(),url:'https://youtu.be/abcdefghijk'})).status,201);
+ assert.equal((await req('/music-requests','POST',{...draft,id:crypto.randomUUID()})).status,429);
 });

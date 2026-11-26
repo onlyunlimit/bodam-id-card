@@ -1,3 +1,4 @@
+import { mountMusicRequest } from './music-request.js';
 import { $, esc } from './runtime.js';
 import { tr, registerCopy } from './i18n.js';
 import { onDispose, every } from './lifecycle.js';
@@ -17,10 +18,10 @@ const icon = (name) => {
 const clock=n=>`${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,'0')}`;
 function shuffle(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 export function renderPlaylists(){
- const root=document.createElement('section');root.className='listening-room';root.setAttribute('aria-label',tr('플레이리스트'));$('#main').append(root);
+ const root=document.createElement('section');root.className='listening-room';root.setAttribute('aria-label','PLAYLIST');$('#main').append(root);
  let all=[],teams=[...musicTeams],teamIndex=0,selected=new Set(),selecting=false,shuffled=false,disposed=false;
  const abort=new AbortController();onDispose(()=>{disposed=true;abort.abort();});
- root.innerHTML=`<div class="room-aura" aria-hidden="true"></div><header class="room-heading"><div><p>THE LISTENING ROOM</p><h1>${tr('플레이리스트')}</h1></div></header>
+ root.innerHTML=`<div class="room-aura" aria-hidden="true"></div><header class="room-heading"><div><p>THE LISTENING ROOM</p><h1>${'PLAYLIST'}</h1></div></header>
  <nav class="theme-dots" aria-label="${tr('테마 둘러보기')}"></nav><div class="room-layout"><section class="deck-column"><div class="deck-stage" tabindex="0" role="group" aria-label="${tr('테마 둘러보기')}">
  <div class="deck-body"><i class="deck-screw screw-a"></i><i class="deck-screw screw-b"></i><div class="deck-well"><div class="disc"><div class="disc-print"><div class="disc-brand"><span>SGIA · SOUND COLLECTION</span><strong data-disc-team></strong><small data-disc-caption></small></div></div></div><span class="disc-hub"></span><span class="deck-glaze"></span></div><div class="deck-footer"><span>STEREO / 01</span><span class="deck-led"></span><span>COMPACT DISC</span></div></div><div class="deck-cord"></div></div>
  <div class="deck-navigation"><button data-theme-prev aria-label="${tr('이전 테마')}">${icon('left')}</button><span class="theme-navigation-label">${tr('테마 둘러보기')}</span><button data-theme-next aria-label="${tr('다음 테마')}">${icon('right')}</button></div>
@@ -30,7 +31,8 @@ export function renderPlaylists(){
  const parking=document.createElement('div');parking.hidden=true;root.append(parking);parking.append(transport);
  const listActions=document.createElement('div');listActions.className='track-actions';root.querySelector('.track-heading').append(listActions);
  listActions.append(root.querySelector('[data-room-shuffle]'),root.querySelector('[data-room-select]'),root.querySelector('.play-all'));
- root.querySelector('.deck-stage').prepend(root.querySelector('.theme-dots'));
+ const teamNav=root.querySelector('.theme-dots');
+ mountMusicRequest(root,abort.signal);
 
  // The disc animation is kept alive across tracks from the same character.
  const disc=root.querySelector('.disc');let spin=null,settle=null,discCharacter='',wasSpinning=false;
@@ -74,6 +76,8 @@ export function renderPlaylists(){
  const orbitSoon=()=>{if(!orbitFrame)orbitFrame=requestAnimationFrame(orbit);};
  listElement.addEventListener('scroll',orbitSoon,{passive:true,signal:abort.signal});
  function tabsLayout(){
+  if(innerWidth<=680){if(teamNav.parentElement!==root)root.querySelector('.room-layout').before(teamNav);teamNav.querySelectorAll('button').forEach(b=>{b.style.left='';b.style.top='';});return;}
+  const deck=root.querySelector('.deck-stage');if(teamNav.parentElement!==deck)deck.prepend(teamNav);
   const w=root.querySelector('.deck-stage').clientWidth,r=w/2,buttons=[...root.querySelectorAll('[data-theme]')];
   const gap=Math.max(3,Math.min(6,w*.012)),widths=buttons.map(b=>b.offsetWidth),total=widths.reduce((a,b)=>a+b,0)+gap*(buttons.length-1);
   const stage=root.querySelector('.deck-stage').getBoundingClientRect(),room=root.getBoundingClientRect();
@@ -95,8 +99,8 @@ export function renderPlaylists(){
  }
  function themeUI(){
   root.dataset.musicTeam=team().id;root.style.setProperty('--theme-tint',team().color);
-  root.querySelector('.theme-title').textContent=team().label;root.querySelector('.theme-caption').textContent=team().caption;root.querySelector('.theme-count').textContent=`${tracks().length} ${tr('곡')}`;
-  root.querySelector('[data-disc-team]').textContent=team().label;root.querySelector('[data-disc-caption]').textContent=team().caption;
+  root.querySelector('.theme-title').textContent=team().id==='hankuk'?'Hankuk Univ.':team().label;root.querySelector('.theme-caption').textContent=team().caption;root.querySelector('.theme-count').textContent=`${tracks().length} ${tr('곡')}`;
+  root.querySelector('[data-disc-team]').textContent=team().id==='hankuk'?'Hankuk Univ.':team().label;root.querySelector('[data-disc-caption]').textContent=team().caption;
   root.querySelector('.theme-dots').innerHTML=teams.map((t,i)=>`<button data-theme="${i}" aria-label="${esc(t.label)}" aria-pressed="${i===teamIndex}">${esc(t.label)}</button>`).join('');tabsLayout();rows();
  }
  function changeTheme(i){teamIndex=(i+teams.length)%teams.length;selected.clear();themeUI();const d=root.querySelector('.disc-print');d.classList.remove('disc-change');requestAnimationFrame(()=>{if(!disposed)d.classList.add('disc-change');});}
@@ -133,5 +137,5 @@ export function renderPlaylists(){
   }catch{if(disposed)return;list.setAttribute('aria-busy','false');list.innerHTML=`<p>${tr('곡을 불러오지 못했습니다.')}</p><button class="room-retry glass">${tr('다시 시도')}</button>`;list.querySelector('button').onclick=load;}
  }
  // Show the physical player immediately while the catalogue arrives.
- root.querySelector('.theme-title').textContent=team().label;root.querySelector('[data-disc-team]').textContent=team().label;root.querySelector('[data-disc-caption]').textContent=team().caption;load();
+ root.querySelector('.theme-title').textContent=team().id==='hankuk'?'Hankuk Univ.':team().label;root.querySelector('[data-disc-team]').textContent=team().id==='hankuk'?'Hankuk Univ.':team().label;root.querySelector('[data-disc-caption]').textContent=team().caption;load();
 }

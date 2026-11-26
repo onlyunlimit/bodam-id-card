@@ -2,8 +2,9 @@ export const playlistAdminClient=String.raw`
 function initPlaylistAdmin(){
  if(document.querySelector('#playlist-console'))return;
  const box=document.createElement('section');box.id='playlist-console';box.className='artist-console';
- box.innerHTML='<div class="bar"><h2>음악 플레이리스트</h2><button id="playlist-manage">목록 관리</button></div><p class="muted">캐릭터와 어울리는 곡을 직접 큐레이션합니다. 저장한 목록은 홈페이지에 공개됩니다.</p><div id="playlist-admin-list"></div>';
+ box.innerHTML='<div class="bar"><h2>PLAYLIST</h2><button id="playlist-manage">목록 관리</button></div><p class="muted">캐릭터와 어울리는 곡을 직접 큐레이션합니다. 저장한 목록은 홈페이지에 공개됩니다.</p><div id="playlist-admin-list"></div>';
  document.querySelector('#workspace').append(box);
+ initMusicRequests(box);
  box.querySelector('#playlist-manage').onclick=async()=>{try{
   const result=await api('playlists'),list=box.querySelector('#playlist-admin-list');
   list.innerHTML='<button id="playlist-new">새 플레이리스트</button>'+result.playlists.map(p=>'<article><b>'+esc(p.title)+'</b><small> · '+p.tracks.length+'곡</small><div class="tools"><button data-playlist-edit="'+esc(p.id)+'">편집</button><button data-playlist-delete="'+esc(p.id)+'">삭제</button></div></article>').join('');
@@ -22,4 +23,18 @@ async function editPlaylist(p){try{
  f.onsubmit=async e=>{e.preventDefault();const button=f.querySelector('[type=submit]');button.disabled=true;try{await api('playlists'+(p.id?'/'+p.id:''),p.id?'PATCH':'POST',{title:f.elements.title.value,description:f.elements.description.value,member_id:f.elements.member_id.value,tracks:[...rows.children].map(el=>({title:el.querySelector('[data-track-title]').value,artist:el.querySelector('[data-track-artist]').value,url:el.querySelector('[data-track-url]').value}))});d.close();document.querySelector('#playlist-manage').click();message('플레이리스트를 저장했습니다.');}catch(e){document.querySelector('#editor-status').textContent=e.message;}finally{button.disabled=false;}};
  if(!d.open)d.showModal();
 }catch(e){message(e);}}
+
+function initMusicRequests(parent){
+ const box=document.createElement('section');box.className='music-request-inbox';
+ box.innerHTML='<div class="bar"><h3>추천곡 신청함</h3><select aria-label="신청 필터"><option value="new">새 신청</option><option value="all">전체 신청</option></select><button data-request-refresh>새로고침</button></div><p class="muted">관리자에게만 보이는 신청입니다.</p><div data-requests></div><button data-request-more hidden>더 보기</button><p data-request-status role="status"></p>';
+ parent.append(box);let offset=0,busy=false;
+ const list=box.querySelector('[data-requests]'),more=box.querySelector('[data-request-more]'),status=box.querySelector('[data-request-status]'),filter=box.querySelector('select');
+ async function load(reset=true){if(busy)return;busy=true;filter.disabled=true;status.textContent='불러오는 중…';more.disabled=true;
+  try{const start=reset?0:offset;const data=await api('music-requests?filter='+filter.value+'&offset='+start);if(reset)list.replaceChildren();
+   for(const r of data.requests){const row=document.createElement('article');row.innerHTML='<small>'+esc(new Date(r.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}))+'</small><h4>'+esc(r.title)+' · '+esc(r.artist)+'</h4><p>'+esc(r.character)+'</p>'+(r.youtube_url?'<a target="_blank" rel="noopener noreferrer" href="'+esc(r.youtube_url)+'">YouTube 링크 ↗</a>':'')+(r.read_at?'<small> · 확인함</small>':'<button data-request-read>확인</button>');
+    const button=row.querySelector('[data-request-read]');if(button)button.onclick=async()=>{button.disabled=true;try{await api('music-requests/'+r.id,'PATCH',{});await load(true);}catch(e){status.textContent=e.message;button.disabled=false;}};list.append(row);
+   }offset=start+data.requests.length;more.hidden=!data.more;status.textContent=list.children.length?'':'신청이 없습니다.';
+  }catch(e){status.textContent=e.message;}finally{busy=false;filter.disabled=false;more.disabled=false;}}
+ filter.onchange=()=>load();box.querySelector('[data-request-refresh]').onclick=()=>load();more.onclick=()=>load(false);load();
+}
 `;

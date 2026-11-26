@@ -16,7 +16,7 @@ import { renderCommunity, initVisitors } from './community.js';
 import { disposeRoute } from './lifecycle.js';
 import { initI18n, translateDOM, tr } from './i18n.js';
 const titles = {
-  playlists: '플레이리스트',
+  playlists: 'PLAYLIST',
   overview: '통합 관제',
   departments: '조직·부서',
   entertainment: '헌터 엔터테인먼트',

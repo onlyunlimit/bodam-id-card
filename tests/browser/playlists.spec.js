@@ -106,7 +106,7 @@ test('Music and work panels are exclusive; collapse and routing preserve the pla
 });
 
 test('Bookmark lower corners remain buried in the CD including raised tabs',async({page})=>{
- for(const width of [320,390,768,1440]){
+ for(const width of [768,1440]){
   await page.setViewportSize({width,height:1000});await room(page);
   for(const i of [0,1,2,3]){
    await page.locator(`[data-theme="${i}"]`).click();
@@ -149,4 +149,19 @@ test('Native audio keeps one element through collapse/navigation, seeks and resp
  await page.keyboard.press('Escape');await page.locator('#work-channel-open').click();await expect.poll(()=>page.locator('#music-audio').evaluate(a=>a.paused)).toBe(true);
  await page.locator('#work-channel-open').click();await page.locator('[data-music-close]').click();await expect(page.locator('#music-player')).toBeHidden();
  expect(await page.locator('#music-audio').getAttribute('src')).toBeNull();
+});
+
+test('Mobile team selector stays readable outside the CD, HKU expands its heading, and suggestions submit privately',async({page})=>{
+ await page.setViewportSize({width:320,height:900});await room(page);
+ await expect(page.locator('.room-heading h1')).toHaveText('PLAYLIST');
+ const nav=page.locator('.listening-room > .theme-dots');await expect(nav).toBeVisible();
+ for(const b of await nav.locator('button').all()){const box=await b.boundingBox();expect(box.height).toBeGreaterThanOrEqual(44);expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(320);}
+ await nav.locator('[data-theme="3"]').click();await expect(page.locator('.theme-title')).toHaveText('Hankuk Univ.');await expect(nav.locator('[data-theme="3"]')).toHaveText('HKU');
+ let payload,attempts=0;
+ await page.route('**/music-requests',async r=>{payload=r.request().postDataJSON();attempts++;await r.fulfill(attempts===1?{status:503,json:{error:'잠시 후 다시 시도해 주세요.'}}:{status:201,json:{ok:true}});});
+ const f=page.locator('.song-suggestion form');await f.locator('[name=character]').fill('직접 입력 캐릭터');await f.locator('[name=title]').fill('New song');await f.locator('[name=artist]').fill('Artist');await f.locator('button').click();
+ await expect(f.locator('[role=status]')).toContainText('다시 시도');await expect(f.locator('[name=title]')).toHaveValue('New song');const id=payload.id;await f.locator('button').click();
+ await expect(f.locator('[role=status]')).toContainText('보냈습니다');expect(payload).toEqual({id,character:'직접 입력 캐릭터',title:'New song',artist:'Artist',url:''});await expect(f.locator('[name=title]')).toHaveValue('');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.setViewportSize({width:1440,height:1000});await expect(page.locator('.deck-stage > .theme-dots')).toBeVisible();
 });

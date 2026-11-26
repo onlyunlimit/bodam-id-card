@@ -308,3 +308,10 @@ CD 회전은 `rotateDisc()`의 Web Animations로 처리합니다. 같은 인물�
 - `assets/playlists.css` 마지막 `#music-library` 규칙: 재생목록의 반투명 유리, 앨범 블러, 인물 테마 색, 현재 곡 강조, 모바일 썸네일 크기.
 - `assets/playlists.js`의 `render()`: 재생 순서·앨범 썸네일·현재 곡 표시. 공통 Audio 요소는 내부 화면 이동과 접기에서 유지합니다.
 - `assets/playlist-page.js`의 `rotateDisc()`: 재생 회전·정방향 복귀. 모바일 `.deck-column`은 오른쪽으로 20px 이동하며 원호 계산은 실제 CD 위치를 따릅니다. 이전/다음은 `◀◀` / `▶▶`로 표시합니다.
+
+### PLAYLIST 제목·모바일 선택바·추천곡 신청
+
+- `assets/playlists.css`: `.listening-room > h1` 세리프 제목, 680px 이하 `.listening-room > .theme-tabs` 가로 선택바, `.song-suggestion` 유리 신청 패널·입력 필드·버튼·모션. PC 책갈피는 유지.
+- `assets/playlist-page.js`: 화면 폭에 따른 탭 위치, HKU 탭/Hankuk Univ. 선택 제목.
+- `assets/music-request.js`: 추천 캐릭터·곡·가수·선택 링크 양식 및 전송 상태.
+- `backend/admin-playlists.js`: 관리자 전용 추천곡 신청함.
