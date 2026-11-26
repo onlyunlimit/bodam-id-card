@@ -636,7 +636,7 @@ export default {
     let response;
     try {
       response = await musicAudio(request, env) || await handle(request, env);
-      if(request.method==='POST'&&response.status===201&&(/^\/posts(?:\/[a-f0-9-]{36}\/comments)?$/.test(new URL(request.url).pathname)||['/admin/publish','/admin/reply'].includes(new URL(request.url).pathname))){const {id}=await response.clone().json();const delivery=dispatchNotification(env,id).catch(()=>{});if(ctx?.waitUntil)ctx.waitUntil(delivery);else await delivery;}
+      if(request.method==='POST'&&response.status===201&&(/^\/posts(?:\/[a-f0-9-]{36}\/comments)?$/.test(new URL(request.url).pathname)||['/admin/publish','/admin/reply','/music-requests'].includes(new URL(request.url).pathname))){const {id}=await response.clone().json();const delivery=dispatchNotification(env,id).catch(()=>{});if(ctx?.waitUntil)ctx.waitUntil(delivery);else await delivery;}
     } catch (e) {
       response = json(
         {

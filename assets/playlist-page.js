@@ -21,7 +21,7 @@ export function renderPlaylists(){
  const root=document.createElement('section');root.className='listening-room';root.setAttribute('aria-label','PLAYLIST');$('#main').append(root);
  let all=[],teams=[...musicTeams],teamIndex=0,selected=new Set(),selecting=false,shuffled=false,disposed=false;
  const abort=new AbortController();onDispose(()=>{disposed=true;abort.abort();});
- root.innerHTML=`<div class="room-aura" aria-hidden="true"></div><header class="room-heading"><div><p>THE LISTENING ROOM</p><h1>${'PLAYLIST'}</h1></div></header>
+ root.innerHTML=`<div class="room-aura" aria-hidden="true"></div><header class="room-heading"><div><h1>${'PLAYLIST'}</h1></div></header>
  <nav class="theme-dots" aria-label="${tr('테마 둘러보기')}"></nav><div class="room-layout"><section class="deck-column"><div class="deck-stage" tabindex="0" role="group" aria-label="${tr('테마 둘러보기')}">
  <div class="deck-body"><i class="deck-screw screw-a"></i><i class="deck-screw screw-b"></i><div class="deck-well"><div class="disc"><div class="disc-print"><div class="disc-brand"><span>SGIA · SOUND COLLECTION</span><strong data-disc-team></strong><small data-disc-caption></small></div></div></div><span class="disc-hub"></span><span class="deck-glaze"></span></div><div class="deck-footer"><span>STEREO / 01</span><span class="deck-led"></span><span>COMPACT DISC</span></div></div><div class="deck-cord"></div></div>
  <div class="deck-navigation"><button data-theme-prev aria-label="${tr('이전 테마')}">${icon('left')}</button><span class="theme-navigation-label">${tr('테마 둘러보기')}</span><button data-theme-next aria-label="${tr('다음 테마')}">${icon('right')}</button></div>

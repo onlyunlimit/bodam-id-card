@@ -269,7 +269,7 @@ export function renderRecords() {
   let page = 0;
   $('#main').innerHTML =
     heading('INCIDENT ARCHIVE / RESPONSE', '사건 기록실', '신고 접수 · 현장 대응 · 종결 기록') +
-    `<section id="records-workspace"><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><p id="report-success" class="panel" role="status" tabindex="-1" hidden></p><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p id="incident-sync-status" class="muted" role="status">공유 기록 불러오는 중…</p></section>`;
+    `<section id="records-workspace"><div class="receiver panel"><div><p class="eyebrow">INCIDENT RECEIVER / CH. 04</p><h2>신고 수신 채널</h2></div><label>수신 주파수 <output id="frequency-label">98.6 Hz</output><input id="frequency" type="range" min="80" max="120" step="0.1" value="98.6"></label><span id="signal-quality" data-state="stable">수신 양호</span><button id="radio-sound" aria-pressed="false">수신음 OFF</button></div><div class="records-toolbar"><label>유형 <select id="incident-type"><option value="all">전체</option>${incidentTypes.map((t) => `<option>${t}</option>`).join('')}</select></label><label>처리 <select id="incident-status"><option value="all">전체</option><option value="open" selected>처리 대기</option><option value="resolved">종결</option></select></label><button id="refresh-incidents">수신 갱신 ↻</button><button class="primary" id="new-incident">신고서 작성 ＋</button></div><p id="report-success" class="panel" role="status" tabindex="-1" hidden></p><div id="incident-summary" class="incident-summary"></div><div id="incident-list"></div><div class="pagination"><button id="incident-prev">← 이전</button><span id="incident-page-info"></span><button id="incident-next">다음 →</button></div><p id="incident-sync-status" class="muted" role="status">공유 기록 불러오는 중…</p></section>`;
   const rack = document.createElement('aside');
   rack.className = 'records-rack';
   const receiver = $('.receiver');
@@ -477,7 +477,9 @@ export function renderRecords() {
   $('#frequency').oninput = (e) => {
     const f = Number(e.target.value);
     $('#frequency-label').textContent = f.toFixed(1) + ' Hz';
-    $('#signal-quality').textContent = Math.abs(f - 98.6) < 1 ? '수신 양호' : '신호 불안정';
+    const stable = Math.abs(f - 98.6) < 1;
+    $('#signal-quality').textContent = stable ? '수신 양호' : '신호 불안정';
+    $('#signal-quality').dataset.state = stable ? 'stable' : 'unstable';
     $('#records-workspace').style.setProperty('--noise', Math.min(0.3, Math.abs(f - 98.6) / 60));
     if (osc && context) osc.frequency.setTargetAtTime(f * 6, context.currentTime, 0.05);
   };

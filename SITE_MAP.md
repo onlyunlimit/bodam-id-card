@@ -302,4 +302,4 @@
 
 - PLAYLIST 제목은 세리프 영문으로 표시합니다. HKU는 탭에만 쓰고 선택 제목·CD 기본 표기는 **Hankuk Univ.**입니다.
 - 페이지 하단 추천곡 신청: 캐릭터·제목·가수 직접 입력, YouTube 링크 선택. `assets/music-request.js`, `playlists.css`. 공개 `POST /music-requests`만 가능하며 공개 조회는 없습니다.
-- 관리자 앱 → **PLAYLIST → 추천곡 신청함**: 새 신청/전체 신청, 확인 처리, 50개씩 추가 조회. 인증된 `GET /admin/music-requests`, `PATCH /admin/music-requests/:id`. `backend/music-requests.js`, `admin-playlists.js`, D1 `music_requests` / 마이그레이션 `0017_music_requests.sql`.
+- 관리자 앱 → **PLAYLIST → 추천곡 신청함**: 새 신청/전체 신청, 확인 처리, 50개씩 추가 조회. 인증된 `GET /admin/music-requests`, `GET /admin/music-requests/:id`, `PATCH /admin/music-requests/:id`. 신규 신청은 관리자 푸시·새 소식으로 연결되고 `/admin?musicRequest=:id`에서 열람 시 읽음 처리됩니다. `backend/music-requests.js`, `admin-playlists.js`, D1 `music_requests` / 마이그레이션 `0017_music_requests.sql`.

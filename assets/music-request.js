@@ -2,7 +2,8 @@ import {tr,registerCopy} from './i18n.js';
 import {serviceConfig} from './service-config.js';
 [
  ['추천곡 신청','Suggest a song','楽曲をリクエスト','推荐歌曲'],
- ['이 캐릭터에게 어울리는 한 곡','A song that feels like them','あの人に似合う一曲','适合这个角色的一首歌'],
+ ['캐릭터 추천 노래 신청','Suggest a character song','キャラクターへの楽曲リクエスト','角色歌曲推荐'],
+ ['only_unlimit의 모든 캐릭터에게 신청할 수 있어요. 아직 없는 캐릭터는 추후 차차 추가될 수 있습니다.','Suggestions are welcome for any only_unlimit character. Characters not listed yet may be added over time.','only_unlimitのすべてのキャラクターにリクエストできます。未掲載のキャラクターも順次追加される場合があります。','可为only_unlimit的所有角色推荐歌曲。尚未收录的角色可能会陆续添加。'],
  ['신청 내용은 관리자에게만 전달됩니다.','Only the administrator can see your suggestion.','内容は管理者だけに届きます。','推荐内容仅管理员可见。'],
  ['추천 캐릭터','Character','キャラクター','推荐角色'],['노래 제목','Song title','曲名','歌曲名称'],['가수','Artist','アーティスト','歌手'],['유튜브 링크 (선택)','YouTube link (optional)','YouTubeリンク（任意）','YouTube链接（选填）'],
  ['신청 보내기','Send suggestion','リクエストを送信','发送推荐'],['보내는 중…','Sending…','送信中…','发送中…'],
@@ -12,7 +13,7 @@ import {serviceConfig} from './service-config.js';
 ].forEach(row=>registerCopy(...row));
 export function mountMusicRequest(root,signal){
  const section=document.createElement('section');section.className='song-suggestion glass';
- section.innerHTML=`<header><span class="suggestion-eyebrow">YOUR NEXT TRACK</span><h2>${tr('이 캐릭터에게 어울리는 한 곡')}</h2><p>${tr('신청 내용은 관리자에게만 전달됩니다.')}</p></header><form aria-label="${tr('추천곡 신청')}"><label>${tr('추천 캐릭터')}<input name="character" maxlength="80" required autocomplete="off"></label><label>${tr('노래 제목')}<input name="title" maxlength="120" required autocomplete="off"></label><label>${tr('가수')}<input name="artist" maxlength="100" required autocomplete="off"></label><label class="suggestion-link">${tr('유튜브 링크 (선택)')}<input name="url" type="url" maxlength="2048" placeholder="https://youtu.be/…" inputmode="url" autocomplete="off"></label><footer><p role="status" aria-live="polite"></p><button type="submit">${tr('신청 보내기')} <span aria-hidden="true">↗</span></button></footer></form>`;
+ section.innerHTML=`<header><span class="suggestion-eyebrow">YOUR NEXT TRACK</span><h2>${tr('캐릭터 추천 노래 신청')}</h2><p>${tr('only_unlimit의 모든 캐릭터에게 신청할 수 있어요. 아직 없는 캐릭터는 추후 차차 추가될 수 있습니다.')}</p><p>${tr('신청 내용은 관리자에게만 전달됩니다.')}</p></header><form aria-label="${tr('추천곡 신청')}"><label>${tr('추천 캐릭터')}<input name="character" maxlength="80" required autocomplete="off"></label><label>${tr('노래 제목')}<input name="title" maxlength="120" required autocomplete="off"></label><label>${tr('가수')}<input name="artist" maxlength="100" required autocomplete="off"></label><label class="suggestion-link">${tr('유튜브 링크 (선택)')}<input name="url" type="url" maxlength="2048" placeholder="https://youtu.be/…" inputmode="url" autocomplete="off"></label><footer><p role="status" aria-live="polite"></p><button type="submit">${tr('신청 보내기')} <span aria-hidden="true">↗</span></button></footer></form>`;
  root.append(section);const form=section.querySelector('form'),button=form.querySelector('button'),status=form.querySelector('[role=status]');let id=crypto.randomUUID();
  form.elements.url.oninput=()=>form.elements.url.setCustomValidity('');
  form.onsubmit=async e=>{

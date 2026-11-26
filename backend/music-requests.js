@@ -6,6 +6,11 @@ export async function musicRequests(request, env, helpers, admin=false) {
  if(url.pathname!==base&&!url.pathname.startsWith(base+'/'))return null;
  const id=url.pathname.slice(base.length+1);
  if(admin){
+  if(request.method==='GET'&&/^[a-f0-9-]{36}$/.test(id)){
+   const entry=await env.DB.prepare('SELECT * FROM music_requests WHERE id=?').bind(id).first();
+   if(!entry)throw new HTTPError(404,'신청을 찾을 수 없습니다.');
+   return json({requests:[entry],more:false});
+  }
   if(request.method==='GET'&&!id){
    const offset=Math.max(0,Math.min(100000,Number.parseInt(url.searchParams.get('offset'),10)||0));
    const unread=url.searchParams.get('filter')!=='all';
@@ -29,8 +34,8 @@ export async function musicRequests(request, env, helpers, admin=false) {
   // A retried submission must not create a second entry.
   if(await env.DB.prepare('SELECT id FROM music_requests WHERE id=?').bind(requestID).first())return json({ok:true});
   await helpers.rate(env,'music-request:'+hash,6,3600);
-  await env.DB.prepare('INSERT OR IGNORE INTO music_requests(id,character,title,artist,youtube_url,created_at) VALUES(?,?,?,?,?,?)').bind(requestID,character,title,artist,youtube,Date.now()).run();
-  return json({ok:true},201);
+  const saved=await env.DB.prepare('INSERT OR IGNORE INTO music_requests(id,character,title,artist,youtube_url,created_at) VALUES(?,?,?,?,?,?)').bind(requestID,character,title,artist,youtube,Date.now()).run();
+  return json({ok:true,id:requestID},saved.meta.changes?201:200);
  }
  // There is deliberately no public read endpoint, even for a known request ID.
  throw new HTTPError(405,'지원하지 않는 요청입니다.');

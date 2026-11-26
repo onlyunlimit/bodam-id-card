@@ -25,15 +25,16 @@ async function editPlaylist(p){try{
 }catch(e){message(e);}}
 
 function initMusicRequests(parent){
- const box=document.createElement('section');box.className='music-request-inbox';
+ const box=document.createElement('section');box.className='music-request-inbox';box.id='music-request-inbox';
  box.innerHTML='<div class="bar"><h3>추천곡 신청함</h3><select aria-label="신청 필터"><option value="new">새 신청</option><option value="all">전체 신청</option></select><button data-request-refresh>새로고침</button></div><p class="muted">관리자에게만 보이는 신청입니다.</p><div data-requests></div><button data-request-more hidden>더 보기</button><p data-request-status role="status"></p>';
- parent.append(box);let offset=0,busy=false;
+ parent.append(box);let offset=0,busy=false;let target=new URLSearchParams(location.search).get('musicRequest');if(!/^[a-f0-9-]{36}$/.test(target||''))target=null;
  const list=box.querySelector('[data-requests]'),more=box.querySelector('[data-request-more]'),status=box.querySelector('[data-request-status]'),filter=box.querySelector('select');
+ async function markRead(id){await api('music-requests/'+id,'PATCH',{});if(notificationsReady)await refreshNotifications();const registration=await navigator.serviceWorker?.getRegistration?.();for(const notice of await registration?.getNotifications?.()||[])if(notice.data?.url==='/admin?musicRequest='+id)notice.close();}
  async function load(reset=true){if(busy)return;busy=true;filter.disabled=true;status.textContent='불러오는 중…';more.disabled=true;
-  try{const start=reset?0:offset;const data=await api('music-requests?filter='+filter.value+'&offset='+start);if(reset)list.replaceChildren();
+  try{const start=reset?0:offset;const opened=target;target=null;const data=await api(opened?'music-requests/'+opened:'music-requests?filter='+filter.value+'&offset='+start);if(reset)list.replaceChildren();
    for(const r of data.requests){const row=document.createElement('article');row.innerHTML='<small>'+esc(new Date(r.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}))+'</small><h4>'+esc(r.title)+' · '+esc(r.artist)+'</h4><p>'+esc(r.character)+'</p>'+(r.youtube_url?'<a target="_blank" rel="noopener noreferrer" href="'+esc(r.youtube_url)+'">YouTube 링크 ↗</a>':'')+(r.read_at?'<small> · 확인함</small>':'<button data-request-read>확인</button>');
-    const button=row.querySelector('[data-request-read]');if(button)button.onclick=async()=>{button.disabled=true;try{await api('music-requests/'+r.id,'PATCH',{});await load(true);}catch(e){status.textContent=e.message;button.disabled=false;}};list.append(row);
-   }offset=start+data.requests.length;more.hidden=!data.more;status.textContent=list.children.length?'':'신청이 없습니다.';
+    const button=row.querySelector('[data-request-read]');if(button)button.onclick=async()=>{button.disabled=true;try{await markRead(r.id);await load(true);}catch(e){status.textContent=e.message;button.disabled=false;}};list.append(row);
+   }if(opened){box.scrollIntoView({block:'start'});await markRead(opened);const done=list.querySelector('[data-request-read]');if(done){done.textContent='확인함';done.disabled=true;}}offset=start+data.requests.length;more.hidden=!data.more;status.textContent=list.children.length?'':'신청이 없습니다.';
   }catch(e){status.textContent=e.message;}finally{busy=false;filter.disabled=false;more.disabled=false;}}
  filter.onchange=()=>load();box.querySelector('[data-request-refresh]').onclick=()=>load();more.onclick=()=>load(false);load();
 }

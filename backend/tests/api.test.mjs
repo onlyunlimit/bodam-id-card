@@ -913,9 +913,17 @@ test('Song suggestions are private, retry-safe, validated and readable only by a
  const inbox=await req('/admin/music-requests','GET',undefined,admin);
  assert.equal(inbox.data.requests.length,1);assert.equal(inbox.data.requests[0].character,draft.character);
  assert.equal(inbox.data.requests[0].youtube_url,'');assert.equal(inbox.response.headers.get('Cache-Control'),'no-store');
+ const notices=await req('/admin/notifications','GET',undefined,admin);
+ assert.equal(notices.data.unread,1);assert.equal(notices.data.events[0].kind,'music');assert.equal(notices.data.events[0].id,id);
+ assert.equal((await req('/admin/music-requests/'+id,'GET',undefined,admin)).data.requests[0].title,draft.title);
+ assert.equal((await req('/admin/music-requests/'+id)).status,401);
  assert.equal((await req('/admin/music-requests/'+id,'PATCH',{},admin)).status,200);
+ assert.equal((await req('/admin/notifications','GET',undefined,admin)).data.unread,0);
  assert.equal((await req('/admin/music-requests','GET',undefined,admin)).data.requests.length,0);
  assert.equal((await req('/admin/music-requests?filter=all','GET',undefined,admin)).data.requests.length,1);
  for(let i=0;i<5;i++)assert.equal((await req('/music-requests','POST',{...draft,id:crypto.randomUUID(),url:'https://youtu.be/abcdefghijk'})).status,201);
+ assert.equal((await req('/admin/notifications','GET',undefined,admin)).data.unread,5);
+ assert.equal((await req('/admin/notifications/read','POST',{all:true,through:Date.now()},admin)).status,200);
+ assert.equal((await req('/admin/notifications','GET',undefined,admin)).data.unread,0);
  assert.equal((await req('/music-requests','POST',{...draft,id:crypto.randomUUID()})).status,429);
 });

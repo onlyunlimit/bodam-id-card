@@ -104,7 +104,7 @@ function route(url = location.href, push = false) {
       e.innerHTML = h.innerHTML;
       h.replaceWith(e);
     });
-    $('#main').insertAdjacentHTML(
+    if (page === 'overview') $('#main').insertAdjacentHTML(
       'afterbegin',
       `<nav class="section-jumps"><a href="#main">${page === 'overview' ? '통합 관제' : '사건 기록실'}</a><a href="#${section.id}">${page === 'overview' ? '각성관 층별 안내' : '위협 정보 · ORPÉ'}</a></nav>`,
     );
