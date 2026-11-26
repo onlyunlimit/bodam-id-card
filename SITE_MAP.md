@@ -46,10 +46,10 @@
 | [통합 관제](https://onlyunlimit.github.io/portal.html) | `/portal.html` | 세계 지도와 미종결 사건 핀·구역, 위험 등급·게이트 집계, 부서 운용 상태, 서울 날씨, 한국 시각, 브리핑, 제작 도구 링크 | 공개 중심 |
 | [각성관 층별 안내](https://onlyunlimit.github.io/portal.html#headquarters) | `/portal.html#headquarters` | 통합 관제 아래 구역. 지상·지하 총 18개 층 선택, 실내 계획도, 방별 설명, 관련 부서 이동 | 일부 시설 직원 화면에서 열람 |
 | [조직·부서](https://onlyunlimit.github.io/departments.html) | `/departments.html` | 블랙잭·오리진·비콘·실드 4개 부서, 각각 다른 재질·구조·팔레트로 상세 페이지 진입 | 공개 |
-| [오리진](https://onlyunlimit.github.io/origin.html) | `/origin.html` | 부서 소개, 시간표, 브리핑, 소속 인물 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
-| [비콘](https://onlyunlimit.github.io/beacon.html) | `/beacon.html` | 추적관리팀 소개, 시간표, 브리핑, 소속 인물 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
-| [실드](https://onlyunlimit.github.io/shield.html) | `/shield.html` | 부서 소개, 시간표, 브리핑, 소속 인물 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
-| [블랙잭](https://onlyunlimit.github.io/blackjack.html) | `/blackjack.html` | 시소 참고의 올리브 금속 TV·크림 카드, 포커·딜러·리어·판덴·시소 5명, 작전 일정 안내·브리핑·메신저 | 공개 카드 / 직원 상세 |
+| [오리진](https://onlyunlimit.github.io/origin.html) | `/origin.html` | 부서 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
+| [비콘](https://onlyunlimit.github.io/beacon.html) | `/beacon.html` | 추적관리팀 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
+| [실드](https://onlyunlimit.github.io/shield.html) | `/shield.html` | 부서 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
+| [블랙잭](https://onlyunlimit.github.io/blackjack.html) | `/blackjack.html` | 시소 참고의 올리브 금속 TV·녹색 포인트 은색 신분증 카드, 포커·딜러·리어·판덴·시소 5명, 작전 일정 안내·브리핑·메신저 | 공개 카드 / 직원 상세 |
 | [엔터테인먼트](https://onlyunlimit.github.io/entertainment.html) | `/entertainment.html` | 그룹별 입체 소개 패널 2개. 각 기획사 페이지로 이동 | 공개 |
 | [엘리시안·럭키트릭](https://onlyunlimit.github.io/elysian.html) | `/elysian.html` | 핑크 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
 | [헌터윈드·옵시더스](https://onlyunlimit.github.io/hunterwind.html) | `/hunterwind.html` | 금속·어두운 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |

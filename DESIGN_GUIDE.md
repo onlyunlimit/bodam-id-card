@@ -48,7 +48,9 @@
 | 밝은 테마 색상 | [assets/forensic.css](assets/forensic.css) | `:root[data-theme='light']` |
 | 럭키트릭·옵시더스 커뮤니티 색상 | [assets/fan-community.css](assets/fan-community.css) | `--fan-bg`, `--fan-paper`, `--fan-accent`, `.fan-community.obsidus` |
 | 커뮤니티 바깥 배경·헤더까지 색상 통일 | [assets/fan-community.css](assets/fan-community.css) | `html[data-community-theme='lucky']`, `html[data-community-theme='obsidus']` |
-| 인물 카드 크기·사진·이름판 | [assets/forensic.css](assets/forensic.css) | `.person-card`, `.id-photo`, `.id-caption`, `.person-title` |
+| 부서 소속요원 신분증 앞·뒷면 | [assets/units.js](assets/units.js), [assets/team-themes.css](assets/team-themes.css) | `officialCard()`, `.official-id`, `.credential-*`; ORIGIN·BEACON·SHIELD·BLACKJACK 공통 구조와 팀별 색상 |
+| 기타 인물 카드 크기·사진·이름판 | [assets/forensic.css](assets/forensic.css) | `.person-card`, `.id-photo`, `.id-caption`, `.person-title` |
+| 사내 Lounge 게시글 여백·댓글 | [assets/team-themes.css](assets/team-themes.css) | `.fan-community.staff`, `.fan-post-card`, `.fan-post-detail[data-community=staff]` |
 | 사건 기록 카드 크기·간격 | [assets/forensic.css](assets/forensic.css) | `.case-file`, `.case-content`, `.case-location`, 파일 하단의 기록물 규칙 |
 | 게시글 목록·본문·댓글 | [assets/fan-community.css](assets/fan-community.css) | `.fan-post-card`, `.feed-body`, `.post-body`, `.comment-row` |
 | 선택한 태그·입력·자동완성 | [assets/fan-community.css](assets/fan-community.css) | `.selected-hashtags`, `.selected-hashtag`, `.hashtag-input`(자동 # 표시), `.hashtag-suggestions` |

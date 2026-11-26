@@ -61,7 +61,7 @@ export const playlistThemes = [
     "label": "DEALER",
     "team": "blackjack",
     "color": "#b6a883",
-    "cover": ""
+    "cover": "https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=webp,w=800,metadata=none/charim/a456eeae-c8ca-4792-9de9-3d848f789cb4?v=574e50"
   },
   {
     "id": "poker",

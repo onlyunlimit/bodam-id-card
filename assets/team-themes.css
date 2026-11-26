@@ -185,3 +185,87 @@ body .fan-post-detail .comment-row .fan-author>span{min-width:0}
 body .fan-post-detail .comment-row .fan-author time{font-size:9px;letter-spacing:0;line-height:1.5;margin-top:4px}
 body .fan-post-detail .comment-row .record-edit-links{margin:0;gap:6px;justify-self:end}
 body .fan-post-detail .comment-row .record-edit-links button{margin:0;padding:0;font-size:10px}
+
+/* Department credentials */
+.person-card.official-id{--credential-tint:102,137,165;container-type:inline-size}
+.person-card.official-id[data-team=origin]{--credential-tint:142,116,164}
+.person-card.official-id[data-team=shield]{--credential-tint:132,142,102}
+.person-card.official-id[data-team=blackjack]{--credential-tint:83,143,111}
+body .person-card.official-id .card-turner{aspect-ratio:390/640}
+body .person-card.official-id[data-team] .card-face{border-radius:28px!important;clip-path:none!important;border:1px solid #ffffffad!important;box-shadow:inset 0 1px 2px #fff,inset 0 -2px 3px #2d3a4a30,0 12px 24px #111b2926!important;font-family:Inter,Pretendard,sans-serif;color:#243347!important}
+body .person-card.official-id[data-team] .front{display:flex;flex-direction:column;grid-template:none;padding:6.5%;gap:0;background:linear-gradient(135deg,#ffffffed,#e5ebefeb 45%,rgba(var(--credential-tint),.48))!important}
+body .person-card.official-id .front:after{inset:0;background:radial-gradient(circle at var(--shine-x) var(--shine-y),#ffffff80,transparent 57%);mask:none;opacity:.45;pointer-events:none;border-radius:inherit}
+.official-id .credential-slot{display:block;flex:none;align-self:center;width:16%;height:1.7%;min-height:7px;border-radius:20px;background:#52616d;box-shadow:inset 0 2px 4px #071420aa,0 1px 1px #fff;margin-bottom:5%}
+.official-id .credential-header{position:relative;z-index:1;display:flex;align-items:center;gap:3%;min-height:8%;margin-bottom:5%}
+.official-id .credential-header>img{width:12%;height:auto;filter:brightness(.65);flex:none}
+.official-id .credential-header>span{display:grid;gap:3px;min-width:0}
+.official-id .credential-header small,.official-id .credential-specs small{font-size:clamp(7px,2.4cqw,10px);font-weight:600;letter-spacing:.08em;color:#536477}
+.official-id .credential-header b{font-size:clamp(13px,4.8cqw,21px);letter-spacing:.08em;font-weight:750}
+.official-id .credential-header .credential-grade{margin-left:auto;text-align:right}
+.official-id .credential-grade b{font-size:7cqw;line-height:1}
+.official-id .credential-watermark{position:absolute;right:4%;top:13%;font-size:40cqw;font-weight:900;line-height:1;color:rgba(var(--credential-tint),.12);pointer-events:none}
+.official-id .credential-photo-wrap{position:relative;display:block;height:53%;flex:none;padding-right:8%;margin-bottom:5%}
+body .person-card.official-id[data-team] .id-photo{position:relative;display:block;width:100%;height:100%;margin:0!important;padding:0;border:1px solid #ffffffcc!important;border-radius:20px!important;transform:none;overflow:hidden;box-shadow:0 4px 12px #24334726;background:#c6cdd4}
+body .person-card.official-id .id-photo>img{width:100%;height:100%;object-fit:cover;object-position:center 25%;border-radius:inherit}
+.official-id .credential-rail{position:absolute;right:0;top:6%;bottom:6%;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:space-between;font-size:2.1cqw;letter-spacing:.16em;color:#536477}
+.official-id .credential-rail .barcode{height:60%;width:9px;background:repeating-linear-gradient(0deg,#344357 0 1px,transparent 1px 3px,#344357 3px 5px,transparent 5px 7px);opacity:.65}
+.official-id .credential-name{position:absolute;bottom:0;left:0;right:8%;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:4px;padding:10% 7% 6%;border-radius:0 0 20px 20px;background:linear-gradient(transparent,#122031c9 38%,#122031eb);color:#fff;text-shadow:0 1px 2px #0007}
+body .official-id .credential-name .card-code{font-size:clamp(21px,8.2cqw,35px);line-height:1.15;color:#fff;letter-spacing:-.04em}
+.official-id .credential-name .fixed-code{font-size:2.8cqw;letter-spacing:.12em;color:#e6edf5}
+.official-id .credential-name small{flex-basis:100%;font-size:clamp(9px,3cqw,13px);line-height:1.5;color:#e6edf5}
+.official-id .credential-specs{display:grid;grid-template-columns:1.2fr 1fr;gap:10px 8px;position:relative;z-index:1}
+.official-id .credential-specs>span{display:grid;gap:4px;min-width:0}
+.official-id .credential-specs b{font-size:clamp(10px,3.1cqw,14px);font-weight:650;line-height:1.4;overflow-wrap:anywhere}
+.official-id .credential-ability{grid-column:1/-1}
+.official-id .credential-footer{display:flex;justify-content:space-between;align-items:end;gap:8px;margin-top:auto;padding-top:4%;border-top:1px solid #62738733;font-size:2.7cqw;font-weight:650;letter-spacing:.04em;line-height:1.4}
+.official-id .credential-footer small{font-size:1.9cqw;font-weight:500;letter-spacing:.1em}
+.official-id .credential-footer i{font-style:normal;margin-left:8px}
+body .person-card.official-id[data-team] .back{display:flex;flex-direction:column;grid-template:none;padding:7%;background:linear-gradient(145deg,#354251,#18232e 70%,rgba(var(--credential-tint),.95))!important;color:#f4f7fa!important;gap:3%}
+.official-id .credential-back-heading{display:grid;gap:6px;text-align:center;letter-spacing:.15em}
+.official-id .credential-back-heading small{font-size:2.7cqw;color:#d2dde8}
+.official-id .credential-back-heading b{font-size:5cqw}
+.official-id .credential-seal{display:block;width:27%;height:auto;align-self:center;margin:5% 0;opacity:.8}
+.official-id .credential-back-name{font-size:7cqw;letter-spacing:.06em;text-align:center;overflow-wrap:anywhere}
+body .official-id .back p{color:#e3eaf1;font-size:3.5cqw;line-height:1.8;margin:0}
+body .official-id .back dl{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;font-size:3.2cqw;margin:2% 0;line-height:1.6}
+body .official-id .back dt{color:#c7d2dc}
+body .official-id .back dd{margin:0;color:#fff}
+.official-id .back .credential-footer{border-color:#ffffff30;color:#dce5ee}
+@media(max-width:600px){
+ body .character-grid:has(.official-id){grid-template-columns:minmax(0,390px)!important;justify-content:center;gap:28px}
+ body .person-card.official-id[data-team] .card-face{border-radius:24px!important}
+}
+
+/* Staff lounge: a comfortable reading surface, with restrained reply hierarchy. */
+body .fan-community.staff .staff-masthead{padding:28px 4px 30px}
+body .fan-community.staff .staff-wordmark{font-size:clamp(24px,4vw,38px);letter-spacing:-.045em}
+body .fan-community.staff .staff-masthead p{line-height:1.7;opacity:.7;margin:10px 0 0}
+body .fan-community.staff{border:0;box-shadow:none}
+body .fan-community.staff .fan-feed{padding:24px 0;background:transparent;box-shadow:none;border-radius:0}
+body .fan-community.staff .fan-post-list{display:grid;gap:16px;border:0;background:transparent;border-radius:0;overflow:visible}
+body .fan-community.staff .fan-post-card{padding:28px 30px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:0 4px 18px #00000005;transition:background .2s,box-shadow .2s,transform .2s}
+body .fan-community.staff .fan-post-card:hover{box-shadow:0 8px 24px #0000000d;transform:translateY(-2px)}
+body .fan-community.staff .fan-post-card h3{font-size:19px;line-height:1.55;letter-spacing:-.025em;margin:18px 0 10px;font-weight:700}
+body .fan-community.staff .fan-post-card .feed-body{font-size:14px;line-height:1.85;margin:0 0 22px;color:var(--text);opacity:.85}
+body .fan-community.staff .fan-post-card .feed-counts{padding-top:16px;border-top:1px solid var(--line);gap:22px;font-size:12px;color:var(--muted)}
+body .fan-community.staff .fan-post-card .fan-author{gap:12px}
+body .fan-community.staff .fan-post-card .fan-author time{margin-top:5px;font-size:11px;color:var(--muted)}
+body .fan-post-detail[data-community=staff] .post-body{font-size:16px;line-height:1.95;padding:26px 0 30px;overflow-wrap:anywhere}
+body .fan-post-detail[data-community=staff] .comments .comment-row{padding:24px 16px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;box-shadow:none;margin:0}
+body .fan-post-detail[data-community=staff] .comment-row .fan-author{grid-template-columns:32px minmax(0,1fr) auto;gap:10px}
+body .fan-post-detail[data-community=staff] .comment-row .fan-author time{font-size:11px;line-height:1.6}
+body .fan-post-detail[data-community=staff] .comment-row>p{font-size:14px;line-height:1.85;margin:14px 0 16px}
+body .fan-post-detail[data-community=staff] .reply-list{margin:6px 0 0 24px;padding:0;background:var(--control);border:0;border-radius:14px;overflow:hidden}
+body .fan-post-detail[data-community=staff] .reply-list .comment-row{padding:20px;border-radius:0}
+@media(max-width:600px){
+ body .fan-community.staff{padding:0}
+ body .fan-community.staff .fan-feed{padding:16px 0}
+ body .fan-community.staff .fan-post-list{gap:12px}
+ body .fan-community.staff .fan-post-card{padding:22px 20px;border-radius:18px}
+ body .fan-community.staff .fan-post-card h3{font-size:17px;margin-top:16px}
+ body .fan-community.staff .fan-post-card .feed-body{font-size:14px;line-height:1.8}
+ body .fan-post-detail[data-community=staff] .comments .comment-row{padding:22px 8px}
+ body .fan-post-detail[data-community=staff] .reply-list{margin-left:12px}
+ body .fan-post-detail[data-community=staff] .reply-list .comment-row{padding:18px 14px}
+}
+@media(prefers-reduced-motion:reduce){body .fan-community.staff .fan-post-card{transition:none}body .fan-community.staff .fan-post-card:hover{transform:none}}

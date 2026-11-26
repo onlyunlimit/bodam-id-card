@@ -89,10 +89,27 @@ export function dossier(c) {
   );
   openSequence(dialog, c);
 }
+function officialCard(c, i) {
+  const team = teams.find(t => t.id === c.team);
+  const rank = state.staff ? esc(c.rank) : '—';
+  const serial = `SG / ${String(i + 1).padStart(3, '0')}`;
+  const name = esc(personName(c));
+  return `<article class="person-card official-id" data-team="${c.team}" data-character="${c.id}" style="--order:${i}"><div class="card-tilt"><button class="card-turner" aria-label="${name} 프로필 열람. 좌우 스와이프 또는 방향키로 회전" aria-pressed="false"><span class="card-rotator">
+    <span class="card-face front" aria-hidden="false">
+      <span class="credential-slot" aria-hidden="true"></span>
+      <span class="credential-header"><img src="assets/art/silver-emblem.webp" alt=""><span><small>PERSONNEL IDENTIFICATION</small><b>${esc(team.en)}</b></span><span class="credential-grade"><small>GRADE</small><b>${rank}</b></span></span>
+      <span class="credential-watermark" aria-hidden="true">${rank}</span>
+      <span class="credential-photo-wrap"><span class="id-photo"><img src="${esc(c.portrait)}" alt="${state.staff ? name : '신원 비공개'}" draggable="false" loading="lazy">${!state.staff ? '<span class="redaction-label">IDENTITY PROTECTED</span>' : ''}</span><span class="credential-rail" aria-hidden="true"><span class="barcode"></span>SGIA · PERSONNEL</span><span class="credential-name"><strong class="card-code">${name}</strong>${language() !== 'en' ? `<span class="fixed-code" data-no-translate>${esc(c.code)}</span>` : ''}<small>${state.staff ? esc(c.role) : 'PUBLIC RECORD'}</small></span></span>
+      <span class="credential-specs"><span><small>CLASSIFICATION</small><b>${state.staff ? esc(c.rank) + ' · ' + esc(c.role) : 'STAFF ACCESS'}</b></span><span><small>ASSIGNMENT</small><b>${esc(team.name)}</b></span><span class="credential-ability"><small>ABILITY</small><b>${state.staff ? esc(c.ability) : '직원 채널에서 열람'}</b></span></span>
+      <span class="credential-footer"><span>SGIA<br><small>AUTHORIZED PERSONNEL</small></span><span>${serial} <i aria-hidden="true">↔</i></span></span>
+    </span>
+    <span class="card-face back" aria-hidden="true"><span class="credential-slot" aria-hidden="true"></span><span class="credential-back-heading"><small>${state.staff ? 'INTERNAL RECORD' : 'PUBLIC RECORD'}</small><b>${esc(team.en)}</b></span><img class="credential-seal" src="assets/art/silver-emblem.webp" alt=""><strong class="credential-back-name">${esc(c.code)}</strong><p>${state.staff ? esc(c.bio) : '개인 식별 정보는 직원 채널에서 열람하십시오.'}</p><dl><dt>소속</dt><dd>${esc(team.name)}</dd>${state.staff ? `<dt>등급</dt><dd>${rank}</dd><dt>능력</dt><dd>${esc(c.ability)}</dd>` : ''}</dl><span class="credential-footer"><span>SGIA · AUTHORIZED RECORD</span><span>${serial}</span></span></span>
+    </span><span class="hold-meter"></span></button></div></article>`;
+}
 export function renderCards(list, target) {
   target.innerHTML = list
     .map(
-      (c, i) =>
+      (c, i) => units.some(t => t.id === c.team) ? officialCard(c, i) :
         `<article class="person-card" data-team="${c.team}" data-design="${c.team}" data-character="${c.id}" data-visual="${visualSignature(c).mode}" style="--order:${i};--identity-angle:${visualSignature(c).angle}deg;--signal-delay:-${visualSignature(c).number % 9}s"><div class="card-tilt"><button class="card-turner" aria-label="${esc(personName(c))} 프로필 열람. 좌우 스와이프 또는 방향키로 회전" aria-pressed="false"><span class="card-rotator"><span class="card-face front" aria-hidden="false"><span class="id-card-head"><img src="assets/art/silver-emblem.webp" alt=""><span>${c.team === 'orpe' ? 'CLASSIFIED / ORPÉ' : 'SGIA / ' + teams.find((t) => t.id === c.team).en}</span><span>${state.staff ? esc(c.rank) : 'PUBLIC'}</span></span><span class="card-index" aria-hidden="true">${String(i + 1).padStart(2, '0')}<small>FILE / ${visualSignature(c).number}</small></span><span class="id-photo"><img src="${c.portrait}" alt="${state.staff ? esc(c.name) : '신원 비공개'}" draggable="false" loading="lazy">${scanMarkup(c)}${!state.staff ? '<span class="redaction-label">IDENTITY PROTECTED</span>' : ''}</span><span class="id-caption"><small>${state.staff ? esc(c.role) : 'PERSONNEL RECORD'}</small><span class="person-title"><strong class="card-code">${esc(personName(c))}</strong>${language() !== 'en' ? `<span class="fixed-code" data-no-translate>${esc(c.code)}</span>` : ''}</span></span><span class="id-card-foot"><span class="barcode"></span><small>SG / ${String(i + 1).padStart(3, '0')}</small><span>↔ FLIP</span></span><span class="hologram"></span></span><span class="card-face back" aria-hidden="true"><span class="eyebrow">${state.staff ? 'INTERNAL RECORD' : 'PUBLIC RECORD'}</span><img class="back-emblem" src="assets/art/silver-emblem.webp" alt=""><strong>${esc(c.code)}</strong><p>${state.staff ? esc(c.role) : '개인 식별 정보는 직원 채널에서 열람하십시오.'}</p><dl><dt>소속</dt><dd>${teams.find((t) => t.id === c.team).name}</dd>${state.staff ? `<dt>능력</dt><dd>${esc(c.ability)}</dd>` : ''}</dl><span class="back-bottom">SGIA · AUTHORIZED RECORD</span></span></span><span class="hold-meter"></span></button></div></article>`,
     )
     .join('');

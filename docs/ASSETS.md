@@ -114,3 +114,8 @@
 - 사용자가 제공하고 직접 재생하도록 지정한 32개 MP3에서 ID3 태그를 제거한 배포 사본을 사용합니다. MPEG 오디오는 재인코딩하지 않습니다.
 - 사본: Git 제외 `backend/.music-assets/audio/`. 공개 경로·무결성: `backend/music-assets.json`. Worker 자산으로 배포하며 GitHub Pages 빌드에는 포함하지 않습니다.
 - 원본과 참고 자료는 로컬에 보존합니다. 공개 음원 요청과 파일 형식은 브라우저에서 확인할 수 있으며 해시 이름은 접근 통제나 출처 은폐 수단이 아닙니다.
+
+## 2026-11-27 Dealer CD 커버
+
+- 사용자가 CD 표시용으로 지정한 [Dealer 이미지](https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=webp,w=800,metadata=none/charim/a456eeae-c8ca-4792-9de9-3d848f789cb4?v=574e50)를 `assets/playlist-themes.js`에서 연결합니다. 곡 목록의 앨범 이미지는 유지합니다.
+- 부서 신분증은 HTML/CSS로 구현하고 기존 SGIA 은색 엠블럼·인물 이미지 링크를 재사용합니다.

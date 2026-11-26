@@ -45,3 +45,21 @@ test('Artist introduction logos occupy the centered navigation slot at desktop a
   }
  }
 });
+
+test('Official personnel cards keep both faces contained on narrow screens and use actual grades',async({page})=>{
+ await page.setViewportSize({width:320,height:900});
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.goto('/beacon.html');
+ await expect(page.locator('.credential-grade').first()).toContainText('—');
+ await page.locator('#viewer-toggle').click();await page.locator('#login-submit').click();
+ await expect(page.locator('body')).toHaveAttribute('data-viewer','staff');
+ await expect(page.locator('[data-character=levit] .credential-grade')).toContainText('SS');
+ for(const unit of ['beacon','origin','shield','blackjack']){
+  await page.goto('/'+unit+'.html');
+  await expect(page.locator('.official-id').first()).toBeVisible();
+  const sizes=await page.locator('.official-id .card-face').evaluateAll(els=>els.map(el=>({height:el.clientHeight,scroll:el.scrollHeight,width:el.clientWidth,scrollWidth:el.scrollWidth})));
+  for(const size of sizes){expect(size.scroll).toBeLessThanOrEqual(size.height+2);expect(size.scrollWidth).toBeLessThanOrEqual(size.width+2);}
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  const button=page.locator('.card-turner').first();await button.focus();await page.keyboard.press('ArrowRight');await expect(button).toHaveAttribute('aria-pressed','true');
+ }
+});
