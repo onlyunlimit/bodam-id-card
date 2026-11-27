@@ -13,7 +13,7 @@
 / 또는 /index.html — SGIA 접속 대기실
 └─ /portal.html — SGIA 공통 포털
    ├─ 통합 관제 → 같은 페이지 아래에 각성관 층별 안내
-   ├─ 조직·부서 → 블랙잭 / 오리진 / 비콘 / 실드
+   ├─ 조직·부서 → 실드 / 오리진 / 비콘 / 블랙잭
    ├─ 엔터테인먼트 → 엘리시안·럭키트릭 / 헌터윈드·옵시더스
    ├─ 사건 기록실 → 같은 페이지 아래에 ORPÉ 위협 정보
    ├─ 세계관 안내서
@@ -45,7 +45,7 @@
 | [접속 대기실](https://onlyunlimit.github.io/index.html) | `/`, `/index.html` | 회전 게이트, 접속 연출, 접속 효과음, 언어·모션 설정. 접속 버튼으로 통합 관제 이동 | 공개 |
 | [통합 관제](https://onlyunlimit.github.io/portal.html) | `/portal.html` | 세계 지도와 미종결 사건 핀·구역, 위험 등급·게이트 집계, 부서 운용 상태, 서울 날씨, 한국 시각, 브리핑, 제작 도구 링크 | 공개 중심 |
 | [각성관 층별 안내](https://onlyunlimit.github.io/portal.html#headquarters) | `/portal.html#headquarters` | 통합 관제 아래 구역. 지상·지하 총 18개 층 선택, 실내 계획도, 방별 설명, 관련 부서 이동 | 일부 시설 직원 화면에서 열람 |
-| [조직·부서](https://onlyunlimit.github.io/departments.html) | `/departments.html` | 블랙잭·오리진·비콘·실드 4개 부서, 각각 다른 재질·구조·팔레트로 상세 페이지 진입 | 공개 |
+| [조직·부서](https://onlyunlimit.github.io/departments.html) | `/departments.html` | 실드·오리진·비콘·블랙잭 4개 부서, 각각 다른 재질·구조·팔레트로 상세 페이지 진입 | 공개 |
 | [오리진](https://onlyunlimit.github.io/origin.html) | `/origin.html` | 부서 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
 | [비콘](https://onlyunlimit.github.io/beacon.html) | `/beacon.html` | 추적관리팀 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
 | [실드](https://onlyunlimit.github.io/shield.html) | `/shield.html` | 부서 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
@@ -54,7 +54,7 @@
 | [엘리시안·럭키트릭](https://onlyunlimit.github.io/elysian.html) | `/elysian.html` | 핑크 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
 | [헌터윈드·옵시더스](https://onlyunlimit.github.io/hunterwind.html) | `/hunterwind.html` | 금속·어두운 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
 | [사건 기록실](https://onlyunlimit.github.io/records.html) | `/records.html` | 아날로그 수신기·주파수 조정, 사건 필터·목록·상세 문서, 지도, 신고서 작성, 긴급 수신 알림, 종결 승인·재개 | 열람은 공개 · 작성 진입은 직원 화면 |
-| [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 봉인 파일, 숫자 키패드·클릭음, 추적 커서, AZ 대상 관측 기록·위험 평가, 구조화된 증거 문서 3개, 동선 지도·감청 로그 | 코드 입력 연출 + 일부 직원 열람 |
+| [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 봉인 파일, 숫자 키패드·클릭음, 추적 커서, AZ 대상 관측 기록·위험 평가, 증거 문서 3개에서 진입하는 AZ 수사 파일 5장(UV·단서 확인), 동선 지도·감청 로그 | 코드 입력 연출 + 일부 직원 열람 |
 | [세계관 안내서](https://onlyunlimit.github.io/manual.html) | `/manual.html` | 용어 검색·목차, 게이트·각성자·가이딩·각인·매칭 등 설명, 등급표, 개념 도해, 명령어 복사 | 공개 |
 | [커뮤니티](https://onlyunlimit.github.io/community.html) | `/community.html` | 그룹별 4개 피드, 사진 첨부, 팬·아티스트 글/답글, 글·댓글 좋아요, 6자리 PIN 수정·삭제, 관리자 진입 | 팬 공개 / 사내는 직원 화면 |
 
@@ -198,7 +198,7 @@
 | 사건 데이터 검증·집계·시간표 계산 | `assets/model.js`, `assets/incident-store.js`, `backend/incidents.js` |
 | 봉인 파일·키패드·수신기·감청 단말 | `assets/hardware.js` |
 | ORPÉ 증거 색인·문서 열람 / 추적 커서 | `assets/evidence.js` / `assets/forensics.js` |
-| 부서·인물 카드·상세 프로필·메신저 | `assets/units.js`, `assets/personnel-design.js` |
+| 부서·인물 카드·상세 프로필·메신저 | `assets/units.js`, `assets/personnel-design.js`, `assets/member-archive.js/css`, `assets/member-archive-data.js` |
 | 공개 인물 데이터·이미지/로고 연결 | `assets/characters.js`, `assets/media.js` |
 | 기획사 화면·화보 목록 | `assets/agencies.js`, `assets/agency-gallery.js` |
 | 안내서·각성관·층별 계획도 | `assets/guide.js`, `assets/manual-visuals.js`, `assets/floor-plans.js` |
@@ -303,3 +303,9 @@
 - PLAYLIST 제목은 세리프 영문으로 표시합니다. HKU는 탭에만 쓰고 선택 제목·CD 기본 표기는 **Hankuk Univ.**입니다.
 - 페이지 하단 추천곡 신청: 캐릭터·제목·가수 직접 입력, YouTube 링크 선택. `assets/music-request.js`, `playlists.css`. 공개 `POST /music-requests`만 가능하며 공개 조회는 없습니다.
 - 관리자 앱 → **PLAYLIST → 추천곡 신청함**: 새 신청/전체 신청, 확인 처리, 50개씩 추가 조회. 인증된 `GET /admin/music-requests`, `GET /admin/music-requests/:id`, `PATCH /admin/music-requests/:id`. 신규 신청은 관리자 푸시·새 소식으로 연결되고 `/admin?musicRequest=:id`에서 열람 시 읽음 처리됩니다. `backend/music-requests.js`, `admin-playlists.js`, D1 `music_requests` / 마이그레이션 `0017_music_requests.sql`.
+
+### 요원 개인 기록과 AZ 열람 — 2026-11-27
+
+- 네 부서의 소속 요원 상세는 공통 문서 창 안에서 신분증·개인 파일·갤러리를 전환합니다. 카드 앞뒤 전환과 모바일 스와이프를 지원합니다.
+- 개인 파일 뒷면의 칠판 방명록은 `GET/POST /guestbook`으로 공유되며 D1의 `member_guestbook`에 저장합니다. 업무 메신저의 로컬 저장과 별개입니다.
+- ORPÉ의 기존 키패드 통과 후 증거 문서를 열면 `assets/az-reader.js/css`의 다섯 장 수사 기록이 표시됩니다. 기존 동선 추적은 유지합니다.

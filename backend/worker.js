@@ -1,3 +1,4 @@
+import { guestbook } from './guestbook.js';
 import { musicRequests } from './music-requests.js';
 import { playlistAPI } from './playlists.js';
 import { musicAudio } from './music-audio.js';
@@ -324,6 +325,8 @@ async function handle(request, env) {
   }
   const incidentResponse = await incidentAPI(request, env, {identity,rate,blocked,body,captcha,sourceLog});
   if (incidentResponse) return incidentResponse;
+  const guestbookResponse=await guestbook(request,env,{identity,blocked,rate,body});
+  if(guestbookResponse)return guestbookResponse;
   const suggestions=await musicRequests(request,env,{identity,blocked,rate,body});
   if(suggestions)return suggestions;
   const music=await playlistAPI(request,env,{body});

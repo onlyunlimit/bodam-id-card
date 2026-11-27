@@ -61,7 +61,7 @@ test('Login cancellation stays public, staff persists across pages, photo roles 
     'hidden',
   );
   await card.locator('.card-turner').click();
-  expect(await page.locator('.dossier-photo').getAttribute('data-image-url')).not.toBe(front);
+  expect(await page.locator('.badge-portrait').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
   await expect(page.locator('[data-gallery]')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await page.goto('/origin.html');

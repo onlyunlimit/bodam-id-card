@@ -70,7 +70,7 @@ test('Classified evidence opens as a document and crosshair stays decorative wit
   await expect(page.locator('[data-evidence]')).toHaveCount(3);
   await expect.poll(() => page.locator('#tracking-map img.leaflet-tile').evaluateAll(es => Math.max(...es.map(e => Number(e.src.match(/\/(\d+)\/\d+\/\d+\.png/)?.[1] || 0))))).toBe(11);
   await page.locator('[data-evidence="01"]').click();
-  await expect(page.locator('.evidence-reader')).toContainText('동일 발화');
+  await expect(page.locator('.az-reader')).toContainText('비켜.');
   await page.setViewportSize({ width: 320, height: 850 });
   expect(
     await page.locator('#document-dialog').evaluate((e) => e.scrollWidth <= e.clientWidth + 1),
@@ -78,26 +78,16 @@ test('Classified evidence opens as a document and crosshair stays decorative wit
   await page.keyboard.press('Escape');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
-test('Portrait artwork uses a background and expanded past records do not intersect the barcode rail', async ({
-  page,
-}) => {
+test('Personnel artwork uses backgrounds and photo collections open separately', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/beacon.html');
   await staff(page);
-  const photo = page.locator('[data-character="levit"] .id-photo>img');
-  await expect(photo).toHaveAttribute('src', /^data:image\/svg/);
-  expect(await photo.evaluate((e) => getComputedStyle(e).backgroundImage)).toContain('https://');
   await page.locator('[data-character="levit"] .card-turner').click();
-  await page.locator('.past-record summary').click();
-  const boxes = await page.locator('.profile-photo-index,.past-record').evaluateAll((es) =>
-    es.map((e) => {
-      const r = e.getBoundingClientRect();
-      return { top: r.top, bottom: r.bottom };
-    }),
-  );
-  expect(boxes[0].bottom).toBeLessThanOrEqual(boxes[1].top + 1);
+  expect(await page.locator('.badge-portrait').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
+  await page.locator('[data-tab="photos"]').click();
+  await page.locator('[data-photo]').first().click();
+  await expect(page.locator('.photo-view')).toBeVisible();
 });
-
 test('Closing a report and immediately reusing the dialog never refreshes a disposed map', async ({
   page,
 }) => {

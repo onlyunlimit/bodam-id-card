@@ -1,3 +1,5 @@
+import { memberArchive } from './member-archive.js';
+import { openAZReader } from './az-reader.js';
 import { teamHero } from './team-design.js';
 import { visualSignature, scanMarkup, openSequence } from './personnel-design.js';
 import { voice } from './voices.js';
@@ -7,7 +9,7 @@ import { characters } from './characters.js';
 import { teams, activityFor, scheduleFor, koreaTime, formatMinutes } from './model.js';
 import { openTransmission, requestTransmission } from './transmissions.js';
 import { $, $$, esc, state, heading, modal, login, toast, read, save } from './runtime.js';
-export const units = teams.filter((t) => ['origin', 'beacon', 'shield', 'blackjack'].includes(t.id));
+export const units = ['shield', 'origin', 'beacon', 'blackjack'].map(id => teams.find(t => t.id === id));
 export const unitLocations = {
   blackjack: '각성관 · 대테러부대',
   origin: 'B4 · 오리진 생활 구역',
@@ -68,6 +70,8 @@ export function detailImage(c) {
 }
 export function dossier(c) {
   if (!state.staff && !['lucky', 'obsidus'].includes(c.team)) return login(() => dossier(c));
+  if (['shield','origin','beacon','blackjack'].includes(c.team)) return memberArchive(c);
+  if (c.team === 'orpe') return openAZReader();
   const artist = ['lucky', 'obsidus'].includes(c.team);
   const historic = (c.gallery || []).filter((g) => /과거/.test(g.label));
   const dialog = modal(

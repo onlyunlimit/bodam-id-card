@@ -50,7 +50,7 @@ test('Long profile backs and a messenger fit at mobile width', async ({ page }) 
   const back = page.locator('.card-face.back').first();
   expect(await back.evaluate((e) => e.scrollHeight <= e.clientHeight + 2)).toBe(true);
   await page.locator('.card-turner').first().click();
-  await expect(page.locator('.dossier-photo')).toBeVisible();
+  await expect(page.locator('.badge-portrait')).toBeVisible();
   expect(
     await page.locator('#document-dialog').evaluate((e) => e.scrollWidth <= e.clientWidth + 1),
   ).toBe(true);

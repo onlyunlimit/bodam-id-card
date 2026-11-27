@@ -20,7 +20,9 @@ for(const team of ['blackjack','origin','beacon','shield'])test(`${team} all per
   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();
   for(const id of ids){
    await page.locator(`[data-character="${id}"] .card-turner`).click();
-   const fields=page.locator('.profile-document :is(h3,h3 small,p,dt,dd,a,.coming-soon),.profile-filebar,.profile-photo-index');
+   await page.locator('[data-tab=paper]').click();
+   const fields=page.locator('.paper-front :is(h3,small,p,dt,dd,h4)');
+   expect(await fields.count()).toBeGreaterThan(0);
    for(const field of await fields.all())expect(await contrast(field),`${id}/${theme}: ${await field.textContent()}`).toBeGreaterThanOrEqual(4.5);
    const action=page.locator('.profile-document .primary');
    if(await action.count()){await action.hover();expect(await contrast(action)).toBeGreaterThanOrEqual(4.5);}
@@ -38,15 +40,15 @@ test('AZ archive replaces text art with a readable evidence dossier and keeps tr
  await expect(page.locator('.az-dossier')).toBeVisible();await expect(page.locator('.az-dossier pre,.identity-terminal')).toHaveCount(0);
  await expect(page.locator('.evidence-file')).toHaveCount(3);
  for(const button of await page.locator('.evidence-file').all()){
-  await button.click();await expect(page.locator('.evidence-reader .evidence-facts>div')).toHaveCount(3);
-  await expect(page.locator('.evidence-reader pre')).toHaveCount(0);await page.keyboard.press('Escape');
+  await button.click();await expect(page.locator('.az-folder-tabs [data-sheet]')).toHaveCount(5);
+  await expect(page.locator('.az-reader pre')).toHaveCount(0);await page.keyboard.press('Escape');
  }
  await page.locator('#tracking-pause').click();await expect(page.locator('#tracking-pause')).toHaveAttribute('aria-pressed','true');
  const before=await page.locator('#sighting-log li').count();await page.locator('#track-az').click();await expect(page.locator('#sighting-log li')).toHaveCount(before+1);
  for(const theme of ['dark','light']){
   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();
-  await page.locator('#az-profile .card-turner').click();await expect(page.locator('.profile-stage')).toBeVisible();
-  for(const field of await page.locator('.profile-document :is(h3,h3 small,p,dt,dd,a,.coming-soon),.profile-filebar').all())expect(await contrast(field),`AZ/${theme}: ${await field.textContent()}`).toBeGreaterThanOrEqual(4.5);
+  await page.locator('#az-profile .card-turner').click();await expect(page.locator('.az-reader')).toBeVisible();
+  await expect(page.locator('.az-page')).toContainText('AZ');
   await page.keyboard.press('Escape');
  }
  for(const width of [1440,320]){

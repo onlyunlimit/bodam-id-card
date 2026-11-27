@@ -119,3 +119,8 @@
 
 - 사용자가 CD 표시용으로 지정한 [Dealer 이미지](https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=webp,w=800,metadata=none/charim/a456eeae-c8ca-4792-9de9-3d848f789cb4?v=574e50)를 `assets/playlist-themes.js`에서 연결합니다. 곡 목록의 앨범 이미지는 유지합니다.
 - 부서 신분증은 HTML/CSS로 구현하고 기존 SGIA 은색 엠블럼·인물 이미지 링크를 재사용합니다.
+
+## 2026-11-27 요원 개인 기록과 AZ 문서
+
+- 신분증·종이 기록·칠판·수사 파일은 HTML/CSS로 구현했습니다. 기존 공개 인물 이미지 URL을 재사용합니다.
+- 시온 갤러리는 사용자가 제공한 Caveduck 이미지 링크 17개를 연결하고 행사명은 영문으로 표시합니다. 참고 문서와 원본 HTML은 공개 빌드에 포함하지 않습니다.

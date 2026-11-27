@@ -1,3 +1,4 @@
+import { openAZReader } from './az-reader.js';
 import { $, $$, esc, modal, state, login } from './runtime.js';
 import { registerCopy } from './i18n.js';
 [
@@ -48,11 +49,7 @@ export function mountEvidenceIndex() {
       (button.onclick = () => {
         if (!state.staff) return login(() => button.click());
         const f = files.find((f) => f.id === button.dataset.evidence);
-        modal(
-          'EXHIBIT ' + f.id + ' / OR—001',
-          `<article class="evidence-reader"><header><span>COUNTERINTELLIGENCE BUREAU</span><b>CLASSIFIED</b></header><div class="evidence-reader-title"><small>${f.kind}</small><h3>${f.title}</h3><span>${f.status}</span></div>${evidenceFacts(f)}<p>${esc(f.body)}</p><aside>${esc(f.note)}</aside><footer><i class="barcode"></i><span>OR—001 / ${f.id}<br>RECORD RETAINED</span></footer></article>`,
-          'evidence',
-        );
+        openAZReader({ '01': 4, '02': 1, '03': 3 }[f.id]);
       }),
   );
 }
