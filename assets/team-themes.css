@@ -434,3 +434,10 @@ body .shield-hero .shield-lineup>div{border:1px solid #aebce040;background:#111a
 body .shield-hero .shield-lineup .team-hero-photo{filter:none}
 body .shield-hero .shield-lineup>div>span{background:linear-gradient(transparent,#0c1128e6);color:#e6ebff}
 body[data-unit=shield] .unit-workspace .panel{background:var(--surface);border-color:var(--line)}
+
+/* Team pages keep their own palette in both light and dark mode, signed in or not:
+   the generic light/staff variables (:root[data-theme] body[data-viewer]) must not reach them. */
+:root[data-theme] body[data-unit=blackjack]{--bg:#0b100b;--surface:#1c261b;--surface2:#2d3c29;--text:#e6e5ce;--muted:#b7c2a4;--accent:#b4cd8d;--line:#526044;--field:#182116;--control:#35452d;--nav:#1c261b;--accent-soft:#b4cd8d14;color-scheme:dark}
+:root[data-theme] body[data-unit=origin]{--bg:#100d1d;--surface:#21192f;--surface2:#312542;--text:#eee6ff;--muted:#b8a9cb;--accent:#c3a0f6;--line:#514260;--field:#1b1428;--control:#3b2d4d;--nav:#21192f;--accent-soft:#c3a0f614;color-scheme:dark}
+:root[data-theme] body[data-unit=beacon]{--bg:#101d27;--surface:#1c2b36;--surface2:#2c3d49;--text:#e5eef2;--muted:#a1b6c4;--accent:#98cee3;--line:#465b69;--field:#172630;--control:#304552;--nav:#1c2b36;--accent-soft:#98cee314;color-scheme:dark}
+:root[data-theme] body[data-unit=shield]{--bg:#0b1026;--surface:#151c38;--surface2:#212a4d;--text:#edf1ff;--muted:#b3bfe0;--accent:#c9d4ff;--line:#38446e;--field:#111733;--control:#2a3462;--nav:#151c38;--accent-soft:#c9d4ff14;color-scheme:dark}

@@ -235,3 +235,7 @@ html[data-motion=off] .az-reader *{animation:none!important}
 .az-inline .az-stage{order:0}
 .az-inline .az-dock{order:1}
 @media(max-width:860px){.az-inline .az-terminal{margin:8px 10px 0}}
+
+/* Inline clue memo: pinned over the open sheet, not to the bottom of the page. */
+.az-inline .az-clue{position:absolute;left:50%;top:var(--clue-top,40%);bottom:auto;transform:translateX(-50%) rotate(-1.5deg);z-index:70;animation:azClueIn .35s cubic-bezier(.22,1,.36,1) both}
+@keyframes azClueIn{from{opacity:0;transform:translateX(-50%) translateY(12px) rotate(-1.5deg)}}

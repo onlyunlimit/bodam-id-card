@@ -231,8 +231,14 @@ export function mountAZFile(host, { inline = true, sealed = false, onSeal = null
     found.add(id);
     if (id === 'tape') q('[data-tape]').textContent = '▶ "…아니야."';
     q('[data-clue-text]').innerHTML = clueText[id].join('<br>');
+    // Inline, the memo sits next to the trace that was tapped and stays inside the file.
+    if (inline) {
+      const r = root.getBoundingClientRect(), t = el.getBoundingClientRect();
+      root.style.setProperty('--clue-top', `${Math.max(60, Math.min(r.height - 220, t.top - r.top - 40))}px`);
+    }
     clue.hidden = false;
     q('[data-clue-close]').focus({ preventScroll: true });
+    if (inline) clue.scrollIntoView({ block: 'nearest', behavior: state.motion ? 'smooth' : 'auto' });
     const n = Math.min(found.size, NEED);
     q('[data-term-count]').textContent = `단서 ${n} / ${NEED}`;
     q('[data-term-bar]').style.width = `${(n / NEED) * 100}%`;
