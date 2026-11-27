@@ -30,7 +30,7 @@ async function fixture() {
   sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0010_public_codenames.sql', import.meta.url), 'utf8'));
-  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql','0016_music_playlists.sql','0017_music_requests.sql','0018_member_guestbook.sql','0019_guestbook_moderation.sql','0020_playlist_catalog.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql','0016_music_playlists.sql','0017_music_requests.sql','0018_member_guestbook.sql','0019_guestbook_moderation.sql','0020_playlist_catalog.sql','0021_guestbook_examples.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -930,9 +930,9 @@ test('Song suggestions are private, retry-safe, validated and readable only by a
 
 test('Guestbook notes notify the owner and can be edited, hidden, traced and deleted',async()=>{
  const {req,key}=await fixture();
- const posted=await req('/guestbook','POST',{character:'jion',author:'방문자',message:'안녕',font:'memo',color:'#1F2430',x:.2,y:.3,size:40});
+ const posted=await req('/guestbook','POST',{character:'binjo',author:'방문자',message:'안녕',font:'memo',color:'#1F2430',x:.2,y:.3,size:40});
  assert.equal(posted.status,201);const id=posted.data.id;assert.match(id,/^[a-f0-9-]{36}$/);
- assert.equal((await req('/guestbook?character=jion')).data.notes[0].size,28);
+ assert.equal((await req('/guestbook?character=binjo')).data.notes[0].size,28);
  assert.equal((await req('/admin/guestbook')).status,401);
  const login=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
  const admin={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
@@ -942,15 +942,22 @@ test('Guestbook notes notify the owner and can be edited, hidden, traced and del
  assert.equal((await req('/admin/guestbook/'+id,'PATCH',{read:true},admin)).status,200);
  assert.equal((await req('/admin/notifications','GET',undefined,admin)).data.unread,0);
  assert.equal((await req('/admin/guestbook/'+id,'PATCH',{message:'수정됨'},admin)).status,200);
- assert.equal((await req('/guestbook?character=jion')).data.notes[0].message,'수정됨');
+ assert.equal((await req('/guestbook?character=binjo')).data.notes[0].message,'수정됨');
  assert.equal((await req('/admin/guestbook/'+id,'PATCH',{hidden:true},admin)).status,200);
- assert.equal((await req('/guestbook?character=jion')).data.notes.length,0);
+ assert.equal((await req('/guestbook?character=binjo')).data.notes.length,0);
  assert.ok((await req('/admin/ip','POST',{id},admin)).data.ip);
  assert.equal((await req('/admin/moderate','POST',{kind:'guestbook',id,action:'delete'},admin)).status,400);
  assert.equal((await req('/admin/moderate','POST',{kind:'guestbook',id,action:'block'},admin)).status,200);
- assert.equal((await req('/guestbook','POST',{character:'jion',message:'차단 후'})).status,403);
+ assert.equal((await req('/guestbook','POST',{character:'binjo',message:'차단 후'})).status,403);
  assert.equal((await req('/admin/guestbook/'+id,'DELETE',undefined,admin)).status,200);
- assert.equal((await req('/admin/guestbook?filter=all','GET',undefined,admin)).data.notes.length,0);
+ assert.equal((await req('/admin/guestbook?filter=all','GET',undefined,admin)).data.notes.filter(n=>n.character==='binjo').length,0);
+ // Zion's former built-in examples are ordinary, already-read rows the owner can manage.
+ const examples=(await req('/guestbook?character=jion')).data.notes;assert.equal(examples.length,3);
+ const example=examples[0].id;
+ assert.equal((await req('/admin/guestbook/'+example,'PATCH',{message:'예시 수정'},admin)).status,200);
+ assert.equal((await req('/guestbook?character=jion')).data.notes[0].message,'예시 수정');
+ assert.equal((await req('/admin/guestbook/'+example,'DELETE',undefined,admin)).status,200);
+ assert.equal((await req('/guestbook?character=jion')).data.notes.length,2);
 });
 
 test('Playlists keep SGIA before HKU, accept new teams and cover links, and hide on request',async()=>{

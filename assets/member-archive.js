@@ -250,7 +250,6 @@ export function memberArchive(c) {
     board.append(el);
     return el;
   }
-  const seeds = (facts.seed || []).map(([author, message, font, color, x, y]) => ({ author, message, font, color, x, y, size: SIZE.base }));
   async function load() {
     let notes = [];
     try {
@@ -263,8 +262,8 @@ export function memberArchive(c) {
     }
     if (!root.isConnected) return;
     board.replaceChildren();
-    [...seeds, ...notes].forEach((n) => note(n));
-    q('[data-count]').textContent = String(seeds.length + notes.length);
+    notes.forEach((n) => note(n));
+    q('[data-count]').textContent = String(notes.length);
     if (pending) board.append(pending);
   }
   load();

@@ -39,7 +39,7 @@ test('Personnel file: floating badge, paper record with guestbook on its back, p
   await expect(page.locator('[data-dossier]')).toHaveClass(/is-flipped/);
   await expect(page.locator('.paper-front')).toBeHidden();
   await expect(page.locator('.ma-chalk,.ma-board')).toHaveCount(0);
-  await expect(page.locator('.ma-sheet .ma-ink-note')).toHaveCount(4);
+  await expect(page.locator('.ma-sheet .ma-ink-note')).toHaveCount(1);
   await page.locator('.guest-form [name=message]').fill('<b>안녕</b>');
   await expect(page.locator('.ma-ink-note.pending')).toContainText('<b>안녕</b>');
   await page.locator('[data-size-step="1"]').click();
