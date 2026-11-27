@@ -7,7 +7,7 @@
 
 ## 2026-11-28 — 지온 방명록 예시를 관리 가능한 글로 전환
 
-- **상태:** 서버 DB 반영 확인, 홈페이지 배포는 아래 항목 참고.
+- **상태:** 서버 DB 반영·홈페이지 배포 확인. 소스 [8fc564b](https://github.com/onlyunlimit/bodam-id-card/commit/8fc564b9f2848e16c9d46a8e483330e86f42b2a5) → 공개 `058ada1`, GitHub Pages `built`, `member-archive.js` 해시 일치.
 - 지온 개인 파일 뒷면에 화면 코드로 고정되어 있던 예시 3개(실드 팀원 A·전담 가이드·SGIA 기록관)를 실제 방명록 글로 옮김. 관리자 앱 ‘방명록’ 탭의 ‘전체’에서 다른 글처럼 수정·숨김·삭제 가능. 이미 읽음 처리되어 알림은 가지 않으며, 작성 IP는 없음. 분필 색은 종이 잉크 색으로 변환.
 - 마이그레이션 `0021_guestbook_examples.sql` 원격 적용 완료(행 3개 추가, 기존 글 변경 없음). 공개 `/guestbook?character=jion`에서 3개 확인.
 - 수정 파일: `assets/member-archive.js`, `assets/member-archive-data.js`(고정 예시 삭제), `backend/migrations/0021_guestbook_examples.sql`, 서버·브라우저 검사.
