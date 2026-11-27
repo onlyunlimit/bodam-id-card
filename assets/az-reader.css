@@ -228,3 +228,10 @@ html[data-motion=off] .az-reader *{animation:none!important}
 /* Phone, closed: the cover keeps its own proportions; the sheets wait behind it. */
 .az-rig.compact:not(.is-open) .az-cover{inset:0 0 auto;height:548px}
 .az-rig.compact:not(.is-open) :is(.az-stack,.az-board){visibility:hidden}
+
+/* Inline: field terminal sits above the folder so the folder edge and sticky dock never cover it. */
+.az-inline .az-hud{order:-2}
+.az-inline .az-terminal{order:-1;margin:10px auto 0}
+.az-inline .az-stage{order:0}
+.az-inline .az-dock{order:1}
+@media(max-width:860px){.az-inline .az-terminal{margin:8px 10px 0}}

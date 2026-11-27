@@ -51,7 +51,7 @@ test('Theme has just light/dark, public and staff have distinct system appearanc
   expect(await page.locator('body').evaluate((e) => getComputedStyle(e).backgroundColor)).not.toBe(
     before,
   );
-  await expect(page.locator('.staff-ribbon')).toBeVisible();
+  await expect(page.locator('.staff-ribbon')).toHaveCount(0);
   await page.mouse.move(900, 350);
   await expect.poll(() => page.locator('#map-target').evaluate((e) => e.style.left)).not.toBe('');
 });

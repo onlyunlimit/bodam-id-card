@@ -14,7 +14,7 @@ test('Administrator sees private suggestions and can clear reviewed entries from
   if(u.pathname==='/admin/music-requests/test'&&req.method()==='PATCH'){read=true;data={ok:true};}
   return route.fulfill({json:data});
  });
- await page.goto('/admin');const inbox=page.locator('.music-request-inbox');await expect(inbox.locator('article')).toContainText('추천곡 · Artist');
+ await page.goto('/admin');await page.locator('.admin-tabs [data-tab=music]').click();const inbox=page.locator('.music-request-inbox');await expect(inbox.locator('article')).toContainText('추천곡 · Artist');
  await expect(inbox.locator('article p')).toHaveText('<img src=x onerror=alert(1)>');await expect(inbox.locator('img')).toHaveCount(0);
  await inbox.locator('[data-request-read]').click();await expect(inbox.locator('article')).toHaveCount(0);await expect(inbox.locator('[data-request-status]')).toHaveText('신청이 없습니다.');
  await inbox.locator('select').selectOption('all');await expect(inbox.locator('article')).toContainText('확인함');expect(errors).toEqual([]);

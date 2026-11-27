@@ -399,7 +399,32 @@ export function memberArchive(c) {
     slots.forEach((el, i) => { el.style.zIndex = String(10 + i); });
   }
   function deal() { slots.forEach((el, i) => later(() => el.classList.add('is-dealt'), i * 45)); }
-  slots.forEach((el) => on(el, 'click', () => {
+  // Touch screens have no hover: a tap brings the card to the centre, large; a sideways
+  // swipe turns it over (same curve as the Lucky Trick cards). Mouse users flip in place.
+  const touchMode = () => matchMedia('(hover: none), (max-width: 899px)').matches;
+  // Its own modal dialog: the top layer escapes the personnel dialog's containing block.
+  const zoom = document.createElement('dialog');
+  zoom.className = 'ma-poca-zoom tw';
+  zoom.setAttribute('aria-label', '포토카드 크게 보기');
+  zoom.innerHTML = '<button type="button" class="ma-poca-zoom-card" aria-label="포토카드 크게 보기. 옆으로 밀면 뒤집힙니다" aria-pressed="false"><span class="ma-poca-body ma-zoom-pivot"><span class="ma-poca-face ma-poca-front"><span class="ma-poca-img" data-zoom-img></span><span class="ma-holo" aria-hidden="true"></span></span><span class="ma-poca-face ma-poca-back"><span class="ma-poca-title" data-zoom-title></span></span></span></button>';
+  root.append(zoom);
+  const zoomCard = zoom.querySelector('.ma-poca-zoom-card');
+  const zoomTurn = turnable(zoomCard, zoomCard.querySelector('.ma-zoom-pivot'));
+  let zoomFrom = null;
+  const closeZoom = () => { if (zoom.open) zoom.close(); };
+  on(zoom, 'close', () => zoomFrom?.focus({ preventScroll: true }));
+  on(d, 'close', closeZoom, { once: true });
+  on(zoom, 'click', (e) => { if (e.target === zoom) closeZoom(); });
+  slots.forEach((el, i) => on(el, 'click', () => {
+    if (touchMode()) {
+      zoomFrom = el;
+      zoom.querySelector('[data-zoom-img]').setAttribute('style', bg(cards[i].url).replaceAll('&quot;', '"'));
+      zoom.querySelector('[data-zoom-title]').textContent = cards[i].title;
+      zoomTurn.reset();
+      zoom.showModal();
+      zoomCard.focus({ preventScroll: true });
+      return;
+    }
     const body = el.querySelector('.ma-poca-body');
     const flipped = !body.classList.contains('is-flipped');
     body.classList.toggle('is-flipped', flipped);

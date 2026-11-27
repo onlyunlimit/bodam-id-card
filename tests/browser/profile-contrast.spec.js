@@ -40,7 +40,7 @@ test('AZ archive replaces text art with a readable evidence dossier and keeps tr
  await expect(page.locator('.az-dossier')).toBeVisible();await expect(page.locator('.az-dossier pre,.identity-terminal,.az-reader pre')).toHaveCount(0);
  await expect(page.locator('.az-vault-file .az-folder-tabs [data-sheet]')).toHaveCount(5);
  await page.locator('#tracking-pause').click();await expect(page.locator('#tracking-pause')).toHaveAttribute('aria-pressed','true');
- const before=await page.locator('#sighting-log li').count();await page.locator('#track-az').click();await expect(page.locator('#sighting-log li')).toHaveCount(before+1);
+ await expect(page.locator('#sighting-log')).toHaveCount(0);const before=await page.locator('#intrusion-log').textContent();await page.locator('#track-az').click();await expect(page.locator('#intrusion-log')).not.toHaveText(before);
  for(const theme of ['dark','light']){
   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();
   await expect(page.locator('.az-sheet[data-page="1"] .az-page')).toContainText('AZ');

@@ -503,7 +503,7 @@ function renderOrpeContent(target) {
       '외부 위협 정보',
       '비인가 조직 · 관측 자료의 외부 반출을 금합니다.',
     ) +
-    `<div class="az-vault-file"></div><section class="classified-board az-dossier"><header class="az-case-header"><div><span class="eyebrow">SPECIAL INVESTIGATION / 001</span><h2>대상 관측 기록</h2></div><span class="az-classification">RESTRICTED<span>ORPÉ / AZ</span></span></header><div class="threat-layout threat-solo"><div class="threat-intelligence"><span class="eyebrow">SUBJECT 001 / UNREGISTERED</span><h2>AZ<span>에이지</span></h2><p>극단주의 범죄 집단 ORPÉ 소속 미등록 각성자.<br>증언의 일치가 정보의 진실성을 보증하지 않습니다.</p><div class="threat-class"><span>THREAT ASSESSMENT</span><strong>위험도 측정 불가</strong><span class="az-risk-rule" aria-hidden="true"></span></div><dl class="facts"><div><dt>발화 동기화</dt><dd>추정 영향 반경 약 2km</dd></div><div><dt>주요 위험</dt><dd>거짓 증언 · 수치심 환산</dd></div><div><dt>대응 원칙</dt><dd>단독 접촉 금지 · 교차 검증</dd></div></dl><button class="danger-button" id="threat-log">감청·침입 로그 열람 ↗</button><div id="intrusion-log" class="terminal-log" aria-live="polite"></div></div></div><div class="tracking-section"><div class="section-title"><h2>동선 추적</h2><span class="badge danger">RESTRICTED INTELLIGENCE</span><button id="tracking-pause" aria-pressed="false">추적 일시정지</button><button id="track-az">신호 재탐색 ↻</button></div><div class="tracking-layout"><div id="tracking-map" class="seoul-map"></div><ol id="sighting-log"></ol></div></div></section>`;
+    `<div class="az-vault-file"></div><section class="classified-board az-dossier"><header class="az-case-header"><div><span class="eyebrow">SPECIAL INVESTIGATION / 001</span><h2>대상 관측 기록</h2></div><span class="az-classification">RESTRICTED<span>ORPÉ / AZ</span></span></header><div class="threat-layout threat-solo"><div class="threat-intelligence"><span class="eyebrow">SUBJECT 001 / UNREGISTERED</span><h2>AZ<span>에이지</span></h2><p>극단주의 범죄 집단 ORPÉ 소속 미등록 각성자.<br>증언의 일치가 정보의 진실성을 보증하지 않습니다.</p><div class="threat-class"><span>THREAT ASSESSMENT</span><strong>위험도 측정 불가</strong><span class="az-risk-rule" aria-hidden="true"></span></div><dl class="facts"><div><dt>발화 동기화</dt><dd>추정 영향 반경 약 2km</dd></div><div><dt>주요 위험</dt><dd>거짓 증언 · 수치심 환산</dd></div><div><dt>대응 원칙</dt><dd>단독 접촉 금지 · 교차 검증</dd></div></dl><button class="danger-button" id="threat-log">감청·침입 로그 열람 ↗</button><div id="intrusion-log" class="terminal-log" aria-live="polite"></div></div></div><div class="tracking-section"><div class="section-title"><h2>동선 추적</h2><span class="badge danger">RESTRICTED INTELLIGENCE</span><button id="tracking-pause" aria-pressed="false">추적 일시정지</button><button id="track-az">신호 재탐색 ↻</button></div><div class="tracking-layout"><div id="tracking-map" class="seoul-map"></div></div></div></section>`;
   $('.classified-board', target).insertAdjacentHTML(
     'afterbegin',
     '<div class="case-breadcrumb"><span>COUNTERINTELLIGENCE BUREAU</span><b>CASE / OR—001</b><span>EVIDENCE REVIEW</span></div>',
@@ -515,12 +515,6 @@ function renderOrpeContent(target) {
     markers = [],
     step = 0,
     paused = false;
-  const events = [
-    '감청 채널에서 동일 발화가 중복 수신됨.',
-    '비인가 장비 거래 정황. 목격자 진술 대조 중.',
-    'CCTV 시각과 출입 기록 불일치. 흔적 복원 중.',
-    '대상 파장 소실. 2km 반경 접촉을 제한함.',
-  ];
   function track() {
     const options = Object.entries(locations).filter(([n]) => n !== points.at(-1)?.name),
       [name, pos] = options[Math.floor(Math.random() * options.length)];
@@ -549,11 +543,7 @@ function renderOrpeContent(target) {
         );
       });
     }
-    const li = document.createElement('li');
-    li.className = 'incoming';
-    li.innerHTML = `<time>${koreaTime().clock}</time><strong>${name}</strong><p>${events[step++ % events.length]}</p>`;
-    $('#sighting-log').prepend(li);
-    while ($('#sighting-log').children.length > 4) $('#sighting-log').lastChild.remove();
+    step++;
     $('#intrusion-log').textContent =
       `[${koreaTime().clock}] TRACE ${String(step).padStart(3, '0')}\nINTEGRITY WARNING / 신호 교차 검증 중\nENCRYPTED CHANNEL / ORPÉ-${1000 + step}`;
   }

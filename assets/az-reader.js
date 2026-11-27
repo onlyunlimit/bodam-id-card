@@ -161,7 +161,8 @@ export function mountAZFile(host, { inline = true, sealed = false, onSeal = null
     const maxH = inline ? Infinity : root.clientHeight - (compact ? 150 : 140);
     const s = Math.min(compact ? 1.12 : 1, w / needW, maxH / needH);
     rig.style.setProperty('--az-s', String(s));
-    if (inline) stage.style.height = `${Math.ceil(needH * s) + 24}px`;
+    // The stage box is border-box: reserve its top padding (tabs) plus room for the folder edge.
+    if (inline) stage.style.height = `${Math.ceil(needH * s) + (parseFloat(getComputedStyle(stage).paddingTop) || 0) + 28}px`;
     noise.width = root.clientWidth;
     noise.height = root.clientHeight;
   }

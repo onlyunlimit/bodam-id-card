@@ -31,7 +31,7 @@ test('Internal navigation preserves the same playing BGM and records actions thr
         window.routeMarker === 42,
     ),
   ).toBe(true);
-  await page.locator('#network-log').click();
+  await page.locator('#activity-open').click();
   await expect(page.locator('.activity-lines')).toContainText('NAVIGATE');
   await expect(page.locator('.activity-lines')).toContainText('비콘');
   await page.keyboard.press('Escape');

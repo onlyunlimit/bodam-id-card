@@ -64,6 +64,7 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await page.locator('#key').fill('test-only-strong-secret-not-a-production-key');
   await page.locator('#login button').click();
   await expect(page.locator('#workspace')).toBeVisible();
+  await page.locator('.admin-tabs [data-tab=compose]').click();
   await page.locator('#artist-compose').click();
   await page.locator('#admin-editor [name=created_at]').fill('2024-01-02T03:04:05');
   await page.locator('#admin-editor [name=title]').fill('공식 첫 인사');
@@ -86,6 +87,7 @@ test('Owner console publishes with a member identity, edits profiles and manages
   await page.locator('#admin-editor button[type=submit]').click();
   await expect(page.locator('#admin-editor')).not.toBeVisible();
   expect(members[0].bio).toBe('웹에서 수정한 프로필');
+  await page.locator('.admin-tabs [data-tab=posts]').click();
   await page.locator('[data-artist-reply]').first().click();
   await page.locator('#admin-editor [name=body]').fill('@재');
   await page.getByRole('option',{name:'@재인 · LUCKY'}).click();
@@ -111,12 +113,14 @@ test('Owner console publishes with a member identity, edits profiles and manages
   expect(calls.find(c=>c.path.startsWith('/admin/posts/')).data.member_id).toBeNull();
   expect(calls.find(c=>c.path.startsWith('/admin/posts/')).data.board).toBe('staff');
   expect(calls.find(c=>c.path.startsWith('/admin/posts/')).data.channel).toBe('soliloquy');
+  await page.locator('.admin-tabs [data-tab=compose]').click();
   await page.locator('#artist-compose').click();
   await page.locator('[name=title]').fill('사진 없이 작성');await page.locator('[name=body]').fill('취소한 사진은 등록하지 않음');
   await expect(page.locator('[data-images]')).toHaveCount(1);await page.locator('[data-image-url]').fill('https://images.example/second.jpg');await page.locator('[data-add-image-url]').click();await expect(page.locator('.upload-image')).toHaveCount(1);
   await page.locator('.attachment-remove').click();await expect(page.locator('.upload-image')).toHaveCount(0);
   await page.locator('#admin-editor button[type=submit]').click();await expect(page.locator('#admin-editor')).not.toBeVisible();
   expect(calls.filter(c=>c.path==='/admin/publish').at(-1).data.images).toEqual([]);
+  await page.locator('.admin-tabs [data-tab=posts]').click();
   await page.locator('[data-like-edit]').first().click();
   await page.locator('#admin-editor [name=likes]').fill('321');
   await page.locator('#admin-editor button[type=submit]').click();
@@ -144,7 +148,7 @@ test('Admin curates shared playlists with track ordering, editing and deletion',
   return route.fulfill({json:path==='/admin/members'?{members:[{id:'jaein',board:'lucky',name:'재인',bio:'',avatar_url:''}]}:path==='/admin/posts'?{posts:[]}:{comments:[]}});
  });
  await page.goto('https://admin.test/admin');await page.locator('#key').fill('test-secret');await page.locator('#login button').click();
- await page.locator('#playlist-manage').click();await page.locator('#playlist-new').click();
+ await page.locator('.admin-tabs [data-tab=music]').click();await page.locator('#playlist-manage').click();await page.locator('#playlist-new').click();
  const form=page.locator('#playlist-edit-form');await form.locator('[name=title]').fill('퇴근길');await form.locator('[name=member_id]').selectOption('jaein');
  for(const [title,id]of [['첫 곡','abcdefghijk'],['두 번째','zyxwvutsrqp']]){await page.locator('#playlist-add-track').click();const row=form.locator('fieldset').last();await row.locator('[data-track-title]').fill(title);await row.locator('[data-track-url]').fill('https://www.youtube.com/watch?v='+id);}
  await form.locator('fieldset').last().locator('[data-up]').click();await form.locator('[type=submit]').click();

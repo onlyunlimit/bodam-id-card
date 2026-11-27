@@ -1840,3 +1840,5 @@ body .az-dossier .person-card .id-card-head{background:#491522;color:#e8c7cc}
 #records-workspace .receiver .frequency-scale,#records-workspace .receiver .receiver-meter,#records-workspace .receiver .device-vents{display:none}
 .case-status-link{display:inline-block;margin-top:18px;padding:10px 18px;border-radius:10px;background:var(--control);color:var(--text);text-decoration:none}
 @media(max-width:600px){#records-workspace .records-rack .receiver{grid-template-columns:minmax(0,1fr) auto;gap:10px 14px!important;padding:16px!important}#records-workspace .receiver label{grid-column:1;grid-row:3/5}#records-workspace .receiver #signal-quality{grid-column:2;grid-row:2}#records-workspace .receiver .receiver-controls{grid-column:2;grid-row:3}#records-workspace .receiver #radio-sound{grid-column:2;grid-row:4}}
+/* The sighting memo list under the map was removed; the map uses the full width. */
+.az-dossier .tracking-layout{grid-template-columns:minmax(0,1fr)!important}
