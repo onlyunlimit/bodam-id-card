@@ -50,7 +50,7 @@
 .az-sheet-front,.az-sheet-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:2px 5px 5px 2px;overflow:hidden}
 .az-sheet-front{background:#ece5d5 url('https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/6f229be7-3f5e-47ba-9918-c464fe6a0394?v=44ab7a') center/100% 100%;color:var(--ink);padding:34px 32px 28px 36px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:1px 2px 6px #0004,inset 14px 0 24px #00000014}
 .az-sheet-front::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#00000029 0%,transparent 14%,transparent 85%,#0000000f 100%)}
-.az-sheet-back{transform:rotateY(180deg);background:radial-gradient(rgba(27,26,24,.06) 1px,transparent 1px),linear-gradient(180deg,#dfd7c7,#d4cbb9);background-size:6px 6px,100% 100%;box-shadow:-2px 4px 14px #0006,inset -16px 0 26px #00000024;padding:36px 34px;display:flex;flex-direction:column;justify-content:space-between;color:#1b1a1859}
+.az-sheet-back{transform:rotateY(180deg);background:radial-gradient(rgba(27,26,24,.05) 1px,transparent 1px),linear-gradient(180deg,#e2dacb,#d6cdbb);background-size:6px 6px,100% 100%;box-shadow:-2px 4px 14px #0006,inset -16px 0 26px #00000024}
 .az-punch{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:150px}
 .az-punch i{width:13px;height:13px;border-radius:50%;background:#141518;box-shadow:inset 0 2px 4px #000c,0 1px 0 #fff6}
 .az-back-stamp{font-size:9px;letter-spacing:.18em;border-top:1px solid #1b1a181f;padding-top:10px;display:flex;justify-content:space-between}
@@ -171,3 +171,60 @@ html[data-motion=off] .az-reader *{animation:none!important}
 .az-sheet.flipped,.az-sheet[inert]{pointer-events:none}
 .az-sheet:not(.flipped):not([inert]){pointer-events:auto}
 .az-reader .az-trace:active,.az-reader .az-trace:hover{transform:none!important}
+
+/* Turned sheets: show blank paper only. Visibility swaps at mid-turn so no layer of the
+   front (handwriting, stamps, traces) can leak through the back, with or without UV. */
+.az-sheet .az-sheet-front{transition:visibility 0s .42s}
+.az-sheet.flipped .az-sheet-front{visibility:hidden}
+.az-sheet .az-sheet-back{visibility:hidden;transition:visibility 0s .42s}
+.az-sheet.flipped .az-sheet-back{visibility:visible}
+.az-sheet-front{isolation:isolate}
+
+/* Sealed: only the cover and its wax seal. */
+.az-reader[data-sealed=true] :is(.az-dock,.az-terminal,.az-folder-tabs,.az-clue){display:none!important}
+.az-reader[data-sealed=true] .az-seal span{animation:azPulse 1.8s infinite}
+
+/* Phone sheet: one readable page (400 × 780 design), larger type. */
+.az-rig.compact{width:400px;height:780px}
+.az-rig.compact,.az-rig.compact.is-open{transform:scale(var(--az-s))}
+.az-compact .az-sheet-front{padding:30px 24px 22px 26px}
+.az-compact .az-doc-title{font-size:17px}
+.az-compact .az-meta,.az-compact .az-code{font-size:10px}
+.az-compact .az-body,.az-compact .az-spec,.az-compact .az-crimes div,.az-compact .az-contrast p,.az-compact .az-tr,.az-compact .az-sim-out,.az-compact .az-rumors li{font-size:12.5px;line-height:1.62}
+.az-compact .az-witness,.az-compact .az-uv{font-size:11.5px}
+.az-compact .az-spec{grid-template-columns:74px 1fr}
+.az-compact .az-spec>span:first-child,.az-compact .az-label,.az-compact .az-label-s{font-size:10px}
+.az-compact .az-profile{grid-template-columns:118px 1fr}
+.az-compact .az-photo{width:118px;height:150px}
+.az-compact .az-pen{font-size:21px}
+.az-compact .az-folder-tabs{top:auto;bottom:calc(100% + 6px);right:0;left:0;flex-direction:row;justify-content:center;gap:4px}
+.az-compact .az-folder-tabs button{writing-mode:horizontal-tb;border:1px solid #ffffff1f;border-bottom:0;border-radius:6px 6px 0 0;padding:6px 8px;font-size:10.5px;letter-spacing:.04em}
+.az-compact .az-folder-tabs button.active,.az-compact .az-folder-tabs button:hover:not(:disabled){transform:none}
+.az-compact .az-seal{right:50%;top:auto;bottom:-30px;transform:translateX(50%)}
+.az-compact .az-seal:hover{transform:translateX(50%) scale(1.06)}
+
+/* Dock: one compact row that always fits, no sideways scrolling. */
+.az-dock{gap:6px;padding:6px 8px;border-radius:999px;overflow:visible}
+.az-btn{border-radius:999px;padding:7px 13px}
+.az-arrow{width:40px;padding:7px 0;text-align:center}
+.az-close-btn{font-size:10.5px}
+@media(max-width:560px){.az-dock{gap:4px;padding:5px 6px}.az-btn{padding:7px 10px;font-size:11px}.az-arrow{width:38px;padding:7px 0}}
+
+/* Inline: the case file lives on the records page. */
+.az-modal-host{height:100%}
+.az-reader.az-inline{height:auto;overflow:clip;border-radius:18px;border:1px solid #ffffff1a;background:#0a0b0d;color:#e4e4e7;display:flex;flex-direction:column}
+.az-inline .az-hud{position:relative;padding:0 18px}
+.az-inline .az-stage{position:relative;inset:auto;width:100%;align-self:stretch;display:flex;align-items:flex-start;justify-content:center;padding-top:12px;overflow:visible}
+.az-inline.az-compact .az-stage{padding-top:44px}
+.az-inline .az-rig{transform-origin:top center}
+.az-inline .az-rig.is-open:not(.compact){transform:scale(var(--az-s)) translateX(235px)}
+.az-inline .az-rig:not(.is-open):not(.compact){transform:scale(var(--az-s))}
+.az-inline .az-terminal{position:relative;left:auto;bottom:auto;right:auto;width:auto;max-width:560px;margin:4px auto 10px;z-index:5}
+.az-inline .az-dock{position:sticky;bottom:12px;left:auto;transform:none;margin:0 auto 14px;align-self:center;max-width:calc(100% - 16px)}
+.az-inline .az-clue{position:fixed;bottom:84px}
+.az-inline[data-sealed=true] .az-stage{padding-bottom:30px}
+@media(max-width:860px){.az-inline .az-terminal{margin:2px 10px 8px}.az-inline .az-stage{bottom:auto}}
+
+/* Phone, closed: the cover keeps its own proportions; the sheets wait behind it. */
+.az-rig.compact:not(.is-open) .az-cover{inset:0 0 auto;height:548px}
+.az-rig.compact:not(.is-open) :is(.az-stack,.az-board){visibility:hidden}

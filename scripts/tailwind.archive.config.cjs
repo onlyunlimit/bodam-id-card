@@ -3,7 +3,7 @@
 // its own base styles. Regenerate after changing classes in the listed modules:
 //   npx tailwindcss@3.4.17 -c scripts/tailwind.archive.config.cjs -i scripts/tailwind.archive.css -o assets/archive.tw.css --minify
 module.exports = {
-  content: ['./assets/id-badge.js', './assets/member-archive.js', './assets/lucky-page.js', './assets/lucky-data.js'],
+  content: ['./assets/id-badge.js', './assets/member-archive.js', './assets/lucky-page.js', './assets/lucky-data.js', './assets/obsidus-data.js'],
   important: '.tw',
   corePlugins: { preflight: false },
   theme: {

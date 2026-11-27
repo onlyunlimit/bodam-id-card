@@ -20,7 +20,7 @@ for(const team of ['blackjack','origin','beacon','shield'])test(`${team} all per
   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();
   for(const id of ids){
    await page.locator(`[data-character="${id}"] .card-turner`).click();
-   await page.locator('[data-open-file]').click();await expect(page.locator('.ma-workspace')).toBeVisible();
+   await page.locator('[data-card=badge]').click();await expect(page.locator('.ma-file')).toBeVisible();
    const fields=page.locator('.paper-front :is(h4,h5,dt,dd,.ma-memos p)');
    expect(await fields.count()).toBeGreaterThan(0);
    for(const field of await fields.all())expect(await contrast(field),`${id}/${theme}: ${await field.textContent()}`).toBeGreaterThanOrEqual(4.5);
@@ -37,29 +37,21 @@ test('AZ archive replaces text art with a readable evidence dossier and keeps tr
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/records.html');
  await page.locator('#viewer-toggle').click();await page.locator('#login-submit').click();
  await page.locator('#open-sealed').click();await page.locator('#archive-pin').fill('0826');await page.locator('[data-key=ENTER]').click();
- await expect(page.locator('.az-dossier')).toBeVisible();await expect(page.locator('.az-dossier pre,.identity-terminal')).toHaveCount(0);
- await expect(page.locator('.evidence-file')).toHaveCount(3);
- for(const button of await page.locator('.evidence-file').all()){
-  await button.click();await expect(page.locator('.az-folder-tabs [data-sheet]')).toHaveCount(5);
-  await expect(page.locator('.az-reader pre')).toHaveCount(0);await page.keyboard.press('Escape');
- }
+ await expect(page.locator('.az-dossier')).toBeVisible();await expect(page.locator('.az-dossier pre,.identity-terminal,.az-reader pre')).toHaveCount(0);
+ await expect(page.locator('.az-vault-file .az-folder-tabs [data-sheet]')).toHaveCount(5);
  await page.locator('#tracking-pause').click();await expect(page.locator('#tracking-pause')).toHaveAttribute('aria-pressed','true');
  const before=await page.locator('#sighting-log li').count();await page.locator('#track-az').click();await expect(page.locator('#sighting-log li')).toHaveCount(before+1);
  for(const theme of ['dark','light']){
   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();
-  await page.locator('#az-profile .card-turner').click();await expect(page.locator('.az-reader')).toBeVisible();
   await expect(page.locator('.az-sheet[data-page="1"] .az-page')).toContainText('AZ');
-  await page.keyboard.press('Escape');
  }
  for(const width of [1440,320]){
   await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
  }
 });
 
-for(const [team,path] of [['obsidus','hunterwind']])test(`${team} artist profile opens without blocking effects and remains readable`,async({page})=>{
- await page.goto('/'+path+'.html');
- const ids=await page.locator('.artist-strip [data-artist],.agency-lineup [data-artist]').evaluateAll(es=>[...new Set(es.map(e=>e.dataset.artist))]);
- const all=ids.length?ids:await page.locator('[data-artist]').evaluateAll(es=>[...new Set(es.map(e=>e.dataset.artist))]);expect(all.length).toBe(4);
- for(const theme of ['light','dark']){if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();for(const id of all){await page.locator('[data-artist="'+id+'"]').first().click();await expect(page.locator('.profile-stage')).toBeVisible();await expect(page.locator('.profile-acquisition,.profile-stage .video-echo')).toHaveCount(0);for(const field of await page.locator('.profile-document :is(h3,h3 small,p,dt,dd,a,.coming-soon),.profile-filebar').all())await expect.poll(()=>contrast(field),{message:id+'/'+theme+': '+await field.textContent()}).toBeGreaterThanOrEqual(4.5);await page.keyboard.press('Escape');}}
- await page.setViewportSize({width:320,height:850});await page.locator('[data-artist]').first().click();expect(await page.locator('#document-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1)).toBe(true);
+test('OBSIDUS crew page shows every member profile and fits a phone',async({page})=>{
+ await page.goto('/hunterwind.html');
+ for(let i=0;i<4;i++){await page.locator('[data-deck-pills] [data-member="'+i+'"]').click();await expect(page.locator('[data-dossier-panel]')).toContainText(['차빈','한호','모현','유환'][i]);}
+ await page.setViewportSize({width:320,height:850});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 });

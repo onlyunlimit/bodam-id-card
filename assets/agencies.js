@@ -6,6 +6,7 @@ import { teamLogos } from './media.js';
 import { personName, registerCopy } from './i18n.js';
 import { agencyGallery } from './agency-gallery.js';
 import { renderLuckyPage } from './lucky-page.js';
+import { obsidusMembers } from './obsidus-data.js';
 [
   ['아티스트', 'Artists', 'アーティスト', '艺人'],
   ['화보 갤러리', 'Editorial gallery', 'フォトギャラリー', '写真画廊'],
@@ -17,6 +18,9 @@ import { renderLuckyPage } from './lucky-page.js';
 ].forEach((row) => registerCopy(...row));
 export function renderAgency(agency) {
   if (agency === 'elysian') return renderLuckyPage();
+  return renderLuckyPage({ members: obsidusMembers, title: 'OBSIDUS', agency: 'HUNTERWIND', agencyKo: '헌터윈드', board: 'obsidus', tagline: 'Unshaken defense, flawless combat', other: { href: 'elysian.html', label: 'ELYSIAN ↗' }, communityId: {} });
+}
+function renderLegacyAgency(agency) {
   const lucky = agency === 'elysian',
     team = lucky ? 'lucky' : 'obsidus',
     people = characters.filter((c) => c.team === team);

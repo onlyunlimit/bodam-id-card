@@ -9,16 +9,16 @@ test('Sealed archive rejects bad codes, accepts physical keypad input, and runs 
 }) => {
   await page.goto('/records.html');
   await staff(page);
-  await expect(page.locator('#az-profile')).toHaveCount(0);
+  await expect(page.locator('.az-vault-file .az-reader')).toHaveAttribute('data-sealed', 'true');
   await page.locator('#open-sealed').click();
   await page.locator('#archive-pin').fill('0000');
   await page.locator('[data-key=ENTER]').click();
   await expect(page.locator('#pin-status')).toContainText('일치하지');
-  await expect(page.locator('#az-profile')).toHaveCount(0);
+  await expect(page.locator('#threat-log')).toHaveCount(0);
   for (const n of ['0', '8', '2', '6']) await page.locator('[data-key="' + n + '"]').click();
   await page.locator('[data-key=ENTER]').click();
   await expect(page.locator('.release-toasts')).toContainText('ACCESS VERIFIED');
-  await expect(page.locator('#az-profile')).toBeVisible();
+  await expect(page.locator('.az-vault-file .az-reader')).toHaveAttribute('data-sealed', 'false');
   await page.locator('#threat-log').click();
   await page.locator('#intercept-check').click();
   await expect(page.locator('#integrity-state')).toHaveText('MISMATCH / ISOLATED');
@@ -50,21 +50,14 @@ test('Agencies show public artist profiles and a functional gallery; compendium 
   await expect(page.locator('.lt-poca-slot')).toHaveCount(12);
   await page.locator('.lt-poca-slot').first().click();
   await expect(page.locator('.lt-poca-slot').first()).toHaveAttribute('aria-pressed', 'true');
-  for (const route of ['hunterwind']) {
-    await page.goto('/' + route + '.html');
-    await expect(page.locator('.agency-lineup button')).toHaveCount(4);
-    await expect(page.locator('.person-card')).toHaveCount(0);
-    await page.locator('.agency-lineup button').first().click();
-    await expect(page.locator('.dossier-photo')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await page.locator('[data-gallery-index]').first().click();
-    const img = await page.locator('.gallery-lightbox>img').getAttribute('data-image-url');
-    await page.locator('#gallery-next').click();
-    expect(await page.locator('.gallery-lightbox>img').getAttribute('data-image-url')).not.toBe(
-      img,
-    );
-    await page.keyboard.press('Escape');
-  }
+  await page.goto('/hunterwind.html');
+  await expect(page.locator('.lt-root h1')).toHaveText('OBSIDUS');
+  await expect(page.locator('.lt-id-card')).toHaveCount(4);
+  await expect(page.locator('.lt-cutout-slot')).toHaveCount(4);
+  await page.locator('[data-deck-pills] [data-member="3"]').click();
+  await expect(page.locator('[data-editorial-title]')).toHaveText('YUHWAN');
+  await page.locator('[data-binder]').click();
+  await expect(page.locator('.lt-poca-slot')).toHaveCount(2);
   await page.goto('/manual.html');
   await page.locator('#gate summary').click();
   await expect(page.locator('#gate details')).toHaveAttribute('open', '');
@@ -83,7 +76,7 @@ test('Hardware panels and agency pages fit a 320px screen', async ({ page }) => 
   ).toBe(true);
   await page.locator('#archive-pin').fill('0826');
   await page.locator('[data-key=ENTER]').click();
-  await expect(page.locator('#az-profile')).toBeVisible();
+  await expect(page.locator('.az-vault-file .az-reader')).toHaveAttribute('data-sealed', 'false');
   await page.locator('#threat-log').click();
   expect(
     await page.locator('#document-dialog').evaluate((e) => e.scrollWidth <= e.clientWidth + 1),

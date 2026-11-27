@@ -422,3 +422,15 @@ body .directory-grid>.directory-card[data-team="shield"]{--ink:#edf1ff;--subtle:
 body .directory-grid>.directory-card[data-team="origin"]{--ink:#f7ecff;--subtle:#dac3e8}
 body .directory-grid>.directory-card[data-team="beacon"]{--ink:#20324b;--subtle:#4e6582}
 body .directory-grid>.directory-card[data-team="blackjack"]{--ink:#f0efdf;--subtle:#d1d6bd}
+
+/* Shield page: the navy-white identity used by its directory card and badges
+   replaces the earlier olive field palette everywhere on /shield.html. */
+body[data-unit=shield]{--bg:#0b1026;--surface:#151c38;--surface2:#212a4d;--text:#edf1ff;--muted:#b3bfe0;--accent:#c9d4ff;--line:#38446e;--field:#111733;--control:#2a3462;background:radial-gradient(ellipse at 75% 0%,#3a4a8a40,transparent 60%),var(--bg)}
+body .team-hero.shield-hero,body .team-hero[data-team="shield"]{background:radial-gradient(ellipse at 50% 12%,#6574a1 0%,#242e54 44%,#0c1128 100%)!important;color:#edf1ff;border:1px solid #aebce050;box-shadow:inset 0 1px 0 #e7edff60,0 18px 38px #0b10252b}
+body .shield-hero h2{color:#f4f6ff!important;text-shadow:0 2px 24px #8fa3ff55}
+body .shield-hero :is(p,small,.unit-meta){color:#c6d0ee!important}
+body .shield-hero .shield-hero-top,body .shield-hero .shield-hero-bottom{color:#c9d4ff;border-color:#aebce040;background:transparent}
+body .shield-hero .shield-lineup>div{border:1px solid #aebce040;background:#111a35}
+body .shield-hero .shield-lineup .team-hero-photo{filter:none}
+body .shield-hero .shield-lineup>div>span{background:linear-gradient(transparent,#0c1128e6);color:#e6ebff}
+body[data-unit=shield] .unit-workspace .panel{background:var(--surface);border-color:var(--line)}

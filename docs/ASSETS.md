@@ -132,3 +132,7 @@
 - 글꼴(Oswald·Syne·Cormorant Garamond·Gaegu·Nanum Pen Script·Nanum Myeongjo·JetBrains Mono·Inter)은 Google Fonts, Pretendard는 jsDelivr에서 불러옵니다.
 - `assets/archive.tw.css`는 위 화면의 Tailwind 유틸리티를 `.tw` 범위로 한정해 생성한 파일입니다(`scripts/tailwind.archive.config.cjs`). 원본 예시의 Tailwind CDN 스크립트는 사용하지 않습니다.
 - AZ 05 부록의 저해상도 인물 모델은 canvas로 그린 정이십면체 기반 ASCII 렌더링이며 외부 이미지가 아닙니다.
+
+## 2026-11-28 옵시더스 소개 페이지
+
+- `/hunterwind.html` 히어로의 투명 배경 인물 이미지 4장(차빈·한호·모현·유환)은 사용자가 지정한 caveduck CDN 주소를 CSS 배경으로 연결합니다(`assets/obsidus-data.js`). 화보·포토카드는 기존 공개 갤러리 이미지를 재사용합니다.

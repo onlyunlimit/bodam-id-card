@@ -63,9 +63,8 @@ test('Swipe flips while click opens detail; languages preserve codes and localiz
   for (const lang of ['en', 'ja', 'zh', 'ko']) {
     await page.locator(`[data-lang="${lang}"]`).click();
     await expect(page.locator('html')).toHaveAttribute('lang', lang);
-    await expect(page.locator('[data-character="binjo"] .card-code')).toHaveText(
-      lang === 'en' ? 'VINJO' : '빈조',
-    );
+    await expect(page.locator('[data-character="binjo"] .front .fixed-code')).toHaveText('VINJO');
+    await expect(page.locator('[data-character="binjo"] .front .card-code')).toHaveCount(lang === 'en' ? 0 : 1);
   }
   await page.locator('[data-lang="en"]').click();
   await page.locator('.site-nav a[href="manual.html"]').click();

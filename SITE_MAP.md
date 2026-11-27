@@ -46,15 +46,15 @@
 | [통합 관제](https://onlyunlimit.github.io/portal.html) | `/portal.html` | 세계 지도와 미종결 사건 핀·구역, 위험 등급·게이트 집계, 부서 운용 상태, 서울 날씨, 한국 시각, 브리핑, 제작 도구 링크 | 공개 중심 |
 | [각성관 층별 안내](https://onlyunlimit.github.io/portal.html#headquarters) | `/portal.html#headquarters` | 통합 관제 아래 구역. 지상·지하 총 18개 층 선택, 실내 계획도, 방별 설명, 관련 부서 이동 | 일부 시설 직원 화면에서 열람 |
 | [조직·부서](https://onlyunlimit.github.io/departments.html) | `/departments.html` | 실드·오리진·비콘·블랙잭 4개 부서, 각각 다른 재질·구조·팔레트로 상세 페이지 진입 | 공개 |
-| [오리진](https://onlyunlimit.github.io/origin.html) | `/origin.html` | 부서 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드 → 개인 파일(열람 승인·종이 기록 앞뒤·칠판 방명록·포토카드), 업무 메신저 | 공개 카드 / 직원 상세 |
-| [비콘](https://onlyunlimit.github.io/beacon.html) | `/beacon.html` | 추적관리팀 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드 → 개인 파일(열람 승인·종이 기록 앞뒤·칠판 방명록·포토카드), 업무 메신저 | 공개 카드 / 직원 상세 |
-| [실드](https://onlyunlimit.github.io/shield.html) | `/shield.html` | 부서 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드 → 개인 파일(열람 승인·종이 기록 앞뒤·칠판 방명록·포토카드), 업무 메신저 | 공개 카드 / 직원 상세 |
-| [블랙잭](https://onlyunlimit.github.io/blackjack.html) | `/blackjack.html` | 시소 참고의 올리브 금속 TV·올리브 유리 신분증 카드(개인 파일 연결), 포커·딜러·리어·판덴·시소 5명, 작전 일정 안내·브리핑·메신저 | 공개 카드 / 직원 상세 |
+| [오리진](https://onlyunlimit.github.io/origin.html) | `/origin.html` | 부서 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드(큰 글자 = 등급) → 개인 파일 팝업(흐린 페이지 위 카드 → 종이 기록 앞면·뒷면 종이 방명록·포토카드 덱), 업무 메신저 | 공개 카드 / 직원 상세 |
+| [비콘](https://onlyunlimit.github.io/beacon.html) | `/beacon.html` | 추적관리팀 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드(큰 글자 = 등급) → 개인 파일 팝업(흐린 페이지 위 카드 → 종이 기록 앞면·뒷면 종이 방명록·포토카드 덱), 업무 메신저 | 공개 카드 / 직원 상세 |
+| [실드](https://onlyunlimit.github.io/shield.html) | `/shield.html` | 부서 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드(큰 글자 = 등급) → 개인 파일 팝업(흐린 페이지 위 카드 → 종이 기록 앞면·뒷면 종이 방명록·포토카드 덱), 업무 메신저 | 공개 카드 / 직원 상세 |
+| [블랙잭](https://onlyunlimit.github.io/blackjack.html) | `/blackjack.html` | 리더 포커가 나오는 올리브 금속 TV·올리브 유리 신분증 카드(설정상 팀 색상은 블랙, 개인 파일 연결), 포커·딜러·리어·판덴·시소 5명, 작전 일정 안내·브리핑·메신저 | 공개 카드 / 직원 상세 |
 | [엔터테인먼트](https://onlyunlimit.github.io/entertainment.html) | `/entertainment.html` | 그룹별 입체 소개 패널 2개. 각 기획사 페이지로 이동 | 공개 |
 | [엘리시안·럭키트릭](https://onlyunlimit.github.io/elysian.html) | `/elysian.html` | LUCKY TRICK 소개 페이지: 4인 컷아웃 히어로(흑백 패널·패럴랙스), 센티넬 ID 카드 덱(앞뒤 회전)·멤버 정보, 화보 3장, 스티커 바인더를 열면 펼쳐지는 포토카드(앞면 이미지만·뒷면 영문 각인), 팬 게시판·커뮤니티 프로필 연결 | 공개 |
-| [헌터윈드·옵시더스](https://onlyunlimit.github.io/hunterwind.html) | `/hunterwind.html` | 금속·어두운 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
+| [헌터윈드·옵시더스](https://onlyunlimit.github.io/hunterwind.html) | `/hunterwind.html` | OBSIDUS 소개 페이지(럭키트릭과 같은 구성): 4인 투명 배경 컷아웃 히어로, 센티넬 ID 카드 덱·멤버 정보, 화보 3장, 포토카드 바인더, 팬 게시판·커뮤니티 프로필 연결 | 공개 |
 | [사건 기록실](https://onlyunlimit.github.io/records.html) | `/records.html` | 아날로그 수신기·주파수 조정, 사건 필터·목록·상세 문서, 지도, 신고서 작성, 긴급 수신 알림, 종결 승인·재개 | 열람은 공개 · 작성 진입은 직원 화면 |
-| [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 봉인 파일, 숫자 키패드·클릭음, 추적 커서, AZ 대상 관측 기록·위험 평가, 증거 문서 3개에서 진입하는 AZ 수사 서류철(왁스 봉인·4장 + 단서 3개 확보 시 해제되는 05 소문 부록, UV 감식·도장·검열 해제·2km 동기화 시뮬레이터), 동선 지도·감청 로그 | 코드 입력 연출 + 일부 직원 열람 |
+| [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 대문이 AZ 수사 서류철 표지 자체: 왁스 봉인 → 숫자 키패드(0826) → 같은 자리에서 서류철이 펼쳐짐(넘긴 장 뒷면은 빈 종이, 4장 + 단서 3개 확보 시 05 소문 부록, UV 감식·도장·검열 해제·2km 동기화 시뮬레이터, 화면 하단에 고정되는 조작 막대). 아래에 위험 평가·감청 로그·동선 지도 | 코드 입력 연출 + 일부 직원 열람 |
 | [세계관 안내서](https://onlyunlimit.github.io/manual.html) | `/manual.html` | 용어 검색·목차, 게이트·각성자·가이딩·각인·매칭 등 설명, 등급표, 개념 도해, 명령어 복사 | 공개 |
 | [커뮤니티](https://onlyunlimit.github.io/community.html) | `/community.html` | 그룹별 4개 피드, 사진 첨부, 팬·아티스트 글/답글, 글·댓글 좋아요, 6자리 PIN 수정·삭제, 관리자 진입 | 팬 공개 / 사내는 직원 화면 |
 
@@ -306,6 +306,6 @@
 
 ### 요원 개인 기록과 AZ 열람 — 2026-11-27
 
-- 네 부서의 소속 요원 상세는 공통 문서 창 안에서 신분증·개인 파일·갤러리를 전환합니다. 카드 앞뒤 전환과 모바일 스와이프를 지원합니다.
-- 개인 파일 뒷면의 칠판 방명록은 `GET/POST /guestbook`으로 공유되며 D1의 `member_guestbook`에 저장합니다. 업무 메신저의 로컬 저장과 별개입니다.
+- 네 부서의 소속 요원 상세는 공통 문서 창을 투명 팝업으로 씁니다. 처음엔 카드만 떠 있고, 카드를 누르면 종이 기록과 포토카드 덱이 나옵니다. 빈 곳을 누르거나 Esc로 닫습니다. 카드·종이는 스와이프로 뒤집습니다.
+- 개인 파일 뒷면 전체가 종이 방명록입니다. `GET/POST /guestbook`으로 공유되며 D1의 `member_guestbook`에 저장합니다(글꼴·잉크·위치·글자 크기). 새 글은 관리자 앱 알림으로 오고, 관리자 화면 ‘요원 방명록’에서 확인·수정·숨김·삭제·IP 열람·차단합니다. 업무 메신저의 로컬 저장과 별개입니다.
 - ORPÉ의 기존 키패드 통과 후 증거 문서를 열면 `assets/az-reader.js/css`의 다섯 장 수사 기록이 표시됩니다. 기존 동선 추적은 유지합니다.

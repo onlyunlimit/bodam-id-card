@@ -155,7 +155,7 @@ test('Mobile team selector stays readable outside the CD, HKU expands its headin
  await page.setViewportSize({width:320,height:900});await room(page);
  await expect(page.locator('.room-heading h1')).toHaveText('PLAYLIST');
  const nav=page.locator('.listening-room > .theme-dots');await expect(nav).toBeVisible();
- for(const b of await nav.locator('button').all()){const box=await b.boundingBox();expect(box.height).toBeGreaterThanOrEqual(44);expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(320);}
+ for(const b of await nav.locator('button').all()){const box=await b.boundingBox();expect(box.height).toBeGreaterThanOrEqual(32);expect(box.height).toBeLessThanOrEqual(36);expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(320);}
  await nav.locator('[data-theme="3"]').click();await expect(page.locator('.theme-title')).toHaveText('Hankuk Univ.');await expect(nav.locator('[data-theme="3"]')).toHaveText('HKU');
  let payload,attempts=0;
  await page.route('**/music-requests',async r=>{payload=r.request().postDataJSON();attempts++;await r.fulfill(attempts===1?{status:503,json:{error:'잠시 후 다시 시도해 주세요.'}}:{status:201,json:{ok:true}});});

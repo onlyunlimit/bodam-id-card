@@ -10,7 +10,7 @@ export function initForensicCursor() {
       e.pointerType === 'mouse' &&
       state.motion &&
       !!e.target.closest(
-        '.sealed-vault,.classified-board,[data-kind=keypad],[data-kind=intercept],[data-kind=orpe],[data-kind=evidence]',
+        '.sealed-vault,.az-vault-file,.classified-board,[data-kind=keypad],[data-kind=intercept],[data-kind=orpe],[data-kind=evidence]',
       );
     el.hidden = !active;
     document.body.classList.toggle('forensic-tracking', active);

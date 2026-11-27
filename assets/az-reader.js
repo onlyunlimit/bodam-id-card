@@ -10,7 +10,8 @@ const IMG = {
   suspect: 'https://cdn.caveduck.io/charim-standard/631d30d1-4080-47fd-b0e2-86e45192ff87?v=a11dbd',
 };
 const NEED = 3;
-const back = (ref, line) => `<div class="az-sheet-back"><div class="az-punch"><i></i><i></i></div><div class="az-meta" style="opacity:.45">SGIA ARCHIVE // VERSO SIDE</div><div class="az-back-stamp"><span>${line}</span><span>DOC-REF: ${ref}</span></div></div>`;
+// The reverse of a turned sheet is plain paper: nothing from the front may show through.
+const back = () => `<div class="az-sheet-back" aria-hidden="true"></div>`;
 const trace = (id, label, cls = '') => `<button type="button" class="az-trace ${cls}" data-trace="${id}" aria-label="${label}"><span aria-hidden="true"></span></button>`;
 const pen = (text, cls = '') => `<p class="az-pen ${cls}" aria-hidden="false">${text}</p>`;
 
@@ -19,9 +20,9 @@ const sheets = [
   `<article class="az-sheet" data-page="1"><div class="az-sheet-front az-page"><div>
     <div class="az-doc-head"><div><div class="az-meta">SUBJECT IDENTIFICATION // 01</div><h2 class="az-doc-title">수배 기록: 에이지 (AZ)</h2></div><span class="az-code">WANTED // AT LARGE</span></div>
     <div class="az-profile"><div class="az-photo"><div class="az-photo-in" role="img" aria-label="에이지(AZ) 관측 이미지" style="background-image:url('${IMG.suspect}')"><span class="az-photo-cap">CCTV / WITNESS RECON</span></div>${trace('print', '사진 모서리의 얼룩 확인', 'az-trace-print')}</div>
-     <div class="az-specs">${[['코드명', '에이지 / AZ (본명 미상)'], ['신원 추정', '남성 · 27세 추정'], ['소속', 'ORPÉ (단, 철저한 개인 행동)'], ['등급/역할', '측정 불가 센티넬 (가이딩 겸용)'], ['검거 현황', '<b class="az-red">추적 실패 (상습 도주)</b>']].map(([k, v]) => `<div class="az-spec"><span>${k}</span><span>${v}</span></div>`).join('')}</div></div>
-    <div class="az-section"><div class="az-label">COMPOSITE APPEARANCE (목격자 종합 인상착의)</div><p class="az-body">공식 생체 데이터 부재로 현장 진술만 취합됨. <strong>매우 큰 신장</strong>에 창백할 만큼 흰 피부, 마른 듯 보이나 <button type="button" class="az-redacted" aria-label="검열선 해제">탄탄한 근육질 체격과 넓은 어깨, 다부진 골격</button>을 지님. 흑발과 푸른 벽안의 수려한 미남상으로 목격자 전원이 외모를 명확히 기억함.</p>
-     <div class="az-witness">"호불호가 갈릴 수 없는 압도적인 미남상이었다. 하지만 말수가 극단적으로 적었고, 내가 내 입으로 '그는 여기 없다'고 말할 때까지 아무 제지도 하지 않았다."<span>— [증언 #07] 제2관할 순찰 요원 진술서 발췌 (검은 검열선을 눌러 해제)</span></div></div>
+     <div class="az-specs">${[['코드명', '에이지 / AZ (본명 미상)'], ['신원 추정', '미상'], ['소속', 'ORPÉ (단, 철저한 개인 행동)'], ['등급/역할', '측정 불가 센티넬 (가이딩 겸용)'], ['검거 현황', '<b class="az-red">추적 실패 (상습 도주)</b>']].map(([k, v]) => `<div class="az-spec"><span>${k}</span><span>${v}</span></div>`).join('')}</div></div>
+    <div class="az-section"><div class="az-label">WITNESS RECORD (목격자 진술)</div><p class="az-body">공식 생체 데이터가 없습니다. 목격자 진술이 서로 맞지 않아 인상착의는 확정하지 않았습니다. <button type="button" class="az-redacted" aria-label="검열선 해제">진술서 원본 14건 중 9건 폐기</button></p>
+     <div class="az-witness">"말수가 극단적으로 적었다. 내가 내 입으로 '그는 여기 없다'고 말할 때까지 아무 제지도 하지 않았다."<span>— [증언 #07] 제2관할 순찰 요원 진술서 발췌 (검은 검열선을 눌러 해제)</span></div></div>
     ${pen('얼굴은 다들 기억하는데<br>목소리는 아무도 기억 못 함. 왜?', 'az-pen-1')}
     <div class="az-uv">[UV 감식 메모] 목격 시각 14건 중 9건이 서로 겹침. 같은 시각, 다른 장소. 진술 자체가 조작됐을 가능성.</div>
    </div><div class="az-doc-foot"><span>SGIA TRACKING TEAM 'BEACON' ARCHIVE</span><span>PAGE 01 / 04</span></div></div>${back('01-B', 'PROPERTY OF SGIA — DO NOT COPY')}</article>`,
@@ -76,33 +77,44 @@ const clueText = {
   tape: ['노이즈 사이 0.4초: "…아니야."', '세 어절 이하. 이번에도.'],
 };
 
-export function openAZReader(section = 0) {
-  if (!document.querySelector('[data-az-reader-css]')) {
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = 'assets/az-reader.css';
-    css.dataset.azReaderCss = '';
-    document.head.append(css);
-  }
-  const html = `<div class="az-reader" data-open="false">
+function css() {
+  if (document.querySelector('[data-az-reader-css]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'assets/az-reader.css';
+  link.dataset.azReaderCss = '';
+  document.head.append(link);
+}
+function markup(inline) {
+  return `<div class="az-reader ${inline ? 'az-inline' : ''}" data-open="false" data-sealed="true">
    <div class="az-desk" aria-hidden="true"></div><div class="az-scan" aria-hidden="true"></div><canvas class="az-noise" aria-hidden="true"></canvas>
-   <header class="az-hud"><div><i class="az-dot"></i><span>SGIA // COUNTERINTELLIGENCE ARCHIVE</span><span class="az-hud-tag">WANTED / UNVERIFIED INTEL</span></div><div><span>TARGET: AZ (ORPÉ)</span><span data-clock>00:00:00</span></div></header>
+   <header class="az-hud"><div><i class="az-dot"></i><span>SGIA COUNTERINTELLIGENCE ARCHIVE</span><span class="az-hud-tag">WANTED · UNVERIFIED INTEL</span></div><div><span>TARGET: AZ (ORPÉ)</span><span data-clock>00:00:00</span></div></header>
    <main class="az-stage"><div class="az-rig" data-rig>
     <div class="az-board" aria-hidden="true"></div>
     <nav class="az-folder-tabs" aria-label="기록철 섹션 탭">${['01·용의자', '02·ORPÉ', '03·특이능력', '04·녹취기록', '05·소문'].map((t, i) => `<button type="button" data-sheet="${i + 1}" ${i === 4 ? 'disabled aria-disabled="true" title="LEVEL 2 권한 필요"' : ''}>${t}${i === 4 ? ' 🔒' : ''}</button>`).join('')}</nav>
     <div class="az-stack">${sheets.slice().reverse().join('')}</div>
     <div class="az-cover" data-cover>
      <div class="az-cover-front" style="background-image:url('${IMG.cover}')"></div>
-     <div class="az-cover-inside"><div class="az-pocket"><h4>RESTRICTED ARCHIVE PROTOCOL</h4><p>본 사건 기록철은 국가 각성자 통합관리청(SGIA) 추적관리팀 <strong>BEACON</strong>의 기밀 자산입니다.<br><br>용의자 <strong>AZ</strong>의 '거짓 증언' 권능 특성상, 현장 요원의 구두 보고는 신뢰할 수 없으며 오직 교차 검증된 물적 채록만 수록되었습니다.</p></div>${pen('이 파일 넘기는 사람에게.<br>흔적을 먼저 찾아라. 말은 나중에.', 'az-pen-cover')}<div class="az-serial">FILE SERIAL: SGIA-ORP-027-AZ<br>STATUS: ACTIVE PURSUIT</div></div>
+     <div class="az-cover-inside"><div class="az-pocket"><h4>RESTRICTED ARCHIVE PROTOCOL</h4><p>본 사건 기록철은 국가 각성자 통합관리청(SGIA) 추적관리팀 <strong>BEACON</strong>의 기밀 자산입니다.<br><br>용의자 <strong>AZ</strong>의 '거짓 증언' 권능 특성상, 현장 요원의 구두 보고는 신뢰할 수 없으며 오직 교차 검증된 물적 채록만 수록되었습니다.</p></div>${pen('이 파일 넘기는 사람에게.<br>흔적을 먼저 찾아라. 말은 나중에.', 'az-pen-cover')}<div class="az-serial">STATUS: ACTIVE PURSUIT</div></div>
      <button type="button" class="az-seal" data-seal aria-label="실링 왁스 봉인 해제"><img src="${IMG.seal}" alt="" draggable="false"><span>CLICK TO UNSEAL</span></button>
     </div>
    </div></main>
    <aside class="az-terminal" data-terminal aria-live="polite"><div class="az-term-head"><i></i>FIELD TERMINAL · 수사 보조</div><p data-term-text>봉인된 기록철입니다. 왁스 봉인을 눌러 열람을 시작하십시오.</p><div class="az-term-meter"><span data-term-count>단서 0 / ${NEED}</span><em><b data-term-bar></b></em></div></aside>
    <div class="az-clue" data-clue hidden role="status"><p class="az-pen" data-clue-text></p><button type="button" data-clue-close>메모 닫기</button></div>
-   <footer class="az-dock"><button type="button" class="az-btn az-primary" data-toggle>봉인 해제 / 열람</button><button type="button" class="az-btn" data-prev disabled>◀ 이전 장</button><span class="az-indicator" data-indicator>SEALED</span><button type="button" class="az-btn" data-next disabled>다음 장 ▶</button><button type="button" class="az-btn" data-stamp disabled>도장 찍기</button><button type="button" class="az-btn" data-uv aria-pressed="false">UV 감식등</button></footer>
+   <footer class="az-dock"><button type="button" class="az-btn az-close-btn" data-toggle aria-label="파일 덮기">덮기</button><button type="button" class="az-btn az-arrow" data-prev disabled aria-label="이전 장">◀</button><span class="az-indicator" data-indicator>SEALED</span><button type="button" class="az-btn az-arrow" data-next disabled aria-label="다음 장">▶</button><button type="button" class="az-btn" data-stamp disabled>도장</button><button type="button" class="az-btn" data-uv aria-pressed="false">UV</button></footer>
   </div>`;
-  const d = modal('AZ — CLASSIFIED CASE FILE', html, 'az-reader');
-  const root = d.querySelector('.az-reader');
+}
+
+/**
+ * Mounts the case file into `host`.
+ * sealed: the cover stays shut and the wax seal calls `onSeal` (the keypad) instead of opening.
+ * autoOpen: swing the cover open once mounted (after the keypad accepted the code).
+ * Returns a cleanup function.
+ */
+export function mountAZFile(host, { inline = true, sealed = false, onSeal = null, autoOpen = false, section = 0 } = {}) {
+  css();
+  host.innerHTML = markup(inline);
+  const root = host.querySelector('.az-reader');
   const q = (s) => root.querySelector(s);
   const qa = (s) => [...root.querySelectorAll(s)];
   const abort = new AbortController();
@@ -110,74 +122,87 @@ export function openAZReader(section = 0) {
   const intervals = [];
   const timeouts = new Set();
   const later = (fn, ms) => { const id = setTimeout(() => { timeouts.delete(id); if (root.isConnected) fn(); }, ms); timeouts.add(id); };
-  on(d, 'close', () => { abort.abort(); intervals.forEach(clearInterval); timeouts.forEach(clearTimeout); }, { once: true });
+  let ro = null;
+  const dispose = () => { abort.abort(); intervals.forEach(clearInterval); timeouts.forEach(clearTimeout); ro?.disconnect(); };
   on(root, 'contextmenu', (e) => { if (e.target.closest('img,.az-photo-in,.az-cover-front')) e.preventDefault(); });
+  root.dataset.sealed = String(sealed);
 
-  // Clock + ASCII noise (paused when motion is off)
   const clock = q('[data-clock]');
-  const tick = () => { clock.textContent = new Date().toTimeString().slice(0, 8); };
+  const tick = () => { if (!root.isConnected) return dispose(); clock.textContent = new Date().toTimeString().slice(0, 8); };
   tick();
   intervals.push(setInterval(tick, 1000));
   const noise = q('.az-noise'), nctx = noise.getContext('2d');
   const chars = ['.', ':', '+', '*', '#', '0', '1', '·'];
-  const resize = () => { noise.width = root.clientWidth; noise.height = root.clientHeight; fit(); };
   const paintNoise = () => {
+    if (!noise.width) return;
     nctx.clearRect(0, 0, noise.width, noise.height);
     nctx.fillStyle = 'rgba(220,225,235,.38)';
     nctx.font = '10px monospace';
-    for (let i = 0; i < 95; i++) nctx.fillText(chars[(Math.random() * chars.length) | 0], Math.random() * noise.width, Math.random() * noise.height);
+    for (let i = 0; i < 70; i++) nctx.fillText(chars[(Math.random() * chars.length) | 0], Math.random() * noise.width, Math.random() * noise.height);
   };
-  if (state.motion) intervals.push(setInterval(paintNoise, 140));
+  if (state.motion) intervals.push(setInterval(paintNoise, 160));
 
-  // Folder state
   const rig = q('[data-rig]');
+  const stage = q('.az-stage');
   const pages = qa('.az-sheet');
   pages.sort((a, b) => a.dataset.page - b.dataset.page);
   const tabs = qa('[data-sheet]');
   let open = false, page = 0, unlocked = false;
   const found = new Set();
   const visible = () => (unlocked ? 5 : 4);
+  // Design sizes: desktop spread 980 × 660 (cover + sheet), phone single sheet 390 × 760.
   function fit() {
-    const w = root.clientWidth - 24, h = root.clientHeight - 150;
-    const compact = w < 860;
+    const w = (inline ? stage.clientWidth : root.clientWidth) - 16;
+    if (w <= 0) return;
+    const compact = w < 820;
     rig.classList.toggle('compact', compact);
-    const need = compact ? 470 + 40 : 980;
-    rig.style.setProperty('--az-s', String(Math.min(1, w / need, h / 660)));
+    root.classList.toggle('az-compact', compact);
+    const needW = compact ? 400 : 980, needH = compact ? (open ? 780 : 640) : 680;
+    const maxH = inline ? Infinity : root.clientHeight - (compact ? 150 : 140);
+    const s = Math.min(compact ? 1.12 : 1, w / needW, maxH / needH);
+    rig.style.setProperty('--az-s', String(s));
+    if (inline) stage.style.height = `${Math.ceil(needH * s) + 24}px`;
+    noise.width = root.clientWidth;
+    noise.height = root.clientHeight;
   }
   function update() {
+    const wasOpen = root.dataset.open === 'true';
     root.dataset.open = String(open);
     rig.classList.toggle('is-open', open);
-    q('[data-toggle]').textContent = open ? '파일 덮기' : '봉인 해제 / 열람';
     q('[data-prev]').disabled = !open || page === 0;
     q('[data-next]').disabled = !open || page >= visible() - 1;
     q('[data-stamp]').disabled = !open;
-    q('[data-indicator]').textContent = open ? `PAGE 0${page + 1} / 0${visible()}` : 'SEALED';
-    pages.forEach((s, i) => {
+    q('[data-toggle]').disabled = !open;
+    q('[data-indicator]').textContent = open ? `${String(page + 1).padStart(2, '0')} / ${String(visible()).padStart(2, '0')}` : 'SEALED';
+    pages.forEach((sh, i) => {
       const flipped = open && i < page;
-      s.classList.toggle('flipped', flipped);
-      s.style.zIndex = String(flipped ? 10 + i : 30 - i);
-      s.hidden = i >= visible();
-      s.setAttribute('aria-hidden', String(!open || i !== page));
-      s.inert = !open || i !== page;
+      sh.classList.toggle('flipped', flipped);
+      sh.style.zIndex = String(flipped ? 10 + i : 30 - i);
+      sh.hidden = i >= visible();
+      sh.setAttribute('aria-hidden', String(!open || i !== page));
+      sh.inert = !open || i !== page;
     });
     tabs.forEach((t, i) => t.classList.toggle('active', open && i === page));
     if (open && page === 4) startAscii();
+    if (wasOpen !== open) fit();
   }
-  function go(i) { if (!open) open = true; page = Math.max(0, Math.min(visible() - 1, i)); update(); }
+  function go(i) { if (sealed) return; if (!open) open = true; page = Math.max(0, Math.min(visible() - 1, i)); update(); }
   function say(text) { q('[data-term-text]').textContent = text; q('[data-terminal]').classList.remove('ping'); void q('[data-terminal]').offsetWidth; q('[data-terminal]').classList.add('ping'); }
-  on(q('[data-seal]'), 'click', (e) => { e.stopPropagation(); if (!open) { go(0); say('기록철 개봉. 각 장에 남은 흔적을 눌러 보십시오. 일부는 UV 감식등으로만 보입니다.'); } });
-  on(q('[data-cover]'), 'click', () => { if (!open) q('[data-seal]').click(); });
-  on(q('[data-toggle]'), 'click', () => { open = !open; if (open) page = 0; update(); });
+  function unseal() {
+    if (sealed) { onSeal?.(); return; }
+    if (!open) { go(0); say('기록철 개봉. 각 장에 남은 흔적을 눌러 보십시오. 일부는 UV 감식등으로만 보입니다.'); }
+  }
+  on(q('[data-seal]'), 'click', (e) => { e.stopPropagation(); unseal(); });
+  on(q('[data-cover]'), 'click', () => { if (!open) unseal(); });
+  on(q('[data-toggle]'), 'click', () => { open = false; page = 0; update(); });
   on(q('[data-prev]'), 'click', () => go(page - 1));
   on(q('[data-next]'), 'click', () => go(page + 1));
   tabs.forEach((t) => on(t, 'click', () => go(Number(t.dataset.sheet) - 1)));
   on(root, 'keydown', (e) => { if (!open || e.target.closest('input')) return; if (e.key === 'ArrowRight') go(page + 1); if (e.key === 'ArrowLeft') go(page - 1); });
-  // Swipe to turn
   let sx = null;
   on(q('.az-stack'), 'pointerdown', (e) => { if (e.target.closest('button')) return; sx = { x: e.clientX, y: e.clientY }; });
   on(q('.az-stack'), 'pointerup', (e) => { if (!sx) return; const dx = e.clientX - sx.x, dy = e.clientY - sx.y; sx = null; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(page + (dx < 0 ? 1 : -1)); });
 
-  // Stamp, UV, redactions, simulator
   const stamp = q('.az-stamp-img');
   on(q('[data-stamp]'), 'click', () => { go(1); stamp.classList.remove('stamped'); void stamp.offsetWidth; later(() => stamp.classList.add('stamped'), state.motion ? 280 : 0); });
   on(q('[data-uv]'), 'click', (e) => {
@@ -192,11 +217,10 @@ export function openAZReader(section = 0) {
     const synced = sim.classList.toggle('synced');
     sync.setAttribute('aria-pressed', String(synced));
     sync.textContent = synced ? '동기화 해제' : '동기화 발동';
-    sim.querySelector('small').textContent = synced ? '⚠ 경고: 반경 2km 내 구강 동기화 감지 (의식 명료 / 발화 강제 변조)' : '피해 요원 의식 상태: 명료함 (통제권 정상)';
+    sim.querySelector('small').textContent = synced ? '⚠ 경고: 반경 2km 내 구강 동기화 감지 (의식 명료 · 발화 강제 변조)' : '피해 요원 의식 상태: 명료함 (통제권 정상)';
     sim.querySelector('p').textContent = synced ? '"이상 무. 해당 구역에 에이지의 흔적은 전혀 없다. 철수한다."' : '"용의자 AZ가 북쪽 환기구로 도주했습니다! 즉시 지원 바랍니다!"';
   });
 
-  // Clue hunt → terminal grants LEVEL 2 and unlocks the rumour appendix
   const clue = q('[data-clue]');
   qa('[data-trace]').forEach((el) => on(el, 'click', (e) => {
     e.stopPropagation();
@@ -286,10 +310,20 @@ export function openAZReader(section = 0) {
     if (state.motion) intervals.push(setInterval(draw, 70));
   }
 
-  on(window, 'resize', resize);
-  requestAnimationFrame(resize);
-  resize();
+
+  if ('ResizeObserver' in window) { ro = new ResizeObserver(fit); ro.observe(inline ? stage : root); }
+  else on(window, 'resize', fit);
+  fit();
   update();
-  if (section > 0) { go(Math.min(4, section) - 1); say('지정 문서로 이동했습니다. 흔적을 눌러 단서를 확보하십시오.'); }
+  if (!sealed && section > 0) { go(Math.min(4, section) - 1); say('지정 문서로 이동했습니다. 흔적을 눌러 단서를 확보하십시오.'); }
+  else if (!sealed && autoOpen) later(() => { if (!open) unseal(); }, state.motion ? 420 : 0);
+  return dispose;
+}
+
+/** Full-screen reader (used when the file is opened from another screen). */
+export function openAZReader(section = 0) {
+  const d = modal('AZ — CLASSIFIED CASE FILE', '<div class="az-modal-host"></div>', 'az-reader');
+  const dispose = mountAZFile(d.querySelector('.az-modal-host'), { inline: false, section, autoOpen: section === 0 });
+  d.addEventListener('close', dispose, { once: true });
   return d;
 }

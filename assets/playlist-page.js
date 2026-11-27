@@ -6,6 +6,8 @@ import { serviceConfig } from './service-config.js';
 import { music } from './playlists.js';
 import { albumArtwork } from './music-artwork.js';
 import { musicTeams, playlistThemes } from './playlist-themes.js';
+import { characters } from './characters.js';
+import { teams as sgiaTeams } from './model.js';
 [
  ['선택','Select','選択','选择'],['선택 해제','Clear selection','選択を解除','清除选择'],['선택 재생','Play selected','選択した曲を再生','播放所选'],['셔플','Shuffle','シャッフル','随机播放'],
  ['모든 목록','All mixes','すべてのミックス','全部歌单'],['이전 테마','Previous theme','前のテーマ','上一个主题'],['다음 테마','Next theme','次のテーマ','下一个主题'],['재생 위치','Playback position','再生位置','播放进度'],['곡을 선택해 주세요.','Choose a track.','楽曲を選んでください。','请选择歌曲。'],['선택한 테마에 곡이 없습니다.','No tracks in this theme.','このテーマには楽曲がありません。','此主题暂无歌曲。'],['테마 둘러보기','Browse themes','テーマを探す','浏览主题'],['전체 재생','Play all','すべて再生','播放全部'],['곡을 불러오지 못했습니다.','Unable to load tracks.','楽曲を読み込めませんでした。','无法载入歌曲。']
@@ -130,9 +132,27 @@ export function renderPlaylists(){
  async function load(){
   const list=root.querySelector('.room-tracks');list.setAttribute('aria-busy','true');
   try{const r=await fetch(serviceConfig.api+'/playlists',{signal:AbortSignal.any([abort.signal,AbortSignal.timeout(12000)])});if(!r.ok)throw Error();const data=await r.json();if(disposed)return;
-   all=(data.playlists||[]).flatMap(p=>{const meta=playlistThemes.find(m=>m.playlist_id===p.id)||playlistThemes.find(m=>m.id===p.member_id);return p.tracks.map((t,i)=>({...t,key:p.id+':'+i,team:meta?.team||'mixes',character:meta?.label||p.title,cover:meta?.cover||'',artwork:albumArtwork[t.video_id]||'',color:meta?.color||'#a9a2c9'}));});
-   all.sort((a,b)=>playlistThemes.findIndex(m=>m.label===a.character)-playlistThemes.findIndex(m=>m.label===b.character));
-   if(all.some(t=>t.team==='mixes'))teams.push({id:'mixes',label:'MIXTAPES',caption:'PERSONAL SELECTION',color:'#a9a2c9'});
+   all=(data.playlists||[]).flatMap((p,n)=>{
+    const meta=playlistThemes.find(m=>m.playlist_id===p.id)||playlistThemes.find(m=>m.id===p.member_id);
+    const member=characters.find(c=>c.id===p.member_id);
+    const hku=p.universe==='hku'||meta?.team==='hankuk';
+    const team=meta?.team||(hku?'hankuk':p.team)||'mixes';
+    const themed=meta?playlistThemes.indexOf(meta):-1;
+    // SGIA first, HKU always after; curated themes keep their order, later additions go to the end of their group.
+    const order=[hku?1:0,themed>=0?0:1,themed>=0?themed:(p.created_at||0),n];
+    const character=meta?.label||(hku?(p.character||member?.name):member?.code)||p.title;
+    const color=meta?.color||sgiaTeams.find(t=>t.id===team)?.color||'#a9a2c9';
+    return p.tracks.map((t,i)=>({...t,key:p.id+':'+i,team,character,cover:meta?.cover||member?.portrait||'',artwork:albumArtwork[t.video_id]||t.cover||'',color,order:[...order,i]}));
+   });
+   all.sort((a,b)=>{for(let i=0;i<a.order.length;i++)if(a.order[i]!==b.order[i])return a.order[i]-b.order[i];return 0;});
+   // A team that only exists in the catalogue gets its own tab: SGIA teams before HKU.
+   for(const t of all){
+    if(teams.some(x=>x.id===t.team))continue;
+    const known=sgiaTeams.find(x=>x.id===t.team);
+    const tab={id:t.team,label:t.team==='mixes'?'MIXTAPES':known?.en||String(t.team).toUpperCase(),caption:t.team==='mixes'?'PERSONAL SELECTION':'NEW COLLECTION',color:known?.color||t.color};
+    const hk=teams.findIndex(x=>x.id==='hankuk');
+    if(t.team==='mixes'||hk<0)teams.push(tab);else teams.splice(hk,0,tab);
+   }
    const active=music.state().track;if(active){const i=teams.findIndex(t=>t.id===active.team);if(i>=0)teamIndex=i;}themeUI();
   }catch{if(disposed)return;list.setAttribute('aria-busy','false');list.innerHTML=`<p>${tr('곡을 불러오지 못했습니다.')}</p><button class="room-retry glass">${tr('다시 시도')}</button>`;list.querySelector('button').onclick=load;}
  }

@@ -3,7 +3,7 @@ import { incidents, incidentRequest, acceptIncident, watchIncidents, rebuildInci
 export { incidents } from './incident-store.js';
 import { secureForm, captchaMarkup } from './community.js';
 import { reportMapControls, mountReportMap } from './report-map.js';
-import { evidenceIndex, mountEvidenceIndex } from './evidence.js';
+import { mountAZFile } from './az-reader.js';
 import { registerCopy, tr } from './i18n.js';
 [
   ["공유 기록 불러오는 중…", "Loading shared records…", "共有記録を読み込み中…", "正在加载共享记录…"],
@@ -503,13 +503,12 @@ function renderOrpeContent(target) {
       '외부 위협 정보',
       '비인가 조직 · 관측 자료의 외부 반출을 금합니다.',
     ) +
-    `<section class="classified-board az-dossier"><header class="az-case-header"><div><span class="eyebrow">SPECIAL INVESTIGATION / 001</span><h2>대상 관측 기록</h2></div><span class="az-classification">RESTRICTED<span>ORPÉ / AZ</span></span></header><div class="threat-layout"><div><div id="az-profile" class="character-grid single"></div></div><div class="threat-intelligence"><span class="eyebrow">SUBJECT 001 / UNREGISTERED</span><h2>AZ<span>에이지</span></h2><p>극단주의 범죄 집단 ORPÉ 소속 미등록 각성자.<br>증언의 일치가 정보의 진실성을 보증하지 않습니다.</p><div class="threat-class"><span>THREAT ASSESSMENT</span><strong>위험도 측정 불가</strong><span class="az-risk-rule" aria-hidden="true"></span></div><dl class="facts"><div><dt>발화 동기화</dt><dd>추정 영향 반경 약 2km</dd></div><div><dt>주요 위험</dt><dd>거짓 증언 · 수치심 환산</dd></div><div><dt>대응 원칙</dt><dd>단독 접촉 금지 · 교차 검증</dd></div></dl><button class="danger-button" id="threat-log">감청·침입 로그 열람 ↗</button><div id="intrusion-log" class="terminal-log" aria-live="polite"></div></div></div>${evidenceIndex()}<div class="tracking-section"><div class="section-title"><h2>동선 추적</h2><span class="badge danger">RESTRICTED INTELLIGENCE</span><button id="tracking-pause" aria-pressed="false">추적 일시정지</button><button id="track-az">신호 재탐색 ↻</button></div><div class="tracking-layout"><div id="tracking-map" class="seoul-map"></div><ol id="sighting-log"></ol></div></div></section>`;
+    `<div class="az-vault-file"></div><section class="classified-board az-dossier"><header class="az-case-header"><div><span class="eyebrow">SPECIAL INVESTIGATION / 001</span><h2>대상 관측 기록</h2></div><span class="az-classification">RESTRICTED<span>ORPÉ / AZ</span></span></header><div class="threat-layout threat-solo"><div class="threat-intelligence"><span class="eyebrow">SUBJECT 001 / UNREGISTERED</span><h2>AZ<span>에이지</span></h2><p>극단주의 범죄 집단 ORPÉ 소속 미등록 각성자.<br>증언의 일치가 정보의 진실성을 보증하지 않습니다.</p><div class="threat-class"><span>THREAT ASSESSMENT</span><strong>위험도 측정 불가</strong><span class="az-risk-rule" aria-hidden="true"></span></div><dl class="facts"><div><dt>발화 동기화</dt><dd>추정 영향 반경 약 2km</dd></div><div><dt>주요 위험</dt><dd>거짓 증언 · 수치심 환산</dd></div><div><dt>대응 원칙</dt><dd>단독 접촉 금지 · 교차 검증</dd></div></dl><button class="danger-button" id="threat-log">감청·침입 로그 열람 ↗</button><div id="intrusion-log" class="terminal-log" aria-live="polite"></div></div></div><div class="tracking-section"><div class="section-title"><h2>동선 추적</h2><span class="badge danger">RESTRICTED INTELLIGENCE</span><button id="tracking-pause" aria-pressed="false">추적 일시정지</button><button id="track-az">신호 재탐색 ↻</button></div><div class="tracking-layout"><div id="tracking-map" class="seoul-map"></div><ol id="sighting-log"></ol></div></div></section>`;
   $('.classified-board', target).insertAdjacentHTML(
     'afterbegin',
     '<div class="case-breadcrumb"><span>COUNTERINTELLIGENCE BUREAU</span><b>CASE / OR—001</b><span>EVIDENCE REVIEW</span></div>',
   );
-  renderCards([az], $('#az-profile'));
-  mountEvidenceIndex();
+  onDispose(mountAZFile($('.az-vault-file', target), { autoOpen: true }));
   const map = createMap($('#tracking-map'), []);
   delay(() => map?.refreshSize(), 400);
   let points = [],
@@ -572,5 +571,4 @@ function renderOrpeContent(target) {
   every(() => {
     if (!paused && state.motion && !document.hidden) track();
   }, 18000);
-  listen(document, 'sgia:viewer', () => renderCards([az], $('#az-profile')));
 }

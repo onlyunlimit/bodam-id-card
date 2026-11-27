@@ -3,7 +3,7 @@ export const adminSW = String.raw`
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
 // Never cache authenticated HTML, posts, IP records, or credentials.
-self.addEventListener('push',event=>{let p={};try{p=event.data?.json()||{};}catch{};event.waitUntil(self.registration.showNotification('SGIA 커뮤니티',{body:p.body||'새 활동이 있습니다.',icon:'/admin/icon.png',tag:p.tag||'sgia',data:{url:/^\/admin(?:\?(?:post|musicRequest)=[a-f0-9-]{36})?$/.test(p.url||'')?p.url:'/admin'}}));});
+self.addEventListener('push',event=>{let p={};try{p=event.data?.json()||{};}catch{};event.waitUntil(self.registration.showNotification('SGIA 커뮤니티',{body:p.body||'새 활동이 있습니다.',icon:'/admin/icon.png',tag:p.tag||'sgia',data:{url:/^\/admin(?:\?(?:post|musicRequest|guestbook)=[a-f0-9-]{36})?$/.test(p.url||'')?p.url:'/admin'}}));});
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{const url=new URL(event.notification.data?.url||'/admin',self.location.origin).href;const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});const current=windows.find(w=>new URL(w.url).origin===self.location.origin&&new URL(w.url).pathname==='/admin');if(current){await current.navigate(url);return current.focus();}return self.clients.openWindow(url);})());});
 `;
 export const notificationClient = String.raw`
@@ -13,7 +13,7 @@ async function refreshNotifications(){
  if(inboxBusy||$('#workspace').hidden)return;inboxBusy=true;
  try{const r=await api('notifications');inboxThrough=r.asOf||Date.now();
  $('#notification-count').textContent=r.unread??(r.events||[]).length;
- $('#notification-events').innerHTML=(r.events||[]).map(e=>'<a class="inbox-item" href="/admin?'+(e.kind==='music'?'musicRequest='+encodeURIComponent(e.id):'post='+encodeURIComponent(e.post_id))+'"><span class="inbox-dot"></span><span><small>'+esc(e.kind==='music'?'추천곡 신청':e.kind==='post'?'새 글':'새 댓글·답글')+'</small><strong>'+esc(e.title)+'</strong><time>'+new Date(e.created_at).toLocaleString('ko-KR')+'</time></span><span aria-hidden="true">›</span></a>').join('')||'<div class="inbox-empty">모든 소식을 확인했어요.</div>';
+ $('#notification-events').innerHTML=(r.events||[]).map(e=>'<a class="inbox-item" href="/admin?'+(e.kind==='music'?'musicRequest='+encodeURIComponent(e.id):e.kind==='guestbook'?'guestbook='+encodeURIComponent(e.id):'post='+encodeURIComponent(e.post_id))+'"><span class="inbox-dot"></span><span><small>'+esc(e.kind==='music'?'추천곡 신청':e.kind==='guestbook'?'요원 방명록 · '+e.board:e.kind==='post'?'새 글':'새 댓글·답글')+'</small><strong>'+esc(e.title)+'</strong><time>'+new Date(e.created_at).toLocaleString('ko-KR')+'</time></span><span aria-hidden="true">›</span></a>').join('')||'<div class="inbox-empty">모든 소식을 확인했어요.</div>';
  $('#events-read-all').disabled=!(r.unread??(r.events||[]).length);
  if(navigator.setAppBadge){if(r.unread)await navigator.setAppBadge(r.unread).catch(()=>{});else await navigator.clearAppBadge?.().catch(()=>{});}
  }finally{inboxBusy=false;}

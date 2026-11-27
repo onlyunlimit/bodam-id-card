@@ -1,4 +1,4 @@
-import { guestbook } from './guestbook.js';
+import { guestbook, guestbookAdmin } from './guestbook.js';
 import { musicRequests } from './music-requests.js';
 import { playlistAPI } from './playlists.js';
 import { musicAudio } from './music-audio.js';
@@ -191,6 +191,8 @@ async function handle(request, env) {
     if(path.startsWith('/admin/push/') && method!=='GET') await rate(env,'push:'+hash,20,60);
     const notificationResponse=await notificationAPI(request,env,body);
     if(notificationResponse)return notificationResponse;
+    const guestbookResponse = await guestbookAdmin(request, env, { body, audit: (action, target) => env.DB.prepare('INSERT INTO audit(id,action,target,created_at) VALUES (?,?,?,?)').bind(random(), action, target, now()) });
+    if (guestbookResponse) return guestbookResponse;
     const fanResponse = await adminFan(request, env, { body, identity, sourceLog });
     if (fanResponse) return fanResponse;
     if (path === '/admin/logout' && method === 'POST') {
@@ -240,11 +242,12 @@ async function handle(request, env) {
       const data = await body(request),
         id = text(data.id, 1, 80, '기록');
       if (
-        !['post', 'comment'].includes(data.kind) ||
-        !['hide', 'restore', 'delete', 'block'].includes(data.action)
+        !['post', 'comment', 'guestbook'].includes(data.kind) ||
+        !['hide', 'restore', 'delete', 'block'].includes(data.action) ||
+        (data.kind === 'guestbook' && data.action !== 'block')
       )
         throw new HTTPError(400, '잘못된 관리 작업입니다.');
-      const table = data.kind === 'post' ? 'posts' : 'comments';
+      const table = { post: 'posts', comment: 'comments', guestbook: 'member_guestbook' }[data.kind];
       const record = await env.DB.prepare(`SELECT id FROM ${table} WHERE id=?`).bind(id).first();
       if (!record) throw new HTTPError(404, '기록이 없습니다.');
       const changes = [];
@@ -325,7 +328,7 @@ async function handle(request, env) {
   }
   const incidentResponse = await incidentAPI(request, env, {identity,rate,blocked,body,captcha,sourceLog});
   if (incidentResponse) return incidentResponse;
-  const guestbookResponse=await guestbook(request,env,{identity,blocked,rate,body});
+  const guestbookResponse=await guestbook(request,env,{identity,blocked,rate,body,log:sourceLog});
   if(guestbookResponse)return guestbookResponse;
   const suggestions=await musicRequests(request,env,{identity,blocked,rate,body});
   if(suggestions)return suggestions;
@@ -639,7 +642,7 @@ export default {
     let response;
     try {
       response = await musicAudio(request, env) || await handle(request, env);
-      if(request.method==='POST'&&response.status===201&&(/^\/posts(?:\/[a-f0-9-]{36}\/comments)?$/.test(new URL(request.url).pathname)||['/admin/publish','/admin/reply','/music-requests'].includes(new URL(request.url).pathname))){const {id}=await response.clone().json();const delivery=dispatchNotification(env,id).catch(()=>{});if(ctx?.waitUntil)ctx.waitUntil(delivery);else await delivery;}
+      if(request.method==='POST'&&response.status===201&&(/^\/posts(?:\/[a-f0-9-]{36}\/comments)?$/.test(new URL(request.url).pathname)||['/admin/publish','/admin/reply','/music-requests','/guestbook'].includes(new URL(request.url).pathname))){const {id}=await response.clone().json();const delivery=dispatchNotification(env,id).catch(()=>{});if(ctx?.waitUntil)ctx.waitUntil(delivery);else await delivery;}
     } catch (e) {
       response = json(
         {

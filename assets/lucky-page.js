@@ -1,23 +1,25 @@
 // ELYSIAN — LUCKY TRICK introduction page (hero cut-outs, sentinel ID deck, pictorial, photocard binder).
 import { $, state } from './runtime.js';
 import { listen, delay } from './lifecycle.js';
-import { luckyMembers as MEMBERS } from './lucky-data.js';
+import { luckyMembers } from './lucky-data.js';
 
-const communityId = { ujin: 'yujin' };
+// Each agency page shares this layout; the config names the crew, agency and links.
+export const luckyConfig = { members: luckyMembers, title: 'LUCKY TRICK', agency: 'ELYSIAN', agencyKo: '엘리시안', board: 'lucky', tagline: 'A new era of Awakened Artists', other: { href: 'hunterwind.html', label: 'HUNTERWIND ↗' }, communityId: { ujin: 'yujin' } };
 const url = (u) => String(u).replaceAll("'", '%27');
 
-export function renderLuckyPage() {
-  $('#main').innerHTML = `<div class="lt-root tw" data-lucky-page>
+export function renderLuckyPage(cfg = luckyConfig) {
+  const MEMBERS = cfg.members;
+  $('#main').innerHTML = `<div class="lt-root tw" data-lucky-page data-crew="${cfg.board}">
   <div class="lt-grain" aria-hidden="true"></div>
   <header class="lt-header sticky top-3 z-50 px-4 sm:px-8 pointer-events-none">
-    <nav class="max-w-7xl mx-auto lt-glass rounded-full px-4 sm:px-7 py-3 flex items-center justify-between gap-3 pointer-events-auto" aria-label="엘리시안 페이지">
-      <a href="entertainment.html" class="flex items-center gap-3 group shrink-0"><span class="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)] group-hover:scale-125 transition"></span><span class="font-display font-extrabold text-sm sm:text-base tracking-[0.22em] text-white uppercase">ELYSIAN</span></a>
-      <div class="hidden lg:flex items-center gap-2 font-mono text-[11px] tracking-[0.28em] text-white font-semibold uppercase"><span>LUCKY TRICK</span></div>
+    <nav class="max-w-7xl mx-auto lt-glass rounded-full px-4 sm:px-7 py-3 flex items-center justify-between gap-3 pointer-events-auto" aria-label="${cfg.agencyKo} 페이지">
+      <a href="entertainment.html" class="flex items-center gap-3 group shrink-0"><span class="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)] group-hover:scale-125 transition"></span><span class="font-display font-extrabold text-sm sm:text-base tracking-[0.22em] text-white uppercase">${cfg.agency}</span></a>
+      <div class="hidden lg:flex items-center gap-2 font-mono text-[11px] tracking-[0.28em] text-white font-semibold uppercase"><span>${cfg.title}</span></div>
       <div class="flex items-center gap-3 sm:gap-7 font-mono text-[10px] sm:text-[11px] tracking-[0.16em] uppercase overflow-x-auto">
         <button type="button" data-jump="sentinel-deck-section" class="text-white/75 hover:text-white transition whitespace-nowrap">SENTINEL ID</button>
         <button type="button" data-jump="editorial-spotlight" class="text-white/75 hover:text-white transition whitespace-nowrap">PICTORIAL</button>
         <button type="button" data-jump="photocard-binder-section" class="text-white/75 hover:text-white transition whitespace-nowrap">PHOTOCARD</button>
-        <a href="community.html?board=lucky" class="hidden sm:inline text-white/75 hover:text-white transition whitespace-nowrap">FAN BOARD ↗</a>
+        <a href="community.html?board=${cfg.board}" class="hidden sm:inline text-white/75 hover:text-white transition whitespace-nowrap">FAN BOARD ↗</a>
       </div>
     </nav>
   </header>
@@ -26,8 +28,8 @@ export function renderLuckyPage() {
     <div data-hero-bg class="absolute inset-0 grid grid-cols-2 lg:grid-cols-4 z-0"></div>
     <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#06070A]/80 via-transparent to-[#06070A] z-10"></div>
     <div data-hero-text class="relative z-20 pt-16 sm:pt-20 px-5 sm:px-10 max-w-7xl mx-auto w-full pointer-events-none">
-      <p class="font-editorial italic text-2xl sm:text-3xl text-white/85 tracking-wide">A new era of Awakened Artists</p>
-      <h1 class="font-display font-extrabold text-5xl sm:text-7xl lg:text-[96px] leading-[0.86] tracking-[-0.03em] text-white uppercase drop-shadow-[0_14px_35px_rgba(0,0,0,0.9)] mt-1">LUCKY TRICK</h1>
+      <p class="font-editorial italic text-2xl sm:text-3xl text-white/85 tracking-wide">${cfg.tagline}</p>
+      <h1 class="font-display font-extrabold text-5xl sm:text-7xl lg:text-[96px] leading-[0.86] tracking-[-0.03em] text-white uppercase drop-shadow-[0_14px_35px_rgba(0,0,0,0.9)] mt-1">${cfg.title}</h1>
     </div>
     <div data-hero-cutouts class="relative z-30 flex-1 w-full max-w-[1440px] mx-auto px-2 sm:px-6 flex items-end justify-center mt-4 sm:mt-0">
       <div data-cutouts class="grid grid-cols-2 lg:grid-cols-4 w-full h-[540px] sm:h-[660px] lg:h-[740px] items-end"></div>
@@ -84,8 +86,8 @@ export function renderLuckyPage() {
 
   <footer class="relative z-10 border-t border-white/10 mt-12 py-10 px-4 sm:px-8 max-w-7xl mx-auto">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-      <div class="font-display font-bold text-sm tracking-[0.24em] text-white uppercase">ELYSIAN ENTERTAINMENT</div>
-      <div class="flex items-center gap-5 font-mono text-[10px] tracking-[0.18em] uppercase"><a class="text-white/60 hover:text-white" href="community.html?board=lucky">LUCKY TRICK FAN BOARD ↗</a><a class="text-white/60 hover:text-white" href="hunterwind.html">HUNTERWIND ↗</a><span class="text-white/40">LUCKY TRICK © 2026</span></div>
+      <div class="font-display font-bold text-sm tracking-[0.24em] text-white uppercase">${cfg.agency} ENTERTAINMENT</div>
+      <div class="flex items-center gap-5 font-mono text-[10px] tracking-[0.18em] uppercase"><a class="text-white/60 hover:text-white" href="community.html?board=${cfg.board}">${cfg.title} FAN BOARD ↗</a><a class="text-white/60 hover:text-white" href="${cfg.other.href}">${cfg.other.label}</a><span class="text-white/40">${cfg.title} © 2026</span></div>
     </div>
   </footer>
 </div>`;
@@ -147,19 +149,19 @@ export function renderLuckyPage() {
         <div class="lt-id-inner ${f ? 'is-flipped' : ''}" style="--id-flip:${f ? '180deg' : '0deg'}">
           <div class="lt-id-face lt-id-front p-5 flex flex-col justify-between"><div class="lt-id-glare"></div>
             <div class="relative z-10"><div class="w-14 h-2.5 rounded-full bg-black mx-auto mb-3.5 border border-white/15"></div>
-              <div class="flex items-start justify-between border-b border-white/[0.12] pb-2.5"><div><div class="flex items-baseline gap-2"><span class="font-display font-extrabold text-2xl tracking-tight text-white uppercase">${m.nameEn}</span><span class="text-sm font-bold text-white/75">${m.nameKo}</span></div><div class="font-mono text-[10px] font-semibold tracking-[0.22em] text-white/55 uppercase mt-0.5">LUCKY TRICK</div></div>
+              <div class="flex items-start justify-between border-b border-white/[0.12] pb-2.5"><div><div class="flex items-baseline gap-2"><span class="font-display font-extrabold text-2xl tracking-tight text-white uppercase">${m.nameEn}</span><span class="text-sm font-bold text-white/75">${m.nameKo}</span></div><div class="font-mono text-[10px] font-semibold tracking-[0.22em] text-white/55 uppercase mt-0.5">${cfg.title}</div></div>
               <div class="text-right"><div class="font-display font-extrabold text-xl leading-none text-white">${m.gradeShort}</div><div class="font-mono text-[8.5px] font-semibold tracking-widest text-white/50 mt-1">SENTINEL</div></div></div></div>
             <div class="relative z-10 flex gap-2.5 my-3.5 flex-1 min-h-0"><div class="flex-1 h-full rounded-2xl overflow-hidden relative border border-white/15 bg-[#090B0F]"><div class="lt-protected w-full h-full" style="background-image:url('${url(m.heroBgPhoto)}')"></div></div>
-              <div class="w-5 shrink-0 flex flex-col items-center justify-between py-1"><span class="font-mono text-[7.5px] font-bold tracking-widest text-white/45 [writing-mode:vertical-rl]">SGIA</span><div class="lt-barcode w-3 flex-1 my-2 opacity-75"></div><span class="font-mono text-[7.5px] font-bold tracking-widest text-white/65 [writing-mode:vertical-rl]">ELYSIAN</span></div></div>
+              <div class="w-5 shrink-0 flex flex-col items-center justify-between py-1"><span class="font-mono text-[7.5px] font-bold tracking-widest text-white/45 [writing-mode:vertical-rl]">SGIA</span><div class="lt-barcode w-3 flex-1 my-2 opacity-75"></div><span class="font-mono text-[7.5px] font-bold tracking-widest text-white/65 [writing-mode:vertical-rl]">${cfg.agency}</span></div></div>
             <div class="relative z-10"><div class="grid grid-cols-2 gap-1.5 text-[11px] mb-2.5"><div class="rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 min-w-0"><div class="font-mono text-[8px] text-white/45 uppercase">ABILITY</div><div class="font-semibold text-white truncate mt-0.5">${m.ability}</div></div><div class="rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 min-w-0"><div class="font-mono text-[8px] text-white/45 uppercase">ROLE</div><div class="font-semibold text-white truncate mt-0.5">${m.role}</div></div></div>
-              <div class="flex items-center justify-between font-mono text-[9px] text-white/50 border-t border-white/10 pt-2"><span>ELYSIAN</span><span class="text-white/85 font-semibold">${m.grade}</span></div></div>
+              <div class="flex items-center justify-between font-mono text-[9px] text-white/50 border-t border-white/10 pt-2"><span>${cfg.agency}</span><span class="text-white/85 font-semibold">${m.grade}</span></div></div>
           </div>
           <div class="lt-id-face lt-id-back p-6 flex flex-col justify-between"><div class="lt-id-glare"></div>
             <div><div class="w-14 h-2.5 rounded-full bg-black mx-auto mb-4 border border-white/15"></div>
-              <div class="flex items-center justify-between border-b border-white/[0.12] pb-3"><div><div class="flex items-baseline gap-2"><h3 class="font-display font-bold text-2xl text-white uppercase">${m.nameEn}</h3><span class="text-sm font-semibold text-white/75">${m.nameKo}</span></div><span class="font-mono text-[9.5px] tracking-[0.2em] text-white/50 uppercase">LUCKY TRICK</span></div><span class="px-2.5 py-1 rounded-lg bg-white/10 font-mono text-xs font-bold text-white">${m.grade}</span></div>
+              <div class="flex items-center justify-between border-b border-white/[0.12] pb-3"><div><div class="flex items-baseline gap-2"><h3 class="font-display font-bold text-2xl text-white uppercase">${m.nameEn}</h3><span class="text-sm font-semibold text-white/75">${m.nameKo}</span></div><span class="font-mono text-[9.5px] tracking-[0.2em] text-white/50 uppercase">${cfg.title}</span></div><span class="px-2.5 py-1 rounded-lg bg-white/10 font-mono text-xs font-bold text-white">${m.grade}</span></div>
               <div class="mt-4 space-y-2 text-xs text-white/80 leading-relaxed">${m.notes.map((l) => `<p>${l}</p>`).join('')}</div>
               <div class="mt-4 space-y-2 font-mono text-[10.5px]">${[['나이', m.age], ['외형', m.appearance], ['사용 무기', m.weapon]].map(([k, v]) => `<div class="flex justify-between gap-3 py-1.5 border-b border-white/10"><span class="text-white/45 shrink-0">${k}</span><span class="text-white text-right">${v}</span></div>`).join('')}</div></div>
-            <div class="pt-3 border-t border-white/[0.12] flex items-center justify-between font-mono text-[9px] text-white/50"><span>SGIA SENTINEL</span><span class="text-white/85 font-semibold">ELYSIAN</span></div>
+            <div class="pt-3 border-t border-white/[0.12] flex items-center justify-between font-mono text-[9px] text-white/50"><span>SGIA SENTINEL</span><span class="text-white/85 font-semibold">${cfg.agency}</span></div>
           </div>
         </div></div>`;
     }).join('');
@@ -182,7 +184,7 @@ export function renderLuckyPage() {
       listen(card, 'mouseleave', () => { inner.style.setProperty('--id-rx', '0deg'); inner.style.setProperty('--id-ry', '0deg'); });
     });
     const m = MEMBERS[active];
-    q('[data-dossier-panel]').innerHTML = `<div class="flex items-center justify-between gap-3 pb-4 border-b border-white/10"><div><div class="font-mono text-[10px] tracking-[0.22em] text-white/50 uppercase">LUCKY TRICK</div><div class="flex items-baseline gap-3 mt-1"><h3 class="text-3xl sm:text-4xl font-bold text-white">${m.nameKo}</h3><span class="font-display font-bold text-xl text-white/60 tracking-wider">${m.nameEn}</span></div></div><span class="shrink-0 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 font-mono text-xs font-semibold text-white">${m.grade}</span></div>
+    q('[data-dossier-panel]').innerHTML = `<div class="flex items-center justify-between gap-3 pb-4 border-b border-white/10"><div><div class="font-mono text-[10px] tracking-[0.22em] text-white/50 uppercase">${cfg.title}</div><div class="flex items-baseline gap-3 mt-1"><h3 class="text-3xl sm:text-4xl font-bold text-white">${m.nameKo}</h3><span class="font-display font-bold text-xl text-white/60 tracking-wider">${m.nameEn}</span></div></div><span class="shrink-0 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 font-mono text-xs font-semibold text-white">${m.grade}</span></div>
       <div class="space-y-2.5 text-xs sm:text-sm text-white/80 leading-relaxed mt-5">${m.notes.map((l) => `<p>${l}</p>`).join('')}</div>
       <div class="grid grid-cols-2 gap-2.5 mt-6">
         <div class="rounded-2xl bg-white/[0.04] border border-white/10 px-3.5 py-2.5"><div class="font-mono text-[9.5px] tracking-[0.14em] text-white/45 uppercase">나이 · 역할</div><div class="text-xs sm:text-[13px] font-semibold text-white mt-0.5">${m.age} · ${m.role}</div></div>
@@ -190,7 +192,7 @@ export function renderLuckyPage() {
         <div class="col-span-2 rounded-2xl bg-white/[0.04] border border-white/10 px-3.5 py-2.5"><div class="font-mono text-[9.5px] tracking-[0.14em] text-white/45 uppercase">외형</div><div class="text-xs sm:text-[13px] font-medium text-white/90 mt-0.5">${m.appearance}</div></div>
         <div class="col-span-2 rounded-2xl bg-white/[0.04] border border-white/10 px-3.5 py-2.5"><div class="font-mono text-[9.5px] tracking-[0.14em] text-white/45 uppercase">사용 무기 · 위치</div><div class="text-xs sm:text-[13px] font-medium text-white/90 mt-0.5">${m.weapon} · ${m.location}</div></div>
       </div>
-      <a href="community.html?board=lucky&member=${communityId[m.id] || m.id}" class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.06] border border-white/15 font-mono text-[11px] tracking-[0.12em] text-white/80 hover:text-white hover:bg-white/10 transition uppercase">커뮤니티 프로필 · 피드 ↗</a>`;
+      <a href="community.html?board=${cfg.board}&member=${cfg.communityId[m.id] || m.id}" class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.06] border border-white/15 font-mono text-[11px] tracking-[0.12em] text-white/80 hover:text-white hover:bg-white/10 transition uppercase">커뮤니티 프로필 · 피드 ↗</a>`;
   }
   function centerCard(i) {
     const card = track.querySelector(`[data-card="${i}"]`);

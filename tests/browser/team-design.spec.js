@@ -26,24 +26,10 @@ test('Team surfaces follow light/dark preference, modal controls remain legible,
  await page.locator('.site-nav a[href="portal.html"]').click();
  expect(await page.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor)).not.toBe(team);
 });
-test('Entertainment image controls change slides and reduced motion does not auto-advance',async({page})=>{
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/hunterwind.html');
- await page.locator('#spotlight-next').click();await expect(page.locator('#spotlight-count')).toHaveText('02 / 04');
- await page.waitForTimeout(6700);await expect(page.locator('#spotlight-count')).toHaveText('02 / 04');
- await page.locator('#spotlight-prev').click();await expect(page.locator('#spotlight-count')).toHaveText('01 / 04');
-});
-
-test('Artist introduction logos occupy the centered navigation slot at desktop and mobile widths',async({page})=>{
- await page.goto('/elysian.html');await expect(page.locator('.lt-root h1')).toHaveText('LUCKY TRICK');
- for(const route of ['hunterwind']){
-  await page.goto('/'+route+'.html');
-  await expect(page.locator('.agency-hero h1')).toHaveText('HUNTERWIND');
-  await expect(page.locator('.agency-nav-logo')).toBeVisible();await expect(page.locator('.agency-hero .agency-wordmark')).toHaveCount(0);
-  for(const width of [1440,320]){
-   await page.setViewportSize({width,height:900});
-   const position=await page.locator('.agency-nav-logo').evaluate(el=>{const a=el.getBoundingClientRect(),b=el.parentElement.getBoundingClientRect();return Math.abs(a.x+a.width/2-b.x-b.width/2);});expect(position).toBeLessThan(2);
-   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
-  }
+test('Crew pages share the Lucky Trick layout and fit a phone',async({page})=>{
+ for(const [route,title] of [['elysian','LUCKY TRICK'],['hunterwind','OBSIDUS']]){
+  await page.goto('/'+route+'.html');await expect(page.locator('.lt-root h1')).toHaveText(title);
+  for(const width of [1440,320]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
  }
 });
 

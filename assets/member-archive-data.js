@@ -53,6 +53,7 @@ export const memberFacts = {
     ],
   },
   wonhyeol: {
+    birthday: '08/21',
     directive: '게이트를 닫는 자. 단독 토벌이 가능한 최상위 센티넬.',
     highlight: '게이트 개방 · 봉인 · 안정화',
     notes: [
@@ -62,6 +63,7 @@ export const memberFacts = {
     ],
   },
   dain: {
+    birthday: '06/18',
     directive: '실드의 회복과 감정 안정을 책임지는 완충 전력.',
     highlight: '생명 회복 · 감정 안정 파동',
     notes: [
@@ -71,6 +73,7 @@ export const memberFacts = {
     ],
   },
   sando: {
+    birthday: '01/09',
     directive: '모든 전투를 확률로 읽는 실드의 분석가.',
     highlight: '전투 예측 · 위험 확률 계산',
     notes: [
@@ -80,6 +83,7 @@ export const memberFacts = {
     ],
   },
   baekjin: {
+    birthday: '12/12',
     directive: '두려움을 안고도 정확히 조준하는 신입 저격 요원.',
     highlight: '정밀 저격 · 후방 지원',
     notes: [
@@ -89,6 +93,7 @@ export const memberFacts = {
     ],
   },
   ibex: {
+    location: 'B4 오리진 생활 구역 · 3F 가이드 관리국',
     directive: '게이트에서 돌아온 네 명을 이끄는 원칙주의자.',
     highlight: '특수 추적 · 고위험 게이트 탐사',
     notes: [
@@ -98,6 +103,7 @@ export const memberFacts = {
     ],
   },
   slun: {
+    location: 'B6 고위험 격리 구역',
     directive: '분류 체계로 설명되지 않는 귀환자.',
     highlight: '센티넬 파장 간섭 · 하반신 변이',
     notes: [
@@ -107,6 +113,7 @@ export const memberFacts = {
     ],
   },
   jaeshin: {
+    location: 'B4 오리진 생활 구역',
     directive: '보이지 않는 실로 퇴로를 막는 귀환체.',
     highlight: '거미줄 함정 · 매개체 인형 조종',
     notes: [
@@ -116,6 +123,7 @@ export const memberFacts = {
     ],
   },
   bug: {
+    location: 'B8 게이트 연구소',
     directive: '세계를 데이터처럼 읽는 오리진의 간섭자.',
     highlight: '데이터 실체화 · 공간 좌표 수정',
     notes: [

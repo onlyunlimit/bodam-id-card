@@ -191,3 +191,31 @@ html[data-theme=light] .song-suggestion input{background:#ffffff65;border-color:
  .song-suggestion footer button{align-self:flex-end}
 }
 @media(prefers-reduced-motion:reduce){.song-suggestion input,.song-suggestion button,.listening-room>.theme-dots button{transition:none!important;transform:none!important}}
+
+/* 2026-11-28: compact phone tabs (any number of teams), tighter request form, slim mini player. */
+@media(max-width:680px){
+ .listening-room>.theme-dots{display:flex;flex-wrap:wrap;gap:4px;margin:14px 0 18px;padding:4px;border-radius:16px}
+ .listening-room>.theme-dots button{flex:1 1 auto;width:auto;height:32px;padding:4px 9px;border-radius:11px;font-size:9px;letter-spacing:.04em}
+}
+.song-suggestion{max-width:620px;margin:28px auto 8px;padding:18px 22px;border-radius:22px}
+.song-suggestion h2{font-size:17px;margin:4px 0 6px}
+.song-suggestion header p{font-size:11px;line-height:1.55;margin:0 0 4px}
+.song-suggestion header p:last-of-type{margin-bottom:12px}
+.song-suggestion form{gap:10px 12px}
+.song-suggestion label{gap:4px;font-size:11px}
+.song-suggestion input{min-height:36px;padding:7px 11px;border-radius:10px;font-size:14px}
+.listening-room .song-suggestion button{padding:8px 15px;gap:12px}
+.song-suggestion [role=status]{font-size:11px}
+@media(max-width:680px){.song-suggestion{margin:20px 0 0;padding:16px;border-radius:18px}.song-suggestion h2{font-size:16px}.song-suggestion form{gap:9px}.song-suggestion input{font-size:16px;min-height:38px}.song-suggestion footer{gap:8px}}
+#music-player.is-collapsed{display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:300px;padding:7px 10px;border-radius:18px}
+#music-player.is-collapsed .music-video{order:1;width:36px;min-width:36px;height:36px;flex:none}
+#music-player.is-collapsed .music-now{order:2;flex:1 1 0;min-width:0;margin:0;gap:2px}
+#music-player.is-collapsed .music-now strong{font-size:12px}
+#music-player.is-collapsed .music-now small{font-size:10px}
+#music-player.is-collapsed .music-now button{font-size:15px!important;padding:0 4px!important}
+#music-player.is-collapsed .music-controls{order:3;flex:none;margin:0;gap:2px}
+#music-player.is-collapsed .music-controls button{padding:0 3px!important;font-size:14px!important;min-height:0}
+#music-player.is-collapsed .music-controls [data-music-queue]{display:none}
+#music-player.is-collapsed [data-music-status]{order:4;flex:1 0 100%;margin:0}
+#music-player.is-collapsed [data-music-status]:empty{display:none}
+@media(max-width:680px){#music-player.is-collapsed{width:min(300px,calc(100vw - 24px));padding:6px 9px}}

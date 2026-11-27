@@ -30,7 +30,7 @@ async function fixture() {
   sql.exec(readFileSync(new URL('../migrations/0008_withdraw_joker.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0009_comment_aliases.sql', import.meta.url), 'utf8'));
   sql.exec(readFileSync(new URL('../migrations/0010_public_codenames.sql', import.meta.url), 'utf8'));
-  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql','0016_music_playlists.sql','0017_music_requests.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+  for(const file of ['0011_admin_notifications.sql','0012_siso_portrait.sql','0013_comment_images.sql','0014_notification_state.sql','0015_shared_incidents.sql','0016_music_playlists.sql','0017_music_requests.sql','0018_member_guestbook.sql','0019_guestbook_moderation.sql','0020_playlist_catalog.sql'])sql.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
   const DB = {
     prepare(query) {
       const statement = {
@@ -926,4 +926,49 @@ test('Song suggestions are private, retry-safe, validated and readable only by a
  assert.equal((await req('/admin/notifications/read','POST',{all:true,through:Date.now()},admin)).status,200);
  assert.equal((await req('/admin/notifications','GET',undefined,admin)).data.unread,0);
  assert.equal((await req('/music-requests','POST',{...draft,id:crypto.randomUUID()})).status,429);
+});
+
+test('Guestbook notes notify the owner and can be edited, hidden, traced and deleted',async()=>{
+ const {req,key}=await fixture();
+ const posted=await req('/guestbook','POST',{character:'jion',author:'방문자',message:'안녕',font:'memo',color:'#1F2430',x:.2,y:.3,size:40});
+ assert.equal(posted.status,201);const id=posted.data.id;assert.match(id,/^[a-f0-9-]{36}$/);
+ assert.equal((await req('/guestbook?character=jion')).data.notes[0].size,28);
+ assert.equal((await req('/admin/guestbook')).status,401);
+ const login=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const admin={origin:'https://sgia.test',headers:{Cookie:login.response.headers.get('Set-Cookie').split(';')[0]}};
+ const notices=await req('/admin/notifications','GET',undefined,admin);
+ assert.equal(notices.data.unread,1);assert.equal(notices.data.events[0].kind,'guestbook');assert.equal(notices.data.events[0].id,id);
+ assert.equal((await req('/admin/guestbook?filter=new','GET',undefined,admin)).data.notes.length,1);
+ assert.equal((await req('/admin/guestbook/'+id,'PATCH',{read:true},admin)).status,200);
+ assert.equal((await req('/admin/notifications','GET',undefined,admin)).data.unread,0);
+ assert.equal((await req('/admin/guestbook/'+id,'PATCH',{message:'수정됨'},admin)).status,200);
+ assert.equal((await req('/guestbook?character=jion')).data.notes[0].message,'수정됨');
+ assert.equal((await req('/admin/guestbook/'+id,'PATCH',{hidden:true},admin)).status,200);
+ assert.equal((await req('/guestbook?character=jion')).data.notes.length,0);
+ assert.ok((await req('/admin/ip','POST',{id},admin)).data.ip);
+ assert.equal((await req('/admin/moderate','POST',{kind:'guestbook',id,action:'delete'},admin)).status,400);
+ assert.equal((await req('/admin/moderate','POST',{kind:'guestbook',id,action:'block'},admin)).status,200);
+ assert.equal((await req('/guestbook','POST',{character:'jion',message:'차단 후'})).status,403);
+ assert.equal((await req('/admin/guestbook/'+id,'DELETE',undefined,admin)).status,200);
+ assert.equal((await req('/admin/guestbook?filter=all','GET',undefined,admin)).data.notes.length,0);
+});
+
+test('Playlists keep SGIA before HKU, accept new teams and cover links, and hide on request',async()=>{
+ const {req,key}=await fixture();
+ const auth=await req('/admin/login','POST',{key},{origin:'https://sgia.test'});
+ const options={origin:'https://sgia.test',headers:{Cookie:auth.response.headers.get('Set-Cookie').split(';')[0]}};
+ const track={title:'곡',artist:'가수',url:'https://youtu.be/abcdefghijk'};
+ assert.equal((await req('/admin/playlists','POST',{title:'HKU',universe:'hku',tracks:[track]},options)).status,400);
+ const hku=await req('/admin/playlists','POST',{title:'HKU',universe:'hku',character:'새 인물',tracks:[{...track,cover:'https://example.com/a.jpg'},{...track,title:'숨김 곡',hidden:true}]},options);
+ assert.equal(hku.status,200);
+ assert.equal((await req('/admin/playlists','POST',{title:'X',team:'새팀',tracks:[{...track,cover:'http://example.com/a.jpg'}]},options)).status,400);
+ const sgia=await req('/admin/playlists','POST',{title:'새 팀',team:'실드',tracks:[track]},options);
+ const hidden=await req('/admin/playlists','POST',{title:'비공개',team:'비콘',hidden:true,tracks:[track]},options);
+ const list=(await req('/playlists')).data.playlists;
+ assert.equal(list.length,2);
+ const h=list.find(p=>p.id===hku.data.id);assert.equal(h.team,'hankuk');assert.equal(h.universe,'hku');assert.equal(h.character,'새 인물');
+ assert.equal(h.tracks.length,1);assert.equal(h.tracks[0].cover,'https://example.com/a.jpg');
+ assert.equal(list.find(p=>p.id===sgia.data.id).team,'shield');
+ assert.equal((await req('/admin/playlists','GET',undefined,options)).data.playlists.length,3);
+ assert.ok(!list.some(p=>p.id===hidden.data.id));
 });

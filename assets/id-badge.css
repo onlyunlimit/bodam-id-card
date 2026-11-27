@@ -12,11 +12,11 @@
 .tw :where(img,svg){display:block}
 
 /* ===== Badge palettes (one per department) ===== */
-.idc-host{--idc-s:1;--idc-front:linear-gradient(145deg,rgba(244,246,248,.9) 0%,rgba(235,240,243,.74) 45%,rgba(210,220,229,.82) 100%);--idc-ink:#1C2938;--idc-muted:#5A6E82;--idc-cell:rgba(255,255,255,.55);--idc-back:linear-gradient(155deg,rgba(28,41,56,.96) 0%,rgba(38,53,70,.92) 52%,rgba(20,30,42,.98) 100%);--idc-on:#fff;--idc-on-ink:#0b1118;--idc-glow:rgba(255,255,255,.25)}
-[data-team=shield] .idc-host,.idc-host[data-team=shield]{--idc-front:linear-gradient(145deg,rgba(255,255,255,.95) 0%,rgba(244,246,249,.84) 48%,rgba(226,231,238,.9) 100%);--idc-ink:#12151A;--idc-muted:#5d6370;--idc-cell:rgba(255,255,255,.78);--idc-back:linear-gradient(155deg,rgba(18,22,32,.97) 0%,rgba(28,34,48,.93) 52%,rgba(9,12,18,.99) 100%)}
-[data-team=origin] .idc-host,.idc-host[data-team=origin]{--idc-front:linear-gradient(145deg,rgba(248,245,252,.94) 0%,rgba(234,226,246,.8) 46%,rgba(205,190,232,.88) 100%);--idc-ink:#241B33;--idc-muted:#6B5B86;--idc-cell:rgba(255,255,255,.6);--idc-back:linear-gradient(155deg,rgba(43,30,62,.97) 0%,rgba(58,40,84,.93) 52%,rgba(22,14,34,.99) 100%);--idc-on-ink:#1d1230}
-[data-team=blackjack] .idc-host,.idc-host[data-team=blackjack]{--idc-front:linear-gradient(145deg,rgba(246,247,238,.94) 0%,rgba(229,233,214,.8) 46%,rgba(196,205,168,.88) 100%);--idc-ink:#1F2618;--idc-muted:#5F6B4C;--idc-cell:rgba(255,255,255,.58);--idc-back:linear-gradient(155deg,rgba(32,40,24,.97) 0%,rgba(44,56,32,.93) 52%,rgba(16,21,11,.99) 100%);--idc-on:#d8e8b8;--idc-on-ink:#18210f}
-html[data-theme] body .berserk-mode .idc-host{--idc-front:linear-gradient(145deg,rgba(255,250,250,.95) 0%,rgba(248,238,240,.84) 50%,rgba(235,218,222,.9) 100%);--idc-back:linear-gradient(155deg,rgba(28,14,17,.97) 0%,rgba(42,18,22,.93) 52%,rgba(14,7,9,.99) 100%);--idc-glow:rgba(220,38,38,.45)}
+.idc-host{--idc-s:1;--idc-front:linear-gradient(145deg,rgba(244,246,248,.9) 0%,rgba(235,240,243,.74) 45%,rgba(210,220,229,.82) 100%);--idc-ink:#1C2938;--idc-muted:#5A6E82;--idc-cell:rgba(255,255,255,.55);--idc-back:linear-gradient(155deg,rgb(28,41,56) 0%,rgb(38,53,70) 52%,rgb(20,30,42) 100%);--idc-on:#fff;--idc-on-ink:#0b1118;--idc-glow:rgba(255,255,255,.25)}
+[data-team=shield] .idc-host,.idc-host[data-team=shield]{--idc-front:linear-gradient(145deg,rgba(255,255,255,.95) 0%,rgba(244,246,249,.84) 48%,rgba(226,231,238,.9) 100%);--idc-ink:#12151A;--idc-muted:#5d6370;--idc-cell:rgba(255,255,255,.78);--idc-back:linear-gradient(155deg,rgb(18,22,32) 0%,rgb(28,34,48) 52%,rgb(9,12,18) 100%)}
+[data-team=origin] .idc-host,.idc-host[data-team=origin]{--idc-front:linear-gradient(145deg,rgba(248,245,252,.94) 0%,rgba(234,226,246,.8) 46%,rgba(205,190,232,.88) 100%);--idc-ink:#241B33;--idc-muted:#6B5B86;--idc-cell:rgba(255,255,255,.6);--idc-back:linear-gradient(155deg,rgb(43,30,62) 0%,rgb(58,40,84) 52%,rgb(22,14,34) 100%);--idc-on-ink:#1d1230}
+[data-team=blackjack] .idc-host,.idc-host[data-team=blackjack]{--idc-front:linear-gradient(145deg,rgba(246,247,238,.94) 0%,rgba(229,233,214,.8) 46%,rgba(196,205,168,.88) 100%);--idc-ink:#1F2618;--idc-muted:#5F6B4C;--idc-cell:rgba(255,255,255,.58);--idc-back:linear-gradient(155deg,rgb(32,40,24) 0%,rgb(44,56,32) 52%,rgb(16,21,11) 100%);--idc-on:#d8e8b8;--idc-on-ink:#18210f}
+html[data-theme] body .berserk-mode .idc-host{--idc-front:linear-gradient(145deg,rgba(255,250,250,.95) 0%,rgba(248,238,240,.84) 50%,rgba(235,218,222,.9) 100%);--idc-back:linear-gradient(155deg,rgb(28,14,17) 0%,rgb(42,18,22) 52%,rgb(14,7,9) 100%);--idc-glow:rgba(220,38,38,.45)}
 
 /* ===== Stage and liquid-glass faces ===== */
 .idc-stage{position:absolute;inset:0;display:block;overflow:hidden;border-radius:calc(28px * var(--idc-s))}
@@ -55,6 +55,15 @@ html body .person-card.official-id .card-face:after,html body .person-card.offic
 html body .person-card.official-id.holding .idc-photo{transform:scale(1.03)}
 html body .person-card.official-id .card-tilt{border-radius:28px}
 @media(max-width:600px){html body .character-grid:has(.official-id){grid-template-columns:minmax(0,390px)!important;justify-content:center;gap:28px}}
-html body .idc .card-code{color:#fff!important;font-size:15px!important;letter-spacing:-.01em!important;line-height:1!important;font-family:Pretendard,Inter,sans-serif!important;text-shadow:none!important;margin:0!important}
-html body .idc .fixed-code{color:#ffffffcc!important;font-size:14px!important;font-family:Oswald,Syne,sans-serif!important;letter-spacing:.06em!important}
+html body .idc .card-code{color:var(--idc-muted)!important;font-size:11px!important;letter-spacing:0!important;line-height:1!important;font-family:Pretendard,Inter,sans-serif!important;text-shadow:none!important;margin:0!important;font-weight:600!important}
+html body .idc .fixed-code{color:var(--idc-ink)!important;font-family:Oswald,Syne,sans-serif!important;letter-spacing:-.01em!important;line-height:.95!important;margin:4px 0 0!important;text-shadow:none!important}
 .idc-photo-locked{filter:blur(11px) grayscale(.35);transform:scale(1.08)}
+
+/* Backs are fully opaque and the front is hidden once a badge has turned:
+   blurred glass layers on the front must never show through the back. */
+.idc-back{background:var(--idc-back)!important}
+html body .person-card.official-id .card-face.front{transition:visibility 0s .28s}
+html body .person-card.official-id .card-face.back{visibility:hidden;transition:visibility 0s .28s}
+html body .person-card.official-id.flipped .card-face.front{visibility:hidden}
+html body .person-card.official-id.flipped .card-face.back{visibility:visible}
+.idc-team-icon{display:block;opacity:.75}

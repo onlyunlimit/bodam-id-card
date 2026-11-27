@@ -32,23 +32,24 @@ export function notificationStatement(env,id,postId,kind) {
 }
 export async function dispatchNotification(env,id) {
   if(!env.VAPID_PUBLIC_KEY||!env.VAPID_PRIVATE_KEY)return;
-  const event=await env.DB.prepare('SELECT id,post_id,kind FROM notification_events WHERE id=?').bind(id).first() || await env.DB.prepare("SELECT id,'music' AS kind FROM music_requests WHERE id=?").bind(id).first();
+  const event=await env.DB.prepare('SELECT id,post_id,kind FROM notification_events WHERE id=?').bind(id).first() || await env.DB.prepare("SELECT id,'music' AS kind FROM music_requests WHERE id=?").bind(id).first() || await env.DB.prepare("SELECT id,'guestbook' AS kind,character FROM member_guestbook WHERE id=?").bind(id).first();
   if(!event)return;
   const {results}=await env.DB.prepare('SELECT * FROM push_subscriptions ORDER BY created_at DESC LIMIT 10').all();
-  await Promise.allSettled(results.map(sub=>pushTo(env,sub,{title:'SGIA 커뮤니티',body:event.kind==='music'?'새 추천곡 신청이 도착했습니다.':event.kind==='post'?'새 게시글이 등록되었습니다.':'새 댓글·답글이 등록되었습니다.',url:event.kind==='music'?'/admin?musicRequest='+event.id:'/admin?post='+event.post_id,tag:event.id})));
+  await Promise.allSettled(results.map(sub=>pushTo(env,sub,{title:'SGIA 커뮤니티',body:event.kind==='music'?'새 추천곡 신청이 도착했습니다.':event.kind==='guestbook'?'요원 방명록에 새 글이 남겨졌습니다.':event.kind==='post'?'새 게시글이 등록되었습니다.':'새 댓글·답글이 등록되었습니다.',url:event.kind==='music'?'/admin?musicRequest='+event.id:event.kind==='guestbook'?'/admin?guestbook='+event.id:'/admin?post='+event.post_id,tag:event.id})));
 }
 export async function notificationAPI(request,env,body) {
   const {pathname:path}=new URL(request.url),method=request.method;
   if(path==='/admin/notifications'&&method==='GET'){
-    const {results}=await env.DB.prepare(`SELECT e.id,e.post_id,e.kind,e.created_at,p.board,p.title FROM notification_events e JOIN posts p ON p.id=e.post_id WHERE e.read_at IS NULL AND p.deleted_at IS NULL AND p.hidden=0 UNION ALL SELECT id,NULL AS post_id,'music' AS kind,created_at,'music' AS board,title FROM music_requests WHERE read_at IS NULL ORDER BY created_at DESC,id DESC LIMIT 50`).all();
+    const {results}=await env.DB.prepare(`SELECT e.id,e.post_id,e.kind,e.created_at,p.board,p.title FROM notification_events e JOIN posts p ON p.id=e.post_id WHERE e.read_at IS NULL AND p.deleted_at IS NULL AND p.hidden=0 UNION ALL SELECT id,NULL AS post_id,'music' AS kind,created_at,'music' AS board,title FROM music_requests WHERE read_at IS NULL UNION ALL SELECT id,NULL AS post_id,'guestbook' AS kind,CAST(strftime('%s',created_at) AS INTEGER)*1000 AS created_at,character AS board,message AS title FROM member_guestbook WHERE read_at IS NULL ORDER BY created_at DESC,id DESC LIMIT 50`).all();
     const count=await env.DB.prepare('SELECT count(*) AS n FROM notification_events e JOIN posts p ON p.id=e.post_id WHERE e.read_at IS NULL AND p.deleted_at IS NULL AND p.hidden=0').first();
     const music=await env.DB.prepare('SELECT count(*) AS n FROM music_requests WHERE read_at IS NULL').first();
-    return json({events:results,unread:count.n+music.n,asOf:Date.now()});
+    const notes=await env.DB.prepare('SELECT count(*) AS n FROM member_guestbook WHERE read_at IS NULL').first();
+    return json({events:results,unread:count.n+music.n+notes.n,asOf:Date.now()});
   }
   if(path==='/admin/notifications/read'&&method==='POST'){
     const data=await body(request),through=Number(data.through);
     if(!Number.isSafeInteger(through)||through<0||through>Date.now()+60000)throw new HTTPError(400,'읽음 범위를 확인해 주세요.');
-    if(data.all===true)await env.DB.batch([env.DB.prepare('UPDATE notification_events SET read_at=? WHERE read_at IS NULL AND created_at<=?').bind(Date.now(),through),env.DB.prepare('UPDATE music_requests SET read_at=? WHERE read_at IS NULL AND created_at<=?').bind(Date.now(),through)]);
+    if(data.all===true)await env.DB.batch([env.DB.prepare('UPDATE notification_events SET read_at=? WHERE read_at IS NULL AND created_at<=?').bind(Date.now(),through),env.DB.prepare('UPDATE music_requests SET read_at=? WHERE read_at IS NULL AND created_at<=?').bind(Date.now(),through),env.DB.prepare("UPDATE member_guestbook SET read_at=? WHERE read_at IS NULL AND created_at<=?").bind(Date.now(),new Date(through).toISOString())]);
     else {
       if(!/^[a-f0-9-]{36}$/.test(data.postId||''))throw new HTTPError(400,'게시글을 확인해 주세요.');
       await env.DB.prepare('UPDATE notification_events SET read_at=? WHERE post_id=? AND read_at IS NULL AND created_at<=?').bind(Date.now(),data.postId,through).run();

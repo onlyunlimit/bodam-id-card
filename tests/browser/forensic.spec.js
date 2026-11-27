@@ -67,15 +67,12 @@ test('Classified evidence opens as a document and crosshair stays decorative wit
   await page.locator('#open-sealed').click();
   await page.locator('#archive-pin').fill('0826');
   await page.locator('[data-key=ENTER]').click();
-  await expect(page.locator('[data-evidence]')).toHaveCount(3);
+  await expect(page.locator('.az-vault-file .az-reader')).toHaveAttribute('data-open', 'true');
   await expect.poll(() => page.locator('#tracking-map img.leaflet-tile').evaluateAll(es => Math.max(...es.map(e => Number(e.src.match(/\/(\d+)\/\d+\/\d+\.png/)?.[1] || 0))))).toBe(11);
-  await page.locator('[data-evidence="01"]').click();
-  await expect(page.locator('.az-reader')).toContainText('비켜.');
+  await page.locator('.az-vault-file [data-sheet="4"]').click();
+  await expect(page.locator('.az-sheet[data-page="4"] .az-sheet-front')).toContainText('비켜.');
   await page.setViewportSize({ width: 320, height: 850 });
-  expect(
-    await page.locator('#document-dialog').evaluate((e) => e.scrollWidth <= e.clientWidth + 1),
-  ).toBe(true);
-  await page.keyboard.press('Escape');
+  await expect(page.locator('.az-vault-file .az-rig')).toHaveClass(/compact/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 test('Personnel artwork uses backgrounds and photo collections open separately', async ({ page }) => {
@@ -83,10 +80,13 @@ test('Personnel artwork uses backgrounds and photo collections open separately',
   await page.goto('/beacon.html');
   await staff(page);
   await page.locator('[data-character="levit"] .card-turner').click();
-  expect(await page.locator('[data-card=entry] .ma-face-front .idc-photo').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
-  await page.locator('.ma-nav [data-go=deck]').click();
-  await page.locator('[data-photo]').first().click();
-  await expect(page.locator('.photo-view')).toBeVisible();
+  expect(await page.locator('[data-card=badge] .ma-face-front .idc-photo').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
+  await expect(page.locator('.ma-deck')).toBeHidden();
+  await page.locator('[data-card=badge]').click();
+  const card = page.locator('[data-photo]').first();
+  expect(await card.locator('.ma-poca-img').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
+  await card.click();
+  await expect(card).toHaveAttribute('aria-pressed', 'true');
 });
 test('Closing a report and immediately reusing the dialog never refreshes a disposed map', async ({
   page,
