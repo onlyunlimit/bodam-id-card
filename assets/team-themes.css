@@ -3,10 +3,10 @@ body[data-unit=blackjack]{--bg:#0b100b;--surface:#1c261b;--surface2:#2d3c29;--te
 body[data-unit=origin]{--bg:#100d1d;--surface:#21192f;--surface2:#312542;--text:#eee6ff;--muted:#b8a9cb;--accent:#c3a0f6;--line:#514260;--field:#1b1428;--control:#3b2d4d;background:radial-gradient(ellipse at 85% 30%,#54357d44,transparent 60%),var(--bg)}
 body[data-unit=beacon]{--bg:#101d27;--surface:#1c2b36;--surface2:#2c3d49;--text:#e5eef2;--muted:#a1b6c4;--accent:#98cee3;--line:#465b69;--field:#172630;--control:#304552;background:var(--bg)}
 body[data-unit=shield]{--bg:#191a18;--surface:#292b25;--surface2:#3a3c32;--text:#ede9d9;--muted:#bcb59e;--accent:#dabb76;--line:#5a5748;--field:#22241e;--control:#414133;background:linear-gradient(120deg,#39322135,transparent 70%),var(--bg)}
-:root[data-theme=light] body[data-unit=blackjack]{--bg:#d9dfcc;--surface:#eef0e2;--surface2:#cbd4b9;--text:#25311f;--muted:#58674b;--accent:#49672e;--line:#a4b28f;--field:#f8f9ef;--control:#d4ddc4}
-:root[data-theme=light] body[data-unit=origin]{--bg:#e3deec;--surface:#f3eef8;--surface2:#d9cde7;--text:#2c213b;--muted:#746183;--accent:#774ba8;--line:#bdadce;--field:#fbf8ff;--control:#e5daef}
-:root[data-theme=light] body[data-unit=beacon]{--bg:#dfe7eb;--surface:#f6f8f8;--surface2:#d4e0e7;--text:#233848;--muted:#5d7786;--accent:#2d718d;--line:#aec4d0;--field:#fff;--control:#dce8ee}
-:root[data-theme=light] body[data-unit=shield]{--bg:#e1ddcf;--surface:#f0eee5;--surface2:#d9d2bf;--text:#353426;--muted:#79715a;--accent:#8b6c29;--line:#bcb396;--field:#fffdf4;--control:#e2dcc9}
+
+
+
+
 body:is([data-unit=blackjack],[data-unit=origin],[data-unit=beacon],[data-unit=shield]) :is(.site-header,.site-nav,.site-footer,.agency-strip){background:var(--surface);color:var(--text);border-color:var(--line)}
 body .team-hero{position:relative;isolation:isolate;min-height:420px;padding:40px!important;border:1px solid var(--line);color:var(--text);background:var(--surface)!important}
 .team-hero h2{font-size:clamp(44px,6.5vw,96px);line-height:.95;letter-spacing:-.045em;margin:22px 0}
@@ -128,9 +128,9 @@ body .person-card[data-team=beacon] :is(.id-caption,.id-card-foot){--muted:#425f
 body .person-card[data-team=blackjack] .card-face{--muted:#485a39}
 body .directory-grid>.directory-card[data-team=beacon]{--muted:#405e73}
 body .directory-grid>.directory-card[data-team=shield] .directory-window-label{background:#343e29;color:#fff4d2}
-:root[data-theme=light] body[data-unit=beacon]{--muted:#435f70}
-:root[data-theme=light] body[data-unit=shield]{--muted:#655d47}
-:root[data-theme=light] body[data-unit=origin]{--muted:#675474}
+
+
+
 
 body .directory-grid>.directory-card[data-team=blackjack]{--accent:#e0edbf}
 body .directory-grid>.directory-card[data-team=origin]{--accent:#e2c6fb}
@@ -284,7 +284,7 @@ body .directory-grid>.directory-card[data-team=beacon]{--team:#8eb9d8;--glass:#1
 body .directory-grid>.directory-card[data-team=origin]{--team:#bfa1d7;--glass:#282031}
 body .directory-grid>.directory-card[data-team=shield]{--team:#c3ad77;--glass:#29291f}
 body .directory-grid>.directory-card[data-team=blackjack]{--team:#a7bf84;--glass:#232b20}
-html[data-theme=light] body .directory-grid>.directory-card[data-team]{--ink:#202936;--subtle:#53616d;--glass:#f5f6f7;--line:#263a521f;border-color:#ffffffc9;box-shadow:inset 0 1px 0 #fff,0 18px 48px #24334412}
+
 body .directory-grid>.directory-card[data-team] .eyebrow{color:var(--subtle);font-size:10px;letter-spacing:.18em}
 body .directory-grid>.directory-card[data-team] .directory-visual{height:290px;margin:24px 0 28px}
 body .directory-grid>.directory-card[data-team] .directory-visual img{filter:saturate(.8);transition:filter .4s,scale .6s}
@@ -434,25 +434,25 @@ body .agency-gallery .gallery-grid>button>span{padding:16px;font-size:11px;color
 }
 
 /* Team identities: independent silhouettes and palettes, without accent rails. */
-body .directory-card[data-team="shield"], body .team-hero[data-team="shield"] {
+body .directory-grid > .directory-card[data-team="shield"], body .team-hero[data-team="shield"] {
   --team:#b8c5f5; --muted:#bdc9e7; color:#edf1ff;
   background:radial-gradient(ellipse at 50% 18%,#6574a1 0%,#242e54 42%,#0c1128 100%);
   border:1px solid #aebce050; border-radius:42px 42px 18px 18px!important;
   box-shadow:inset 0 1px 0 #e7edff60,0 18px 38px #0b10252b;
 }
-body .directory-card[data-team="origin"], body .team-hero[data-team="origin"] {
+body .directory-grid > .directory-card[data-team="origin"], body .team-hero[data-team="origin"] {
   --team:#c98aef; --muted:#dac3e8; color:#f7ecff;
   background:radial-gradient(ellipse at 35% 10%,#895398 0%,#493253 48%,#211c35 100%);
   border:1px solid #d0a6ed45; border-radius:48px 48px 12px 12px!important;
   box-shadow:inset 0 1px 0 #f0cfff50,0 18px 38px #25122d2b;
 }
-body .directory-card[data-team="beacon"], body .team-hero[data-team="beacon"] {
+body .directory-grid > .directory-card[data-team="beacon"], body .team-hero[data-team="beacon"] {
   --team:#54759c; --muted:#4e6582; color:#20324b;
   background:radial-gradient(circle at 12% 0%,#fff 0%,#edf3fb 43%,#c5d4e7 100%);
   border:2px solid #34465d; border-radius:12px 32px 32px 12px!important;
   box-shadow:6px 8px 0 #8298b331,inset 0 1px 0 #fff;
 }
-body .directory-card[data-team="blackjack"], body .team-hero[data-team="blackjack"] {
+body .directory-grid > .directory-card[data-team="blackjack"], body .team-hero[data-team="blackjack"] {
   --team:#d4ddb0; --muted:#d1d6bd; color:#f0efdf;
   background:linear-gradient(135deg,#7c8566 0%,#48553e 45%,#202f24 100%);
   border:3px solid #9ba786; border-radius:30px!important;
@@ -462,9 +462,9 @@ body .directory-card[data-team] .directory-title small,
 body .directory-card[data-team] .directory-meta {color:var(--muted)}
 body .team-hero[data-team="shield"] .shield-lineup>div {background:#111a35;color:#edf1ff;border-color:#879bc055}
 @media(max-width:600px){
- body .directory-card[data-team="shield"],body .team-hero[data-team="shield"]{border-radius:30px 30px 14px 14px!important}
- body .directory-card[data-team="origin"],body .team-hero[data-team="origin"]{border-radius:36px 36px 10px 10px!important}
- body .directory-card[data-team="beacon"],body .team-hero[data-team="beacon"]{border-radius:10px 24px 24px 10px!important}
+ body .directory-grid > .directory-card[data-team="shield"],body .team-hero[data-team="shield"]{border-radius:30px 30px 14px 14px!important}
+ body .directory-grid > .directory-card[data-team="origin"],body .team-hero[data-team="origin"]{border-radius:36px 36px 10px 10px!important}
+ body .directory-grid > .directory-card[data-team="beacon"],body .team-hero[data-team="beacon"]{border-radius:10px 24px 24px 10px!important}
 }
 
 /* Directory typography follows each team's own surface in either portal mode. */
