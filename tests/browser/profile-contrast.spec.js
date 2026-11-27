@@ -20,8 +20,8 @@ for(const team of ['blackjack','origin','beacon','shield'])test(`${team} all per
   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();
   for(const id of ids){
    await page.locator(`[data-character="${id}"] .card-turner`).click();
-   await page.locator('[data-tab=paper]').click();
-   const fields=page.locator('.paper-front :is(h3,small,p,dt,dd,h4)');
+   await page.locator('[data-open-file]').click();await expect(page.locator('.ma-workspace')).toBeVisible();
+   const fields=page.locator('.paper-front :is(h4,h5,dt,dd,.ma-memos p)');
    expect(await fields.count()).toBeGreaterThan(0);
    for(const field of await fields.all())expect(await contrast(field),`${id}/${theme}: ${await field.textContent()}`).toBeGreaterThanOrEqual(4.5);
    const action=page.locator('.profile-document .primary');
@@ -48,7 +48,7 @@ test('AZ archive replaces text art with a readable evidence dossier and keeps tr
  for(const theme of ['dark','light']){
   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('#theme-toggle').click();
   await page.locator('#az-profile .card-turner').click();await expect(page.locator('.az-reader')).toBeVisible();
-  await expect(page.locator('.az-page')).toContainText('AZ');
+  await expect(page.locator('.az-sheet[data-page="1"] .az-page')).toContainText('AZ');
   await page.keyboard.press('Escape');
  }
  for(const width of [1440,320]){
@@ -56,7 +56,7 @@ test('AZ archive replaces text art with a readable evidence dossier and keeps tr
  }
 });
 
-for(const [team,path] of [['obsidus','hunterwind'],['lucky','elysian']])test(`${team} artist profile opens without blocking effects and remains readable`,async({page})=>{
+for(const [team,path] of [['obsidus','hunterwind']])test(`${team} artist profile opens without blocking effects and remains readable`,async({page})=>{
  await page.goto('/'+path+'.html');
  const ids=await page.locator('.artist-strip [data-artist],.agency-lineup [data-artist]').evaluateAll(es=>[...new Set(es.map(e=>e.dataset.artist))]);
  const all=ids.length?ids:await page.locator('[data-artist]').evaluateAll(es=>[...new Set(es.map(e=>e.dataset.artist))]);expect(all.length).toBe(4);

@@ -83,8 +83,8 @@ test('Personnel artwork uses backgrounds and photo collections open separately',
   await page.goto('/beacon.html');
   await staff(page);
   await page.locator('[data-character="levit"] .card-turner').click();
-  expect(await page.locator('.badge-portrait').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
-  await page.locator('[data-tab="photos"]').click();
+  expect(await page.locator('[data-card=entry] .ma-face-front .idc-photo').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
+  await page.locator('.ma-nav [data-go=deck]').click();
   await page.locator('[data-photo]').first().click();
   await expect(page.locator('.photo-view')).toBeVisible();
 });

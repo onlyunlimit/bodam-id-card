@@ -43,9 +43,8 @@ test('Login cancellation stays public, staff persists across pages, photo roles 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/beacon.html');
   const card = page.locator('[data-character="binjo"]');
-  const front = await card.locator('.id-photo > img').getAttribute('data-image-url');
   expect(
-    await card.locator('.id-photo > img').evaluate((e) => getComputedStyle(e).filter),
+    await card.locator('.front .idc-photo').evaluate((e) => getComputedStyle(e).filter),
   ).toContain('blur(11px)');
   await page.locator('#viewer-toggle').click();
   await page.locator('#login-submit').click();
@@ -61,7 +60,7 @@ test('Login cancellation stays public, staff persists across pages, photo roles 
     'hidden',
   );
   await card.locator('.card-turner').click();
-  expect(await page.locator('.badge-portrait').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
+  expect(await page.locator('[data-card=entry] .ma-face-front .idc-photo').evaluate(e => getComputedStyle(e).backgroundImage)).toContain('https://');
   await expect(page.locator('[data-gallery]')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await page.goto('/origin.html');

@@ -5,6 +5,7 @@ import { detailImage, dossier } from './units.js';
 import { teamLogos } from './media.js';
 import { personName, registerCopy } from './i18n.js';
 import { agencyGallery } from './agency-gallery.js';
+import { renderLuckyPage } from './lucky-page.js';
 [
   ['아티스트', 'Artists', 'アーティスト', '艺人'],
   ['화보 갤러리', 'Editorial gallery', 'フォトギャラリー', '写真画廊'],
@@ -15,6 +16,7 @@ import { agencyGallery } from './agency-gallery.js';
   ['이미지 다음', 'Next image', '次の画像', '下一张'],
 ].forEach((row) => registerCopy(...row));
 export function renderAgency(agency) {
+  if (agency === 'elysian') return renderLuckyPage();
   const lucky = agency === 'elysian',
     team = lucky ? 'lucky' : 'obsidus',
     people = characters.filter((c) => c.team === team);

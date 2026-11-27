@@ -1,6 +1,6 @@
 import { HTTPError, text } from './security.js';
 const json = (data, status = 200) => Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
-const fonts = new Set(['hand', 'serif', 'sans', 'mono']);
+const fonts = new Set(['hand', 'memo', 'serif', 'sans', 'mono']);
 export function validateNote(data) {
   const character = text(data.character, 1, 64, '요원');
   if (!/^[a-z0-9_-]+$/i.test(character)) throw new HTTPError(400, '요원을 확인해 주세요.');

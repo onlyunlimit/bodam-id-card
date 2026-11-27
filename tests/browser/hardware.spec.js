@@ -42,7 +42,15 @@ test('Receiver controls tune the same signal and new BGM stays mounted', async (
 test('Agencies show public artist profiles and a functional gallery; compendium explains concepts', async ({
   page,
 }) => {
-  for (const route of ['elysian', 'hunterwind']) {
+  await page.goto('/elysian.html');
+  await expect(page.locator('.lt-id-card')).toHaveCount(4);
+  await page.locator('[data-deck-pills] [data-member="1"]').click();
+  await expect(page.locator('[data-editorial-title]')).toHaveText('DANJO');
+  await page.locator('[data-binder]').click();
+  await expect(page.locator('.lt-poca-slot')).toHaveCount(12);
+  await page.locator('.lt-poca-slot').first().click();
+  await expect(page.locator('.lt-poca-slot').first()).toHaveAttribute('aria-pressed', 'true');
+  for (const route of ['hunterwind']) {
     await page.goto('/' + route + '.html');
     await expect(page.locator('.agency-lineup button')).toHaveCount(4);
     await expect(page.locator('.person-card')).toHaveCount(0);

@@ -1,45 +1,295 @@
-import { modal, esc } from './runtime.js';
-import { characters } from './characters.js';
+// AZ classified case file: sealed folder, page-turning sheets, UV inspection and a small clue hunt.
+// The keypad and route tracking that lead here stay in monitor.js / evidence.js.
+import { modal, state } from './runtime.js';
+
+const IMG = {
+  cover: 'https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/77517bd6-150a-48b5-b0cf-17a1cb2e2742?v=2c4d1d',
+  paper: 'https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/6f229be7-3f5e-47ba-9918-c464fe6a0394?v=44ab7a',
+  stamp: 'https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/d4aa025a-f4e2-4ee5-bac7-cc56c079b13b?v=b8dceb',
+  seal: 'https://cdn.caveduck.io/cdn-cgi/image/dpr=2,f=auto,w=800/charim/53175fa3-84ee-4f30-91e4-dd6defea091f?v=dedc46',
+  suspect: 'https://cdn.caveduck.io/charim-standard/631d30d1-4080-47fd-b0e2-86e45192ff87?v=a11dbd',
+};
+const NEED = 3;
+const back = (ref, line) => `<div class="az-sheet-back"><div class="az-punch"><i></i><i></i></div><div class="az-meta" style="opacity:.45">SGIA ARCHIVE // VERSO SIDE</div><div class="az-back-stamp"><span>${line}</span><span>DOC-REF: ${ref}</span></div></div>`;
+const trace = (id, label, cls = '') => `<button type="button" class="az-trace ${cls}" data-trace="${id}" aria-label="${label}"><span aria-hidden="true"></span></button>`;
+const pen = (text, cls = '') => `<p class="az-pen ${cls}" aria-hidden="false">${text}</p>`;
+
+const sheets = [
+  // 01 — subject identification
+  `<article class="az-sheet" data-page="1"><div class="az-sheet-front az-page"><div>
+    <div class="az-doc-head"><div><div class="az-meta">SUBJECT IDENTIFICATION // 01</div><h2 class="az-doc-title">수배 기록: 에이지 (AZ)</h2></div><span class="az-code">WANTED // AT LARGE</span></div>
+    <div class="az-profile"><div class="az-photo"><div class="az-photo-in" role="img" aria-label="에이지(AZ) 관측 이미지" style="background-image:url('${IMG.suspect}')"><span class="az-photo-cap">CCTV / WITNESS RECON</span></div>${trace('print', '사진 모서리의 얼룩 확인', 'az-trace-print')}</div>
+     <div class="az-specs">${[['코드명', '에이지 / AZ (본명 미상)'], ['신원 추정', '남성 · 27세 추정'], ['소속', 'ORPÉ (단, 철저한 개인 행동)'], ['등급/역할', '측정 불가 센티넬 (가이딩 겸용)'], ['검거 현황', '<b class="az-red">추적 실패 (상습 도주)</b>']].map(([k, v]) => `<div class="az-spec"><span>${k}</span><span>${v}</span></div>`).join('')}</div></div>
+    <div class="az-section"><div class="az-label">COMPOSITE APPEARANCE (목격자 종합 인상착의)</div><p class="az-body">공식 생체 데이터 부재로 현장 진술만 취합됨. <strong>매우 큰 신장</strong>에 창백할 만큼 흰 피부, 마른 듯 보이나 <button type="button" class="az-redacted" aria-label="검열선 해제">탄탄한 근육질 체격과 넓은 어깨, 다부진 골격</button>을 지님. 흑발과 푸른 벽안의 수려한 미남상으로 목격자 전원이 외모를 명확히 기억함.</p>
+     <div class="az-witness">"호불호가 갈릴 수 없는 압도적인 미남상이었다. 하지만 말수가 극단적으로 적었고, 내가 내 입으로 '그는 여기 없다'고 말할 때까지 아무 제지도 하지 않았다."<span>— [증언 #07] 제2관할 순찰 요원 진술서 발췌 (검은 검열선을 눌러 해제)</span></div></div>
+    ${pen('얼굴은 다들 기억하는데<br>목소리는 아무도 기억 못 함. 왜?', 'az-pen-1')}
+    <div class="az-uv">[UV 감식 메모] 목격 시각 14건 중 9건이 서로 겹침. 같은 시각, 다른 장소. 진술 자체가 조작됐을 가능성.</div>
+   </div><div class="az-doc-foot"><span>SGIA TRACKING TEAM 'BEACON' ARCHIVE</span><span>PAGE 01 / 04</span></div></div>${back('01-B', 'PROPERTY OF SGIA — DO NOT COPY')}</article>`,
+  // 02 — ORPÉ
+  `<article class="az-sheet" data-page="2"><div class="az-sheet-front az-page"><div>
+    <div class="az-doc-head"><div><div class="az-meta">SYNDICATE DOSSIER // 02</div><h2 class="az-doc-title">극단주의 범죄 카르텔: ORPÉ</h2></div><span class="az-code">THREAT: CRITICAL</span></div>
+    <div class="az-section"><div class="az-label">ORIGIN &amp; STRUCTURE</div><p class="az-body">SGIA(국가 각성자 통합관리청) 출범 및 등록제·등급제 강제 이후, 체제에 반발한 <strong>탈영 센티넬, 미등록 가이드, 불법 연구자</strong>들이 규합해 설립한 거대 범죄 조직.</p></div>
+    <div class="az-contrast"><div class="az-label-s">SURFACE IDEOLOGY (표면적 명분)</div><p>"각성자의 절대적 자유와 관리청 체제로부터의 해방"</p></div>
+    <div class="az-section"><div class="az-label">CONFIRMED ATROCITIES (실상 및 6대 범죄)</div><div class="az-crimes">${['비인가 가이딩 착취', '불법 가이딩 유통', '게이트 무단 밀렵·토벌', '불법 인체 개조 실험', '고위험 생체 병기 제조', '각성관 해킹·약물 갈취'].map((x) => `<div>${x}</div>`).join('')}</div></div>
+    ${trace('receipt', '찢어진 송금 전표 확인', 'az-trace-receipt')}
+    ${pen('조직도에 AZ 자리 없음.<br>간부? 외주? 아무도 모름', 'az-pen-2')}
+    <div class="az-uv">[UV 감식 메모] ORPÉ 내부 자금 흐름 추적 결과, 에이지(AZ)는 상부 명령 계통을 무시하고 단독 작전만 수행 중.</div>
+   </div><img class="az-stamp-img" src="${IMG.stamp}" alt="UNVERIFIED 도장" draggable="false"><div class="az-doc-foot"><span>STATE AWAKENED INTEGRATED ADMINISTRATION</span><span>PAGE 02 / 04</span></div></div>${back('02-B', 'EYES ONLY — LEVEL 1 CLEARANCE')}</article>`,
+  // 03 — ability
+  `<article class="az-sheet" data-page="3"><div class="az-sheet-front az-page"><div>
+    <div class="az-doc-head"><div><div class="az-meta">ANOMALY ANALYSIS // 03</div><h2 class="az-doc-title">능력 분석: 거짓 증언 &amp; 수치심 환산</h2></div><span class="az-code">CLASS: UNMEASURED</span></div>
+    <div class="az-specs az-specs-wide">${[['포지션', '측정 불가 등급 센티넬 (동시에 가이딩 파장 방출 관측)'], ['유효 반경', '직경 4km (반경 <strong>2km</strong> 내 대상 구강 강제 동기화)'], ['부수 권능', '수치심 환산 (상대의 심리적 굴욕감을 에너지로 전환 추정)']].map(([k, v]) => `<div class="az-spec"><span>${k}</span><span>${v}</span></div>`).join('')}</div>
+    <div class="az-section"><div class="az-label">MECHANISM OF 'FALSE TESTIMONY'</div><p class="az-body">능력 발동 시 대상의 <strong>의식과 사고는 완전히 또렷한 상태</strong>로 유지되나, 성대와 입술 근육만 에이지의 발화와 실시간 동기화됨. 대상은 자신이 허위 증언을 내뱉는 것을 인지하면서도 통제하지 못해 극심한 패닉과 답답함을 호소함.</p></div>
+    <div class="az-sim"><div class="az-sim-head"><span>[2KM 동기화 증언 시뮬레이션]</span><button type="button" class="az-sim-btn" data-sync aria-pressed="false">동기화 발동</button></div><div class="az-sim-out" data-sim><small>피해 요원 의식 상태: 명료함 (통제권 정상)</small><p>"용의자 AZ가 북쪽 환기구로 도주했습니다! 즉시 지원 바랍니다!"</p></div></div>
+    ${trace('dent', '연필 눌린 자국 확인 (UV에서 잘 보임)', 'az-trace-dent az-uv-only')}
+    ${pen('2km 밖에서 무전 받을 것!!', 'az-pen-3')}
+    <div class="az-uv">[UV 감식 메모] 피해자 증언: "내 입이 내 말을 안 들었다." 동일 문장 6건. 서로 모르는 사람들.</div>
+   </div><div class="az-doc-foot"><span>CAUTION: VERBAL REPORTS WITHIN 2KM UNRELIABLE</span><span>PAGE 03 / 04</span></div></div>${back('03-B', 'SGIA COUNTERINTELLIGENCE DIVISION')}</article>`,
+  // 04 — transcripts
+  `<article class="az-sheet" data-page="4"><div class="az-sheet-front az-page"><div>
+    <div class="az-doc-head"><div><div class="az-meta">SGIA FIELD INTERCEPT LOG // 04</div><h2 class="az-doc-title">목격자 진술 및 단답 발화 채록</h2></div><span class="az-code">LOG-AZ-09</span></div>
+    <div class="az-section"><div class="az-label">BEHAVIORAL OBSERVATION</div><p class="az-body">용의자 <strong>에이지(AZ)</strong>는 장황한 대화나 설득을 극도로 기피하며, 모든 현장 접촉에서 <strong>3어절 이하의 단답</strong>만 남긴 채 이탈함.</p></div>
+    <div class="az-tr"><div class="az-tr-time">[CASE #26-0412] 제3외곽 검문소 습격 당시 무전 채록</div><div>요원 A: "투항해라. 이미 반경 500m가 포위됐다—"</div><div class="az-speech">AZ: "비켜."</div><small>* 직후 검문소 분대장 입이 동기화되며 전원 철수 명령을 하달함.</small></div>
+    <div class="az-tr"><div class="az-tr-time">[CASE #26-0819] 비인가 연구소 급습 현장 생존자 진술</div><div>연구원: "ORPÉ 본부의 지시입니까? 샘플은 금고에..."</div><div class="az-speech">AZ: "시끄러워. 입 닫아."</div></div>
+    <div class="az-tape">${trace('tape', '녹음 테이프 노이즈 구간 재생', 'az-trace-tape')}<span>TAPE 09 · 03:12 — 노이즈 구간</span><output data-tape></output></div>
+    ${pen('단답만 함 = 말이 길면 들킨다?', 'az-pen-4')}
+    <div class="az-uv">[UV 감식 메모] 추적팀 내부 보고: 에이지는 ORPÉ 조직원들과도 동행하지 않고 단독 행동함. 조직의 이념보다 개인적 목적에 따라 움직이는 정황 포착.</div>
+   </div><div class="az-doc-foot"><span>Compiled from 14 Witness Statements</span><span>PAGE 04 / 04</span></div></div>${back('04-B', 'DO NOT DETACH FROM CASE FILE')}</article>`,
+  // 05 — rumours (unlocked by clearance)
+  `<article class="az-sheet az-sheet-rumor" data-page="5"><div class="az-sheet-front az-page"><div>
+    <div class="az-doc-head"><div><div class="az-meta">UNVERIFIED INTEL // 05 — LEVEL 2</div><h2 class="az-doc-title">카더라 · 지라시 · 소문 모음</h2></div><span class="az-code">RELIABILITY: LOW</span></div>
+    <div class="az-ascii-wrap"><canvas class="az-ascii" width="300" height="170" aria-label="저해상도 재구성 모델"></canvas><span>RECONSTRUCTION // LOW-POLY · SOURCE: 14 WITNESSES</span></div>
+    <ul class="az-rumors">${[
+      ['지라시', '"AZ가 ORPÉ 간부라더라." — 조직도에 이름 없음. 확인 불가.'],
+      ['커뮤니티', '"웃는 걸 본 사람은 없대." — 출처 불명. 게시글 삭제됨.'],
+      ['카더라', '"2km 안에서는 거짓말 탐지기도 같이 거짓말한다." — 과장 추정.'],
+      ['목격담', '"검문소 근처 편의점에서 우산만 사 갔다." — CCTV 해당 시각 공백.'],
+      ['내부 소문', '"비콘 누가 한 번 마주쳤는데 기억이 반쯤 비었다." — 당사자 진술 거부.'],
+    ].map(([k, v], i) => `<li style="--r:${[-1.4, 0.9, -0.6, 1.2, -1][i]}deg"><b>${k}</b>${v}</li>`).join('')}</ul>
+    ${pen('전부 믿지 말 것.<br>근데 전부 무시하지도 말 것.', 'az-pen-5')}
+   </div><div class="az-doc-foot"><span>ASSEMBLED BY 형사과 FIELD DESK</span><span>APPENDIX 05</span></div></div>${back('05-B', 'LEVEL 2 — DO NOT CIRCULATE')}</article>`,
+];
+const clueText = {
+  print: ['사진 모서리 얼룩 = 지문 반쪽.', '등록 각성자 DB 대조 결과: 일치 없음.'],
+  receipt: ['찢긴 송금 전표. 수취인 칸이 비어 있다.', 'AZ 몫으로 잡힌 돈이 없다 → 조직 돈으로 움직이지 않음.'],
+  dent: ['종이에 눌린 연필 자국: "2.0"', '반경 2km. 무전은 그 밖에서.'],
+  tape: ['노이즈 사이 0.4초: "…아니야."', '세 어절 이하. 이번에도.'],
+};
 
 export function openAZReader(section = 0) {
   if (!document.querySelector('[data-az-reader-css]')) {
-    const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'assets/az-reader.css'; css.dataset.azReaderCss = ''; document.head.append(css);
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'assets/az-reader.css';
+    css.dataset.azReaderCss = '';
+    document.head.append(css);
   }
-  const az = characters.find(c => c.team === 'orpe');
-  const pages = [
-    `<div class="az-cover"><p>SGIA / COUNTERINTELLIGENCE ARCHIVE</p><span class="az-seal">CLASSIFIED</span><h2>AZ</h2><p class="az-cover-sub">인물 추적 · 제한 열람 문서</p><div class="az-cover-meta"><span>OR—001</span><span>ACTIVE PURSUIT</span></div><p>증언은 사실을 보증하지 않는다.<br>현장 기록과 통신 내용을 교차 검증할 것.</p><button data-next>봉인 해제 · 문서 열람 ↗</button></div>`,
-    `<header><small>01 / SUBJECT IDENTIFICATION</small><h2>신원 기록</h2></header><div class="az-identity"><div class="az-portrait" role="img" aria-label="AZ 인물 기록" style="background-image:url('${esc(az?.portrait || '')}')"></div><div><span class="az-stamp">UNAPPREHENDED</span><h3>AZ</h3><dl><dt>본명</dt><dd><button class="az-redaction" data-reveal="확인된 본명 없음">신원 확인</button></dd><dt>소속</dt><dd>ORPÉ</dd><dt>분류</dt><dd>${esc(az?.rank || '측정 불가')}</dd><dt>상태</dt><dd>미검거 · 추적 중</dd></dl></div></div><section><h3>인물 개요</h3><p>${esc(az?.bio || '')}</p><p>${esc(az?.appearance || '')}</p></section><aside class="az-pencil">외형만으로 식별하지 말 것. 발화와 주변 반응을 함께 기록.</aside><div class="az-uv-clue">UV / 동일한 증언도 독립된 출처인지 먼저 확인한다.</div>`,
-    `<header><small>02 / ORGANIZATION & CONNECTIONS</small><h2>연결망 분석</h2></header><p class="az-lead">ORPÉ — 통제 밖의 각성자 조직</p><div class="az-network"><span>등록 이탈</span><span>불법 연구</span><strong>ORPÉ</strong><span>비공식 거래</span><span>정보 침해</span></div><section><h3>조사 분류</h3><p>탈주자, 미등록 가이드, 불법 연구 관계자의 연결을 추적한다. 조직이 주장하는 자유와 실제 현장 피해는 분리하여 기록한다.</p><div class="az-evidence-list"><p><b>01</b> 가이딩 착취 및 거래 정황</p><p><b>02</b> 게이트 밀렵 · 신체 개조 · 생체 병기</p><p><b>03</b> 통신망 침입 · 약물 탈취</p></div></section><aside class="az-pencil">조직의 지시와 AZ 개인의 목적을 같은 것으로 단정하지 말 것.</aside><div class="az-uv-clue">분석 메모 / 독립 행동 가능성. 지휘 관계는 추가 검증 필요.</div>`,
-    `<header><small>03 / FIELD RESPONSE PROTOCOL</small><h2>접촉 위험 평가</h2></header><div class="az-radius"><strong>≈ 2<span>km</span></strong><p>발화 동기화 추정 영향 반경</p></div><p>${esc(az?.ability || '고통과 수치심을 전환하는 능력. 현장 반응의 교차 확인이 필요하다.')}</p><div class="az-protocol"><section><b>01 / 접근 전</b><p>단독 접촉 금지. 팀별 통신 기록을 확보하고 진술의 시간 순서를 보존한다.</p></section><section><b>02 / 접촉 중</b><p>발화 직후의 인지 변화와 공황 반응을 기록한다. 서로의 기억만으로 상황을 확정하지 않는다.</p></section><section><b>03 / 이탈 후</b><p>현장 영상, 교신 시각, 개별 진술을 분리 수집한다. 증언 충돌은 삭제하지 않고 병기한다.</p></section></div><button class="az-check" data-check>현장 기록 교차 확인</button><output class="az-check-output" aria-live="polite"></output><div class="az-uv-clue">대상은 명료한 의식을 유지할 수 있다. 혼란을 무력화의 증거로 판단하지 말 것.</div>`,
-    `<header><small>04 / INTERCEPT TRANSCRIPT</small><h2>감청 기록</h2></header><p class="az-lead">발화 단편 · 문맥 불완전</p><div class="az-transcript"><small>VOICE FRAGMENT / A</small><blockquote>“비켜.”</blockquote><small>VOICE FRAGMENT / B</small><blockquote>“시끄러워. 입 닫아.”</blockquote></div><section><h3>기록 취급</h3><p>단편 발화만으로 의도나 지휘 관계를 확정할 수 없다. 장소, 목격자, 전후 교신의 대조가 필요하다.</p></section><aside class="az-pencil">들린 말과 실제로 일어난 일을 별도 기록할 것.</aside><div class="az-uv-clue">미확인 추정 / 조직 활동과 별개인 개인적 목적의 가능성. 확인된 사실로 인용 금지.</div><div class="az-end-stamp">RECORD RETAINED<br><small>추적 계속</small></div>`
-  ];
-  const dialog = modal('OR—001 / RESTRICTED ARCHIVE', `<article class="az-reader"><div class="az-reader-tools"><span>BEACON · EVIDENCE ROOM</span><button data-uv aria-pressed="false">UV 조사등</button></div><div class="az-page" tabindex="-1"></div><nav class="az-paging" aria-label="문서 페이지"><button data-prev aria-label="이전 페이지">← 이전</button><span data-page-count></span><button data-next>다음 →</button></nav></article>`, 'az-reader');
+  const html = `<div class="az-reader" data-open="false">
+   <div class="az-desk" aria-hidden="true"></div><div class="az-scan" aria-hidden="true"></div><canvas class="az-noise" aria-hidden="true"></canvas>
+   <header class="az-hud"><div><i class="az-dot"></i><span>SGIA // COUNTERINTELLIGENCE ARCHIVE</span><span class="az-hud-tag">WANTED / UNVERIFIED INTEL</span></div><div><span>TARGET: AZ (ORPÉ)</span><span data-clock>00:00:00</span></div></header>
+   <main class="az-stage"><div class="az-rig" data-rig>
+    <div class="az-board" aria-hidden="true"></div>
+    <nav class="az-folder-tabs" aria-label="기록철 섹션 탭">${['01·용의자', '02·ORPÉ', '03·특이능력', '04·녹취기록', '05·소문'].map((t, i) => `<button type="button" data-sheet="${i + 1}" ${i === 4 ? 'disabled aria-disabled="true" title="LEVEL 2 권한 필요"' : ''}>${t}${i === 4 ? ' 🔒' : ''}</button>`).join('')}</nav>
+    <div class="az-stack">${sheets.slice().reverse().join('')}</div>
+    <div class="az-cover" data-cover>
+     <div class="az-cover-front" style="background-image:url('${IMG.cover}')"></div>
+     <div class="az-cover-inside"><div class="az-pocket"><h4>RESTRICTED ARCHIVE PROTOCOL</h4><p>본 사건 기록철은 국가 각성자 통합관리청(SGIA) 추적관리팀 <strong>BEACON</strong>의 기밀 자산입니다.<br><br>용의자 <strong>AZ</strong>의 '거짓 증언' 권능 특성상, 현장 요원의 구두 보고는 신뢰할 수 없으며 오직 교차 검증된 물적 채록만 수록되었습니다.</p></div>${pen('이 파일 넘기는 사람에게.<br>흔적을 먼저 찾아라. 말은 나중에.', 'az-pen-cover')}<div class="az-serial">FILE SERIAL: SGIA-ORP-027-AZ<br>STATUS: ACTIVE PURSUIT</div></div>
+     <button type="button" class="az-seal" data-seal aria-label="실링 왁스 봉인 해제"><img src="${IMG.seal}" alt="" draggable="false"><span>CLICK TO UNSEAL</span></button>
+    </div>
+   </div></main>
+   <aside class="az-terminal" data-terminal aria-live="polite"><div class="az-term-head"><i></i>FIELD TERMINAL · 수사 보조</div><p data-term-text>봉인된 기록철입니다. 왁스 봉인을 눌러 열람을 시작하십시오.</p><div class="az-term-meter"><span data-term-count>단서 0 / ${NEED}</span><em><b data-term-bar></b></em></div></aside>
+   <div class="az-clue" data-clue hidden role="status"><p class="az-pen" data-clue-text></p><button type="button" data-clue-close>메모 닫기</button></div>
+   <footer class="az-dock"><button type="button" class="az-btn az-primary" data-toggle>봉인 해제 / 열람</button><button type="button" class="az-btn" data-prev disabled>◀ 이전 장</button><span class="az-indicator" data-indicator>SEALED</span><button type="button" class="az-btn" data-next disabled>다음 장 ▶</button><button type="button" class="az-btn" data-stamp disabled>도장 찍기</button><button type="button" class="az-btn" data-uv aria-pressed="false">UV 감식등</button></footer>
+  </div>`;
+  const d = modal('AZ — CLASSIFIED CASE FILE', html, 'az-reader');
+  const root = d.querySelector('.az-reader');
+  const q = (s) => root.querySelector(s);
+  const qa = (s) => [...root.querySelectorAll(s)];
+  const abort = new AbortController();
+  const on = (el, t, fn, o = {}) => el.addEventListener(t, fn, { ...o, signal: abort.signal });
+  const intervals = [];
+  const timeouts = new Set();
+  const later = (fn, ms) => { const id = setTimeout(() => { timeouts.delete(id); if (root.isConnected) fn(); }, ms); timeouts.add(id); };
+  on(d, 'close', () => { abort.abort(); intervals.forEach(clearInterval); timeouts.forEach(clearTimeout); }, { once: true });
+  on(root, 'contextmenu', (e) => { if (e.target.closest('img,.az-photo-in,.az-cover-front')) e.preventDefault(); });
 
-  const annotations = [
-    `<div class="az-access-strip"><span>ARCHIVE / ORPÉ</span><span>UNRESOLVED</span></div><p class="az-pencil">지워진 이름보다, 남겨진 흔적을 먼저 볼 것.</p>`,
-    `<section class="az-evidence-section"><h3>신원 대조표</h3><dl class="az-ledger"><div><dt>호칭</dt><dd>에이지 · AZ</dd></div><div><dt>본명</dt><dd>미확인 / 식별에 사용하지 않음</dd></div><div><dt>소속</dt><dd>ORPÉ</dd></div><div><dt>열람 분류</dt><dd>인물 식별 · 현장 대응 참고</dd></div></dl><button class="az-clue" data-clue="identity" data-hint="이름은 신원을 증명하지 않는다. 다음 문서에서 소속과 행적을 대조할 것.">봉인된 식별 메모 펼치기 <span>01</span></button><p class="az-uv">재확인: 호칭과 본명을 동일한 정보로 취급하지 말 것.</p></section>`,
-    `<section class="az-evidence-section"><h3>연관 정황 검토</h3><div class="az-analysis-grid"><div><small>01 / 조직</small><h4>ORPÉ 연관성</h4><p>조직에 관한 정보와 특정 인물의 행위를 분리해 기록한다. 조직의 범죄 목록만으로 개인의 현장 참여를 단정하지 않는다.</p></div><div><small>02 / 행적</small><h4>시간·장소 대조</h4><p>동선 기록의 시간과 목격 시점을 함께 확인한다. 위치가 겹치는 것만으로 동일 인물임을 확정하지 않는다.</p></div></div><button class="az-clue" data-clue="network" data-hint="서로 다른 기록에서 같은 시간대가 반복된다면 출처부터 확인한다. 중복 제보는 독립된 증거가 아니다.">접힌 조사관 메모 펼치기 <span>02</span></button></section>`,
-    `<section class="az-evidence-section"><h3>현장 기록 체크포인트</h3><ol class="az-checklist"><li><b>접촉 전</b><span>관찰 시각·위치·대상 수를 분리하여 기록.</span></li><li><b>접촉 중</b><span>직접 확인한 현상과 목격자의 해석을 구별.</span></li><li><b>이탈 후</b><span>감각·판단의 변화를 시간순으로 다시 대조.</span></li></ol><p class="az-pencil">설명할 수 없는 공백도 기록이다. 빈칸을 추측으로 채우지 마.</p><button class="az-clue" data-clue="ability" data-hint="현상 기록은 능력의 원인까지 입증하지 않는다. 다음 녹취 문서에서도 발화와 해석을 분리한다.">여백의 연필 흔적 확인 <span>03</span></button></section>`,
-    `<section class="az-evidence-section"><h3>녹취 대조 메모</h3><p>발화만으로 동기와 사건의 전후 관계를 확정할 수 없다. 기록의 공백은 미확인으로 남긴다.</p><div class="az-tape" aria-hidden="true"><i></i><span>OR—001 / VOICE LOG</span><i></i></div><button class="az-clue" data-clue="voice" data-hint="채록된 발화와 인물 식별 정보의 대조 완료. 교차 검토 메모 열람이 활성화되었습니다.">녹취 봉인 확인 <span>04</span></button><details class="az-cross-file"><summary>교차 검토 메모</summary><p>신원 · 조직 · 현상 · 발화의 네 항목을 함께 확인한다. 기록 사이의 차이는 삭제하거나 하나로 합치지 않고 별도 정황으로 보존한다.</p><p class="az-pencil">모든 기록이 일치할 때도, 누가 기록했는지는 다시 확인할 것.</p></details></section>`
-  ];
-  pages.forEach((_, i) => { pages[i] += annotations[i]; });
-  const root = dialog.querySelector('.az-reader'), page = root.querySelector('.az-page');
-  let current = Math.max(0, Math.min(4, Number(section) || 0));
-  const labels = ['표지', '용의자', 'ORPÉ', '특이능력', '녹취 기록'];
-  const tabs = document.createElement('nav'); tabs.className='az-folder-tabs'; tabs.setAttribute('aria-label','기밀 파일 목차');
-  tabs.innerHTML=labels.map((label,i)=>`<button data-sheet="${i}"><small>0${i+1}</small>${label}</button>`).join('');
-  root.insertBefore(tabs,page);
-  const terminal=document.createElement('div');terminal.className='az-terminal';terminal.setAttribute('role','status');terminal.textContent='열람 세션 연결됨 · 기록의 흔적을 눌러 대조합니다.';root.append(terminal);
+  // Clock + ASCII noise (paused when motion is off)
+  const clock = q('[data-clock]');
+  const tick = () => { clock.textContent = new Date().toTimeString().slice(0, 8); };
+  tick();
+  intervals.push(setInterval(tick, 1000));
+  const noise = q('.az-noise'), nctx = noise.getContext('2d');
+  const chars = ['.', ':', '+', '*', '#', '0', '1', '·'];
+  const resize = () => { noise.width = root.clientWidth; noise.height = root.clientHeight; fit(); };
+  const paintNoise = () => {
+    nctx.clearRect(0, 0, noise.width, noise.height);
+    nctx.fillStyle = 'rgba(220,225,235,.38)';
+    nctx.font = '10px monospace';
+    for (let i = 0; i < 95; i++) nctx.fillText(chars[(Math.random() * chars.length) | 0], Math.random() * noise.width, Math.random() * noise.height);
+  };
+  if (state.motion) intervals.push(setInterval(paintNoise, 140));
+
+  // Folder state
+  const rig = q('[data-rig]');
+  const pages = qa('.az-sheet');
+  pages.sort((a, b) => a.dataset.page - b.dataset.page);
+  const tabs = qa('[data-sheet]');
+  let open = false, page = 0, unlocked = false;
   const found = new Set();
-  function render() { page.innerHTML = pages[current]; page.dataset.sheet=String(current); tabs.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-current',i===current?'page':'false')); page.classList.remove('az-page-enter'); void page.offsetWidth; page.classList.add('az-page-enter'); root.querySelector('[data-page-count]').textContent = `${String(current + 1).padStart(2,'0')} / 05`; root.querySelector('[data-prev]').disabled = current === 0; root.querySelector('.az-paging [data-next]').disabled = current === 4; page.scrollTop = 0; }
-  root.addEventListener('click', e => { const b=e.target.closest('button'); if(!b)return;
-    if(b.hasAttribute('data-sheet')) {current=Number(b.dataset.sheet);render();page.focus();}
-    if(b.hasAttribute('data-clue')) { found.add(b.dataset.clue); b.classList.add('is-examined'); b.setAttribute('aria-expanded','true'); let hint=b.nextElementSibling;if(!hint?.classList.contains('az-clue-note')) {hint=document.createElement('p');hint.className='az-clue-note';b.after(hint);}hint.textContent=b.dataset.hint;terminal.textContent=`대조 기록 ${found.size} / 4 · ${found.size===4?'교차 검토 메모 열람 가능':'다른 문서의 흔적을 확인하세요.'}`;if(found.size===4)root.classList.add('all-reviewed'); }
+  const visible = () => (unlocked ? 5 : 4);
+  function fit() {
+    const w = root.clientWidth - 24, h = root.clientHeight - 150;
+    const compact = w < 860;
+    rig.classList.toggle('compact', compact);
+    const need = compact ? 470 + 40 : 980;
+    rig.style.setProperty('--az-s', String(Math.min(1, w / need, h / 660)));
+  }
+  function update() {
+    root.dataset.open = String(open);
+    rig.classList.toggle('is-open', open);
+    q('[data-toggle]').textContent = open ? '파일 덮기' : '봉인 해제 / 열람';
+    q('[data-prev]').disabled = !open || page === 0;
+    q('[data-next]').disabled = !open || page >= visible() - 1;
+    q('[data-stamp]').disabled = !open;
+    q('[data-indicator]').textContent = open ? `PAGE 0${page + 1} / 0${visible()}` : 'SEALED';
+    pages.forEach((s, i) => {
+      const flipped = open && i < page;
+      s.classList.toggle('flipped', flipped);
+      s.style.zIndex = String(flipped ? 10 + i : 30 - i);
+      s.hidden = i >= visible();
+      s.setAttribute('aria-hidden', String(!open || i !== page));
+      s.inert = !open || i !== page;
+    });
+    tabs.forEach((t, i) => t.classList.toggle('active', open && i === page));
+    if (open && page === 4) startAscii();
+  }
+  function go(i) { if (!open) open = true; page = Math.max(0, Math.min(visible() - 1, i)); update(); }
+  function say(text) { q('[data-term-text]').textContent = text; q('[data-terminal]').classList.remove('ping'); void q('[data-terminal]').offsetWidth; q('[data-terminal]').classList.add('ping'); }
+  on(q('[data-seal]'), 'click', (e) => { e.stopPropagation(); if (!open) { go(0); say('기록철 개봉. 각 장에 남은 흔적을 눌러 보십시오. 일부는 UV 감식등으로만 보입니다.'); } });
+  on(q('[data-cover]'), 'click', () => { if (!open) q('[data-seal]').click(); });
+  on(q('[data-toggle]'), 'click', () => { open = !open; if (open) page = 0; update(); });
+  on(q('[data-prev]'), 'click', () => go(page - 1));
+  on(q('[data-next]'), 'click', () => go(page + 1));
+  tabs.forEach((t) => on(t, 'click', () => go(Number(t.dataset.sheet) - 1)));
+  on(root, 'keydown', (e) => { if (!open || e.target.closest('input')) return; if (e.key === 'ArrowRight') go(page + 1); if (e.key === 'ArrowLeft') go(page - 1); });
+  // Swipe to turn
+  let sx = null;
+  on(q('.az-stack'), 'pointerdown', (e) => { if (e.target.closest('button')) return; sx = { x: e.clientX, y: e.clientY }; });
+  on(q('.az-stack'), 'pointerup', (e) => { if (!sx) return; const dx = e.clientX - sx.x, dy = e.clientY - sx.y; sx = null; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(page + (dx < 0 ? 1 : -1)); });
 
-    if(b.hasAttribute('data-next')) { current=Math.min(4,current+1);render();page.focus(); }
-    if(b.hasAttribute('data-prev')) { current=Math.max(0,current-1);render();page.focus(); }
-    if(b.hasAttribute('data-uv')) { const on=root.classList.toggle('uv-on');b.setAttribute('aria-pressed',String(on)); }
-    if(b.dataset.reveal) { b.textContent=b.dataset.reveal;b.classList.add('revealed'); }
-    if(b.hasAttribute('data-check')) { root.querySelector('.az-check-output').textContent='대조 항목: 교신 시각 / 영상 기록 / 독립 목격자 진술 — 세 출처를 확인하십시오.';b.disabled=true; }
-  }); render(); return dialog;
+  // Stamp, UV, redactions, simulator
+  const stamp = q('.az-stamp-img');
+  on(q('[data-stamp]'), 'click', () => { go(1); stamp.classList.remove('stamped'); void stamp.offsetWidth; later(() => stamp.classList.add('stamped'), state.motion ? 280 : 0); });
+  on(q('[data-uv]'), 'click', (e) => {
+    const onUV = root.classList.toggle('uv-active');
+    e.currentTarget.setAttribute('aria-pressed', String(onUV));
+    e.currentTarget.classList.toggle('uv-on', onUV);
+    if (onUV && open) say('UV 감식등 점등. 숨은 필기와 눌린 자국을 확인하십시오.');
+  });
+  qa('.az-redacted').forEach((el) => on(el, 'click', () => el.classList.toggle('revealed')));
+  const sync = q('[data-sync]'), sim = q('[data-sim]');
+  on(sync, 'click', () => {
+    const synced = sim.classList.toggle('synced');
+    sync.setAttribute('aria-pressed', String(synced));
+    sync.textContent = synced ? '동기화 해제' : '동기화 발동';
+    sim.querySelector('small').textContent = synced ? '⚠ 경고: 반경 2km 내 구강 동기화 감지 (의식 명료 / 발화 강제 변조)' : '피해 요원 의식 상태: 명료함 (통제권 정상)';
+    sim.querySelector('p').textContent = synced ? '"이상 무. 해당 구역에 에이지의 흔적은 전혀 없다. 철수한다."' : '"용의자 AZ가 북쪽 환기구로 도주했습니다! 즉시 지원 바랍니다!"';
+  });
+
+  // Clue hunt → terminal grants LEVEL 2 and unlocks the rumour appendix
+  const clue = q('[data-clue]');
+  qa('[data-trace]').forEach((el) => on(el, 'click', (e) => {
+    e.stopPropagation();
+    const id = el.dataset.trace;
+    if (el.classList.contains('az-uv-only') && !root.classList.contains('uv-active')) { say('희미한 자국이 있습니다. 육안으로는 읽을 수 없습니다 — UV 감식등을 켜십시오.'); return; }
+    el.classList.add('found');
+    found.add(id);
+    if (id === 'tape') q('[data-tape]').textContent = '▶ "…아니야."';
+    q('[data-clue-text]').innerHTML = clueText[id].join('<br>');
+    clue.hidden = false;
+    q('[data-clue-close]').focus({ preventScroll: true });
+    const n = Math.min(found.size, NEED);
+    q('[data-term-count]').textContent = `단서 ${n} / ${NEED}`;
+    q('[data-term-bar]').style.width = `${(n / NEED) * 100}%`;
+    if (found.size >= NEED && !unlocked) {
+      unlocked = true;
+      const tab = tabs[4];
+      tab.disabled = false;
+      tab.removeAttribute('aria-disabled');
+      tab.textContent = '05·소문';
+      tab.title = '';
+      root.classList.add('granted');
+      say('교차 검증 완료. LEVEL 2 열람 권한이 부여되었습니다 — 부록 05 “소문 모음”이 해제됩니다.');
+      update();
+    } else if (!unlocked) {
+      say(found.size === 1 ? '단서 확보. 다른 장에도 흔적이 남아 있습니다.' : `단서 ${found.size}개 확보. 조금만 더.`);
+    }
+  }));
+  on(q('[data-clue-close]'), 'click', () => { clue.hidden = true; });
+
+  // Low-poly ASCII reconstruction (canvas, not text art)
+  let asciiStarted = false;
+  function startAscii() {
+    if (asciiStarted) return;
+    asciiStarted = true;
+    const cv = q('.az-ascii'), cx = cv.getContext('2d');
+    const t = (1 + Math.sqrt(5)) / 2;
+    const V = [[-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0], [0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t], [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]].map(([x, y, z]) => [x * 0.8, y * 1.05, z * 0.75]);
+    const F = [[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8], [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9], [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]];
+    const shade = ' .:-=+*#%@';
+    const cols = 60, rows = 26, cw = cv.width / cols, ch = cv.height / rows;
+    let a = 0.6;
+    const draw = () => {
+      const buf = Array.from({ length: rows }, () => Array(cols).fill(' '));
+      const zb = Array.from({ length: rows }, () => Array(cols).fill(-1e9));
+      const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(a * 0.37), sb = Math.sin(a * 0.37);
+      const P = V.map(([x, y, z]) => { const x1 = x * ca + z * sa, z1 = -x * sa + z * ca; const y1 = y * cb - z1 * sb, z2 = y * sb + z1 * cb; return [x1, y1, z2]; });
+      for (const [i, j, k] of F) {
+        const A = P[i], B = P[j], C = P[k];
+        const u = [B[0] - A[0], B[1] - A[1], B[2] - A[2]], v = [C[0] - A[0], C[1] - A[1], C[2] - A[2]];
+        const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+        const len = Math.hypot(...n) || 1;
+        if (n[2] / len < 0) continue;
+        const light = Math.max(0, (n[0] * -0.4 + n[1] * 0.5 + n[2] * 0.75) / len);
+        const s = shade[Math.min(shade.length - 1, 1 + Math.floor(light * (shade.length - 1)))];
+        const pts = [A, B, C].map((p) => [cols / 2 + p[0] * 9.5, rows / 2 - p[1] * 9.5 * 0.52, p[2]]);
+        const minx = Math.max(0, Math.floor(Math.min(...pts.map((p) => p[0])))), maxx = Math.min(cols - 1, Math.ceil(Math.max(...pts.map((p) => p[0]))));
+        const miny = Math.max(0, Math.floor(Math.min(...pts.map((p) => p[1])))), maxy = Math.min(rows - 1, Math.ceil(Math.max(...pts.map((p) => p[1]))));
+        const area = (p, q2, r) => (q2[0] - p[0]) * (r[1] - p[1]) - (q2[1] - p[1]) * (r[0] - p[0]);
+        const total = area(...pts);
+        if (!total) continue;
+        for (let y = miny; y <= maxy; y++) for (let x = minx; x <= maxx; x++) {
+          const pt = [x + 0.5, y + 0.5];
+          const w0 = area(pts[1], pts[2], pt) / total, w1 = area(pts[2], pts[0], pt) / total, w2 = 1 - w0 - w1;
+          if (w0 < 0 || w1 < 0 || w2 < 0) continue;
+          const z = w0 * pts[0][2] + w1 * pts[1][2] + w2 * pts[2][2];
+          if (z > zb[y][x]) { zb[y][x] = z; buf[y][x] = s; }
+        }
+      }
+      cx.fillStyle = '#0d0e10';
+      cx.fillRect(0, 0, cv.width, cv.height);
+      cx.font = `${Math.round(ch * 1.05)}px monospace`;
+      cx.textBaseline = 'top';
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+        const c = buf[y][x];
+        if (c === ' ') { if (Math.random() < 0.012) { cx.fillStyle = '#3a3f46'; cx.fillText('·', x * cw, y * ch); } continue; }
+        cx.fillStyle = Math.random() < 0.02 ? '#d93838' : '#c9d1d9';
+        cx.fillText(c, x * cw, y * ch);
+      }
+      // scan glitch
+      const gy = (Date.now() / 18) % cv.height;
+      cx.fillStyle = 'rgba(217,56,56,.16)';
+      cx.fillRect(0, gy, cv.width, 3);
+      a += 0.035;
+    };
+    draw();
+    if (state.motion) intervals.push(setInterval(draw, 70));
+  }
+
+  on(window, 'resize', resize);
+  requestAnimationFrame(resize);
+  resize();
+  update();
+  if (section > 0) { go(Math.min(4, section) - 1); say('지정 문서로 이동했습니다. 흔적을 눌러 단서를 확보하십시오.'); }
+  return d;
 }

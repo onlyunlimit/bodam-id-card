@@ -58,7 +58,7 @@ test('Swipe flips while click opens detail; languages preserve codes and localiz
   await expect(page.locator('[data-character="binjo"]')).toHaveClass(/flipped/);
   await expect(page.locator('#document-dialog')).not.toBeVisible();
   await btn.click();
-  await expect(page.locator('.badge-portrait')).toBeVisible();
+  await expect(page.locator('.member-archive')).toBeVisible();
   await page.keyboard.press('Escape');
   for (const lang of ['en', 'ja', 'zh', 'ko']) {
     await page.locator(`[data-lang="${lang}"]`).click();
@@ -153,7 +153,7 @@ test('All four languages fit mobile navigation, records and character dossiers',
   for (const lang of ['en', 'ja', 'zh', 'ko']) {
     await page.locator(`[data-lang="${lang}"]`).click();
     await page.locator('.card-turner').first().click();
-    await expect(page.locator('.badge-portrait')).toBeVisible();
+    await expect(page.locator('.member-archive')).toBeVisible();
     expect(
       await page.locator('#document-dialog').evaluate((e) => e.scrollWidth <= e.clientWidth + 1),
       lang + ' dossier',

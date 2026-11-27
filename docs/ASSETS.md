@@ -124,3 +124,11 @@
 
 - 신분증·종이 기록·칠판·수사 파일은 HTML/CSS로 구현했습니다. 기존 공개 인물 이미지 URL을 재사용합니다.
 - 시온 갤러리는 사용자가 제공한 Caveduck 이미지 링크 17개를 연결하고 행사명은 영문으로 표시합니다. 참고 문서와 원본 HTML은 공개 빌드에 포함하지 않습니다.
+
+## 2026-11-27 신분증·개인 파일·AZ 서류철·럭키트릭 페이지 개편
+
+- 신분증·개인 파일·AZ 서류철·럭키트릭 페이지는 사용자가 제공한 디자인 예시를 바탕으로 사이트 코드로 다시 구성했습니다. 예시 파일 자체는 공개 빌드에 포함하지 않습니다.
+- 인물 사진·지온 기념 포토카드 17장·럭키트릭 화보/컷아웃/포토카드·AZ 표지/종이/왁스 봉인/UNVERIFIED 도장 이미지는 사용자가 지정한 caveduck CDN 주소를 CSS 배경으로 연결합니다. 길게 누르기·우클릭 메뉴를 막지만 완전한 다운로드 방지는 아닙니다.
+- 글꼴(Oswald·Syne·Cormorant Garamond·Gaegu·Nanum Pen Script·Nanum Myeongjo·JetBrains Mono·Inter)은 Google Fonts, Pretendard는 jsDelivr에서 불러옵니다.
+- `assets/archive.tw.css`는 위 화면의 Tailwind 유틸리티를 `.tw` 범위로 한정해 생성한 파일입니다(`scripts/tailwind.archive.config.cjs`). 원본 예시의 Tailwind CDN 스크립트는 사용하지 않습니다.
+- AZ 05 부록의 저해상도 인물 모델은 canvas로 그린 정이십면체 기반 ASCII 렌더링이며 외부 이미지가 아닙니다.

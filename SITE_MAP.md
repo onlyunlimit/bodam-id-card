@@ -46,15 +46,15 @@
 | [통합 관제](https://onlyunlimit.github.io/portal.html) | `/portal.html` | 세계 지도와 미종결 사건 핀·구역, 위험 등급·게이트 집계, 부서 운용 상태, 서울 날씨, 한국 시각, 브리핑, 제작 도구 링크 | 공개 중심 |
 | [각성관 층별 안내](https://onlyunlimit.github.io/portal.html#headquarters) | `/portal.html#headquarters` | 통합 관제 아래 구역. 지상·지하 총 18개 층 선택, 실내 계획도, 방별 설명, 관련 부서 이동 | 일부 시설 직원 화면에서 열람 |
 | [조직·부서](https://onlyunlimit.github.io/departments.html) | `/departments.html` | 실드·오리진·비콘·블랙잭 4개 부서, 각각 다른 재질·구조·팔레트로 상세 페이지 진입 | 공개 |
-| [오리진](https://onlyunlimit.github.io/origin.html) | `/origin.html` | 부서 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
-| [비콘](https://onlyunlimit.github.io/beacon.html) | `/beacon.html` | 추적관리팀 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
-| [실드](https://onlyunlimit.github.io/shield.html) | `/shield.html` | 부서 소개, 시간표, 브리핑, 팀 색상 은색 신분증 카드·상세 기록, 업무 메신저 | 공개 카드 / 직원 상세 |
-| [블랙잭](https://onlyunlimit.github.io/blackjack.html) | `/blackjack.html` | 시소 참고의 올리브 금속 TV·녹색 포인트 은색 신분증 카드, 포커·딜러·리어·판덴·시소 5명, 작전 일정 안내·브리핑·메신저 | 공개 카드 / 직원 상세 |
+| [오리진](https://onlyunlimit.github.io/origin.html) | `/origin.html` | 부서 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드 → 개인 파일(열람 승인·종이 기록 앞뒤·칠판 방명록·포토카드), 업무 메신저 | 공개 카드 / 직원 상세 |
+| [비콘](https://onlyunlimit.github.io/beacon.html) | `/beacon.html` | 추적관리팀 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드 → 개인 파일(열람 승인·종이 기록 앞뒤·칠판 방명록·포토카드), 업무 메신저 | 공개 카드 / 직원 상세 |
+| [실드](https://onlyunlimit.github.io/shield.html) | `/shield.html` | 부서 소개, 시간표, 브리핑, 팀 색상 유리 신분증 카드 → 개인 파일(열람 승인·종이 기록 앞뒤·칠판 방명록·포토카드), 업무 메신저 | 공개 카드 / 직원 상세 |
+| [블랙잭](https://onlyunlimit.github.io/blackjack.html) | `/blackjack.html` | 시소 참고의 올리브 금속 TV·올리브 유리 신분증 카드(개인 파일 연결), 포커·딜러·리어·판덴·시소 5명, 작전 일정 안내·브리핑·메신저 | 공개 카드 / 직원 상세 |
 | [엔터테인먼트](https://onlyunlimit.github.io/entertainment.html) | `/entertainment.html` | 그룹별 입체 소개 패널 2개. 각 기획사 페이지로 이동 | 공개 |
-| [엘리시안·럭키트릭](https://onlyunlimit.github.io/elysian.html) | `/elysian.html` | 핑크 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
+| [엘리시안·럭키트릭](https://onlyunlimit.github.io/elysian.html) | `/elysian.html` | LUCKY TRICK 소개 페이지: 4인 컷아웃 히어로(흑백 패널·패럴랙스), 센티넬 ID 카드 덱(앞뒤 회전)·멤버 정보, 화보 3장, 스티커 바인더를 열면 펼쳐지는 포토카드(앞면 이미지만·뒷면 영문 각인), 팬 게시판·커뮤니티 프로필 연결 | 공개 |
 | [헌터윈드·옵시더스](https://onlyunlimit.github.io/hunterwind.html) | `/hunterwind.html` | 금속·어두운 계열 기획사 화면, 아티스트 4명, 공개 상세 프로필, 화보 갤러리·확대 및 이전/다음, 팬 게시판 연결 | 공개 |
 | [사건 기록실](https://onlyunlimit.github.io/records.html) | `/records.html` | 아날로그 수신기·주파수 조정, 사건 필터·목록·상세 문서, 지도, 신고서 작성, 긴급 수신 알림, 종결 승인·재개 | 열람은 공개 · 작성 진입은 직원 화면 |
-| [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 봉인 파일, 숫자 키패드·클릭음, 추적 커서, AZ 대상 관측 기록·위험 평가, 증거 문서 3개에서 진입하는 AZ 수사 파일 5장(UV·단서 확인), 동선 지도·감청 로그 | 코드 입력 연출 + 일부 직원 열람 |
+| [ORPÉ 위협 정보](https://onlyunlimit.github.io/records.html#threats) | `/records.html#threats` | 기록실 아래 구역. 봉인 파일, 숫자 키패드·클릭음, 추적 커서, AZ 대상 관측 기록·위험 평가, 증거 문서 3개에서 진입하는 AZ 수사 서류철(왁스 봉인·4장 + 단서 3개 확보 시 해제되는 05 소문 부록, UV 감식·도장·검열 해제·2km 동기화 시뮬레이터), 동선 지도·감청 로그 | 코드 입력 연출 + 일부 직원 열람 |
 | [세계관 안내서](https://onlyunlimit.github.io/manual.html) | `/manual.html` | 용어 검색·목차, 게이트·각성자·가이딩·각인·매칭 등 설명, 등급표, 개념 도해, 명령어 복사 | 공개 |
 | [커뮤니티](https://onlyunlimit.github.io/community.html) | `/community.html` | 그룹별 4개 피드, 사진 첨부, 팬·아티스트 글/답글, 글·댓글 좋아요, 6자리 PIN 수정·삭제, 관리자 진입 | 팬 공개 / 사내는 직원 화면 |
 

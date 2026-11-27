@@ -10,6 +10,7 @@ test('guestbook rejects invalid targets and oversized messages', () => {
   assert.equal(note.color, '#eee6cf');
   assert.equal(note.x, 0);
   assert.equal(note.y, 1);
+  assert.equal(validateNote({ character: 'jion', message: 'hi', font: 'memo' }).font, 'memo');
 });
 
 test('public guestbook reads are scoped to one member and exclude IP hashes', async () => {
