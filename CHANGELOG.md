@@ -7,7 +7,7 @@
 
 ## 2026-11-28 — 요원 카드·개인 파일 팝업·AZ 대문·옵시더스·플레이리스트 확장
 
-- **상태:** 로컬 구현·검사 완료. 배포 결과는 아래 배포 항목 참고.
+- **상태:** 로컬 구현·검사 완료, 홈페이지 배포 확인. 서버(D1 마이그레이션·Worker) 배포 대기.
 - **요원증:** 앞면 큰 글자를 등급으로 변경(예: A+, SSS, SS+). 오리진은 존재 유형 CR(침식자)·RT(귀환체)·SV(통과자), 블랙잭 미공개 등급은 ?, 시소(비각성)는 N/A. 상단 큰 글씨는 이름, 옆면 세로줄에 팀명·부서. 사진 안 이름 상자, 지어낸 일련번호(예: OR-XX-01), 뒷면 아래 `SGIA // CLEARANCE` 띠, 뒷면 상단 층·숫자 표시 제거. 뒷면은 불투명하고 넘긴 뒤 앞면이 비치지 않음. 위치: 벡스 B4·3F 가이드 관리국, 슬런 B6 고위험 격리 구역, 재신 B4, 버그 B8 게이트 연구소, 비콘 2F, 블랙잭 B3·5F. 실드 생일(원혈 08/21, 데인·지온 06/18, 산도 01/09, 백진 12/12) 반영. 블랙잭 설정상 팀 색상은 BLACK(페이지 테마는 올리브 유지).
 - **실드 페이지:** 올리브 계열로 남아 있던 배경·히어로를 디렉터리 카드와 같은 남색·흰색 테마로 교체. **블랙잭 대문 TV:** 시소 → 리더 포커.
 - **개인 파일:** 화면 전체 페이지 대신 흐린 페이지 위에 떠 있는 팝업. 처음엔 카드만 보이고, 카드를 누르면 종이 기록과 포토카드 덱이 나옴. 상단 단계 메뉴·안내 문구·열람 승인 단말기·배경 글자 제거. 빈 곳을 누르거나 Esc로 닫힘. 기록물 앞면 글자 크기 축소, `//` 표기 제거. 뒷면은 칠판 대신 종이 전체가 방명록(잉크 5색·글꼴 5종), 글자 크기는 SIZE 슬라이더·± 버튼·두 손가락 확대/축소·트랙패드 핀치·키보드 +/−로 조절. 포토카드는 럭키트릭처럼 겹쳐 펼쳐지는 덱(모바일 포함), 눌러서 그 자리에서 뒤집기.
@@ -17,6 +17,8 @@
 - **플레이리스트:** 관리자 편집에 SGIA/HKU 체크, 팀 선택·새 팀 추가, HKU 인물 이름 직접 입력, 곡별 커버 이미지 링크, 곡·목록 숨김 추가. 새 팀은 홈페이지 팀 탭에 자동 추가(SGIA 팀 뒤, HKU 앞). 커버가 없으면 멤버 프로필 이미지 사용. 공개 순서 SGIA → HKU, 나중에 추가한 목록이 뒤. 모바일 팀 탭·추천곡 신청 칸·접은 플레이어를 더 작고 얇게 조정. 마이그레이션 `0020_playlist_catalog.sql`.
 - **주요 파일:** `assets/id-badge.js/css`, `member-archive.js/css`, `member-archive-data.js`, `characters.js`, `az-reader.js/css`, `hardware.js`, `monitor.js`, `forensics.js`, `team-design.js`, `team-themes.css`, `lucky-page.js`, `obsidus-data.js`, `agencies.js`, `playlist-page.js`, `playlists.css`, `archive.tw.css`, `backend/guestbook.js`, `admin-guestbook.js`, `admin.js`, `admin-pwa.js`, `notifications.js`, `playlists.js`, `admin-playlists.js`, `worker.js`, 마이그레이션 2개, 관련 테스트, `SITE_MAP.md`, `docs/COMMUNITY-OPERATIONS.md`, `docs/ASSETS.md`.
 - **검사:** `npm test` 통과, 서버 검사 46개 통과(방명록 관리·알림, 플레이리스트 팀/HKU/커버/숨김 검사 추가), `npm run build` 통과, 전체 브라우저 검사 101개 통과(개인 파일·AZ·옵시더스 관련 검사를 새 구조로 갱신). 1440px·390px에서 카드·개인 파일·AZ 봉인/펼침·옵시더스·플레이리스트 화면 확인.
+- **배포:** 소스 [90ece0c](https://github.com/onlyunlimit/bodam-id-card/commit/90ece0c3ec8444a7dc44998654ad423023ed9bb9) → 공개 `e60354c`, GitHub Pages `built`. 공개 `.sgia-release.json` 소스 일치, `obsidus-data.js`·`member-archive.js`·`az-reader.js` 해시가 검사한 빌드와 일치.
+- **서버 배포 대기:** `npx wrangler d1 migrations apply sgia-community --remote`(0019·0020, 열 추가만)가 자동 권한 검사에서 차단되어 실행하지 못함. 마이그레이션 없이 Worker를 배포하면 방명록·플레이리스트 조회가 실패하므로 Worker도 배포하지 않음. 그때까지 방명록 관리자 화면·알림, 글자 크기 저장, 플레이리스트 팀/HKU/커버/숨김은 서버에 반영되지 않음(홈페이지 나머지 기능은 기존 서버와 정상 동작).
 - **제약:** 실제 iPhone 기기 검사 미실시. 내부 식별자 `jion`(커뮤니티·방명록 DB 키)은 유지하고 화면 표기는 ZION. 슬런 키는 단체 프롬프트 기준 191cm(개인 프롬프트에는 188cm).
 
 ## 2026-11-27 — 요원 신분증·개인 파일·AZ 서류철·럭키트릭 소개 페이지 개편
